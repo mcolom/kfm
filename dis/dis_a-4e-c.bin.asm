@@ -1,6 +1,10 @@
 ; z80dasm 1.1.4
 ; command line: z80dasm -g0 -l -t roms/a-4e-c.bin
 
+; Check:
+; $ z80asm dis/dis_a-4e-c.bin.asm && shasum a.bin 
+; 17e2cfe2b9d6121239803aba7132918e54ae02bf  a.bin
+
 	org	00000h
 
 l0000h:
@@ -688,7 +692,9 @@ l0461h:
 	call sub_04bfh		;049c	cd bf 04 	. . . 
 	ld a,(0e81ch)		;049f	3a 1c e8 	: . . 
 	and a			;04a2	a7 	. 
-	ld hl,l053fh		;04a3	21 3f 05 	! ? . 
+	
+	defb 021h, 03fh, 005h
+	
 	call z,sub_111ch		;04a6	cc 1c 11 	. . . 
 	ld a,054h		;04a9	3e 54 	> T 
 	call 0570fh		;04ab	cd 0f 57 	. . W 
@@ -731,64 +737,21 @@ sub_04e5h:
 	jp sub_111ch		;04fa	c3 1c 11 	. . . 
 l04fdh:
 	defb 0fdh,067h,0d3h	;illegal sequence		;04fd	fd 67 d3 	. g . 
-	cp 0dbh		;0500	fe db 	. . 
-	jr nz,l0524h		;0502	20 20 	    
-	jr nz,l0526h		;0504	20 20 	    
-	jr nz,l0528h		;0506	20 20 	    
-	jr nz,l052ah		;0508	20 20 	    
-	jr nz,$+34		;050a	20 20 	    
-	jr nz,$+34		;050c	20 20 	    
-	jr nz,$+34		;050e	20 20 	    
-	jr nz,$+34		;0510	20 20 	    
-	jr nz,$+34		;0512	20 20 	    
-	defb 0fdh,0a7h,0d3h	;illegal sequence		;0514	fd a7 d3 	. . . 
-	jr nz,$+1		;0517	20 ff 	  . 
-	dec l			;0519	2d 	- 
-	ld d,b			;051a	50 	P 
-	ld c,h			;051b	4c 	L 
-	ld b,c			;051c	41 	A 
-	ld e,c			;051d	59 	Y 
-	ld b,l			;051e	45 	E 
-	ld d,d			;051f	52 	R 
-	jr nz,$+1		;0520	20 ff 	  . 
-	dec l			;0522	2d 	- 
-	ld b,(hl)			;0523	46 	F 
-l0524h:
-	ld c,h			;0524	4c 	L 
-	ld c,a			;0525	4f 	O 
-l0526h:
-	ld c,a			;0526	4f 	O 
-l0527h:
-	ld d,d			;0527	52 	R 
-l0528h:
-	jr nz,l0527h		;0528	20 fd 	  . 
-l052ah:
-	rst 20h			;052a	e7 	. 
-	out (020h),a		;052b	d3 20 	.   
-	jr nz,$+34		;052d	20 20 	    
-	jr nz,$+34		;052f	20 20 	    
-	jr nz,$+34		;0531	20 20 	    
-	jr nz,$+34		;0533	20 20 	    
-	jr nz,$+34		;0535	20 20 	    
-	jr nz,l0559h		;0537	20 20 	    
-	jr nz,sub_055bh		;0539	20 20 	    
-	jr nz,$+34		;053b	20 20 	    
-	jr nz,$+1		;053d	20 ff 	  . 
-l053fh:
-	cp 0dbh		;053f	fe db 	. . 
-	defb 0fdh,02ch,0d4h	;illegal sequence		;0541	fd 2c d4 	. , . 
-	jr nz,$+84		;0544	20 52 	  R 
-	ld b,l			;0546	45 	E 
-	ld b,c			;0547	41 	A 
-	ld b,h			;0548	44 	D 
-l0549h:
-	ld e,c			;0549	59 	Y 
-	jr nz,l0549h		;054a	20 fd 	  . 
-	ld l,h			;054c	6c 	l 
-	call nc,02020h		;054d	d4 20 20 	.     
-	jr nz,l0572h		;0550	20 20 	    
-	jr nz,l0574h		;0552	20 20 	    
-	jr nz,$+1		;0554	20 ff 	  . 
+	defb 0feh, 0dbh
+	defb "                  "
+	defb 0fdh,0a7h,0d3h
+	defb 020h, 0ffh
+	defb 02dh
+	defb "PLAYER ", 0ffh ; 051ah
+	defb 02dh
+	defb "FLOOR ", 0fdh  ; 0523h
+	defb 0e7h,0d3h
+	defb "                  ", 0ffh
+	defb 0feh,0dbh
+	defb 0fdh,02ch,0d4h
+	defb " READY ", 0fdh ; 0544h
+	defb 06ch, 0d4h
+	defb "       ", 0ffh
 sub_0556h:
 	ld a,(0e080h)		;0556	3a 80 e0 	: . . 
 l0559h:
