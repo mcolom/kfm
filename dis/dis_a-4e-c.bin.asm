@@ -5,7 +5,19 @@
 ; $ z80asm dis/dis_a-4e-c.bin.asm && shasum a.bin 
 ; 17e2cfe2b9d6121239803aba7132918e54ae02bf  a.bin
 
+
+
 	org	00000h
+
+; Examples of macros
+makelabel: macro name
+	label_name:
+endm
+
+callf: macro slot address
+	rst 0x30 db slot dw address
+endm
+
 
 l0000h:
 	di			;0000	f3 	. 
