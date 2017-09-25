@@ -39,7 +39,7 @@ l0023h:
 l0029h:
 	ld bc,l0078h		;0029	01 78 00 	. x . 
 	ldir		;002c	ed b0 	. . 
-	ld hl,(l063fh)		;002e	2a 3f 06 	* ? . 
+	defb 02ah, 03fh, 006h
 	ld a,l			;0031	7d 	} 
 	ld l,h			;0032	6c 	l 
 	ld h,a			;0033	67 	g 
@@ -840,115 +840,72 @@ l05c8h:
 	ld (hl),a			;05ca	77 	w 
 	ret			;05cb	c9 	. 
 l05cch:
-	nop			;05cc	00 	. 
-	inc d			;05cd	14 	. 
-	sub l			;05ce	95 	. 
-	ld d,h			;05cf	54 	T 
-	ld b,c			;05d0	41 	A 
-	ld l,000h		;05d1	2e 00 	. . 
-	dec d			;05d3	15 	. 
-	jr c,l0617h		;05d4	38 41 	8 A 
-	ld b,c			;05d6	41 	A 
-	ld b,c			;05d7	41 	A 
-	nop			;05d8	00 	. 
-	dec d			;05d9	15 	. 
-	ld (hl),d			;05da	72 	r 
-	ld c,(hl)			;05db	4e 	N 
-	ld c,(hl)			;05dc	4e 	N 
-	ld c,c			;05dd	49 	I 
-	nop			;05de	00 	. 
-	ld d,052h		;05df	16 52 	. R 
-	ld b,c			;05e1	41 	A 
-	ld b,c			;05e2	41 	A 
-	ld b,c			;05e3	41 	A 
-	nop			;05e4	00 	. 
-	jr l0608h		;05e5	18 21 	. ! 
-	ld c,c			;05e7	49 	I 
-	ld c,e			;05e8	4b 	K 
-	ld c,a			;05e9	4f 	O 
-	nop			;05ea	00 	. 
-	add hl,de			;05eb	19 	. 
-	add a,l			;05ec	85 	. 
-	ld b,c			;05ed	41 	A 
-	ld c,c			;05ee	49 	I 
-	ld l,000h		;05ef	2e 00 	. . 
-	jr nz,l05fah		;05f1	20 07 	  . 
-	ld b,c			;05f3	41 	A 
-	ld c,(hl)			;05f4	4e 	N 
-	ld c,a			;05f5	4f 	O 
-	nop			;05f6	00 	. 
-	ld hl,04d01h		;05f7	21 01 4d 	! . M 
-l05fah:
-	ld l,04bh		;05fa	2e 4b 	. K 
-	nop			;05fc	00 	. 
-	dec h			;05fd	25 	% 
-	ld d,c			;05fe	51 	Q 
-l05ffh:
-	ld c,c			;05ff	49 	I 
-l0600h:
-	ld c,c			;0600	49 	I 
-	ld b,c			;0601	41 	A 
-	nop			;0602	00 	. 
-	dec h			;0603	25 	% 
-	ld (hl),b			;0604	70 	p 
-	ld c,b			;0605	48 	H 
-	ld b,c			;0606	41 	A 
-	ld d,h			;0607	54 	T 
-l0608h:
-	nop			;0608	00 	. 
-	ld h,035h		;0609	26 35 	& 5 
-	ld b,c			;060b	41 	A 
-	ld l,054h		;060c	2e 54 	. T 
-	nop			;060e	00 	. 
-	jr z,$+19		;060f	28 11 	( . 
-	ld e,c			;0611	59 	Y 
-	ld b,l			;0612	45 	E 
-	ld l,000h		;0613	2e 00 	. . 
-	jr nc,l0638h		;0615	30 21 	0 ! 
-l0617h:
-	ld d,e			;0617	53 	S 
-	ld b,c			;0618	41 	A 
-	ld c,c			;0619	49 	I 
-	nop			;061a	00 	. 
-	dec (hl)			;061b	35 	5 
-	ld d,b			;061c	50 	P 
-	ld c,c			;061d	49 	I 
-	ld c,b			;061e	48 	H 
-	ld c,l			;061f	4d 	M 
-	nop			;0620	00 	. 
-	jr c,l0633h		;0621	38 10 	8 . 
-	ld b,c			;0623	41 	A 
-	ld c,(hl)			;0624	4e 	N 
-	ld c,c			;0625	49 	I 
-	nop			;0626	00 	. 
-	add hl,sp			;0627	39 	9 
-	jr l067eh		;0628	18 54 	. T 
-	ld d,e			;062a	53 	S 
-	ld c,c			;062b	49 	I 
-	nop			;062c	00 	. 
-	add hl,sp			;062d	39 	9 
-	ld (hl),l			;062e	75 	u 
-	ld b,d			;062f	42 	B 
-	ld b,c			;0630	41 	A 
-	ld c,b			;0631	48 	H 
-	nop			;0632	00 	. 
-l0633h:
-	ld b,b			;0633	40 	@ 
-	djnz $+86		;0634	10 54 	. T 
-	ld l,04bh		;0636	2e 4b 	. K 
-l0638h:
-	nop			;0638	00 	. 
-	ld b,e			;0639	43 	C 
-	dec d			;063a	15 	. 
-	ld d,e			;063b	53 	S 
-	ld d,l			;063c	55 	U 
-	ld c,c			;063d	49 	I 
-	nop			;063e	00 	. 
-l063fh:
-	ld c,b			;063f	48 	H 
-	ld d,d			;0640	52 	R 
-	ld c,(hl)			;0641	4e 	N 
-	ld l,041h		;0642	2e 41 	. A 
+	nop			;05cc	00 	.
+
+	; Table "BEST 20 PLAYERS"
+	;
+	; Each entry is the record + a NULL-terminated string with the names (3 chars)
+	; The record printed as first hex number + the second hex number + a cero char
+	defb 014h, 095h ; 014h, 095h --> 14950 points for "TA."
+	defb "TA.", 0
+
+	defb 015h, 038h
+	defb "AAA", 0
+
+	defb 015h, 072h ;05d9
+	defb "NNI", 0 ; 05dbh
+
+	defb 016h, 052h ;05d9
+	defb "AAA", 0 ; 05e1
+
+	defb 018h, 021h
+	defb "IKO", 0 ; 05e7
+
+	defb 019h, 085h
+	defb "AI.", 0 ; 05e7
+
+	defb 020h, 007h
+	defb "ANO", 0 ; 05f3
+
+	defb 021h, 001h
+	defb "M.K", 0
+
+	defb 025h, 051h
+	defb "IIA", 0
+
+	defb 025h, 070h
+	defb "HAT", 0
+
+	defb 026h, 035h ;0609
+	defb "A.T", 0
+
+	defb 028h, 011h ;060f
+	defb "YE.", 0
+
+	defb 030h, 021h ;0615
+	defb "SAI", 0
+
+	defb 035h, 050h
+	defb "IHM", 0
+
+	defb 038h, 010h
+	defb "ANI", 0
+
+	defb 039h, 018h
+	defb "TSI", 0
+
+	defb 039h, 075h ;062d
+	defb "BAH", 0
+
+	defb 040h, 010h ;0633
+	defb "T.K", 0
+
+	defb 043h, 015h ;0639
+	defb "SUI", 0
+
+	defb 048h, 052h ;063f
+	defb "N.A"
+
 sub_0644h:
 	ld hl,l0080h		;0644	21 80 00 	! . . 
 	ld (0e902h),hl		;0647	22 02 e9 	" . . 
@@ -1079,8 +1036,8 @@ sub_074dh:
 	ld a,(0e080h)		;075a	3a 80 e0 	: . . 
 	and 007h		;075d	e6 07 	. . 
 	cp 004h		;075f	fe 04 	. . 
-	jr nz,l0791h		;0761	20 2e 	  . 
-	ld hl,l0600h		;0763	21 00 06 	! . . 
+	defb 020h, 02eh
+	defb 021h, 000h, 006h
 	ld (0e342h),hl		;0766	22 42 e3 	" B . 
 	ld hl,00780h		;0769	21 80 07 	! . . 
 	ld (0e34eh),hl		;076c	22 4e e3 	" N . 
@@ -4531,7 +4488,7 @@ l1c55h:
 	rlca			;1c56	07 	. 
 	rlca			;1c57	07 	. 
 	ex af,af'			;1c58	08 	. 
-	ld de,l05ffh		;1c59	11 ff 05 	. . . 
+	defb 011h, 0ffh, 005h
 	rlca			;1c5c	07 	. 
 	ld a,(bc)			;1c5d	0a 	. 
 	ex af,af'			;1c5e	08 	. 
