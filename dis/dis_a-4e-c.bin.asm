@@ -49,6 +49,13 @@ InDSW2: macro
 	in a,(004h)
 endm
 
+; Service mode: bit 7 of DSW2. Active LOW.
+CHECKSERVICEMODE: macro
+	bit 7,a
+endm
+
+
+
 ; ************************ ROM start ************************
 	org	00000h
 
@@ -72,15 +79,13 @@ endm
 	ld (hl),000h
 	ldir
 
-l0013h:
-	ld hl,0eb25h		;0013	21 25 eb 	! % . 
-l0016h:
-	ld (0eb03h),hl		;0016	22 03 eb 	" . . 
+	;0013
+	ld hl,0eb25h
+	ld (0eb03h),hl
 	InDSW2
-l001bh:
-	bit 7,a		;001b	cb 7f 	.  
-l001dh:
-	jp z,07666h		;001d	ca 66 76 	. f v 
+	CHECKSERVICEMODE
+	jp z,07666h; Jump to service mode
+
 l0020h:
 	call sub_058fh		;0020	cd 8f 05 	. . . 
 l0023h:
@@ -404,7 +409,7 @@ l0220h:
 	ld (0e006h),a		;0229	32 06 e0 	2 . . 
 	ld hl,0e080h		;022c	21 80 e0 	! . . 
 	ld de,0e081h		;022f	11 81 e0 	. . . 
-	ld bc,l001dh+2		;0232	01 1f 00 	. . . 
+	ld bc,001dh+2		;0232	01 1f 00 	. . . 
 	ld (hl),000h		;0235	36 00 	6 . 
 	ldir		;0237	ed b0 	. . 
 	InDSW1		;0239	db 03 	. . 
@@ -981,7 +986,7 @@ sub_0644h:
 	ld hl,l08b0h		;0678	21 b0 08 	! . . 
 	ld de,0e360h		;067b	11 60 e3 	. ` . 
 l067eh:
-	ld bc,l0016h+2		;067e	01 18 00 	. . . 
+	ld bc,0016h+2		;067e	01 18 00 	. . . 
 	call sub_06b2h		;0681	cd b2 06 	. . . 
 	ld a,001h		;0684	3e 01 	> . 
 	ld (0e380h),a		;0686	32 80 e3 	2 . . 
@@ -1132,7 +1137,7 @@ l07b6h:
 	ld h,(hl)			;07cb	66 	f 
 	ld l,a			;07cc	6f 	o 
 	ld de,0e19ch		;07cd	11 9c e1 	. . . 
-	ld bc,l001dh		;07d0	01 1d 00 	. . . 
+	ld bc,001dh		;07d0	01 1d 00 	. . . 
 	ldir		;07d3	ed b0 	. . 
 	ld hl,l097fh+1		;07d5	21 80 09 	! . . 
 	pop bc			;07d8	c1 	. 
@@ -3839,7 +3844,7 @@ l173dh:
 	add hl,de			;1750	19 	. 
 	ld (0e811h),hl		;1751	22 11 e8 	" . . 
 	call sub_1c9eh		;1754	cd 9e 1c 	. . . 
-	ld de,l0013h+1		;1757	11 14 00 	. . . 
+	ld de,0013h+1		;1757	11 14 00 	. . . 
 	call sub_1172h		;175a	cd 72 11 	. r . 
 	jr c,l1787h		;175d	38 28 	8 ( 
 l175fh:
@@ -4464,7 +4469,7 @@ l1baah:
 l1bc4h:
 	ld e,(ix+00eh)		;1bc4	dd 5e 0e 	. ^ . 
 	ld d,(ix+00fh)		;1bc7	dd 56 0f 	. V . 
-	ld hl,l0016h		;1bca	21 16 00 	! . . 
+	ld hl,0016h		;1bca	21 16 00 	! . . 
 	add hl,de			;1bcd	19 	. 
 	ld (ix+00eh),l		;1bce	dd 75 0e 	. u . 
 	ld (ix+00fh),h		;1bd1	dd 74 0f 	. t . 
@@ -4769,7 +4774,7 @@ l1e20h:
 	call sub_1c7ah		;1e23	cd 7a 1c 	. z . 
 	call l1be2h		;1e26	cd e2 1b 	. . . 
 	ld hl,(0e327h)		;1e29	2a 27 e3 	* ' . 
-	ld de,l001bh		;1e2c	11 1b 00 	. . . 
+	ld de,001bh		;1e2c	11 1b 00 	. . . 
 	add hl,de			;1e2f	19 	. 
 	ld (0e327h),hl		;1e30	22 27 e3 	" ' . 
 	ex de,hl			;1e33	eb 	. 
@@ -5241,7 +5246,7 @@ l21bdh:
 	jr c,l21ceh		;21c9	38 03 	8 . 
 	ld hl,06080h		;21cb	21 80 60 	! . ` 
 l21ceh:
-	ld de,l0016h+2		;21ce	11 18 00 	. . . 
+	ld de,0016h+2		;21ce	11 18 00 	. . . 
 	jp l2c95h		;21d1	c3 95 2c 	. . , 
 l21d4h:
 	dec (ix+00bh)		;21d4	dd 35 0b 	. 5 . 
@@ -6223,7 +6228,7 @@ l29f7h:
 	jr nc,l2a2ch		;2a20	30 0a 	0 . 
 	ld de,00400h		;2a22	11 00 04 	. . . 
 	add hl,de			;2a25	19 	. 
-	ld de,l0016h+2		;2a26	11 18 00 	. . . 
+	ld de,0016h+2		;2a26	11 18 00 	. . . 
 	call l2c95h		;2a29	cd 95 2c 	. . , 
 l2a2ch:
 	inc (ix+006h)		;2a2c	dd 34 06 	. 4 . 
@@ -6362,7 +6367,7 @@ l2b28h:
 	jr nz,l2b4eh		;2b41	20 0b 	  . 
 	ld (hl),001h		;2b43	36 01 	6 . 
 	ld hl,06000h		;2b45	21 00 60 	! . ` 
-	ld de,l0016h+2		;2b48	11 18 00 	. . . 
+	ld de,0016h+2		;2b48	11 18 00 	. . . 
 	call l2c95h		;2b4b	cd 95 2c 	. . , 
 l2b4eh:
 	ld hl,(0e2e4h)		;2b4e	2a e4 e2 	* . . 
@@ -6645,10 +6650,10 @@ sub_2d01h:
 	pop af			;2d0b	f1 	. 
 	ret			;2d0c	c9 	. 
 sub_2d0dh:
-	ld de,l001bh		;2d0d	11 1b 00 	. . . 
+	ld de,001bh		;2d0d	11 1b 00 	. . . 
 	jp l1beah		;2d10	c3 ea 1b 	. . . 
 sub_2d13h:
-	ld de,l001bh		;2d13	11 1b 00 	. . . 
+	ld de,001bh		;2d13	11 1b 00 	. . . 
 	jp l1bf2h		;2d16	c3 f2 1b 	. . . 
 sub_2d19h:
 	ld a,083h		;2d19	3e 83 	> . 
@@ -6737,7 +6742,7 @@ l2d86h:
 	bit 4,c		;2d86	cb 61 	. a 
 	jr z,l2d91h		;2d88	28 07 	( . 
 	push hl			;2d8a	e5 	. 
-	ld hl,l0016h+2		;2d8b	21 18 00 	! . . 
+	ld hl,0016h+2		;2d8b	21 18 00 	! . . 
 	add hl,de			;2d8e	19 	. 
 	ex de,hl			;2d8f	eb 	. 
 	pop hl			;2d90	e1 	. 
@@ -7119,7 +7124,7 @@ l2fd6h:
 	bit 4,c		;2fd6	cb 61 	. a 
 	call nz,sub_2fe4h		;2fd8	c4 e4 2f 	. . / 
 	pop bc			;2fdb	c1 	. 
-	ld de,l0013h		;2fdc	11 13 00 	. . . 
+	ld de,0013h		;2fdc	11 13 00 	. . . 
 	add ix,de		;2fdf	dd 19 	. . 
 	djnz l2fd2h		;2fe1	10 ef 	. . 
 	ret			;2fe3	c9 	. 
@@ -7285,7 +7290,7 @@ l311ch:
 	cp 00ch		;3149	fe 0c 	. . 
 	ret z			;314b	c8 	. 
 l314ch:
-	ld de,l0013h		;314c	11 13 00 	. . . 
+	ld de,0013h		;314c	11 13 00 	. . . 
 	add iy,de		;314f	fd 19 	. . 
 	djnz l311ch		;3151	10 c9 	. . 
 	ret			;3153	c9 	. 
@@ -7872,7 +7877,7 @@ l363dh:
 	set 0,d		;3644	cb c2 	. . 
 	ex de,hl			;3646	eb 	. 
 	ld ix,0e36fh		;3647	dd 21 6f e3 	. ! o . 
-	ld de,l0013h		;364b	11 13 00 	. . . 
+	ld de,0013h		;364b	11 13 00 	. . . 
 	ld b,010h		;364e	06 10 	. . 
 l3650h:
 	add ix,de		;3650	dd 19 	. . 
@@ -7900,7 +7905,7 @@ l366ch:
 	inc hl			;367c	23 	# 
 	inc (hl)			;367d	34 	4 
 	ld ix,0e36fh		;367e	dd 21 6f e3 	. ! o . 
-	ld bc,l0013h		;3682	01 13 00 	. . . 
+	ld bc,0013h		;3682	01 13 00 	. . . 
 l3685h:
 	add ix,bc		;3685	dd 09 	. . 
 	bit 4,(ix+000h)		;3687	dd cb 00 66 	. . . f 
@@ -7956,7 +7961,7 @@ sub_36f6h:
 	inc a			;36fd	3c 	< 
 	ld (0e381h),a		;36fe	32 81 e3 	2 . . 
 	ld iy,0e36fh		;3701	fd 21 6f e3 	. ! o . 
-	ld de,l0013h		;3705	11 13 00 	. . . 
+	ld de,0013h		;3705	11 13 00 	. . . 
 l3708h:
 	add iy,de		;3708	fd 19 	. . 
 	bit 4,(iy+000h)		;370a	fd cb 00 66 	. . . f 
@@ -8121,7 +8126,7 @@ l3813h:
 	jp c,l38d9h		;383c	da d9 38 	. . 8 
 	inc (hl)			;383f	34 	4 
 	ld iy,0e562h		;3840	fd 21 62 e5 	. ! b . 
-	ld bc,l0013h+2		;3844	01 15 00 	. . . 
+	ld bc,0013h+2		;3844	01 15 00 	. . . 
 l3847h:
 	add iy,bc		;3847	fd 09 	. . 
 	bit 4,(iy+000h)		;3849	fd cb 00 66 	. . . f 
@@ -8370,7 +8375,7 @@ l39cdh:
 	bit 4,c		;39d1	cb 61 	. a 
 	call nz,sub_39dfh		;39d3	c4 df 39 	. . 9 
 	pop bc			;39d6	c1 	. 
-	ld de,l0013h+2		;39d7	11 15 00 	. . . 
+	ld de,0013h+2		;39d7	11 15 00 	. . . 
 	add ix,de		;39da	dd 19 	. . 
 	djnz l39cdh		;39dc	10 ef 	. . 
 	ret			;39de	c9 	. 
@@ -8594,7 +8599,7 @@ l3baah:
 	add hl,de			;3bb4	19 	. 
 	pop hl			;3bb5	e1 	. 
 	jr nc,l3bbch		;3bb6	30 04 	0 . 
-	ld de,l0016h		;3bb8	11 16 00 	. . . 
+	ld de,0016h		;3bb8	11 16 00 	. . . 
 	add hl,de			;3bbb	19 	. 
 l3bbch:
 	call sub_3bd5h		;3bbc	cd d5 3b 	. . ; 
@@ -8812,7 +8817,7 @@ l3d5bh:
 	ret c			;3d62	d8 	. 
 	inc (hl)			;3d63	34 	4 
 	ld iy,0e562h		;3d64	fd 21 62 e5 	. ! b . 
-	ld de,l0013h+2		;3d68	11 15 00 	. . . 
+	ld de,0013h+2		;3d68	11 15 00 	. . . 
 l3d6bh:
 	add iy,de		;3d6b	fd 19 	. . 
 	bit 4,(iy+000h)		;3d6d	fd cb 00 66 	. . . f 
