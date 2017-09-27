@@ -14,12 +14,45 @@ callf: macro slot address
 	rst 0x30 db slot dw address
 endm
 
-;DSW2: 004h
+; ************************ I/O ports ************************
 
+; Irem audio on port 0
+InIremAudio: macro
+	in a,(000h)
+endm
+;
+OutIremAudio: macro
+	out (000h),a
+endm
+
+; P1 joystick, flipscreen, and coin counters on port 1
+InP1FlipscreenCoins: macro
+	in a,(001h)
+endm
+;
+OutP1FlipscreenCoins: macro
+	out (001h),a
+endm
+
+; P2 joystick on port 2
+InP2Button: macro
+	in a,(002h)
+endm
+
+; DSW1 on port 3
+InDSW1: macro
+	in a,(003h)
+endm
+
+; DSW2 on port 4
+InDSW2: macro
+	in a,(004h)
+endm
+
+; ************************ ROM start ************************
 	org	00000h
 
 
-	; ROM START
 	; Disable interrupts
 	; Interrupt mode 1: interrupt handler at address 038h
 	di
@@ -30,6 +63,7 @@ endm
 
 	; Move 0fffh (4095) bytes from 0e000h to 0e001h
 	; Pad (0e000h) = 0
+	; AM_RANGE(0xe000, 0xefff) AM_RAM
 	; This simply moves a memory region just before the stack one byte to
 	; the right (?)
 	ld hl,0e000h
@@ -42,7 +76,7 @@ l0013h:
 	ld hl,0eb25h		;0013	21 25 eb 	! % . 
 l0016h:
 	ld (0eb03h),hl		;0016	22 03 eb 	" . . 
-	in a,(004h)		;0019	db 04 	. . 
+	InDSW2
 l001bh:
 	bit 7,a		;001b	cb 7f 	.  
 l001dh:
@@ -137,14 +171,14 @@ l008dh:
 	ld a,(0e000h)		;008d	3a 00 e0 	: . . 
 	and a			;0090	a7 	. 
 	jp m,l01f8h		;0091	fa f8 01 	. . . 
-	in a,(004h)		;0094	db 04 	. . 
+	InDSW2		;0094	db 04 	. . 
 	bit 4,a		;0096	cb 67 	. g 
 	jr nz,l00b7h		;0098	20 1d 	  . 
 	ld hl,0e005h		;009a	21 05 e0 	! . . 
 	bit 7,(hl)		;009d	cb 7e 	. ~ 
 	jr nz,l00b7h		;009f	20 16 	  . 
 	bit 0,(hl)		;00a1	cb 46 	. F 
-	in a,(000h)		;00a3	db 00 	. . 
+	InIremAudio		;00a3	db 00 	. . 
 	jr nz,l00b0h		;00a5	20 09 	  . 
 	and 002h		;00a7	e6 02 	. . 
 	jr nz,l00b7h		;00a9	20 0c 	  . 
@@ -155,7 +189,7 @@ l00b0h:
 	jp nz,l01f0h		;00b2	c2 f0 01 	. . . 
 	res 0,(hl)		;00b5	cb 86 	. . 
 l00b7h:
-	in a,(004h)		;00b7	db 04 	. . 
+	InDSW2		;00b7	db 04 	. . 
 	bit 3,a		;00b9	cb 5f 	. _ 
 	jr nz,l00cdh		;00bb	20 10 	  . 
 	ld hl,0e904h		;00bd	21 04 e9 	! . . 
@@ -373,7 +407,7 @@ l0220h:
 	ld bc,l001dh+2		;0232	01 1f 00 	. . . 
 	ld (hl),000h		;0235	36 00 	6 . 
 	ldir		;0237	ed b0 	. . 
-	in a,(003h)		;0239	db 03 	. . 
+	InDSW1		;0239	db 03 	. . 
 	and 001h		;023b	e6 01 	. . 
 	jr nz,l0247h		;023d	20 08 	  . 
 	ld a,008h		;023f	3e 08 	> . 
@@ -388,7 +422,7 @@ sub_0250h:
 	res 7,(hl)		;0253	cb be 	. . 
 	xor a			;0255	af 	. 
 	ld (0e000h),a		;0256	32 00 e0 	2 . . 
-	in a,(004h)		;0259	db 04 	. . 
+	InDSW2		;0259	db 04 	. . 
 	and 002h		;025b	e6 02 	. . 
 	ld hl,0e910h		;025d	21 10 e9 	! . . 
 	jr z,l026dh		;0260	28 0b 	( . 
@@ -421,7 +455,7 @@ l0285h:
 	ld a,024h		;0297	3e 24 	> $ 
 	call sub_0dfeh		;0299	cd fe 0d 	. . . 
 l029ch:
-	in a,(004h)		;029c	db 04 	. . 
+	InDSW2		;029c	db 04 	. . 
 	bit 4,a		;029e	cb 67 	. g 
 l02a0h:
 	jr z,l02aeh		;02a0	28 0c 	( . 
@@ -785,7 +819,7 @@ sub_055fh:
 	call sub_0dfeh		;056b	cd fe 0d 	. . . 
 	ret			;056e	c9 	. 
 sub_056fh:
-	in a,(003h)		;056f	db 03 	. . 
+	InDSW1		;056f	db 03 	. . 
 	cpl			;0571	2f 	/ 
 l0572h:
 	and 00ch		;0572	e6 0c 	. . 
@@ -809,7 +843,7 @@ l0585h:
 	jr nz,l0585h		;058c	20 f7 	  . 
 	ret			;058e	c9 	. 
 sub_058fh:
-	in a,(003h)		;058f	db 03 	. . 
+	InDSW1		;058f	db 03 	. . 
 	cpl			;0591	2f 	/ 
 	rra			;0592	1f 	. 
 	rra			;0593	1f 	. 
@@ -818,7 +852,7 @@ l0594h:
 	rra			;0595	1f 	. 
 	ld b,a			;0596	47 	G 
 	ld hl,0e90ah		;0597	21 0a e9 	! . . 
-	in a,(004h)		;059a	db 04 	. . 
+	InDSW2		;059a	db 04 	. . 
 	bit 2,a		;059c	cb 57 	. W 
 	jr nz,l05b1h		;059e	20 11 	  . 
 	ld a,b			;05a0	78 	x 
@@ -2228,9 +2262,9 @@ l0cbfh:
 sub_0d05h:
 	ld a,(0e910h)		;0d05	3a 10 e9 	: . . 
 	and 001h		;0d08	e6 01 	. . 
-	in a,(001h)		;0d0a	db 01 	. . 
+	InP1FlipscreenCoins		;0d0a	db 01 	. . 
 	jr z,l0d10h		;0d0c	28 02 	( . 
-	in a,(002h)		;0d0e	db 02 	. . 
+	InP2Button		;0d0e	db 02 	. . 
 l0d10h:
 	ld hl,(0e906h)		;0d10	2a 06 e9 	* . . 
 	call sub_0d3bh		;0d13	cd 3b 0d 	. ; . 
@@ -2244,10 +2278,10 @@ l0d10h:
 	rla			;0d23	17 	. 
 	rla			;0d24	17 	. 
 	rl (hl)		;0d25	cb 16 	. . 
-	in a,(000h)		;0d27	db 00 	. . 
+	InIremAudio		;0d27	db 00 	. . 
 	and 00fh		;0d29	e6 0f 	. . 
 	ld b,a			;0d2b	47 	G 
-	in a,(002h)		;0d2c	db 02 	. . 
+	InP2Button		;0d2c	db 02 	. . 
 	and 010h		;0d2e	e6 10 	. . 
 	or b			;0d30	b0 	. 
 	ld hl,(0e904h)		;0d31	2a 04 e9 	* . . 
@@ -2303,8 +2337,8 @@ l0d61h:
 	call sub_0da2h		;0d82	cd a2 0d 	. . . 
 	ld a,c			;0d85	79 	y 
 	ld (0e910h),a		;0d86	32 10 e9 	2 . . 
-	out (001h),a		;0d89	d3 01 	. . 
-	in a,(004h)		;0d8b	db 04 	. . 
+	OutP1FlipscreenCoins		;0d89	d3 01 	. . 
+	InDSW2		;0d8b	db 04 	. . 
 	cpl			;0d8d	2f 	/ 
 	xor c			;0d8e	a9 	. 
 	and 001h		;0d8f	e6 01 	. . 
@@ -2376,9 +2410,9 @@ sub_0de5h:
 	dec (hl)			;0deb	35 	5 
 	inc hl			;0dec	23 	# 
 	ld a,(hl)			;0ded	7e 	~ 
-	out (000h),a		;0dee	d3 00 	. . 
+	OutIremAudio		;0dee	d3 00 	. . 
 	or 080h		;0df0	f6 80 	. . 
-	out (000h),a		;0df2	d3 00 	. . 
+	OutIremAudio		;0df2	d3 00 	. . 
 	inc hl			;0df4	23 	# 
 	ld de,0e918h		;0df5	11 18 e9 	. . . 
 	ld bc,00fh		;0df8	01 0f 00 	. . . 
@@ -2550,7 +2584,7 @@ sub_0f1ah:
 	rrca			;0f20	0f 	. 
 	rrca			;0f21	0f 	. 
 	ld b,a			;0f22	47 	G 
-	in a,(003h)		;0f23	db 03 	. . 
+	InDSW1		;0f23	db 03 	. . 
 	and 001h		;0f25	e6 01 	. . 
 	jr nz,l0f2ah		;0f27	20 01 	  . 
 	dec b			;0f29	05 	. 
@@ -2698,7 +2732,7 @@ l100fh:
 	and a			;1018	a7 	. 
 	jr nz,l105ah		;1019	20 3f 	  ? 
 	ld b,a			;101b	47 	G 
-	in a,(003h)		;101c	db 03 	. . 
+	InDSW1		;101c	db 03 	. . 
 	and 001h		;101e	e6 01 	. . 
 	ld a,(0e080h)		;1020	3a 80 e0 	: . . 
 	jr nz,l1027h		;1023	20 02 	  . 
@@ -2993,7 +3027,7 @@ sub_1208h:
 	ld a,(0e000h)		;1208	3a 00 e0 	: . . 
 	cp 006h		;120b	fe 06 	. . 
 	ret z			;120d	c8 	. 
-	in a,(004h)		;120e	db 04 	. . 
+	InDSW2		;120e	db 04 	. . 
 	cpl			;1210	2f 	/ 
 	bit 6,a		;1211	cb 77 	. w 
 	ret			;1213	c9 	. 
@@ -3638,7 +3672,7 @@ l15ffh:
 	and a			;1606	a7 	. 
 	ld a,002h		;1607	3e 02 	> . 
 	jr nz,l1615h		;1609	20 0a 	  . 
-	in a,(003h)		;160b	db 03 	. . 
+	InDSW1		;160b	db 03 	. . 
 	and 002h		;160d	e6 02 	. . 
 	ld a,004h		;160f	3e 04 	> . 
 	jr nz,l1615h		;1611	20 02 	  . 
@@ -4353,7 +4387,7 @@ l1b20h:
 	and a			;1b28	a7 	. 
 	ld a,002h		;1b29	3e 02 	> . 
 	jr nz,l1b37h		;1b2b	20 0a 	  . 
-	in a,(003h)		;1b2d	db 03 	. . 
+	InDSW1		;1b2d	db 03 	. . 
 	and 002h		;1b2f	e6 02 	. . 
 	ld a,004h		;1b31	3e 04 	> . 
 	jr nz,l1b37h		;1b33	20 02 	  . 
