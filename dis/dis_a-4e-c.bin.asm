@@ -5,10 +5,6 @@
 ; $ z80asm dis/dis_a-4e-c.bin.asm && shasum a.bin 
 ; 17e2cfe2b9d6121239803aba7132918e54ae02bf  a.bin
 
-
-
-	org	00000h
-
 ; Examples of macros
 makelabel: macro name
 	label_name:
@@ -17,6 +13,11 @@ endm
 callf: macro slot address
 	rst 0x30 db slot dw address
 endm
+
+;DSW2: 004h
+
+	org	00000h
+
 
 	; ROM START
 	; Disable interrupts
@@ -9035,4 +9036,4 @@ l3eabh:
 	ret nz			;3ed5	c0 	. 
 	rst 38h			;3ed6	ff 	. 
 	; 3ed7. The ROM finishes with 297 bytes of value 0c7h
-	defb 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h, 0c7h
+	defs 297, 0c7h
