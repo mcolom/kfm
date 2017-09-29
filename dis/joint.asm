@@ -10067,7 +10067,7 @@ sub_4704h:
 	ld iy,l5000h
 	jr c,l4723h
 	ret nz	
-	ld iy,l5200h
+	ld iy,5200h
 	ex de,hl	
 l4723h:
 	and a	
@@ -11275,7 +11275,7 @@ l5000h:
 	ld a,0f8h
 	call sub_5038h
 	call sub_5091h
-	ld hl,l50ffh
+	ld hl,50ffh
 	ld c,0d9h
 	call sub_5079h
 	ld a,0f8h
@@ -11361,123 +11361,18 @@ l509ch:
 	djnz l509ch
 	ret	
 l50a7h:
-	defb 0fdh,063h,0d2h	;illegal sequence
-	ld b,c	
-	jr nz,$+77
-	ld d,l	
-	ld c,(hl)	
-	ld b,a	
-	dec l	
-	ld b,(hl)	
-	ld d,l	
-	jr nz,l5102h
-	ld b,c	
-	ld d,e	
-	ld d,h	
-	ld b,l	
-	ld d,d	
-	inc l	
-	ld d,h	
-	ld c,b	
-	ld c,a	
-	ld c,l	
-	ld b,c	
-	ld d,e	
-	jr nz,l5104h
-	ld c,(hl)	
-l50c4h:
-	ld b,h	
-	jr nz,l50c4h
-	ex (sp),hl	
-	jp nc,04953h
-	ld c,h	
-	ld d,(hl)	
-	ld c,c	
-	ld b,c	
-	jr nz,l5116h
-	ld c,(hl)	
-	ld c,d	
-	ld c,a	
-	ld e,c	
-	ld b,l	
-	ld b,h	
-	jr nz,l5121h
-	ld b,c	
-	ld d,b	
-	ld d,b	
-	ld c,c	
-	ld c,(hl)	
-	ld b,l	
-	ld d,e	
-l50e0h:
-	ld d,e	
-	jr nz,l50e0h
-	ld h,e	
-	out (041h),a
-	ld b,a	
-	ld b,c	
-	ld c,c	
-	ld c,(hl)	
-	jr nz,l5132h
-	ld c,a	
-l50edh:
-	ld d,d	
-	jr nz,l5131h
-	jr nz,$+78
-	ld c,c	
-	ld d,h	
-	ld d,h	
-	ld c,h	
-	ld b,l	
-	jr nz,l5150h
-	ld c,b	
-	ld c,c	
-	ld c,h	
-	ld b,l	
-	ld l,0ffh
-l50ffh:
-	and (iy-02eh)
-l5102h:
-	ld b,d	
-	ld d,l	
-l5104h:
-	ld d,h	
-	jr nz,l515bh
-	ld c,b	
-	ld b,l	
-	ld c,c	
-	ld d,d	
-	jr nz,l5155h
-	ld b,c	
-	ld d,b	
-	ld d,b	
-	ld e,c	
-	jr nz,l5157h
-	ld b,c	
-	ld e,c	
-l5115h:
-	ld d,e	
-l5116h:
-	jr nz,l5115h
-	jr z,l50edh
-	ld b,h	
-	ld c,c	
-	ld b,h	
-	jr nz,l516dh
-	ld c,a	
-	ld d,h	
-l5121h:
-	jr nz,$+78
-	ld b,c	
-	ld d,e	
-	ld d,h	
-	jr nz,$+78
-	ld c,a	
-	ld c,(hl)	
-	ld b,a	
-	ld l,0ffh
-	defb 0fdh,02eh,0d4h	;illegal sequence
-	nop	
+	defb 0fdh,063h,0d2h	;illegal sequence		;50a7	fd 63 d2 	. c . 
+	defb "A KUNG-FU MASTER,THOMAS AND "
+	defb 0fdh, 0e3h, 0d2h
+	defb "SILVIA ENJOYED HAPPINESS "
+	defb 0fdh, 063h, 0d3h
+	defb "AGAIN FOR A LITTLE WHILE.", 0ffh
+	defb 0fdh, 0a6h, 0d2h
+	defb "BUT THEIR HAPPY DAYS "
+	defb 0fdh, 028h, 0d3h
+	defb "DID NOT LAST LONG.", 0ffh	
+	defb 0fdh,02eh,0d4h
+	nop			;5130
 l5131h:
 	nop	
 l5132h:
@@ -11553,12 +11448,12 @@ l519ah:
 	ld a,(0e913h)
 	push af	
 	cp 001h
-	ld hl,l51e5h
+	ld hl,51e5h
 	jr z,l51abh
-	ld hl,l51f3h
+	ld hl,51f3h
 l51abh:
 	call sub_111ch
-	ld hl,l5202h
+	ld hl,5202h
 	call sub_111ch
 	pop af	
 	call 10ffh
@@ -11580,356 +11475,185 @@ l51c9h:
 	ld hl,0e005h
 	res 7,(hl)
 	ret	
+
 l51d8h:
-	ld d,b	
-	ld d,l	
-	ld d,e	
-	ld c,b	
-	jr nz,l51feh
-	ld b,d	
-	ld d,l	
-	ld d,h	
-	ld d,h	
-	ld c,a	
-	ld c,(hl)	
-	rst 38h	
-l51e5h:
-	ld c,a	
-	ld c,(hl)	
-	ld c,h	
-	ld e,c	
-	jr nz,$+51
-	jr nz,l523dh
-	ld c,h	
-	ld b,c	
-	ld e,c	
-	ld b,l	
-	ld d,d	
-	rst 38h	
-l51f3h:
-	ld sp,l4f20h
-	ld d,d	
-	jr nz,$+52
-	jr nz,$+82
-	ld c,h	
-	ld b,c	
-	ld e,c	
-l51feh:
-	ld b,l	
-	ld d,d	
-l5200h:
-	ld d,e	
-	rst 38h	
-l5202h:
-	pop iy
-	push de	
-	ld b,e	
-	ld d,d	
-	ld b,l	
-	ld b,h	
-	ld c,c	
-	ld d,h	
-	jr nz,$+1
-sub_520dh:
-	call sub_1157h
-	call sub_5703h
-	ld a,020h
-	call sub_0dfeh
-	ld c,01bh
-	ld de,0d153h
-	ld b,017h
+	defb "PUSH  BUTTON", 0ffh
+	defb "ONLY 1 PLAYER", 0ffh
+	defb "1 OR 2 PLAYERS", 0ffh
+	defb 0fdh, 0e1h, 0d5h
+	defb "CREDIT ", 0ffh
+
+	call 01157h		;520d	cd 57 11 	. W . 
+	call sub_5703h		;5210	cd 03 57 	. . W 
+	ld a,020h		;5213	3e 20 	>   
+	call 00dfeh		;5215	cd fe 0d 	. . . 
+	ld c,01bh		;5218	0e 1b 	. . 
+	ld de,0d153h		;521a	11 53 d1 	. S . 
+	ld b,017h		;521d	06 17 	. . 
 l521fh:
-	call sub_5725h
-	ld hl,0026h
-	add hl,de	
-	ex de,hl	
-	djnz l521fh
-	ld hl,l5232h
-	call sub_5739h
-	jp sub_111ch
+	call sub_5725h		;521f	cd 25 57 	. % W 
+	ld hl,00026h		;5222	21 26 00 	! & . 
+	add hl,de			;5225	19 	. 
+	ex de,hl			;5226	eb 	. 
+	djnz l521fh		;5227	10 f6 	. . 
+	ld hl,l5232h		;5229	21 32 52 	! 2 R 
+	call sub_5739h		;522c	cd 39 57 	. 9 W 
+	jp 0111ch		;522f	c3 1c 11 	. . . 
 l5232h:
-	defb 0fdh,055h,0d1h	;illegal sequence
-	call z,sub_60fdh
-	pop de	
-	call z,sub_67fdh
-	pop de	
+	defb 0fdh,055h,0d1h	;illegal sequence		;5232	fd 55 d1 	. U . 
+	call z,sub_60fdh		;5235	cc fd 60 	. . ` 
+	pop de			;5238	d1 	. 
+	call z,sub_67fdh		;5239	cc fd 67 	. . g 
+	pop de			;523c	d1 	. 
 l523dh:
-	call z,092fdh
-	out (0e3h),a
-	defb 0fdh,0d1h,0d3h	;illegal sequence
-	exx	
-	ret c	
-	nop	
-	ret nc	
+	call z,092fdh		;523d	cc fd 92 	. . . 
+	out (0e3h),a		;5240	d3 e3 	. . 
+	defb 0fdh,0d1h,0d3h	;illegal sequence		;5242	fd d1 d3 	. . . 
+	exx			;5245	d9 	. 
+	ret c			;5246	d8 	. 
+	nop			;5247	00 	. 
+	ret nc			;5248	d0 	. 
 l5249h:
-	pop de	
-	call sub_10fdh
-	call nc,0dbe0h
-	jp c,0d200h
-	out (0cfh),a
-	defb 0fdh,050h,0d4h	;illegal sequence
-	jp po,0dc07h
-	defb 0ddh,0d4h,0d5h	;illegal sequence
-	defb 0fdh,090h,0d4h	;illegal sequence
-	call po,0de07h
+	pop de			;5249	d1 	. 
+	call 010fdh		;524a	cd fd 10 	. . . 
+	call nc,0dbe0h		;524d	d4 e0 db 	. . . 
+	jp c,0d200h		;5250	da 00 d2 	. . . 
+	out (0cfh),a		;5253	d3 cf 	. . 
+	defb 0fdh,050h,0d4h	;illegal sequence		;5255	fd 50 d4 	. P . 
+	jp po,0dc07h		;5258	e2 07 dc 	. . . 
+	defb 0ddh,0d4h,0d5h	;illegal sequence		;525b	dd d4 d5 	. . . 
+	defb 0fdh,090h,0d4h	;illegal sequence		;525e	fd 90 d4 	. . . 
+	call po,0de07h		;5261	e4 07 de 	. . . 
 l5264h:
-	rst 18h	
-	sub 0d7h
-	defb 0fdh,0d0h,0d4h	;illegal sequence
-	and 007h
-	rlca	
-	rlca	
-	push hl	
-	defb 0fdh,010h,0d5h	;illegal sequence
-	pop hl	
-	rlca	
-	ret pe	
-	jp (hl)	
-	rst 20h	
-	defb 0fdh,050h,0d5h	;illegal sequence
-	rlca	
-	rlca	
-	jp pe,0fdebh
-	sub b	
-	push de	
-	rlca	
-	rlca	
-	call pe,0fdedh
-	ret nc	
-	push de	
-	rlca	
-	rst 28h	
-	xor 0fdh
-	djnz l5264h
-	rlca	
-	pop af	
-	defb 0fdh,050h,0d6h	;illegal sequence
-	ret p	
-	di	
-	defb 0fdh,090h,0d6h	;illegal sequence
-	jp p,0d0fdh
-	sub 0f4h
-	defb 0fdh,0d6h,0d6h	;illegal sequence
-	adc a,0fdh
-	call po,0ced6h
-	cp 0fdh
-	xor l	
-	out (0e3h),a
-	jp (iy)
-	out (0cdh),a
-	pop de	
-	ret nc	
-	nop	
-	ret c	
-	exx	
-	add iy,iy
-	call nc,0d3cfh
-	jp nc,0da00h
-	in a,(0e0h)
-	defb 0fdh,06ah,0d4h	;illegal sequence
-	push de	
-	call nc,0dcddh
-	rlca	
-	jp po,0aafdh
-	call nc,0d6d7h
-	rst 18h	
-	sbc a,007h
-	call po,0ebfdh
-	call nc,007e5h
-	rlca	
-	rlca	
-	and 0fdh
-	dec hl	
-	push de	
-	rst 20h	
-	jp (hl)	
-	ret pe	
-	rlca	
-	pop hl	
-	defb 0fdh,06ch,0d5h	;illegal sequence
-	ex de,hl	
-	jp pe,00707h
-	defb 0fdh,0ach,0d5h	;illegal sequence
-	defb 0edh;next byte illegal after ed
-	call pe,00707h
-	defb 0fdh,0edh,0d5h	;illegal sequence
-	xor 0efh
-	rlca	
-	defb 0fdh,02eh,0d6h	;illegal sequence
-	pop af	
-	rlca	
-	ld l,(iy-02ah)
-	di	
-	ret p	
-	defb 0fdh,0afh,0d6h	;illegal sequence
-	jp p,0effdh
-	sub 0f4h
-	rst 38h	
-	cp 01bh
-	defb 0fdh,017h,0d2h	;illegal sequence
-	ld e,c	
-	ld c,a	
-	ld d,l	
-	ld d,d	
-	jr nz,l535dh
-	ld c,a	
-	ld d,(hl)	
-	ld b,l	
-l5314h:
-	jr nz,l5314h
-	rra	
-	ld d,e	
-	ld c,c	
-	ld c,h	
-	ld d,(hl)	
-	ld c,c	
-	ld b,c	
-	cp 01bh
-	defb 0fdh,097h,0d2h	;illegal sequence
-	ld c,c	
-	ld d,e	
-	jr nz,l536fh
-	ld c,(hl)	
-	jr nz,l536ch
-	ld d,l	
-	ld d,e	
-	ld d,h	
-	ld c,a	
-	ld b,h	
-	ld e,c	
-	jr nz,l537fh
-	ld c,a	
-	ld d,a	
-	ld l,0fdh
-	ld d,0d3h
-	ld c,c	
-	ld b,(hl)	
-	jr nz,l5394h
-	ld c,a	
-	ld d,l	
-	jr nz,l5396h
-	ld b,c	
-	ld c,(hl)	
-	ld d,h	
-	jr nz,l5398h
-	ld c,a	
-	jr nz,$+85
-	ld b,c	
-	ld d,(hl)	
-	ld b,l	
-	defb 0fdh,097h,0d3h	;illegal sequence
-	ld e,c	
-	ld c,a	
-	ld d,l	
-	ld d,d	
-	jr nz,l5397h
-	ld b,l	
-	ld b,c	
-	ld d,d	
-l5356h:
-	jr nz,l5356h
-	rra	
-	ld d,e	
-	ld c,c	
-	ld c,h	
-	ld d,(hl)	
-l535dh:
-	ld c,c	
-	ld b,c	
-	daa	
-	ld d,e	
-	add iy,de
-	call nc,01ffeh
-	ld c,h	
-	ld c,c	
-	ld b,(hl)	
-	ld b,l	
-	cp 01bh
-l536ch:
-	inc l	
-	jr nz,l53b2h
-l536fh:
-	ld c,a	
-	ld c,l	
-	ld b,l	
-	jr nz,$+86
-	ld c,a	
-	defb 0fdh,097h,0d4h	;illegal sequence
-	ld d,h	
-	ld c,b	
-	ld b,l	
-	jr nz,$+70
-	ld b,l	
-	ld d,(hl)	
-l537fh:
-	ld c,c	
-	ld c,h	
-	daa	
-	ld d,e	
-	jr nz,l53d9h
-	ld b,l	
-	ld c,l	
-	ld d,b	
-	ld c,h	
-	ld b,l	
-	defb 0fdh,017h,0d5h	;illegal sequence
-	ld b,c	
-	ld d,h	
-	jr nz,$+81
-	ld c,(hl)	
-	ld b,e	
-	ld b,l	
-l5394h:
-	ld l,0fdh
-l5396h:
-	sub (hl)	
-l5397h:
-	push de	
-l5398h:
-	dec (hl)	
-	jr nz,$+85
-	ld c,a	
-	ld c,(hl)	
-	ld d,e	
-	jr nz,l53efh
-	ld b,(hl)	
-	jr nz,l53f7h
-	ld c,b	
-	ld b,l	
-	jr nz,l53ebh
-	ld b,l	
-	ld d,(hl)	
-	ld c,c	
-	ld c,h	
-	defb 0fdh,017h,0d6h	;illegal sequence
-	ld d,a	
-	ld c,c	
-	ld c,h	
-	ld c,h	
-l53b2h:
-	jr nz,$+71
-	ld c,(hl)	
-	ld d,h	
-	ld b,l	
-	ld d,d	
-	ld d,h	
-	ld b,c	
-	ld c,c	
-	ld c,(hl)	
-	jr nz,$+91
-	ld c,a	
-	ld d,l	
-	ld l,0ffh
-sub_53c2h:
-	call sub_5700h
-	ld a,005h
-	call sub_0dfeh
-	ld a,(0e080h)
-	push af	
-	ld a,004h
-	ld (0e080h),a
-	call 064ah
-	ld hl,05400h
+	rst 18h			;5264	df 	. 
+	sub 0d7h		;5265	d6 d7 	. . 
+	defb 0fdh,0d0h,0d4h	;illegal sequence		;5267	fd d0 d4 	. . . 
+	and 007h		;526a	e6 07 	. . 
+	rlca			;526c	07 	. 
+	rlca			;526d	07 	. 
+	push hl			;526e	e5 	. 
+	defb 0fdh,010h,0d5h	;illegal sequence		;526f	fd 10 d5 	. . . 
+	pop hl			;5272	e1 	. 
+	rlca			;5273	07 	. 
+	ret pe			;5274	e8 	. 
+	jp (hl)			;5275	e9 	. 
+	rst 20h			;5276	e7 	. 
+	defb 0fdh,050h,0d5h	;illegal sequence		;5277	fd 50 d5 	. P . 
+	rlca			;527a	07 	. 
+	rlca			;527b	07 	. 
+	jp pe,0fdebh		;527c	ea eb fd 	. . . 
+	sub b			;527f	90 	. 
+	push de			;5280	d5 	. 
+	rlca			;5281	07 	. 
+	rlca			;5282	07 	. 
+	call pe,0fdedh		;5283	ec ed fd 	. . . 
+	ret nc			;5286	d0 	. 
+	push de			;5287	d5 	. 
+	rlca			;5288	07 	. 
+	rst 28h			;5289	ef 	. 
+	xor 0fdh		;528a	ee fd 	. . 
+	djnz l5264h		;528c	10 d6 	. . 
+	rlca			;528e	07 	. 
+	pop af			;528f	f1 	. 
+	defb 0fdh,050h,0d6h	;illegal sequence		;5290	fd 50 d6 	. P . 
+	ret p			;5293	f0 	. 
+	di			;5294	f3 	. 
+	defb 0fdh,090h,0d6h	;illegal sequence		;5295	fd 90 d6 	. . . 
+	jp p,0d0fdh		;5298	f2 fd d0 	. . . 
+	sub 0f4h		;529b	d6 f4 	. . 
+	defb 0fdh,0d6h,0d6h	;illegal sequence		;529d	fd d6 d6 	. . . 
+	adc a,0fdh		;52a0	ce fd 	. . 
+	call po,0ced6h		;52a2	e4 d6 ce 	. . . 
+	cp 0fdh		;52a5	fe fd 	. . 
+	xor l			;52a7	ad 	. 
+	out (0e3h),a		;52a8	d3 e3 	. . 
+	jp (iy)		;52aa	fd e9 	. . 
+	out (0cdh),a		;52ac	d3 cd 	. . 
+	pop de			;52ae	d1 	. 
+	ret nc			;52af	d0 	. 
+	nop			;52b0	00 	. 
+	ret c			;52b1	d8 	. 
+	exx			;52b2	d9 	. 
+	add iy,iy		;52b3	fd 29 	. ) 
+	call nc,0d3cfh		;52b5	d4 cf d3 	. . . 
+	jp nc,0da00h		;52b8	d2 00 da 	. . . 
+	in a,(0e0h)		;52bb	db e0 	. . 
+	defb 0fdh,06ah,0d4h	;illegal sequence		;52bd	fd 6a d4 	. j . 
+	push de			;52c0	d5 	. 
+	call nc,0dcddh		;52c1	d4 dd dc 	. . . 
+	rlca			;52c4	07 	. 
+	jp po,0aafdh		;52c5	e2 fd aa 	. . . 
+	call nc,0d6d7h		;52c8	d4 d7 d6 	. . . 
+	rst 18h			;52cb	df 	. 
+	sbc a,007h		;52cc	de 07 	. . 
+	call po,0ebfdh		;52ce	e4 fd eb 	. . . 
+	call nc,007e5h		;52d1	d4 e5 07 	. . . 
+	rlca			;52d4	07 	. 
+	rlca			;52d5	07 	. 
+	and 0fdh		;52d6	e6 fd 	. . 
+	dec hl			;52d8	2b 	+ 
+	push de			;52d9	d5 	. 
+	rst 20h			;52da	e7 	. 
+	jp (hl)			;52db	e9 	. 
+	ret pe			;52dc	e8 	. 
+	rlca			;52dd	07 	. 
+	pop hl			;52de	e1 	. 
+	defb 0fdh,06ch,0d5h	;illegal sequence		;52df	fd 6c d5 	. l . 
+	ex de,hl			;52e2	eb 	. 
+	jp pe,00707h		;52e3	ea 07 07 	. . . 
+	defb 0fdh,0ach,0d5h	;illegal sequence		;52e6	fd ac d5 	. . . 
+	defb 0edh;next byte illegal after ed		;52e9	ed 	. 
+	call pe,00707h		;52ea	ec 07 07 	. . . 
+	defb 0fdh,0edh,0d5h	;illegal sequence		;52ed	fd ed d5 	. . . 
+	xor 0efh		;52f0	ee ef 	. . 
+	rlca			;52f2	07 	. 
+	defb 0fdh,02eh,0d6h	;illegal sequence		;52f3	fd 2e d6 	. . . 
+	pop af			;52f6	f1 	. 
+	rlca			;52f7	07 	. 
+	ld l,(iy-02ah)		;52f8	fd 6e d6 	. n . 
+	di			;52fb	f3 	. 
+	ret p			;52fc	f0 	. 
+	defb 0fdh,0afh,0d6h	;illegal sequence		;52fd	fd af d6 	. . . 
+	jp p,0effdh		;5300	f2 fd ef 	. . . 
+	sub 0f4h		;5303	d6 f4 	. . 
+	rst 38h			;5305	ff 	. 
+	cp 01bh		;5306	fe 1b 	. .
+
+
+	defb 0fdh,017h,0d2h	;illegal sequence		;5308	fd 17 d2 	. . . 
+	defb "YOUR LOVE "
+	defb 0feh, 01fh
+	defb "SILVIA"
+	defb 0feh, 01bh, 0fdh, 097h, 0d2h
+	defb "IS IN CUSTODY NOW."
+	defb 0fdh, 016h, 0d3h
+	defb "IF YOU WANT TO SAVE"
+	defb 0fdh,097h,0d3h
+	defb "YOUR DEAR "
+	defb 0feh,01fh
+	defb "SILVIA'S"
+	defb 0fdh, 019h, 0d4h, 0feh, 01fh
+	defb "LIFE"
+	defb 0feh,01bh
+	defb ", COME TO"
+	defb 0fdh,097h,0d4h
+	defb "THE DEVIL'S TEMPLE"
+	defb 0fdh,017h,0d5h
+	defb "AT ONCE."
+	defb 0fdh,096h,0d5h
+	defb "5 SONS OF THE DEVIL"
+	defb 0fdh,017h,0d6h
+	defb "WILL ENTERTAIN YOU.", 0ffh
+
+	call sub_5700h		;53c2	cd 00 57 	. . W 
+	ld a,005h		;53c5	3e 05 	> . 
+	call 00dfeh		;53c7	cd fe 0d 	. . . 
+	ld a,(0e080h)		;53ca	3a 80 e0 	: . . 
+	push af			;53cd	f5 	. 
+	ld a,004h		;53ce	3e 04 	> . 
+	ld (0e080h),a		;53d0	32 80 e0 	2 . . 
+	call 0064ah		;53d3	cd 4a 06 	. J . 
+	ld hl,05400h		;53d6	21 00 54 	! . T 
 l53d9h:
 	ld (0e710h),hl
 	ld (0e344h),hl
@@ -11948,7 +11672,7 @@ l53f7h:
 	ld (0e000h),a
 	ld a,070h
 	call sub_5416h
-	ld hl,l54abh
+	ld hl,54abh
 	call sub_111ch
 	ld a,005h
 	call sub_0dfeh
@@ -11963,7 +11687,7 @@ l5419h:
 	ld a,(0e880h)
 	ld de,0d295h
 	ld c,0d9h
-	ld hl,l5485h
+	ld hl,5485h
 	and 018h
 	jr nz,l542bh
 	ld hl,05498h
@@ -11984,128 +11708,49 @@ l543eh:
 	call l431fh
 	call l4e12h
 	jp sub_47b6h
+
 l5447h:
-	cp 096h
-	defb 0fdh,018h,0d5h	;illegal sequence
-	or a	
-	defb 0fdh,057h,0d5h	;illegal sequence
-	xor d	
-	xor e	
-	defb 0fdh,097h,0d5h	;illegal sequence
-	xor h	
-	xor l	
-	defb 0fdh,0d7h,0d5h	;illegal sequence
-	or 0f5h
-	call m,17fdh
-	sub 0f8h
-	ld sp,hl	
-	rst 30h	
-	defb 0fdh,057h,0d6h	;illegal sequence
-	jp m,0fefbh
-	sub 018h
-	ld d,(iy-02fh)
-	cp 0d7h
-	ld c,h	
-	ld b,l	
-	ld d,h	
-	daa	
-	ld d,e	
-	jr nz,l54cbh
-	ld d,d	
-	ld e,c	
-	jr nz,$+80
-	ld b,l	
-	ld e,b	
-	ld d,h	
-	jr nz,l54c6h
-	ld c,h	
-	ld c,a	
-	ld c,a	
-	ld d,d	
-	rst 38h	
-l5485h:
-	ld c,b	
-	ld b,l	
-	ld c,h	
-	ld d,b	
-	jr nz,l54d8h
-	ld b,l	
-	inc l	
-	defb 0fdh,015h,0d3h	;illegal sequence
-	ld d,h	
-	ld c,b	
-	ld c,a	
-	ld c,l	
-	ld b,c	
-	ld d,e	
-	ld hl,l20fdh+2
-	jr nz,$+34
-	jr nz,$+34
-	jr nz,l54bfh
-	jr nz,$-1
-	dec d	
-	out (020h),a
-	jr nz,l54c6h
-	jr nz,l54c8h
-	jr nz,$+34
-	rst 38h	
-l54abh:
-	cp 0dah
-	defb 0fdh,0a3h,0d2h	;illegal sequence
-	ld c,c	
-	daa	
-	ld c,l	
-	jr nz,$+69
-	ld c,a	
-	ld c,l	
-	ld c,c	
-	ld c,(hl)	
-	ld b,a	
-	inc iy
-	out (052h),a
-	ld c,c	
-l54bfh:
-	ld b,a	
-	ld c,b	
-	ld d,h	
-	jr nz,l5505h
-	ld d,a	
-	ld b,c	
-l54c6h:
-	ld e,c	
-	inc l	
-l54c8h:
-	defb 0fdh,0a5h,0d3h	;illegal sequence
-l54cbh:
-	ld d,e	
-	ld c,c	
-	ld c,h	
-	ld d,(hl)	
-	ld c,c	
-	ld b,c	
-	ld hl,l20fdh+2
-	jr nz,l54f6h
-	jr nz,$+34
-l54d8h:
-	jr nz,$+34
-	jr nz,l54fch
-	jr nz,l54feh
-	jr nz,$+73
-	ld b,c	
-	ld c,l	
-	ld b,l	
-	jr nz,l5534h
-	ld d,(hl)	
-	ld b,l	
-	ld d,d	
-	jr nz,l550ah
-	jr nz,l550ch
-	jr nz,$+34
-	jr nz,l5510h
-	jr nz,$+34
-	jr nz,$+34
-sub_54f4h:
-	ld a,021h
+	cp 096h		;5447	fe 96 	. . 
+	defb 0fdh,018h,0d5h	;illegal sequence		;5449	fd 18 d5 	. . . 
+	or a			;544c	b7 	. 
+	defb 0fdh,057h,0d5h	;illegal sequence		;544d	fd 57 d5 	. W . 
+	xor d			;5450	aa 	. 
+	xor e			;5451	ab 	. 
+	defb 0fdh,097h,0d5h	;illegal sequence		;5452	fd 97 d5 	. . . 
+	xor h			;5455	ac 	. 
+	xor l			;5456	ad 	. 
+	defb 0fdh,0d7h,0d5h	;illegal sequence		;5457	fd d7 d5 	. . . 
+	or 0f5h		;545a	f6 f5 	. . 
+	call m,017fdh		;545c	fc fd 17 	. . . 
+	sub 0f8h		;545f	d6 f8 	. . 
+	ld sp,hl			;5461	f9 	. 
+	rst 30h			;5462	f7 	. 
+	defb 0fdh,057h,0d6h	;illegal sequence		;5463	fd 57 d6 	. W . 
+	jp m,0fefbh		;5466	fa fb fe 	. . . 
+	sub 018h		;5469	d6 18 	. . 
+	ld d,(iy-02fh)		;546b	fd 56 d1 	. V . 
+	cp 0d7h		;546e	fe d7 	. . 
+
+	defb "LET'S TRY NEXT FLOOR", 0ffh ; 5470
+	defb "HELP ME,"
+	defb 0fdh,015h,0d3h
+	defb "THOMAS!", 0ffh
+	defb "        "
+	defb 0fdh,015h,0d3h
+	defb "       ", 0ffh
+
+
+	; 54abh
+	defb 0feh, 0dah
+	defb 0fdh,0a3h,0d2h
+	defb "I'M COMING"
+	defb 0fdh,023h,0d3h
+	defb "RIGHT AWAY,"
+	defb 0fdh,0a5h,0d3h	;illegal sequence		;54c8	fd a5 d3 	. . . 
+	defb "SILVIA!", 0ffh
+	defb "            GAME OVER            "
+	defb 03eh,021h
+
 l54f6h:
 	call sub_0dfeh
 	ld de,0d340h
@@ -12188,7 +11833,7 @@ l555dh:
 	ld a,024h
 	call sub_0dfeh
 	call sub_5620h
-	ld hl,l568ah
+	ld hl,568ah
 	call sub_111ch
 	pop af	
 	ld de,0da11h
@@ -12345,59 +11990,20 @@ l5659h:
 	ld de,0d691h
 	jr l5634h
 l5675h:
-	cp 0dbh
-	defb 0fdh,0d8h,0d0h	;illegal sequence
-	ld b,d	
-	ld b,l	
-	ld d,e	
-	ld d,h	
-	jr nz,$+52
-l5680h:
-	jr nc,l56a2h
-	ld d,b	
-	ld c,h	
-	ld b,c	
-	ld e,c	
-	ld b,l	
-	ld d,d	
-	ld d,e	
-	rst 38h	
-l568ah:
-	defb 0fdh,05ah,0d1h	;illegal sequence
-	cp 014h
-	ld d,h	
-	ld c,c	
-	ld c,l	
-	ld b,l	
-	rst 38h	
-l5694h:
-	jr nz,$+34
-	jr nz,$+34
-	jr nz,$+34
-	jr nz,$+34
-	jr nz,l56beh
-	jr nz,l56c0h
-	ld d,h	
-	ld c,c	
-l56a2h:
-	ld c,l	
-	ld b,l	
-	jr nz,$+81
-	ld d,(hl)	
-	ld b,l	
-	ld d,d	
-	jr nz,l56cbh
-	jr nz,l56cdh
-	jr nz,l56cfh
-	jr nz,$+34
-	jr nz,$+34
-	jr nz,l56d5h
-sub_56b5h:
-	ld c,0d8h
-	ld ix,l5694h
-	call sub_56c3h
+	cp 0dbh		;5675	fe db 	. . 
+	defb 0fdh,0d8h,0d0h	; 5677
+	defb "BEST 20 PLAYERS", 0ffh
+	defb 0fdh,05ah,0d1h	; 568a
+	defb 0feh, 014h
+	defb "TIME", 0ffh
+	
+	defb "            TIME OVER            "
+
+	ld c,0d8h		;56b5	0e d8 	. . 
+	ld ix,5694h		;56b7	dd 21 94 56 	. ! . V 
+	call sub_56c3h		;56bb	cd c3 56 	. . V 
 l56beh:
-	ld a,070h
+	ld a,070h		;56be	3e 70 	> p 
 l56c0h:
 	jp WAIT_A
 sub_56c3h:
@@ -12832,104 +12438,44 @@ l5950h:
 	ex de,hl	
 	jr l5927h
 l5958h:
-	ld c,a	
-	jr l5927h
-l595bh:
-	cp 015h
-	defb 0fdh,0d8h,0d2h	;illegal sequence
-	ld d,e	
-	ld b,l	
-	ld c,h	
-	ld b,l	
-	ld b,e	
-	ld d,h	
-	jr nz,l59afh
-	ld b,c	
-	ld c,l	
-	ld b,l	
-	jr nz,$+72
-	ld c,h	
-	ld c,a	
-	ld c,a	
-	ld d,d	
-	defb 0fdh,09ah,0d3h	;illegal sequence
-	ld c,b	
-	ld c,a	
-	ld d,l	
-	ld d,e	
-	ld b,l	
-	jr nz,l59c9h
-	ld d,l	
-	ld c,l	
-	ld b,d	
-	ld b,l	
-	ld d,d	
-l5980h:
-	dec l	
-	defb 0fdh,01ah,0d4h	;illegal sequence
-	ld b,(hl)	
-	ld c,h	
-	ld c,a	
-	ld c,a	
-	ld d,d	
-	jr nz,l59d9h
-	ld d,l	
-	ld c,l	
-	ld b,d	
-	ld b,l	
-	ld d,d	
-	dec l	
-	defb 0fdh,098h,0d4h	;illegal sequence
-	ld d,b	
-	ld d,l	
-	ld c,(hl)	
-	ld b,e	
-	ld c,b	
-	dec l	
-	ld d,l	
-	ld d,b	
-	jr nz,l59e9h
-	ld c,c	
-	ld b,e	
-	ld c,e	
-	dec l	
-	ld b,h	
-	ld c,a	
-	ld d,a	
-	ld c,(hl)	
-	rst 38h	
-l59a7h:
-	cp 015h
-	defb 0fdh,011h,0d0h	;illegal sequence
-	ld sp,2d50h
+	ld c,a			;5958	4f 	O 
+	jr l5927h		;5959	18 cc 	. . 
+	cp 015h		;595b	fe 15 	. . 
+
+	defb 0fdh,0d8h,0d2h	; 595d
+	defb "SELECT GAME FLOOR"
+	defb 0fdh,09ah,0d3h	; 5971
+	defb "HOUSE NUMBER-"
+	defb 0fdh,01ah,0d4h	; 5981
+	defb "FLOOR NUMBER-"
+	defb 0fdh,098h,0d4h	; 5991
+	defb "PUNCH-UP KICK-DOWN", 0ffh
+	defb 0feh, 015h
+	defb 0fdh, 011h, 0d0h	; 59a9
+	defb "1P-"
 l59afh:
-	defb 0fdh,026h,0d0h	;illegal sequence
-	ld (2d50h),a
-	cp 000h
-	defb 0fdh,01bh,0d0h	;illegal sequence
-	ld d,h	
-	ld c,a	
-	ld d,b	
-	dec l	
-	cp 014h
-	defb 0fdh,0aah,0d0h	;illegal sequence
-	ld d,h	
-	ld c,c	
-	ld c,l	
-	ld b,l	
-	cp 094h
-l59c9h:
-	defb 0fdh,091h,0d0h	;illegal sequence
-	sbc a,b	
-	sbc a,c	
-	sbc a,d	
-	sbc a,e	
-	sbc a,h	
-	cp 095h
-	defb 0fdh,011h,0d1h	;illegal sequence
-	sbc a,l	
-	sbc a,(hl)	
-	sbc a,a	
+	defb 0fdh,026h,0d0h	; 59af
+	defb "2P-"
+	defb 0feh,000h
+	defb 0fdh,01bh,0d0h	; 59b7
+	defb "TOP-"
+	defb 0fEh,014h ;59be
+	defb 0fdh,0aah,0d0h	;59c0
+	defb "TIME"
+	defb 0feh, 094h ;59c7
+
+	defb 0fdh,091h,0d0h	;59c9	fd 91 d0 	. . . 
+
+	sbc a,b			;59cc	98 	. 
+	sbc a,c			;59cd	99 	. 
+	sbc a,d			;59ce	9a 	. 
+	sbc a,e			;59cf	9b 	. 
+	sbc a,h			;59d0	9c 	. 
+	cp 095h		;59d1	fe 95 	. . 
+	defb 0fdh,011h,0d1h	;illegal sequence		;59d3	fd 11 d1 	. . . 
+	sbc a,l			;59d6	9d 	. 
+	sbc a,(hl)			;59d7	9e 	. 
+	sbc a,a			;59d8	9f 	. 
 l59d9h:
 	and b	
 	rst 38h	
@@ -19479,863 +19025,762 @@ l7c17h:
 	jr nz,l7c17h
 	pop af	
 	ret	
+
 l7c26h:
-	ld c,a	
-	ld c,e	
-	rst 38h	
+	ld c,a			;7c26	4f 	O 
+	ld c,e			;7c27	4b 	K 
+	rst 38h			;7c28	ff 	. 
 l7c29h:
-	ld c,(hl)	
-	ld b,a	
-	rst 38h	
+	ld c,(hl)			;7c29	4e 	N 
+	ld b,a			;7c2a	47 	G 
+	rst 38h			;7c2b	ff 	. 
 l7c2ch:
-	ld d,d	
-	ld c,a	
-	ld c,l	
-	rst 38h	
+	ld d,d			;7c2c	52 	R 
+	ld c,a			;7c2d	4f 	O 
+	ld c,l			;7c2e	4d 	M 
+	rst 38h			;7c2f	ff 	. 
 l7c30h:
-	cp 014h
-	defb 0fdh,050h,0d1h	;illegal sequence
-	ld b,h	
-	ld c,c	
-	ld d,b	
-	jr nz,l7c8dh
-	ld d,a	
-	jr nz,$+1
-	defb 0fdh,094h,0d1h	;illegal sequence
-	ld b,h	
-	ld d,e	
-	ld d,a	
-	ld sp,0d4fdh
-	pop de	
-	ld b,h	
-	ld d,e	
-	ld d,a	
-	ld (0a3fdh),a
-	pop de	
-	ld sp,l4f2eh
-	ld c,(hl)	
-	ex (sp),iy
-	pop de	
-	jr nc,l7c85h
-	ld c,a	
-	ld b,(hl)	
-	ld b,(hl)	
-	defb 0fdh,050h,0d3h	;illegal sequence
-	ld b,d	
-	ld c,a	
-	ld b,h	
-	ld e,c	
-	jr nz,l7cb7h
-	ld e,c	
-	ld d,b	
-	ld b,l	
-	defb 0fdh,090h,0d3h	;illegal sequence
-	ld b,h	
-	ld c,c	
-	ld b,(hl)	
-	ld b,(hl)	
-	ld c,c	
-	ld b,e	
-	ld d,l	
-	ld c,h	
-	ld d,h	
-	ld e,c	
-	defb 0fdh,0d0h,0d3h	;illegal sequence
-	ld b,h	
-	ld b,l	
-	ld b,e	
-	ld d,d	
-	ld b,l	
-	ld b,c	
-	ld d,e	
-	ld b,l	
-	defb 0fdh,010h,0d4h	;illegal sequence
-	ld b,(hl)	
-	ld c,c	
-	ld b,a	
-	ld c,b	
+	cp 014h		;7c30	fe 14 	. . 
+	defb 0fdh,050h,0d1h	;illegal sequence		;7c32	fd 50 d1 	. P . 
+	ld b,h			;7c35	44 	D 
+	ld c,c			;7c36	49 	I 
+	ld d,b			;7c37	50 	P 
+	jr nz,l7c8dh		;7c38	20 53 	  S 
+	ld d,a			;7c3a	57 	W 
+	jr nz,$+1		;7c3b	20 ff 	  . 
+	defb 0fdh,094h,0d1h	;illegal sequence		;7c3d	fd 94 d1 	. . . 
+	ld b,h			;7c40	44 	D 
+	ld d,e			;7c41	53 	S 
+	ld d,a			;7c42	57 	W 
+	ld sp,0d4fdh		;7c43	31 fd d4 	1 . . 
+	pop de			;7c46	d1 	. 
+	ld b,h			;7c47	44 	D 
+	ld d,e			;7c48	53 	S 
+	ld d,a			;7c49	57 	W 
+	ld (0a3fdh),a		;7c4a	32 fd a3 	2 . . 
+	pop de			;7c4d	d1 	. 
+	ld sp,l4f2eh		;7c4e	31 2e 4f 	1 . O 
+	ld c,(hl)			;7c51	4e 	N 
+	ex (sp),iy		;7c52	fd e3 	. . 
+	pop de			;7c54	d1 	. 
+	jr nc,l7c85h		;7c55	30 2e 	0 . 
+	ld c,a			;7c57	4f 	O 
+	ld b,(hl)			;7c58	46 	F 
+	ld b,(hl)			;7c59	46 	F 
+	defb 0fdh,050h,0d3h	;illegal sequence		;7c5a	fd 50 d3 	. P . 
+	ld b,d			;7c5d	42 	B 
+	ld c,a			;7c5e	4f 	O 
+	ld b,h			;7c5f	44 	D 
+	ld e,c			;7c60	59 	Y 
+	jr nz,l7cb7h		;7c61	20 54 	  T 
+	ld e,c			;7c63	59 	Y 
+	ld d,b			;7c64	50 	P 
+	ld b,l			;7c65	45 	E 
+	defb 0fdh,090h,0d3h	;illegal sequence		;7c66	fd 90 d3 	. . . 
+	ld b,h			;7c69	44 	D 
+	ld c,c			;7c6a	49 	I 
+	ld b,(hl)			;7c6b	46 	F 
+	ld b,(hl)			;7c6c	46 	F 
+	ld c,c			;7c6d	49 	I 
+	ld b,e			;7c6e	43 	C 
+	ld d,l			;7c6f	55 	U 
+	ld c,h			;7c70	4c 	L 
+	ld d,h			;7c71	54 	T 
+	ld e,c			;7c72	59 	Y 
+	defb 0fdh,0d0h,0d3h	;illegal sequence		;7c73	fd d0 d3 	. . . 
+	ld b,h			;7c76	44 	D 
+	ld b,l			;7c77	45 	E 
+	ld b,e			;7c78	43 	C 
+	ld d,d			;7c79	52 	R 
+	ld b,l			;7c7a	45 	E 
+	ld b,c			;7c7b	41 	A 
+	ld d,e			;7c7c	53 	S 
+	ld b,l			;7c7d	45 	E 
+	defb 0fdh,010h,0d4h	;illegal sequence		;7c7e	fd 10 d4 	. . . 
+	ld b,(hl)			;7c81	46 	F 
+	ld c,c			;7c82	49 	I 
+	ld b,a			;7c83	47 	G 
+	ld c,b			;7c84	48 	H 
 l7c85h:
-	ld d,h	
-	ld b,l	
-	ld d,d	
-	ld d,e	
-	defb 0fdh,090h,0d2h	;illegal sequence
+	ld d,h			;7c85	54 	T 
+	ld b,l			;7c86	45 	E 
+	ld d,d			;7c87	52 	R 
+	ld d,e			;7c88	53 	S 
+	defb 0fdh,090h,0d2h	;illegal sequence		;7c89	fd 90 d2 	. . . 
 l7c8ch:
-	ld b,e	
+	ld b,e			;7c8c	43 	C 
 l7c8dh:
-	ld c,a	
-	ld c,c	
-	ld c,(hl)	
-	jr nz,l7cdfh
-	ld c,a	
-	ld b,h	
-	ld b,l	
-	rst 38h	
+	ld c,a			;7c8d	4f 	O 
+	ld c,c			;7c8e	49 	I 
+	ld c,(hl)			;7c8f	4e 	N 
+	jr nz,l7cdfh		;7c90	20 4d 	  M 
+	ld c,a			;7c92	4f 	O 
+	ld b,h			;7c93	44 	D 
+	ld b,l			;7c94	45 	E 
+	rst 38h			;7c95	ff 	. 
 l7c96h:
-	ld d,h	
-	ld b,c	
-	ld b,d	
-	ld c,h	
-	ld b,l	
-	jr nz,l7cbdh
-	rst 38h	
+	ld d,h			;7c96	54 	T 
+	ld b,c			;7c97	41 	A 
+	ld b,d			;7c98	42 	B 
+	ld c,h			;7c99	4c 	L 
+	ld b,l			;7c9a	45 	E 
+	jr nz,l7cbdh		;7c9b	20 20 	    
+	rst 38h			;7c9d	ff 	. 
 l7c9eh:
-	ld d,l	
-	ld d,b	
-	ld d,d	
-	ld c,c	
-	ld b,a	
-	ld c,b	
-	ld d,h	
-	rst 38h	
+	ld d,l			;7c9e	55 	U 
+	ld d,b			;7c9f	50 	P 
+	ld d,d			;7ca0	52 	R 
+	ld c,c			;7ca1	49 	I 
+	ld b,a			;7ca2	47 	G 
+	ld c,b			;7ca3	48 	H 
+	ld d,h			;7ca4	54 	T 
+	rst 38h			;7ca5	ff 	. 
 l7ca6h:
-	ld b,l	
-	ld b,c	
-	ld d,e	
-	ld e,c	
-	jr nz,l7ccch
-	jr nz,$+34
-	jr nz,$+1
+	ld b,l			;7ca6	45 	E 
+	ld b,c			;7ca7	41 	A 
+	ld d,e			;7ca8	53 	S 
+	ld e,c			;7ca9	59 	Y 
+	jr nz,l7ccch		;7caa	20 20 	    
+	jr nz,$+34		;7cac	20 20 	    
+	jr nz,$+1		;7cae	20 ff 	  . 
 l7cb0h:
-	ld b,h	
-	ld c,c	
-	ld b,(hl)	
-	ld b,(hl)	
-	ld c,c	
-	ld b,e	
-	ld d,l	
+	ld b,h			;7cb0	44 	D 
+	ld c,c			;7cb1	49 	I 
+	ld b,(hl)			;7cb2	46 	F 
+	ld b,(hl)			;7cb3	46 	F 
+	ld c,c			;7cb4	49 	I 
+	ld b,e			;7cb5	43 	C 
+	ld d,l			;7cb6	55 	U 
 l7cb7h:
-	ld c,h	
-	ld d,h	
-	rst 38h	
+	ld c,h			;7cb7	4c 	L 
+	ld d,h			;7cb8	54 	T 
+	rst 38h			;7cb9	ff 	. 
 l7cbah:
-	ld d,e	
-	ld c,h	
-	ld c,a	
+	ld d,e			;7cba	53 	S 
+	ld c,h			;7cbb	4c 	L 
+	ld c,a			;7cbc	4f 	O 
 l7cbdh:
-	ld d,a	
-	rst 38h	
+	ld d,a			;7cbd	57 	W 
+	rst 38h			;7cbe	ff 	. 
 l7cbfh:
-	ld b,(hl)	
-	ld b,c	
-	ld d,e	
-	ld d,h	
-	rst 38h	
+	ld b,(hl)			;7cbf	46 	F 
+	ld b,c			;7cc0	41 	A 
+	ld d,e			;7cc1	53 	S 
+	ld d,h			;7cc2	54 	T 
+	rst 38h			;7cc3	ff 	. 
 l7cc4h:
-	jr nz,l7ce6h
-	jr nz,l7ce8h
-	jr nz,l7d10h
-	ld d,d	
-	ld b,l	
+	jr nz,l7ce6h		;7cc4	20 20 	    
+	jr nz,l7ce8h		;7cc6	20 20 	    
+	jr nz,l7d10h		;7cc8	20 46 	  F 
+	ld d,d			;7cca	52 	R 
+	ld b,l			;7ccb	45 	E 
 l7ccch:
-	ld b,l	
-	jr nz,l7cefh
-	jr nz,l7d21h
-	ld c,h	
-	ld b,c	
-	ld e,c	
+	ld b,l			;7ccc	45 	E 
+	jr nz,l7cefh		;7ccd	20 20 	    
+	jr nz,l7d21h		;7ccf	20 50 	  P 
+	ld c,h			;7cd1	4c 	L 
+	ld b,c			;7cd2	41 	A 
+	ld e,c			;7cd3	59 	Y 
 l7cd4h:
-	jr nz,l7cf6h
-	jr nz,$+1
+	jr nz,l7cf6h		;7cd4	20 20 	    
+	jr nz,$+1		;7cd6	20 ff 	  . 
 l7cd8h:
-	ld c,c	
-	ld c,(hl)	
-	ld d,h	
-	ld b,l	
-	ld d,d	
-	ld b,(hl)	
-	ld b,c	
+	ld c,c			;7cd8	49 	I 
+	ld c,(hl)			;7cd9	4e 	N 
+	ld d,h			;7cda	54 	T 
+	ld b,l			;7cdb	45 	E 
+	ld d,d			;7cdc	52 	R 
+	ld b,(hl)			;7cdd	46 	F 
+	ld b,c			;7cde	41 	A 
 l7cdfh:
-	ld b,e	
-	ld b,l	
-	rst 38h	
-	ld d,d	
-	ld b,l	
-	ld b,c	
-	ld b,h	
+	ld b,e			;7cdf	43 	C 
+	ld b,l			;7ce0	45 	E 
+	rst 38h			;7ce1	ff 	. 
+	ld d,d			;7ce2	52 	R 
+	ld b,l			;7ce3	45 	E 
+	ld b,c			;7ce4	41 	A 
+	ld b,h			;7ce5	44 	D 
 l7ce6h:
-	jr nz,l7d2ch
+	jr nz,l7d2ch		;7ce6	20 44 	  D 
 l7ce8h:
-	ld b,c	
-	ld d,h	
-	ld b,c	
-	rst 38h	
+	ld b,c			;7ce8	41 	A 
+	ld d,h			;7ce9	54 	T 
+	ld b,c			;7cea	41 	A 
+	rst 38h			;7ceb	ff 	. 
 l7cech:
-	defb 0fdh,057h,0d5h	;illegal sequence
+	defb 0fdh,057h,0d5h	;illegal sequence		;7cec	fd 57 d5 	. W . 
 l7cefh:
-	ld d,h	
-	ld c,c	
-	ld c,l	
-	ld c,l	
-	ld c,c	
-	ld c,(hl)	
-	ld b,a	
+	ld d,h			;7cef	54 	T 
+	ld c,c			;7cf0	49 	I 
+	ld c,l			;7cf1	4d 	M 
+	ld c,l			;7cf2	4d 	M 
+	ld c,c			;7cf3	49 	I 
+	ld c,(hl)			;7cf4	4e 	N 
+	ld b,a			;7cf5	47 	G 
 l7cf6h:
-	rst 38h	
+	rst 38h			;7cf6	ff 	. 
 l7cf7h:
-	cp 014h
-	defb 0fdh,050h,0d1h	;illegal sequence
-	jr nc,l7d2fh
-	jr nz,l7d44h
-	ld c,c	
-	ld d,b	
-	jr nz,$+85
-	ld d,a	
-	ld c,c	
-	ld d,h	
-	ld b,e	
-	ld c,b	
-	defb 0fdh,090h,0d1h	;illegal sequence
-	jr nc,$+52
-	jr nz,$+75
+	cp 014h		;7cf7	fe 14 	. . 
+	defb 0fdh,050h,0d1h	;illegal sequence		;7cf9	fd 50 d1 	. P . 
+	jr nc,l7d2fh		;7cfc	30 31 	0 1 
+	jr nz,l7d44h		;7cfe	20 44 	  D 
+	ld c,c			;7d00	49 	I 
+	ld d,b			;7d01	50 	P 
+	jr nz,$+85		;7d02	20 53 	  S 
+	ld d,a			;7d04	57 	W 
+	ld c,c			;7d05	49 	I 
+	ld d,h			;7d06	54 	T 
+	ld b,e			;7d07	43 	C 
+	ld c,b			;7d08	48 	H 
+	defb 0fdh,090h,0d1h	;illegal sequence		;7d09	fd 90 d1 	. . . 
+	jr nc,$+52		;7d0c	30 32 	0 2 
+	jr nz,$+75		;7d0e	20 49 	  I 
 l7d10h:
-	cpl	
-	ld c,a	
-	jr nz,$+82
-	ld c,a	
-	ld d,d	
-	ld d,h	
-	defb 0fdh,0d0h,0d1h	;illegal sequence
-	jr nc,l7d4fh
-	jr nz,l7d71h
-	ld c,a	
-	ld d,l	
-	ld c,(hl)	
+	cpl			;7d10	2f 	/ 
+	ld c,a			;7d11	4f 	O 
+	jr nz,$+82		;7d12	20 50 	  P 
+	ld c,a			;7d14	4f 	O 
+	ld d,d			;7d15	52 	R 
+	ld d,h			;7d16	54 	T 
+	defb 0fdh,0d0h,0d1h	;illegal sequence		;7d17	fd d0 d1 	. . . 
+	jr nc,l7d4fh		;7d1a	30 33 	0 3 
+	jr nz,l7d71h		;7d1c	20 53 	  S 
+	ld c,a			;7d1e	4f 	O 
+	ld d,l			;7d1f	55 	U 
+	ld c,(hl)			;7d20	4e 	N 
 l7d21h:
-	ld b,h	
-	defb 0fdh,010h,0d2h	;illegal sequence
-	jr nc,l7d5bh
-	jr nz,l7d6ch
-	ld c,b	
-	ld b,c	
-	ld d,d	
+	ld b,h			;7d21	44 	D 
+	defb 0fdh,010h,0d2h	;illegal sequence		;7d22	fd 10 d2 	. . . 
+	jr nc,l7d5bh		;7d25	30 34 	0 4 
+	jr nz,l7d6ch		;7d27	20 43 	  C 
+	ld c,b			;7d29	48 	H 
+	ld b,c			;7d2a	41 	A 
+	ld d,d			;7d2b	52 	R 
 l7d2ch:
-	ld b,c	
-	ld b,e	
-	ld d,h	
+	ld b,c			;7d2c	41 	A 
+	ld b,e			;7d2d	43 	C 
+	ld d,h			;7d2e	54 	T 
 l7d2fh:
-	ld b,l	
-	ld d,d	
-	defb 0fdh,050h,0d2h	;illegal sequence
-	jr nc,$+55
-	jr nz,l7d7bh
-	ld c,a	
-	ld c,h	
-	ld c,a	
-	ld d,d	
-	defb 0fdh,090h,0d2h	;illegal sequence
-	jr nc,l7d77h
-	jr nz,l7d86h
-	ld d,d	
+	ld b,l			;7d2f	45 	E 
+	ld d,d			;7d30	52 	R 
+	defb 0fdh,050h,0d2h	;illegal sequence		;7d31	fd 50 d2 	. P . 
+	jr nc,$+55		;7d34	30 35 	0 5 
+	jr nz,l7d7bh		;7d36	20 43 	  C 
+	ld c,a			;7d38	4f 	O 
+	ld c,h			;7d39	4c 	L 
+	ld c,a			;7d3a	4f 	O 
+	ld d,d			;7d3b	52 	R 
+	defb 0fdh,090h,0d2h	;illegal sequence		;7d3c	fd 90 d2 	. . . 
+	jr nc,l7d77h		;7d3f	30 36 	0 6 
+	jr nz,l7d86h		;7d41	20 43 	  C 
+	ld d,d			;7d43	52 	R 
 l7d44h:
-	ld c,a	
-	ld d,e	
-	ld d,e	
-	jr nz,$+74
-	ld b,c	
-	ld d,h	
-	ld b,e	
-	ld c,b	
-	jr nz,l7d9fh
+	ld c,a			;7d44	4f 	O 
+	ld d,e			;7d45	53 	S 
+	ld d,e			;7d46	53 	S 
+	jr nz,$+74		;7d47	20 48 	  H 
+	ld b,c			;7d49	41 	A 
+	ld d,h			;7d4a	54 	T 
+	ld b,e			;7d4b	43 	C 
+	ld c,b			;7d4c	48 	H 
+	jr nz,l7d9fh		;7d4d	20 50 	  P 
 l7d4fh:
-	ld b,c	
-	ld d,h	
-	ld d,h	
-	ld b,l	
-	ld d,d	
-	ld c,(hl)	
-	rst 38h	
+	ld b,c			;7d4f	41 	A 
+	ld d,h			;7d50	54 	T 
+	ld d,h			;7d51	54 	T 
+	ld b,l			;7d52	45 	E 
+	ld d,d			;7d53	52 	R 
+	ld c,(hl)			;7d54	4e 	N 
+	rst 38h			;7d55	ff 	. 
 l7d56h:
-	cp 014h
-	defb 0fdh,015h,0d1h	;illegal sequence
+	cp 014h		;7d56	fe 14 	. . 
+	defb 0fdh,015h,0d1h	;illegal sequence		;7d58	fd 15 d1 	. . . 
 l7d5bh:
-	ld d,e	
-	ld c,a	
-	ld d,l	
-	ld c,(hl)	
-	ld b,h	
-	defb 0fdh,050h,0d1h	;illegal sequence
-	jr nc,l7d96h
-	jr nz,l7dc0h
-	ld b,l	
-	ld c,h	
-	ld c,h	
-	jr nz,$+81
+	ld d,e			;7d5b	53 	S 
+	ld c,a			;7d5c	4f 	O 
+	ld d,l			;7d5d	55 	U 
+	ld c,(hl)			;7d5e	4e 	N 
+	ld b,h			;7d5f	44 	D 
+	defb 0fdh,050h,0d1h	;illegal sequence		;7d60	fd 50 d1 	. P . 
+	jr nc,l7d96h		;7d63	30 31 	0 1 
+	jr nz,l7dc0h		;7d65	20 59 	  Y 
+	ld b,l			;7d67	45 	E 
+	ld c,h			;7d68	4c 	L 
+	ld c,h			;7d69	4c 	L 
+	jr nz,$+81		;7d6a	20 4f 	  O 
 l7d6ch:
-	ld b,(hl)	
-	jr nz,$+82
-	ld c,h	
-	ld b,c	
+	ld b,(hl)			;7d6c	46 	F 
+	jr nz,$+82		;7d6d	20 50 	  P 
+	ld c,h			;7d6f	4c 	L 
+	ld b,c			;7d70	41 	A 
 l7d71h:
-	ld e,c	
-	ld b,l	
-	ld d,d	
-	jr z,l7dc0h
-	ld d,l	
+	ld e,c			;7d71	59 	Y 
+	ld b,l			;7d72	45 	E 
+	ld d,d			;7d73	52 	R 
+	jr z,l7dc0h		;7d74	28 4a 	( J 
+	ld d,l			;7d76	55 	U 
 l7d77h:
-	ld c,l	
-	ld d,b	
-	dec l	
-	ld c,e	
+	ld c,l			;7d77	4d 	M 
+	ld d,b			;7d78	50 	P 
+	dec l			;7d79	2d 	- 
+	ld c,e			;7d7a	4b 	K 
 l7d7bh:
-	ld c,c	
-	ld b,e	
-	ld c,e	
-	ld d,e	
-	add hl,hl	
-	defb 0fdh,093h,0d1h	;illegal sequence
-	ld b,e	
-	ld d,d	
-	ld b,l	
+	ld c,c			;7d7b	49 	I 
+	ld b,e			;7d7c	43 	C 
+	ld c,e			;7d7d	4b 	K 
+	ld d,e			;7d7e	53 	S 
+	add hl,hl			;7d7f	29 	) 
+	defb 0fdh,093h,0d1h	;illegal sequence		;7d80	fd 93 d1 	. . . 
+	ld b,e			;7d83	43 	C 
+	ld d,d			;7d84	52 	R 
+	ld b,l			;7d85	45 	E 
 l7d86h:
-	ld b,h	
-	ld c,c	
-	ld d,h	
-	jr nz,l7dcch
-	ld b,h	
-	ld b,h	
-	ld c,c	
-	ld c,(hl)	
-	ld b,a	
-	jr nz,l7de5h
-	ld c,a	
-	ld d,l	
-	ld c,(hl)	
-	ld b,h	
+	ld b,h			;7d86	44 	D 
+	ld c,c			;7d87	49 	I 
+	ld d,h			;7d88	54 	T 
+	jr nz,l7dcch		;7d89	20 41 	  A 
+	ld b,h			;7d8b	44 	D 
+	ld b,h			;7d8c	44 	D 
+	ld c,c			;7d8d	49 	I 
+	ld c,(hl)			;7d8e	4e 	N 
+	ld b,a			;7d8f	47 	G 
+	jr nz,l7de5h		;7d90	20 53 	  S 
+	ld c,a			;7d92	4f 	O 
+	ld d,l			;7d93	55 	U 
+	ld c,(hl)			;7d94	4e 	N 
+	ld b,h			;7d95	44 	D 
 l7d96h:
-	defb 0fdh,0d0h,0d1h	;illegal sequence
-	jr nc,l7dcdh
-	jr nz,l7df6h
-	ld b,l	
-	ld c,h	
+	defb 0fdh,0d0h,0d1h	;illegal sequence		;7d96	fd d0 d1 	. . . 
+	jr nc,l7dcdh		;7d99	30 32 	0 2 
+	jr nz,l7df6h		;7d9b	20 59 	  Y 
+	ld b,l			;7d9d	45 	E 
+	ld c,h			;7d9e	4c 	L 
 l7d9fh:
-	ld c,h	
-	jr nz,l7df1h
-	ld b,(hl)	
-	jr nz,l7df5h
-	ld c,h	
-	ld b,c	
-	ld e,c	
-	ld b,l	
-	ld d,d	
-	jr z,$+82
-	ld d,l	
-	ld c,(hl)	
-	ld b,e	
-	ld c,b	
-	ld b,l	
-	ld d,e	
-	inc l	
-	ld c,e	
-	ld c,c	
-	ld b,e	
-	ld c,e	
-	ld d,e	
-	add hl,hl	
-	defb 0fdh,010h,0d2h	;illegal sequence
-	jr nc,l7df1h
-	jr nz,$+73
+	ld c,h			;7d9f	4c 	L 
+	jr nz,l7df1h		;7da0	20 4f 	  O 
+	ld b,(hl)			;7da2	46 	F 
+	jr nz,l7df5h		;7da3	20 50 	  P 
+	ld c,h			;7da5	4c 	L 
+	ld b,c			;7da6	41 	A 
+	ld e,c			;7da7	59 	Y 
+	ld b,l			;7da8	45 	E 
+	ld d,d			;7da9	52 	R 
+	jr z,$+82		;7daa	28 50 	( P 
+	ld d,l			;7dac	55 	U 
+	ld c,(hl)			;7dad	4e 	N 
+	ld b,e			;7dae	43 	C 
+	ld c,b			;7daf	48 	H 
+	ld b,l			;7db0	45 	E 
+	ld d,e			;7db1	53 	S 
+	inc l			;7db2	2c 	, 
+	ld c,e			;7db3	4b 	K 
+	ld c,c			;7db4	49 	I 
+	ld b,e			;7db5	43 	C 
+	ld c,e			;7db6	4b 	K 
+	ld d,e			;7db7	53 	S 
+	add hl,hl			;7db8	29 	) 
+	defb 0fdh,010h,0d2h	;illegal sequence		;7db9	fd 10 d2 	. . . 
+	jr nc,l7df1h		;7dbc	30 33 	0 3 
+	jr nz,$+73		;7dbe	20 47 	  G 
 l7dc0h:
-	ld d,d	
-	ld c,a	
-	ld b,c	
-	ld c,(hl)	
-	jr nz,l7e15h
-	ld b,(hl)	
-	jr nz,$+82
-	ld c,h	
-	ld b,c	
-	ld e,c	
+	ld d,d			;7dc0	52 	R 
+	ld c,a			;7dc1	4f 	O 
+	ld b,c			;7dc2	41 	A 
+	ld c,(hl)			;7dc3	4e 	N 
+	jr nz,l7e15h		;7dc4	20 4f 	  O 
+	ld b,(hl)			;7dc6	46 	F 
+	jr nz,$+82		;7dc7	20 50 	  P 
+	ld c,h			;7dc9	4c 	L 
+	ld b,c			;7dca	41 	A 
+	ld e,c			;7dcb	59 	Y 
 l7dcch:
-	ld b,l	
+	ld b,l			;7dcc	45 	E 
 l7dcdh:
-	ld d,d	
-	jr nz,$+81
-	ld d,d	
-	jr nz,l7e18h
-	ld c,(hl)	
-	ld b,l	
-	ld c,l	
-	ld e,c	
-	defb 0fdh,050h,0d2h	;illegal sequence
-	jr nc,$+54
-	jr nz,l7e2ah
-	ld b,c	
-	ld d,l	
-	ld b,a	
-	ld c,b	
-	ld c,c	
-	ld c,(hl)	
-	ld b,a	
+	ld d,d			;7dcd	52 	R 
+	jr nz,$+81		;7dce	20 4f 	  O 
+	ld d,d			;7dd0	52 	R 
+	jr nz,l7e18h		;7dd1	20 45 	  E 
+	ld c,(hl)			;7dd3	4e 	N 
+	ld b,l			;7dd4	45 	E 
+	ld c,l			;7dd5	4d 	M 
+	ld e,c			;7dd6	59 	Y 
+	defb 0fdh,050h,0d2h	;illegal sequence		;7dd7	fd 50 d2 	. P . 
+	jr nc,$+54		;7dda	30 34 	0 4 
+	jr nz,l7e2ah		;7ddc	20 4c 	  L 
+	ld b,c			;7dde	41 	A 
+	ld d,l			;7ddf	55 	U 
+	ld b,a			;7de0	47 	G 
+	ld c,b			;7de1	48 	H 
+	ld c,c			;7de2	49 	I 
+	ld c,(hl)			;7de3	4e 	N 
+	ld b,a			;7de4	47 	G 
 l7de5h:
-	jr nz,l7e3dh
-	ld c,a	
-	ld c,c	
-	ld b,e	
-	ld b,l	
-	jr nz,l7e3ch
-	ld b,(hl)	
-	jr nz,l7e35h
-	ld c,(hl)	
+	jr nz,l7e3dh		;7de5	20 56 	  V 
+	ld c,a			;7de7	4f 	O 
+	ld c,c			;7de8	49 	I 
+	ld b,e			;7de9	43 	C 
+	ld b,l			;7dea	45 	E 
+	jr nz,l7e3ch		;7deb	20 4f 	  O 
+	ld b,(hl)			;7ded	46 	F 
+	jr nz,l7e35h		;7dee	20 45 	  E 
+	ld c,(hl)			;7df0	4e 	N 
 l7df1h:
-	ld b,l	
-	ld c,l	
-	ld c,c	
-	ld b,l	
+	ld b,l			;7df1	45 	E 
+	ld c,l			;7df2	4d 	M 
+	ld c,c			;7df3	49 	I 
+	ld b,l			;7df4	45 	E 
 l7df5h:
-	ld d,e	
+	ld d,e			;7df5	53 	S 
 l7df6h:
-	dec l	
-	ld sp,090fdh
-	jp nc,3530h
-	jr nz,l7e4bh
+	dec l			;7df6	2d 	- 
+	ld sp,090fdh		;7df7	31 fd 90 	1 . . 
+	jp nc,03530h		;7dfa	d2 30 35 	. 0 5 
+	jr nz,l7e4bh		;7dfd	20 4c 	  L 
 sub_7dffh:
-	ld b,c	
-	ld d,l	
-	ld b,a	
-	ld c,b	
-	ld c,c	
-	ld c,(hl)	
-	ld b,a	
-	jr nz,l7e5eh
-	ld c,a	
-	ld c,c	
-	ld b,e	
-	ld b,l	
-	jr nz,$+81
-	ld b,(hl)	
-	jr nz,$+71
-	ld c,(hl)	
-	ld b,l	
-	ld c,l	
-	ld c,c	
+	ld b,c			;7dff	41 	A 
+	ld d,l			;7e00	55 	U 
+	ld b,a			;7e01	47 	G 
+	ld c,b			;7e02	48 	H 
+	ld c,c			;7e03	49 	I 
+	ld c,(hl)			;7e04	4e 	N 
+	ld b,a			;7e05	47 	G 
+	jr nz,l7e5eh		;7e06	20 56 	  V 
+	ld c,a			;7e08	4f 	O 
+	ld c,c			;7e09	49 	I 
+	ld b,e			;7e0a	43 	C 
+	ld b,l			;7e0b	45 	E 
+	jr nz,$+81		;7e0c	20 4f 	  O 
+	ld b,(hl)			;7e0e	46 	F 
+	jr nz,$+71		;7e0f	20 45 	  E 
+	ld c,(hl)			;7e11	4e 	N 
+	ld b,l			;7e12	45 	E 
+	ld c,l			;7e13	4d 	M 
+	ld c,c			;7e14	49 	I 
 l7e15h:
-	ld b,l	
-	ld d,e	
-	dec l	
+	ld b,l			;7e15	45 	E 
+	ld d,e			;7e16	53 	S 
+	dec l			;7e17	2d 	- 
 l7e18h:
-	ld (0d0fdh),a
-	jp nc,03630h
-	jr nz,l7e62h
-	ld d,l	
-	ld d,d	
-	ld d,e	
-	ld d,h	
-	ld c,c	
-	ld c,(hl)	
-	ld b,a	
-	jr nz,l7e78h
-	ld b,(hl)	
+	ld (0d0fdh),a		;7e18	32 fd d0 	2 . . 
+	jp nc,03630h		;7e1b	d2 30 36 	. 0 6 
+	jr nz,l7e62h		;7e1e	20 42 	  B 
+	ld d,l			;7e20	55 	U 
+	ld d,d			;7e21	52 	R 
+	ld d,e			;7e22	53 	S 
+	ld d,h			;7e23	54 	T 
+	ld c,c			;7e24	49 	I 
+	ld c,(hl)			;7e25	4e 	N 
+	ld b,a			;7e26	47 	G 
+	jr nz,l7e78h		;7e27	20 4f 	  O 
+	ld b,(hl)			;7e29	46 	F 
 l7e2ah:
-	jr nz,$+82
-	ld b,c	
-	ld d,b	
-	ld b,l	
-	ld d,d	
-	jr nz,l7e74h
-	ld b,c	
-	ld c,h	
-	ld c,h	
+	jr nz,$+82		;7e2a	20 50 	  P 
+	ld b,c			;7e2c	41 	A 
+	ld d,b			;7e2d	50 	P 
+	ld b,l			;7e2e	45 	E 
+	ld d,d			;7e2f	52 	R 
+	jr nz,l7e74h		;7e30	20 42 	  B 
+	ld b,c			;7e32	41 	A 
+	ld c,h			;7e33	4c 	L 
+	ld c,h			;7e34	4c 	L 
 l7e35h:
-	defb 0fdh,013h,0d3h	;illegal sequence
-	ld b,d	
-	ld d,l	
-	ld d,d	
-	ld d,e	
+	defb 0fdh,013h,0d3h	;illegal sequence		;7e35	fd 13 d3 	. . . 
+	ld b,d			;7e38	42 	B 
+	ld d,l			;7e39	55 	U 
+	ld d,d			;7e3a	52 	R 
+	ld d,e			;7e3b	53 	S 
 l7e3ch:
-	ld d,h	
+	ld d,h			;7e3c	54 	T 
 l7e3dh:
-	ld c,c	
-	ld c,(hl)	
-	ld b,a	
-	jr nz,$+81
-	ld b,(hl)	
-	jr nz,l7e89h
-	ld d,d	
-	ld b,c	
-	ld b,a	
-	ld c,a	
-	ld c,(hl)	
-	daa	
+	ld c,c			;7e3d	49 	I 
+	ld c,(hl)			;7e3e	4e 	N 
+	ld b,a			;7e3f	47 	G 
+	jr nz,$+81		;7e40	20 4f 	  O 
+	ld b,(hl)			;7e42	46 	F 
+	jr nz,l7e89h		;7e43	20 44 	  D 
+	ld d,d			;7e45	52 	R 
+	ld b,c			;7e46	41 	A 
+	ld b,a			;7e47	47 	G 
+	ld c,a			;7e48	4f 	O 
+	ld c,(hl)			;7e49	4e 	N 
+	daa			;7e4a	27 	' 
 l7e4bh:
-	ld d,e	
-	jr nz,l7e93h
-	ld b,a	
-	ld b,a	
-	defb 0fdh,050h,0d3h	;illegal sequence
-	jr nc,l7e8ch
-	jr nz,l7eaah
-	ld c,b	
-	ld d,d	
-	ld c,c	
-	ld b,l	
-	ld c,e	
-	jr nz,l7eadh
+	ld d,e			;7e4b	53 	S 
+	jr nz,l7e93h		;7e4c	20 45 	  E 
+	ld b,a			;7e4e	47 	G 
+	ld b,a			;7e4f	47 	G 
+	defb 0fdh,050h,0d3h	;illegal sequence		;7e50	fd 50 d3 	. P . 
+	jr nc,l7e8ch		;7e53	30 37 	0 7 
+	jr nz,l7eaah		;7e55	20 53 	  S 
+	ld c,b			;7e57	48 	H 
+	ld d,d			;7e58	52 	R 
+	ld c,c			;7e59	49 	I 
+	ld b,l			;7e5a	45 	E 
+	ld c,e			;7e5b	4b 	K 
+	jr nz,l7eadh		;7e5c	20 4f 	  O 
 l7e5eh:
-	ld b,(hl)	
-	jr nz,l7eb1h
-	ld c,h	
+	ld b,(hl)			;7e5e	46 	F 
+	jr nz,l7eb1h		;7e5f	20 50 	  P 
+	ld c,h			;7e61	4c 	L 
 l7e62h:
-	ld b,c	
-	ld e,c	
-	ld b,l	
-	ld d,d	
-	defb 0fdh,090h,0d3h	;illegal sequence
-	jr nc,$+58
-	jr nz,$+82
-	ld c,h	
-	ld b,c	
-	ld e,c	
-	ld b,l	
-	ld d,d	
-	jr nz,l7ec6h
+	ld b,c			;7e62	41 	A 
+	ld e,c			;7e63	59 	Y 
+	ld b,l			;7e64	45 	E 
+	ld d,d			;7e65	52 	R 
+	defb 0fdh,090h,0d3h	;illegal sequence		;7e66	fd 90 d3 	. . . 
+	jr nc,$+58		;7e69	30 38 	0 8 
+	jr nz,$+82		;7e6b	20 50 	  P 
+	ld c,h			;7e6d	4c 	L 
+	ld b,c			;7e6e	41 	A 
+	ld e,c			;7e6f	59 	Y 
+	ld b,l			;7e70	45 	E 
+	ld d,d			;7e71	52 	R 
+	jr nz,l7ec6h		;7e72	20 52 	  R 
 l7e74h:
-	ld d,l	
-	ld c,(hl)	
-	ld c,(hl)	
-	ld c,c	
+	ld d,l			;7e74	55 	U 
+	ld c,(hl)			;7e75	4e 	N 
+	ld c,(hl)			;7e76	4e 	N 
+	ld c,c			;7e77	49 	I 
 l7e78h:
-	ld c,(hl)	
-	ld b,a	
-	defb 0fdh,0d0h,0d3h	;illegal sequence
-	jr nc,l7eb8h
-	jr nz,$+74
-	ld c,c	
-	ld d,h	
-	ld d,h	
-	ld c,c	
-	ld c,(hl)	
-	ld b,a	
-	jr nz,l7edch
+	ld c,(hl)			;7e78	4e 	N 
+	ld b,a			;7e79	47 	G 
+	defb 0fdh,0d0h,0d3h	;illegal sequence		;7e7a	fd d0 d3 	. . . 
+	jr nc,l7eb8h		;7e7d	30 39 	0 9 
+	jr nz,$+74		;7e7f	20 48 	  H 
+	ld c,c			;7e81	49 	I 
+	ld d,h			;7e82	54 	T 
+	ld d,h			;7e83	54 	T 
+	ld c,c			;7e84	49 	I 
+	ld c,(hl)			;7e85	4e 	N 
+	ld b,a			;7e86	47 	G 
+	jr nz,l7edch		;7e87	20 53 	  S 
 l7e89h:
-	ld c,a	
-	ld d,l	
-	ld c,(hl)	
+	ld c,a			;7e89	4f 	O 
+	ld d,l			;7e8a	55 	U 
+	ld c,(hl)			;7e8b	4e 	N 
 l7e8ch:
-	ld b,h	
-	defb 0fdh,010h,0d4h	;illegal sequence
-	ld sp,02030h
+	ld b,h			;7e8c	44 	D 
+	defb 0fdh,010h,0d4h	;illegal sequence		;7e8d	fd 10 d4 	. . . 
+	ld sp,02030h		;7e90	31 30 20 	1 0   
 l7e93h:
-	ld d,e	
-	ld d,a	
-	ld c,c	
-	ld d,e	
-	ld c,b	
-	ld c,c	
-	ld c,(hl)	
-	ld b,a	
-	jr nz,$+85
-	ld c,a	
-	ld d,l	
-	ld c,(hl)	
-	ld b,h	
-	defb 0fdh,050h,0d4h	;illegal sequence
-	ld sp,l2031h
-	ld b,d	
-	ld d,l	
-	ld d,d	
+	ld d,e			;7e93	53 	S 
+	ld d,a			;7e94	57 	W 
+	ld c,c			;7e95	49 	I 
+	ld d,e			;7e96	53 	S 
+	ld c,b			;7e97	48 	H 
+	ld c,c			;7e98	49 	I 
+	ld c,(hl)			;7e99	4e 	N 
+	ld b,a			;7e9a	47 	G 
+	jr nz,$+85		;7e9b	20 53 	  S 
+	ld c,a			;7e9d	4f 	O 
+	ld d,l			;7e9e	55 	U 
+	ld c,(hl)			;7e9f	4e 	N 
+	ld b,h			;7ea0	44 	D 
+	defb 0fdh,050h,0d4h	;illegal sequence		;7ea1	fd 50 d4 	. P . 
+	ld sp,02031h		;7ea4	31 31 20 	1 1   
+	ld b,d			;7ea7	42 	B 
+	ld d,l			;7ea8	55 	U 
+	ld d,d			;7ea9	52 	R 
 l7eaah:
-	ld d,e	
-	ld d,h	
-	ld c,c	
+	ld d,e			;7eaa	53 	S 
+	ld d,h			;7eab	54 	T 
+	ld c,c			;7eac	49 	I 
 l7eadh:
-	ld c,(hl)	
-	ld b,a	
-	jr nz,l7f00h
+	ld c,(hl)			;7ead	4e 	N 
+	ld b,a			;7eae	47 	G 
+	jr nz,l7f00h		;7eaf	20 4f 	  O 
 l7eb1h:
-	ld b,(hl)	
-	jr nz,$+85
-	ld c,(hl)	
-	ld b,c	
-	ld c,e	
-	ld b,l	
+	ld b,(hl)			;7eb1	46 	F 
+	jr nz,$+85		;7eb2	20 53 	  S 
+	ld c,(hl)			;7eb4	4e 	N 
+	ld b,c			;7eb5	41 	A 
+	ld c,e			;7eb6	4b 	K 
+	ld b,l			;7eb7	45 	E 
 l7eb8h:
-	jr nz,l7f0ah
-	ld c,a	
-	ld d,h	
-	defb 0fdh,090h,0d4h	;illegal sequence
-	ld sp,l2031h+1
-	ld b,d	
-	ld c,c	
-	ld d,h	
-	ld c,c	
+	jr nz,l7f0ah		;7eb8	20 50 	  P 
+	ld c,a			;7eba	4f 	O 
+	ld d,h			;7ebb	54 	T 
+	defb 0fdh,090h,0d4h	;illegal sequence		;7ebc	fd 90 d4 	. . . 
+	ld sp,02032h		;7ebf	31 32 20 	1 2   
+	ld b,d			;7ec2	42 	B 
+	ld c,c			;7ec3	49 	I 
+	ld d,h			;7ec4	54 	T 
+	ld c,c			;7ec5	49 	I 
 l7ec6h:
-	ld c,(hl)	
-	ld b,a	
-	jr nz,$+85
-	ld c,a	
-	ld d,l	
-	ld c,(hl)	
-	ld b,h	
-	defb 0fdh,0d0h,0d4h	;illegal sequence
-	ld sp,l2031h+2
-	ld d,e	
-	ld c,a	
-	ld d,l	
-	ld c,(hl)	
-	ld b,h	
-	jr nz,l7f2ah
-	ld b,(hl)	
+	ld c,(hl)			;7ec6	4e 	N 
+	ld b,a			;7ec7	47 	G 
+	jr nz,$+85		;7ec8	20 53 	  S 
+	ld c,a			;7eca	4f 	O 
+	ld d,l			;7ecb	55 	U 
+	ld c,(hl)			;7ecc	4e 	N 
+	ld b,h			;7ecd	44 	D 
+	defb 0fdh,0d0h,0d4h	;illegal sequence		;7ece	fd d0 d4 	. . . 
+	ld sp,02033h		;7ed1	31 33 20 	1 3   
+	ld d,e			;7ed4	53 	S 
+	ld c,a			;7ed5	4f 	O 
+	ld d,l			;7ed6	55 	U 
+	ld c,(hl)			;7ed7	4e 	N 
+	ld b,h			;7ed8	44 	D 
+	jr nz,l7f2ah		;7ed9	20 4f 	  O 
+	ld b,(hl)			;7edb	46 	F 
 l7edch:
-	jr nz,l7f29h
-	ld c,(hl)	
-	ld c,c	
-	ld d,(hl)	
-	ld b,l	
-	ld d,e	
-	inc l	
-	ld b,d	
-	ld c,a	
-	ld c,a	
-	ld c,l	
-	ld b,l	
-	ld d,d	
-	ld b,c	
-	ld c,(hl)	
-	ld b,a	
-	ld d,e	
-	defb 0fdh,010h,0d5h	;illegal sequence
-	ld sp,l2031h+3
-	ld b,e	
-	ld c,a	
-	ld d,l	
-	ld c,(hl)	
-	ld d,h	
-	ld c,c	
-	ld c,(hl)	
-	ld b,a	
-	jr nz,l7f4eh
-	ld c,a	
-	ld c,c	
+	jr nz,l7f29h		;7edc	20 4b 	  K 
+	ld c,(hl)			;7ede	4e 	N 
+	ld c,c			;7edf	49 	I 
+	ld d,(hl)			;7ee0	56 	V 
+	ld b,l			;7ee1	45 	E 
+	ld d,e			;7ee2	53 	S 
+	inc l			;7ee3	2c 	, 
+	ld b,d			;7ee4	42 	B 
+	ld c,a			;7ee5	4f 	O 
+	ld c,a			;7ee6	4f 	O 
+	ld c,l			;7ee7	4d 	M 
+	ld b,l			;7ee8	45 	E 
+	ld d,d			;7ee9	52 	R 
+	ld b,c			;7eea	41 	A 
+	ld c,(hl)			;7eeb	4e 	N 
+	ld b,a			;7eec	47 	G 
+	ld d,e			;7eed	53 	S 
+	defb 0fdh,010h,0d5h	;illegal sequence		;7eee	fd 10 d5 	. . . 
+	ld sp,02034h		;7ef1	31 34 20 	1 4   
+	ld b,e			;7ef4	43 	C 
+	ld c,a			;7ef5	4f 	O 
+	ld d,l			;7ef6	55 	U 
+	ld c,(hl)			;7ef7	4e 	N 
+	ld d,h			;7ef8	54 	T 
+	ld c,c			;7ef9	49 	I 
+	ld c,(hl)			;7efa	4e 	N 
+	ld b,a			;7efb	47 	G 
+	jr nz,l7f4eh		;7efc	20 50 	  P 
+	ld c,a			;7efe	4f 	O 
+	ld c,c			;7eff	49 	I 
 l7f00h:
-	ld c,(hl)	
+	ld c,(hl)			;7f00	4e 	N 
 sub_7f01h:
-	ld d,h	
-	ld d,e	
-	defb 0fdh,050h,0d5h	;illegal sequence
-	ld sp,2035h
-	ld b,a	
+	ld d,h			;7f01	54 	T 
+	ld d,e			;7f02	53 	S 
+	defb 0fdh,050h,0d5h	;illegal sequence		;7f03	fd 50 d5 	. P . 
+	ld sp,02035h		;7f06	31 35 20 	1 5   
+	ld b,a			;7f09	47 	G 
 l7f0ah:
-	ld b,c	
-	ld c,l	
-	ld b,l	
-	jr nz,l7f62h
-	ld d,h	
-	ld b,c	
-	ld d,d	
-	ld d,h	
-	defb 0fdh,090h,0d5h	;illegal sequence
-	ld sp,l2036h
-	ld b,d	
-	ld b,a	
-	ld c,l	
-	defb 0fdh,0d0h,0d5h	;illegal sequence
-	ld sp,l2036h+1
-	ld b,e	
-	ld c,a	
-	ld c,l	
-	ld d,b	
-	ld c,h	
-	ld b,l	
-	ld d,h	
+	ld b,c			;7f0a	41 	A 
+	ld c,l			;7f0b	4d 	M 
+	ld b,l			;7f0c	45 	E 
+	jr nz,l7f62h		;7f0d	20 53 	  S 
+	ld d,h			;7f0f	54 	T 
+	ld b,c			;7f10	41 	A 
+	ld d,d			;7f11	52 	R 
+	ld d,h			;7f12	54 	T 
+	defb 0fdh,090h,0d5h	;illegal sequence		;7f13	fd 90 d5 	. . . 
+	ld sp,02036h		;7f16	31 36 20 	1 6   
+	ld b,d			;7f19	42 	B 
+	ld b,a			;7f1a	47 	G 
+	ld c,l			;7f1b	4d 	M 
+	defb 0fdh,0d0h,0d5h	;illegal sequence		;7f1c	fd d0 d5 	. . . 
+	ld sp,02037h		;7f1f	31 37 20 	1 7   
+	ld b,e			;7f22	43 	C 
+	ld c,a			;7f23	4f 	O 
+	ld c,l			;7f24	4d 	M 
+	ld d,b			;7f25	50 	P 
+	ld c,h			;7f26	4c 	L 
+	ld b,l			;7f27	45 	E 
+	ld d,h			;7f28	54 	T 
 l7f29h:
-	ld c,c	
+	ld c,c			;7f29	49 	I 
 l7f2ah:
-	ld c,a	
-	ld c,(hl)	
-	jr nz,$+81
-	ld b,(hl)	
-	jr nz,l7f76h
-	ld b,c	
-	ld b,e	
-	ld c,b	
-	jr nz,l7f86h
-	ld b,c	
-	ld d,h	
-	ld d,h	
-	ld b,l	
-	ld d,d	
-	ld c,(hl)	
-	defb 0fdh,010h,0d6h	;illegal sequence
-	ld sp,2038h
-	ld b,e	
-	ld c,a	
-	ld c,l	
-	ld d,b	
-	ld c,h	
-	ld b,l	
-	ld d,h	
-	ld c,c	
-	ld c,a	
-	ld c,(hl)	
-	jr nz,l7f9dh
+	ld c,a			;7f2a	4f 	O 
+	ld c,(hl)			;7f2b	4e 	N 
+	jr nz,$+81		;7f2c	20 4f 	  O 
+	ld b,(hl)			;7f2e	46 	F 
+	jr nz,l7f76h		;7f2f	20 45 	  E 
+	ld b,c			;7f31	41 	A 
+	ld b,e			;7f32	43 	C 
+	ld c,b			;7f33	48 	H 
+	jr nz,l7f86h		;7f34	20 50 	  P 
+	ld b,c			;7f36	41 	A 
+	ld d,h			;7f37	54 	T 
+	ld d,h			;7f38	54 	T 
+	ld b,l			;7f39	45 	E 
+	ld d,d			;7f3a	52 	R 
+	ld c,(hl)			;7f3b	4e 	N 
+	defb 0fdh,010h,0d6h	;illegal sequence		;7f3c	fd 10 d6 	. . . 
+	ld sp,02038h		;7f3f	31 38 20 	1 8   
+	ld b,e			;7f42	43 	C 
+	ld c,a			;7f43	4f 	O 
+	ld c,l			;7f44	4d 	M 
+	ld d,b			;7f45	50 	P 
+	ld c,h			;7f46	4c 	L 
+	ld b,l			;7f47	45 	E 
+	ld d,h			;7f48	54 	T 
+	ld c,c			;7f49	49 	I 
+	ld c,a			;7f4a	4f 	O 
+	ld c,(hl)			;7f4b	4e 	N 
+	jr nz,l7f9dh		;7f4c	20 4f 	  O 
 l7f4eh:
-	ld b,(hl)	
-	jr nz,l7f98h
-	ld b,c	
-	ld c,l	
-	ld b,l	
-	defb 0fdh,050h,0d6h	;illegal sequence
-	ld sp,2039h
-	ld b,a	
-	ld b,c	
-	ld c,l	
-	ld b,l	
-	jr nz,l7fafh
-	ld d,(hl)	
-	ld b,l	
+	ld b,(hl)			;7f4e	46 	F 
+	jr nz,l7f98h		;7f4f	20 47 	  G 
+	ld b,c			;7f51	41 	A 
+	ld c,l			;7f52	4d 	M 
+	ld b,l			;7f53	45 	E 
+	defb 0fdh,050h,0d6h	;illegal sequence		;7f54	fd 50 d6 	. P . 
+	ld sp,02039h		;7f57	31 39 20 	1 9   
+	ld b,a			;7f5a	47 	G 
+	ld b,c			;7f5b	41 	A 
+	ld c,l			;7f5c	4d 	M 
+	ld b,l			;7f5d	45 	E 
+	jr nz,7fafh		;7f5e	20 4f 	  O 
+	ld d,(hl)			;7f60	56 	V 
+	ld b,l			;7f61	45 	E 
 l7f62h:
-	ld d,d	
-	defb 0fdh,090h,0d6h	;illegal sequence
-	ld (02030h),a
-	ld d,h	
-	ld c,c	
-	ld c,l	
-	ld b,l	
-	jr nz,l7fc4h
-	ld d,b	
-	jr nz,l7fc9h
-	ld b,c	
-	ld d,d	
-	ld c,(hl)	
-	ld c,c	
+	ld d,d			;7f62	52 	R 
+	defb 0fdh,090h,0d6h	;illegal sequence		;7f63	fd 90 d6 	. . . 
+	ld (02030h),a		;7f66	32 30 20 	2 0   
+	ld d,h			;7f69	54 	T 
+	ld c,c			;7f6a	49 	I 
+	ld c,l			;7f6b	4d 	M 
+	ld b,l			;7f6c	45 	E 
+	jr nz,7fc4h		;7f6d	20 55 	  U 
+	ld d,b			;7f6f	50 	P 
+	jr nz,7fc9h		;7f70	20 57 	  W 
+	ld b,c			;7f72	41 	A 
+	ld d,d			;7f73	52 	R 
+	ld c,(hl)			;7f74	4e 	N 
+	ld c,c			;7f75	49 	I 
 l7f76h:
-	ld c,(hl)	
-	ld b,a	
-	defb 0fdh,0d0h,0d6h	;illegal sequence
-	ld (l2031h),a
-	ld b,c	
-	ld b,h	
-	ld b,h	
-	ld c,c	
-	ld d,h	
-	ld c,c	
-	ld c,a	
-	ld c,(hl)	
+	ld c,(hl)			;7f76	4e 	N 
+	ld b,a			;7f77	47 	G 
+	defb 0fdh,0d0h,0d6h	;illegal sequence		;7f78	fd d0 d6 	. . . 
+	ld (02031h),a		;7f7b	32 31 20 	2 1   
+	ld b,c			;7f7e	41 	A 
+	ld b,h			;7f7f	44 	D 
+	ld b,h			;7f80	44 	D 
+	ld c,c			;7f81	49 	I 
+	ld d,h			;7f82	54 	T 
+	ld c,c			;7f83	49 	I 
+	ld c,a			;7f84	4f 	O 
+	ld c,(hl)			;7f85	4e 	N 
 l7f86h:
-	ld b,c	
-	ld c,h	
-	jr nz,l7fd0h
-	ld c,c	
-	ld b,a	
-	ld c,b	
-	ld d,h	
-	ld b,l	
-	ld d,d	
-	defb 0fdh,016h,0d7h	;illegal sequence
-	ld c,l	
-	ld d,l	
-	ld d,e	
-	ld c,c	
-	ld b,e	
+	ld b,c			;7f86	41 	A 
+	ld c,h			;7f87	4c 	L 
+	jr nz,7fd0h		;7f88	20 46 	  F 
+	ld c,c			;7f8a	49 	I 
+	ld b,a			;7f8b	47 	G 
+	ld c,b			;7f8c	48 	H 
+	ld d,h			;7f8d	54 	T 
+	ld b,l			;7f8e	45 	E 
+	ld d,d			;7f8f	52 	R 
+	defb 0fdh,016h,0d7h	;illegal sequence		;7f90	fd 16 d7 	. . . 
+	ld c,l			;7f93	4d 	M 
+	ld d,l			;7f94	55 	U 
+	ld d,e			;7f95	53 	S 
+	ld c,c			;7f96	49 	I 
+	ld b,e			;7f97	43 	C 
 l7f98h:
-	jr nz,l7fdfh
-	ld c,(hl)	
-	ld b,h	
-	rst 38h	
+	jr nz,7fdfh		;7f98	20 45 	  E 
+	ld c,(hl)			;7f9a	4e 	N 
+	ld b,h			;7f9b	44 	D 
+	rst 38h			;7f9c	ff 	. 
+
 l7f9dh:
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-l7fafh:
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-l7fc4h:
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-l7fc9h:
-	rst 0	
-	rst 0	
-	rst 0	
-sub_7fcch:
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-l7fd0h:
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-l7fdfh:
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
-	rst 0	
+	; 7f9dh: The ROM finishes with 99 bytes of value 0c7h
+	defs 99, 0c7h
