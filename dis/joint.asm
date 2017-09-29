@@ -10325,7 +10325,7 @@ l4925h:
 	ld hl,l4c0eh
 	call l1134h
 	ld a,0e1h
-	call sub_570fh
+	call WAIT_A
 	call sub_49aeh
 	ld hl,l4c71h
 	call sub_111ch
@@ -10370,10 +10370,10 @@ l4994h:
 	cp 00bh
 	jr nz,l4994h
 	ld a,038h
-	call sub_570fh
+	call WAIT_A
 	call sub_5620h
 	ld a,0e1h
-	call sub_570fh
+	call WAIT_A
 	jp l487eh
 sub_49aeh:
 	ld de,0d150h
@@ -12320,11 +12320,11 @@ l54feh:
 	call sub_56c3h
 l5505h:
 	ld a,0e1h
-	call sub_570fh
+	call WAIT_A
 l550ah:
 	ld a,038h
 l550ch:
-	call sub_570fh
+	call WAIT_A
 	xor a	
 l5510h:
 	ld (0e700h),a
@@ -12429,7 +12429,7 @@ l5596h:
 	ld a,038h
 	ld (0e881h),a
 l55a8h:
-	call sub_570dh
+	call WAIT_1
 	ld a,(0e904h)
 	and 003h
 	jr nz,l561bh
@@ -12489,7 +12489,7 @@ l5600h:
 l560dh:
 	call sub_562ch
 	ld a,01ch
-	call sub_570fh
+	call WAIT_A
 	ld a,000h
 	call sub_0dfeh
 	ret	
@@ -12603,7 +12603,7 @@ sub_56b5h:
 l56beh:
 	ld a,070h
 l56c0h:
-	jp sub_570fh
+	jp WAIT_A
 sub_56c3h:
 	ld hl,(0e902h)
 	ld de,4
@@ -12656,9 +12656,13 @@ sub_5703h:
 	ld (0e000h),a
 	ld hl,0
 	ld (0e902h),hl
-sub_570dh:
+
+; miguel
+; Write 1 to (0e882h) and wait until (0e882h) is 0
+WAIT_1:
 	ld a,001h
-sub_570fh:
+; Write a to (0e882h) and wait until (0e882h) is 0
+WAIT_A:
 	push hl	
 	ld hl,0e882h
 	ld (hl),a	
@@ -12667,7 +12671,9 @@ l5714h:
 	and a	
 	jr nz,l5714h
 	pop hl	
-	ret	
+	ret
+
+
 sub_571ah:
 	push bc	
 	ld b,021h
@@ -18858,7 +18864,7 @@ SERVICE_MODE:
 	ld a,0ffh
 	ld (0e000h),a
 	ei	
-	call sub_570dh
+	call WAIT_1
 	call sub_1157h
 	di	
 l7673h:
@@ -18990,7 +18996,7 @@ l7743h:
 	call sub_111ch
 	ei	
 	ld a,070h
-	call sub_570fh
+	call WAIT_A
 	ld a,b	
 	and a	
 	call nz,sub_7be8h
