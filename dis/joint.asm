@@ -10309,7 +10309,7 @@ l4904h:
 	ld (0e000h),a
 	ld de,0d152h
 	ld c,00bh
-	ld hl,l4b86h
+	ld hl,4b86h
 	call l1134h
 l491bh:
 	ld a,(0e020h)
@@ -10322,7 +10322,7 @@ l4925h:
 	cp 00bh
 	jr nz,l4925h
 	call sub_49aeh
-	ld hl,l4c0eh
+	ld hl,4c0eh
 	call l1134h
 	ld a,0e1h
 	call WAIT_A
@@ -10430,11 +10430,11 @@ l49feh:
 	and 007h
 l4a0ah:
 	push hl	
-	ld hl,l4a39h
+	ld hl,4a39h
 	jr l4a14h
 sub_4a10h:
 	push hl	
-	ld hl,l4a34h
+	ld hl,4a34h
 l4a14h:
 	push af	
 	push bc	
@@ -10456,31 +10456,11 @@ sub_4a2ch:
 	call sub_1110h
 	ld a,02dh
 	jp sub_1110h
-l4a34h:
-	ld b,e	
-	ld c,a	
-	ld c,c	
-	ld c,(hl)	
-	rst 38h	
-l4a39h:
-	ld d,b	
-	ld c,h	
-	ld b,c	
-	ld e,c	
-	ld b,l	
-	ld d,d	
-	rst 38h	
-	jr nz,l4a62h
-	jr nz,l4a64h
-	jr nz,l4a66h
-	jr nz,l4a68h
-	jr nz,l4a6ah
-	jr nz,$+34
-	jr nz,l4a6eh
-	jr nz,l4a70h
-	jr nz,$+34
-	jr nz,l4a74h
-	rst 38h	
+
+
+COIN_STR: defb "COIN", 0ffh ;4a34
+PLAYER_STR: defb "PLAYER", 0ffh ;4a39
+SPACES_STR: defb "                    ", 0ffh ;4a40
 l4a55h:
 	ld b,d	
 	ld (bc),a	
@@ -10682,13 +10662,13 @@ l4b56h:
 	ld bc,l0220h
 	ld (bc),a	
 	ex af,af'	
-	djnz l4b7eh
+	djnz 4b7eh
 	jr nz,l4b60h
 l4b60h:
 	jr l4b64h
 	djnz l4b6ch
 l4b64h:
-	djnz l4b86h
+	djnz 4b86h
 	djnz l4b68h
 l4b68h:
 	ld b,b	
@@ -10696,229 +10676,45 @@ l4b68h:
 l4b6ch:
 	rst 38h	
 l4b6dh:
-	cp 01dh
-	defb 0fdh,0d8h,0d6h	;illegal sequence
-	ld b,b	
-	jr nz,$+51
-	add hl,sp	
-	jr c,l4bach
-l4b78h:
-	jr nz,l4b78h
-	jp c,l5249h
-	ld b,l	
-l4b7eh:
-	ld c,l	
-	jr nz,l4bc4h
-	ld c,a	
-	ld d,d	
-	ld d,b	
-	ld l,0ffh
-l4b86h:
-	ld b,c	
-	jr nz,l4bd4h
-	ld d,l	
-	ld c,(hl)	
-	ld b,a	
-	dec l	
-	ld b,(hl)	
-	ld d,l	
-	jr nz,l4bdeh
-	ld b,c	
-	ld d,e	
-	ld d,h	
-	ld b,l	
-	ld d,d	
-	inc l	
-	cp 01ah
-	ld d,h	
-	ld c,b	
-	ld c,a	
-	ld c,l	
-	ld b,c	
-	ld d,e	
-	cp 00bh
-	jr nz,l4be4h
-	ld c,(hl)	
-l4ba4h:
-	ld b,h	
-	jr nz,l4ba4h
-	jp nc,0fed1h
-	ld a,(de)	
-	ld d,e	
-l4bach:
-	ld c,c	
-	ld c,h	
-	ld d,(hl)	
-	ld c,c	
-	ld b,c	
-	cp 00bh
-	jr nz,$+89
-	ld b,l	
-	ld d,d	
-	ld b,l	
-	jr nz,l4c0dh
-	ld d,l	
-	ld b,h	
-	ld b,h	
-	ld b,l	
-	ld c,(hl)	
-	ld c,h	
-	ld e,c	
-	jr nz,$+67
-	ld d,h	
-l4bc4h:
-	ld d,h	
-	ld b,c	
-	ld b,e	
-	ld c,e	
-	ld b,l	
-l4bc9h:
-	ld b,h	
-	jr nz,l4bc9h
-	ld d,d	
-	jp nc,l5942h
-	jr nz,l4c25h
-	ld b,l	
-	ld d,(hl)	
-l4bd4h:
-	ld b,l	
-	ld d,d	
-	ld b,c	
-	ld c,h	
-	jr nz,l4c2fh
-	ld c,(hl)	
-	ld c,e	
-	ld c,(hl)	
-	ld c,a	
-l4bdeh:
-	ld d,a	
-	ld c,(hl)	
-	jr nz,l4c29h
-	ld d,l	
-	ld e,c	
-l4be4h:
-	ld d,e	
-	ld l,0ffh
-	defb 0fdh,0d0h,0d2h	;illegal sequence
-l4beah:
-	jr z,l4beah
-	ld a,(de)	
-	ld d,e	
-	ld c,c	
-	ld c,h	
-	ld d,(hl)	
-	ld c,c	
-	ld b,c	
-	cp 00bh
-	jr nz,l4c4eh
-	ld b,c	
-	ld d,e	
-	jr nz,$+77
-	ld c,c	
-	ld b,h	
-	ld c,(hl)	
-l4bfeh:
-	ld b,c	
-	ld d,b	
-	ld d,b	
-	ld b,l	
-	ld b,h	
-	jr nz,l4c47h
-	ld e,c	
-	jr nz,l4c5ch
-	ld c,b	
-	ld b,l	
-	ld c,l	
-	ld l,029h
-l4c0dh:
-	rst 38h	
-l4c0eh:
-	defb 0fdh,053h,0d1h	;illegal sequence
-	ld c,h	
-	ld b,c	
-	ld d,h	
-	ld b,l	
-	ld d,d	
-l4c16h:
-	jr nz,l4c16h
-	ld a,(de)	
-	ld d,h	
-	ld c,b	
-	ld c,a	
-	ld c,l	
-	ld b,c	
-	ld d,e	
-	cp 00bh
-	jr nz,$+72
-	ld c,a	
-	ld d,l	
-l4c25h:
-	ld c,(hl)	
-	ld b,h	
-	jr nz,l4c6ah
-l4c29h:
-	jr nz,l4c77h
-	ld b,l	
-	ld d,h	
-	ld d,h	
-	ld b,l	
-l4c2fh:
-	ld d,d	
-	jr nz,l4c2fh
-	out (0d1h),a
-	ld b,(hl)	
-	ld d,d	
-	ld c,a	
-	ld c,l	
-l4c38h:
-	jr nz,l4c38h
-	ld a,(de)	
-	ld e,b	
-	cp 00bh
-	ld l,020h
-	defb 0fdh,053h,0d2h	;illegal sequence
-	ld c,b	
-	ld b,l	
-	jr nz,$+75
-l4c47h:
-	ld d,e	
-	jr nz,l4c8bh
-	ld c,(hl)	
-	jr nz,l4c96h
-	ld c,(hl)	
-l4c4eh:
-	ld c,b	
-	ld b,c	
-	ld b,d	
-	ld c,c	
-	ld d,h	
-	ld b,c	
-	ld c,(hl)	
-	ld d,h	
-	jr nz,l4ca7h
-	ld b,(hl)	
-	jr nz,l4cafh
-	ld c,b	
-l4c5ch:
-	ld b,l	
-	jr nz,l4c5ch
-	out (0d2h),a
-	ld b,h	
-	ld b,l	
-	ld d,(hl)	
-	ld c,c	
-	ld c,h	
-sub_4c66h:
-	daa	
-	ld d,e	
-	jr nz,l4cbeh
-l4c6ah:
-	ld b,l	
-	ld c,l	
-	ld d,b	
-	ld c,h	
-	ld b,l	
-	ld l,0ffh
+	cp 01dh		;4b6d
+	defb 0fdh,0d8h,0d6h
+	defb "@ 1984 "
+	defb 0feh, 0dah
+	defb "IREM CORP.", 0ffh
+	defb "A KUNG-FU MASTER,"
+	defb 0feh, 01ah
+	defb "THOMAS"
+	defb 0feh, 00bh
+	defb " AND "
+	defb 0fdh, 0d2h, 0d1h, 0feh, 01ah
+	defb "SILVIA"
+	defb 0feh, 00bh
+	defb " WERE SUDDENLY ATTACKED "
+	defb 0fdh, 052h, 0d2h
+	defb "BY SEVERAL UNKNOWN GUYS.", 0ffh
+	defb 0fdh,0d0h,0d2h
+	defb "("
+	defb 0feh, 01ah
+	defb "SILVIA"
+	defb 0feh, 00bh
+	defb " WAS KIDNAPPED BY THEM.)", 0ffh
+	defb 0fdh,053h,0d1h
+	defb "LATER "
+	defb 0feh, 01ah
+	defb "THOMAS"
+	defb 0feh, 00bh
+	defb " FOUND A LETTER "
+	defb 0fdh, 0d3h, 0d1h
+	defb "FROM "
+	defb 0feh, 01ah
+	defb "X"
+	defb 0feh, 00bh
+	defb ". "
+	defb 0fdh,053h,0d2h
+	defb "HE IS AN INHABITANT OF THE "
+	defb 0fdh, 0d3h, 0d2h
+	defb "DEVIL'S TEMPLE.", 0ffh
+
 l4c71h:
 	cp 0dah
 	defb 0fdh,0dah,0d0h	;illegal sequence
@@ -12657,7 +12453,6 @@ sub_5703h:
 	ld hl,0
 	ld (0e902h),hl
 
-; miguel
 ; Write 1 to (0e882h) and wait until (0e882h) is 0
 WAIT_1:
 	ld a,001h
@@ -14585,7 +14380,7 @@ l613ah:
 	cp 001h
 	ld sp,hl	
 	cp 00bh
-	jp c,l4bfeh
+	jp c,4bfeh
 	add a,a	
 	adc a,l	
 	sub b	
@@ -14608,7 +14403,7 @@ l6176h:
 	cp 001h
 	ld b,0f9h
 	cp 00bh
-	jp c,l4bfeh
+	jp c,4bfeh
 	add a,a	
 	adc a,(hl)	
 	sub c	
@@ -14629,7 +14424,7 @@ l6176h:
 	cp 001h
 	ld b,0f9h
 	cp 00bh
-	jp c,l4bfeh
+	jp c,4bfeh
 	adc a,h	
 	adc a,a	
 	sub d	
