@@ -10434,7 +10434,7 @@ l4a0ah:
 	jr l4a14h
 sub_4a10h:
 	push hl	
-	ld hl,4a34h
+	ld hl,COIN_STR
 l4a14h:
 	push af	
 	push bc	
