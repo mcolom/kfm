@@ -10259,7 +10259,7 @@ l487eh:
 	ei	
 	call sub_5700h
 	call 064ah
-	ld hl,l4b6dh
+	ld hl,IREM_COPYRIGHT_STR
 	call sub_111ch
 	ld hl,l4f01h
 	ld (0e70eh),hl
@@ -10309,7 +10309,7 @@ l4904h:
 	ld (0e000h),a
 	ld de,0d152h
 	ld c,00bh
-	ld hl,4b86h
+	ld hl,INTRO_STR
 	call l1134h
 l491bh:
 	ld a,(0e020h)
@@ -10668,19 +10668,22 @@ l4b60h:
 	jr l4b64h
 	djnz l4b6ch
 l4b64h:
-	djnz 4b86h
+	djnz INTRO_STR
 	djnz l4b68h
 l4b68h:
 	ld b,b	
 	ld bc,004a0h
 l4b6ch:
-	rst 38h	
-l4b6dh:
+	rst 38h
+	
+IREM_COPYRIGHT_STR:
 	cp 01dh		;4b6d
 	defb 0fdh,0d8h,0d6h
 	defb "@ 1984 "
 	defb 0feh, 0dah
 	defb "IREM CORP.", 0ffh
+
+INTRO_STR: ; 4b86
 	defb "A KUNG-FU MASTER,"
 	defb 0feh, 01ah
 	defb "THOMAS"
@@ -11270,7 +11273,7 @@ l5000h:
 	call sub_111ch
 	ld hl,l516dh
 	call sub_111ch
-	ld hl,l50a7h
+	ld hl,ENDING_STR
 	call sub_5079h
 	ld a,0f8h
 	call sub_5038h
@@ -11359,9 +11362,10 @@ l509ch:
 	add hl,de	
 	ex de,hl	
 	djnz l509ch
-	ret	
-l50a7h:
-	defb 0fdh,063h,0d2h	;illegal sequence		;50a7	fd 63 d2 	. c . 
+	ret
+
+ENDING_STR:	;50a7
+	defb 0fdh,063h,0d2h
 	defb "A KUNG-FU MASTER,THOMAS AND "
 	defb 0fdh, 0e3h, 0d2h
 	defb "SILVIA ENJOYED HAPPINESS "
@@ -11438,7 +11442,7 @@ l5183h:
 	ld a,(0e880h)
 	and 018h
 	jr z,l5197h
-	ld hl,l51d8h
+	ld hl,PUSH_BUTTON_STR
 	call sub_111ch
 	jr l519ah
 l5197h:
@@ -11448,12 +11452,12 @@ l519ah:
 	ld a,(0e913h)
 	push af	
 	cp 001h
-	ld hl,51e5h
+	ld hl, ONLY_ONE_PLAYER_STR
 	jr z,l51abh
-	ld hl,51f3h
+	ld hl, ONE_OR_TWO_PLAYERS_STR
 l51abh:
 	call sub_111ch
-	ld hl,5202h
+	ld hl, CREDIT_STR
 	call sub_111ch
 	pop af	
 	call 10ffh
@@ -11476,10 +11480,16 @@ l51c9h:
 	res 7,(hl)
 	ret	
 
-l51d8h:
+PUSH_BUTTON_STR: ; 51d8
 	defb "PUSH  BUTTON", 0ffh
+	
+ONLY_ONE_PLAYER_STR:
 	defb "ONLY 1 PLAYER", 0ffh
+
+ONE_OR_TWO_PLAYERS_STR:
 	defb "1 OR 2 PLAYERS", 0ffh
+
+CREDIT_STR:
 	defb 0fdh, 0e1h, 0d5h
 	defb "CREDIT ", 0ffh
 
@@ -11620,7 +11630,7 @@ l5264h:
 	cp 01bh		;5306	fe 1b 	. .
 
 
-	defb 0fdh,017h,0d2h	;illegal sequence		;5308	fd 17 d2 	. . . 
+	defb 0fdh,017h,0d2h	;5308
 	defb "YOUR LOVE "
 	defb 0feh, 01fh
 	defb "SILVIA"
