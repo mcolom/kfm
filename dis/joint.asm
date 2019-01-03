@@ -10430,7 +10430,7 @@ l49feh:
 	and 007h
 l4a0ah:
 	push hl	
-	ld hl,4a39h
+	ld hl,PLAYER_STR
 	jr l4a14h
 sub_4a10h:
 	push hl	
