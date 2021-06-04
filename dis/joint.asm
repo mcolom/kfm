@@ -54,6 +54,8 @@ CHECKSERVICEMODE: macro
 	bit 7,a
 endm
 
+LIVES: EQU 0xE084
+
 
 ; ************************ ROM start ************************
 	org	00000h
@@ -420,7 +422,7 @@ l0220h:
 	ld (0e090h),a		;0244	32 90 e0 	2 . . 
 l0247h:
 	call sub_056fh		;0247	cd 6f 05 	. o . 
-	ld (0e084h),a		;024a	32 84 e0 	2 . . 
+	ld (LIVES),a		;024a	32 84 e0 	2 . . 
 	ld (0e094h),a		;024d	32 94 e0 	2 . . 
 sub_0250h:
 	ld hl,0e005h		;0250	21 05 e0 	! . . 
@@ -552,7 +554,7 @@ l033ah:
 	ld a,l			;0342	7d 	} 
 	or h			;0343	b4 	. 
 	call z,056b5h		;0344	cc b5 56 	. . V 
-	ld hl,0e084h		;0347	21 84 e0 	! . . 
+	ld hl,LIVES		;0347	21 84 e0 	! . . 
 	dec (hl)			;034a	35 	5 
 	jr z,l035dh		;034b	28 10 	( . 
 	ld a,(0e007h)		;034d	3a 07 e0 	: . . 
@@ -588,7 +590,7 @@ l0379h:
 	inc de			;037f	13 	. 
 	djnz l0379h		;0380	10 f7 	. . 
 l0382h:
-	ld a,(0e084h)		;0382	3a 84 e0 	: . . 
+	ld a,(LIVES)		;0382	3a 84 e0 	: . . 
 	and a			;0385	a7 	. 
 	jp nz,sub_0250h		;0386	c2 50 02 	. P . 
 	ld hl,0e910h		;0389	21 10 e9 	! . . 
@@ -2843,7 +2845,7 @@ sub_10d9h:
 	call sub_10fdh		;10e1	cd fd 10 	. . . 
 	jr sub_10fdh		;10e4	18 17 	. . 
 sub_10e6h:
-	ld a,(0e084h)		;10e6	3a 84 e0 	: . . 
+	ld a,(LIVES)		;10e6	3a 84 e0 	: . . 
 	ld de,0d162h		;10e9	11 62 d1 	. b . 
 	ld l,a			;10ec	6f 	o 
 	ld b,007h		;10ed	06 07 	. . 
@@ -10339,7 +10341,7 @@ l4943h:
 	ld (0e081h),a
 	ld (0e082h),hl
 	inc a	
-	ld (0e084h),a
+	ld (LIVES),a
 	ld (0e022h),a
 	ld hl,0e025h
 	ld a,(hl)	
