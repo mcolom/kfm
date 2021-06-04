@@ -56,8 +56,12 @@ endm
 
 LIVES: EQU 0xE084
 DRAGONS_LEVEL: EQU 0xE080 ; 00 DDD LLL, where D is the number of dragons, and L the level - 1.
+
 ENERGY: EQU 0xE709
-ENERGY_DISP: EQU 0xE81A ; Displayed energy. Use to animate the bar when energy decreases
+ENERGY_DISP: EQU 0xE81A ; Displayed energy. Use to animate the bar when energy changes
+
+ENEMY_ENERGY: EQU 0xE2E2
+ENEMY_ENERGY_DISP: EQU 0xE819 ; Displayed enemy's energy. Use to animate the bar when energy changes
 
 
 ; ************************ ROM start ************************
@@ -2559,8 +2563,8 @@ sub_0e9bh:
 	ld (0e881h),a		;0eb9	32 81 e8 	2 . . 
 	ld a,(ENERGY)		;0ebc	3a 09 e7 	: . . 
 	ld (ENERGY_DISP),a		;0ebf	32 1a e8 	2 . . 
-	ld a,(0e2e2h)		;0ec2	3a e2 e2 	: . . 
-	ld (0e819h),a		;0ec5	32 19 e8 	2 . . 
+	ld a,(ENEMY_ENERGY)		;0ec2	3a e2 e2 	: . . 
+	ld (ENEMY_ENERGY_DISP),a		;0ec5	32 19 e8 	2 . . 
 	call sub_0f78h		;0ec8	cd 78 0f 	. x . 
 	call sub_0f6bh		;0ecb	cd 6b 0f 	. k . 
 	ld de,0d0a0h		;0ece	11 a0 d0 	. . . 
@@ -2663,8 +2667,8 @@ l0f65h:
 	ret			;0f6a	c9 	. 
 sub_0f6bh:
 	ld de,0d116h		;0f6b	11 16 d1 	. . . 
-	ld hl,0e819h		;0f6e	21 19 e8 	! . . 
-	ld a,(0e2e2h)		;0f71	3a e2 e2 	: . . 
+	ld hl,ENEMY_ENERGY_DISP		;0f6e	21 19 e8 	! . . 
+	ld a,(ENEMY_ENERGY)		;0f71	3a e2 e2 	: . . 
 	ld c,015h		;0f74	0e 15 	. . 
 	jr l0f83h		;0f76	18 0b 	. . 
 sub_0f78h:
@@ -4826,7 +4830,7 @@ sub_1e4ah:
 	ld (0e2e0h),hl		;1e5c	22 e0 e2 	" . . 
 l1e5fh:
 	ld ix,0e2d8h		;1e5f	dd 21 d8 e2 	. ! . . 
-	ld a,(0e2e2h)		;1e63	3a e2 e2 	: . . 
+	ld a,(ENEMY_ENERGY)		;1e63	3a e2 e2 	: . . 
 	ld hl,0e2fah		;1e66	21 fa e2 	! . . 
 	and a			;1e69	a7 	. 
 	jp m,l1e77h		;1e6a	fa 77 1e 	. w . 
@@ -6695,9 +6699,9 @@ sub_2d19h:
 	ld e,(hl)			;2d2f	5e 	^ 
 	pop hl			;2d30	e1 	. 
 	add hl,de			;2d31	19 	. 
-	ld a,(0e2e2h)		;2d32	3a e2 e2 	: . . 
+	ld a,(ENEMY_ENERGY)		;2d32	3a e2 e2 	: . . 
 	sub (hl)			;2d35	96 	. 
-	ld (0e2e2h),a		;2d36	32 e2 e2 	2 . . 
+	ld (ENEMY_ENERGY),a		;2d36	32 e2 e2 	2 . . 
 	pop de			;2d39	d1 	. 
 	ret nc			;2d3a	d0 	. 
 	ld a,087h		;2d3b	3e 87 	> . 
