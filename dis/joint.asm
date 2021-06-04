@@ -55,6 +55,8 @@ CHECKSERVICEMODE: macro
 endm
 
 LIVES: EQU 0xE084
+DRAGONS_LEVEL: EQU 0xE080 ; 00 DDD LLL, where D is the number of dragons, and L the level - 1.
+
 
 
 ; ************************ ROM start ************************
@@ -234,13 +236,17 @@ l00e0h:
 	ld hl,l007dh+1		;00ed	21 7e 00 	! ~ . 
 	cp 006h		;00f0	fe 06 	. . 
 	jr z,l0107h		;00f2	28 13 	( . 
-	ld hl,l006eh		;00f4	21 6e 00 	! n . 
-	ld a,(0e080h)		;00f7	3a 80 e0 	: . . 
-	and 038h		;00fa	e6 38 	. 8 
-	cp 020h		;00fc	fe 20 	.   
-	jr c,l0102h		;00fe	38 02 	8 . 
+	ld hl,l006eh		;00f4	21 6e 00
+
+    ; Set 3 dragons if more than 3.
+	ld a,(DRAGONS_LEVEL)	;00f7	3a 80 e0
+	and 038h		        ;00fa	e6 38 Get dragons
+	cp 020h		            ;00fc	fe 20 More than 3 dragons?
+	jr c,l0102h		        ;00fe	38 02
 l0100h:
-	ld a,018h		;0100	3e 18 	> . 
+    ; Yes, more than 3 dragons. Thus, set 3 dragons
+	ld a,018h		        ;0100	3e 18
+
 l0102h:
 	rrca			;0102	0f 	. 
 	ld c,a			;0103	4f 	O 
@@ -309,13 +315,14 @@ l0156h:
 l0168h:
 	call 0413fh		;0168	cd 3f 41 	. ? A 
 	call 0402ch		;016b	cd 2c 40 	. , @ 
-	ld a,(0e080h)		;016e	3a 80 e0 	: . . 
-	and 007h		;0171	e6 07 	. . 
-	cp 004h		;0173	fe 04 	. . 
-	jr z,l017fh		;0175	28 08 	( . 
-	call 040e5h		;0177	cd e5 40 	. . @ 
-	call sub_1cb3h		;017a	cd b3 1c 	. . . 
-	jr l0185h		;017d	18 06 	. . 
+
+	ld a,(DRAGONS_LEVEL)	;016e	3a 80 e0
+	and 007h		        ;0171	e6 07 Get level
+	cp 004h		            ;0173	fe 04 Check if it's the last level
+	jr z,l017fh		        ;0175	28 08
+	call 040e5h		        ;0177	cd e5 40
+	call sub_1cb3h		    ;017a	cd b3 1c
+	jr l0185h		        ;017d	18 06
 l017fh:
 	call sub_1cb3h		;017f	cd b3 1c 	. . . 
 	call 040e5h		;0182	cd e5 40 	. . @ 
@@ -409,16 +416,22 @@ l0220h:
 	call 05178h		;0224	cd 78 51 	. x Q 
 	ld a,0ffh		;0227	3e ff 	> . 
 	ld (0e006h),a		;0229	32 06 e0 	2 . . 
-	ld hl,0e080h		;022c	21 80 e0 	! . . 
-	ld de,0e081h		;022f	11 81 e0 	. . . 
-	ld bc,001dh+2		;0232	01 1f 00 	. . . 
-	ld (hl),000h		;0235	36 00 	6 . 
-	ldir		;0237	ed b0 	. . 
+
+    ; Reset all game variables
+	ld hl,DRAGONS_LEVEL		;022c	21 80 e0
+	ld de,DRAGONS_LEVEL + 1	;022f	11 81 e0
+	ld bc, 31		        ;0232	01 1f 00
+	ld (hl),000h		    ;0235	36 00
+	ldir		;0237	ed b0
+
 	InDSW1		;0239	db 03 	. . 
 	and 001h		;023b	e6 01 	. . 
 	jr nz,l0247h		;023d	20 08 	  . 
-	ld a,008h		;023f	3e 08 	> . 
-	ld (0e080h),a		;0241	32 80 e0 	2 . . 
+
+    ; Set 1 dragon, level 1
+	ld a,008h		        ;023f	3e 08
+	ld (DRAGONS_LEVEL),a	;0241	32 80 e0
+
 	ld (0e090h),a		;0244	32 90 e0 	2 . . 
 l0247h:
 	call sub_056fh		;0247	cd 6f 05 	. o . 
@@ -538,13 +551,15 @@ l0307h:
 l031dh:
 	ld a,038h		;031d	3e 38 	> 8 
 	call sub_0582h		;031f	cd 82 05 	. . . 
-	ld a,(0e080h)		;0322	3a 80 e0 	: . . 
-	and 001h		;0325	e6 01 	. . 
-	call nz,053c2h		;0327	c4 c2 53 	. . S 
-	ld a,(0e080h)		;032a	3a 80 e0 	: . . 
-	and 007h		;032d	e6 07 	. . 
-	cp 004h		;032f	fe 04 	. . 
-	call z,04fe9h		;0331	cc e9 4f 	. . O 
+
+	ld a,(DRAGONS_LEVEL)    ;0322	3a 80 e0
+	and 001h		        ;0325	e6 01
+	call nz,053c2h		    ;0327	c4 c2 53 Call if level is odd (1=level 2, 3=level 4)
+
+	ld a,(DRAGONS_LEVEL)	;032a	3a 80 e0
+	and 007h		        ;032d	e6 07 Get level
+	cp 004h		            ;032f	fe 04
+	call z,04fe9h		    ;0331	cc e9 4f Call only if in last level
 	call sub_0432h		;0334	cd 32 04 	. 2 . 
 	call sub_0250h		;0337	cd 50 02 	. P . 
 l033ah:
@@ -578,7 +593,7 @@ l0360h:
 	ld (hl),a			;0370	77 	w 
 l0371h:
 	ld b,010h		;0371	06 10 	. . 
-	ld hl,0e080h		;0373	21 80 e0 	! . . 
+	ld hl,DRAGONS_LEVEL		;0373	21 80 e0 	! . . 
 	ld de,0e090h		;0376	11 90 e0 	. . . 
 l0379h:
 	ld c,(hl)			;0379	4e 	N 
@@ -617,11 +632,14 @@ l039ch:
 l03bch:
 	ld c,014h		;03bc	0e 14 	. . 
 	ld de,0d3a7h		;03be	11 a7 d3 	. . . 
-	ld a,(0e080h)		;03c1	3a 80 e0 	: . . 
-	and 0f8h		;03c4	e6 f8 	. . 
+
+	ld a,(DRAGONS_LEVEL)	;03c1	3a 80 e0
+    ; Consider only dragons
+	and 0f8h		        ;03c4	e6 f8
 	rrca			;03c6	0f 	. 
 	rrca			;03c7	0f 	. 
 	rrca			;03c8	0f 	. 
+    ; A = number of dragons
 	call sub_055bh		;03c9	cd 5b 05 	. [ . 
 	ld de,0d427h		;03cc	11 27 d4 	. ' . 
 	call sub_0556h		;03cf	cd 56 05 	. V . 
@@ -679,13 +697,15 @@ l0414h:
 	dec (hl)			;0419	35 	5 
 l041ah:
 	ret			;041a	c9 	. 
+
 sub_041bh:
-	ld hl,0e080h		;041b	21 80 e0 	! . . 
+	ld hl,DRAGONS_LEVEL	;041b	21 80 e0 	! . . 
 	dec (hl)			;041e	35 	5 
 	ld a,(hl)			;041f	7e 	~ 
-	and 007h		;0420	e6 07 	. . 
-	cp 007h		;0422	fe 07 	. . 
-	ret nz			;0424	c0 	. 
+	and 007h		    ;0420	e6 07 A = level
+	cp 007h		        ;0422	fe 07
+	ret nz			    ;0424	c0 Return if we have 1 dragon, level 0
+
 	ld a,(hl)			;0425	7e 	~ 
 	and 0f8h		;0426	e6 f8 	. . 
 	cp 0f8h		;0428	fe f8 	. . 
@@ -695,8 +715,9 @@ l042eh:
 	or 004h		;042e	f6 04 	. . 
 	ld (hl),a			;0430	77 	w 
 	ret			;0431	c9 	. 
+
 sub_0432h:
-	ld hl,0e080h		;0432	21 80 e0 	! . . 
+	ld hl,DRAGONS_LEVEL		;0432	21 80 e0 	! . . 
 	inc (hl)			;0435	34 	4 
 	ld a,(hl)			;0436	7e 	~ 
 	and 007h		;0437	e6 07 	. . 
@@ -711,12 +732,13 @@ sub_0432h:
 l0447h:
 	ld (hl),a			;0447	77 	w 
 	ret			;0448	c9 	. 
+
 sub_0449h:
 	ld (0e81ch),a		;0449	32 1c e8 	2 . . 
 	ld a,001h		;044c	3e 01 	> . 
 	ld (0e000h),a		;044e	32 00 e0 	2 . . 
 	call sub_0644h		;0451	cd 44 06 	. D . 
-	ld a,(0e080h)		;0454	3a 80 e0 	: . . 
+	ld a,(DRAGONS_LEVEL)		;0454	3a 80 e0 	: . . 
 	and 001h		;0457	e6 01 	. . 
 	ld hl,l0020h+1		;0459	21 21 00 	! ! . 
 	jr nz,l0461h		;045c	20 03 	  . 
@@ -763,7 +785,7 @@ l0461h:
 	ld (0e016h),hl		;04bb	22 16 e0 	" . . 
 	ret			;04be	c9 	. 
 sub_04bfh:
-	ld a,(0e080h)		;04bf	3a 80 e0 	: . . 
+	ld a,(DRAGONS_LEVEL)		;04bf	3a 80 e0 	: . . 
 	and 007h		;04c2	e6 07 	. . 
 	ret z			;04c4	c8 	. 
 	and 001h		;04c5	e6 01 	. . 
@@ -810,7 +832,7 @@ l04fdh:
 	defb 06ch, 0d4h
 	defb "       ", 0ffh
 sub_0556h:
-	ld a,(0e080h)		;0556	3a 80 e0 	: . . 
+	ld a,(DRAGONS_LEVEL)		;0556	3a 80 e0 	: . . 
 l0559h:
 	and 007h		;0559	e6 07 	. . 
 sub_055bh:
@@ -1028,7 +1050,7 @@ sub_06beh:
 	ld bc,l0023h		;06c4	01 23 00 	. # . 
 	ld (hl),000h		;06c7	36 00 	6 . 
 	ldir		;06c9	ed b0 	. . 
-	ld a,(0e080h)		;06cb	3a 80 e0 	: . . 
+	ld a,(DRAGONS_LEVEL)		;06cb	3a 80 e0 	: . . 
 	and 007h		;06ce	e6 07 	. . 
 	add a,a			;06d0	87 	. 
 	ld c,a			;06d1	4f 	O 
@@ -1043,7 +1065,7 @@ sub_06beh:
 	ld (0e709h),a		;06df	32 09 e7 	2 . . 
 	ld hl,05000h		;06e2	21 00 50 	! . P 
 	ld (0e710h),hl		;06e5	22 10 e7 	" . . 
-	ld a,(0e080h)		;06e8	3a 80 e0 	: . . 
+	ld a,(DRAGONS_LEVEL)		;06e8	3a 80 e0 	: . . 
 	and 001h		;06eb	e6 01 	. . 
 	ld (0e101h),a		;06ed	32 01 e1 	2 . . 
 	jr z,l071dh		;06f0	28 2b 	( + 
@@ -1064,7 +1086,7 @@ sub_06beh:
 	ld a,001h		;0718	3e 01 	> . 
 	jp l0749h		;071a	c3 49 07 	. I . 
 l071dh:
-	ld a,(0e080h)		;071d	3a 80 e0 	: . . 
+	ld a,(DRAGONS_LEVEL)		;071d	3a 80 e0 	: . . 
 	and 007h		;0720	e6 07 	. . 
 	ld hl,010e0h		;0722	21 e0 10 	! . . 
 	cp 004h		;0725	fe 04 	. . 
@@ -1090,7 +1112,7 @@ sub_074dh:
 	ld bc,l0152h		;0753	01 52 01 	. R . 
 	ld (hl),000h		;0756	36 00 	6 . 
 	ldir		;0758	ed b0 	. . 
-	ld a,(0e080h)		;075a	3a 80 e0 	: . . 
+	ld a,(DRAGONS_LEVEL)		;075a	3a 80 e0 	: . . 
 	and 007h		;075d	e6 07 	. . 
 	cp 004h		;075f	fe 04 	. . 
 	defb 020h, 02eh
@@ -1117,7 +1139,7 @@ l0791h:
 	ld (ix+007h),007h		;0799	dd 36 07 07 	. 6 . . 
 	ld hl,05000h		;079d	21 00 50 	! . P 
 	ld (0e2dch),hl		;07a0	22 dc e2 	" . . 
-	ld a,(0e080h)		;07a3	3a 80 e0 	: . . 
+	ld a,(DRAGONS_LEVEL)		;07a3	3a 80 e0 	: . . 
 	and 001h		;07a6	e6 01 	. . 
 	ld hl,l1500h		;07a8	21 00 15 	! . . 
 	ld de,03100h		;07ab	11 00 31 	. . 1 
@@ -1228,7 +1250,7 @@ sub_0851h:
 	inc ix		;0863	dd 23 	. # 
 	ret			;0865	c9 	. 
 sub_0866h:
-	ld a,(0e080h)		;0866	3a 80 e0 	: . . 
+	ld a,(DRAGONS_LEVEL)		;0866	3a 80 e0 	: . . 
 	ld l,a			;0869	6f 	o 
 	and 007h		;086a	e6 07 	. . 
 	ld h,a			;086c	67 	g 
@@ -2548,7 +2570,7 @@ l0ed6h:
 	inc a			;0ed9	3c 	< 
 	inc de			;0eda	13 	. 
 	djnz l0ed6h		;0edb	10 f9 	. . 
-	ld a,(0e080h)		;0edd	3a 80 e0 	: . . 
+	ld a,(DRAGONS_LEVEL)		;0edd	3a 80 e0 	: . . 
 	and 007h		;0ee0	e6 07 	. . 
 	inc a			;0ee2	3c 	< 
 	ld h,a			;0ee3	67 	g 
@@ -2585,7 +2607,7 @@ l0f17h:
 	djnz l0f0fh		;0f17	10 f6 	. . 
 	ret			;0f19	c9 	. 
 sub_0f1ah:
-	ld a,(0e080h)		;0f1a	3a 80 e0 	: . . 
+	ld a,(DRAGONS_LEVEL)		;0f1a	3a 80 e0 	: . . 
 	and 0f8h		;0f1d	e6 f8 	. . 
 	rrca			;0f1f	0f 	. 
 	rrca			;0f20	0f 	. 
@@ -2716,7 +2738,7 @@ sub_0fe3h:
 	call sub_0f78h		;0fed	cd 78 0f 	. x . 
 	call sub_0f6bh		;0ff0	cd 6b 0f 	. k . 
 	ld hl,0d0e0h		;0ff3	21 e0 d0 	! . . 
-	ld a,(0e080h)		;0ff6	3a 80 e0 	: . . 
+	ld a,(DRAGONS_LEVEL)		;0ff6	3a 80 e0 	: . . 
 	and 007h		;0ff9	e6 07 	. . 
 	add a,a			;0ffb	87 	. 
 	ld e,a			;0ffc	5f 	_ 
@@ -2741,7 +2763,7 @@ l100fh:
 	ld b,a			;101b	47 	G 
 	InDSW1		;101c	db 03 	. . 
 	and 001h		;101e	e6 01 	. . 
-	ld a,(0e080h)		;1020	3a 80 e0 	: . . 
+	ld a,(DRAGONS_LEVEL)		;1020	3a 80 e0 	: . . 
 	jr nz,l1027h		;1023	20 02 	  . 
 	sub 008h		;1025	d6 08 	. . 
 l1027h:
@@ -2758,7 +2780,7 @@ l103ah:
 	ld a,(0e085h)		;103a	3a 85 e0 	: . . 
 	and 001h		;103d	e6 01 	. . 
 	jr nz,l105ah		;103f	20 19 	  . 
-	ld hl,(0e081h)		;1041	2a 81 e0 	* . . 
+	ld hl,(DRAGONS_LEVEL + 1)		;1041	2a 81 e0 	* . . 
 	ld de,05000h		;1044	11 00 50 	. . P 
 	sbc hl,de		;1047	ed 52 	. R 
 	jr c,l105ah		;1049	38 0f 	8 . 
@@ -2795,7 +2817,7 @@ l1080h:
 	call sub_10d9h		;1080	cd d9 10 	. . . 
 	ld a,(0e083h)		;1083	3a 83 e0 	: . . 
 	ld c,a			;1086	4f 	O 
-	ld de,(0e081h)		;1087	ed 5b 81 e0 	. [ . . 
+	ld de,(DRAGONS_LEVEL + 1)		;1087	ed 5b 81 e0 	. [ . . 
 	ld a,(0e982h)		;108b	3a 82 e9 	: . . 
 	ld hl,(0e980h)		;108e	2a 80 e9 	* . . 
 	sub c			;1091	91 	. 
@@ -4815,7 +4837,7 @@ l1e5fh:
 l1e77h:
 	ld (hl),070h		;1e77	36 70 	6 p 
 l1e79h:
-	ld a,(0e080h)		;1e79	3a 80 e0 	: . . 
+	ld a,(DRAGONS_LEVEL)		;1e79	3a 80 e0 	: . . 
 	and 007h		;1e7c	e6 07 	. . 
 	ld hl,l1e84h		;1e7e	21 84 1e 	! . . 
 	jp l1f26h		;1e81	c3 26 1f 	. & . 
@@ -6471,7 +6493,7 @@ l2bddh:
 	ld (ix+007h),005h		;2be5	dd 36 07 05 	. 6 . . 
 	ld (ix+001h),00ah		;2be9	dd 36 01 0a 	. 6 . . 
 	ld (ix+006h),017h		;2bed	dd 36 06 17 	. 6 . . 
-	ld a,(0e080h)		;2bf1	3a 80 e0 	: . . 
+	ld a,(DRAGONS_LEVEL)		;2bf1	3a 80 e0 	: . . 
 	rrca			;2bf4	0f 	. 
 	rrca			;2bf5	0f 	. 
 	rrca			;2bf6	0f 	. 
@@ -6561,7 +6583,7 @@ l2c69h:
 	dec (ix-002h)		;2c74	dd 35 fe 	. 5 . 
 	ret			;2c77	c9 	. 
 sub_2c78h:
-	ld a,(0e080h)		;2c78	3a 80 e0 	: . . 
+	ld a,(DRAGONS_LEVEL)		;2c78	3a 80 e0 	: . . 
 	and 0fch		;2c7b	e6 fc 	. . 
 	ret nz			;2c7d	c0 	. 
 sub_2c7eh:
@@ -6588,7 +6610,7 @@ sub_2c9ah:
 	jp p,l2cb6h		;2c9e	f2 b6 2c 	. . , 
 	call sub_1208h		;2ca1	cd 08 12 	. . . 
 	jr nz,l2cb6h		;2ca4	20 10 	  . 
-	ld a,(0e080h)		;2ca6	3a 80 e0 	: . . 
+	ld a,(DRAGONS_LEVEL)		;2ca6	3a 80 e0 	: . . 
 	and 007h		;2ca9	e6 07 	. . 
 	cp 002h		;2cab	fe 02 	. . 
 	ld a,004h		;2cad	3e 04 	> . 
@@ -7073,7 +7095,7 @@ l2f96h:
 sub_2f97h:
 	ld de,000fh+1		;2f97	11 10 00 	. . . 
 sub_2f9ah:
-	ld hl,0e081h		;2f9a	21 81 e0 	! . . 
+	ld hl,DRAGONS_LEVEL + 1		;2f9a	21 81 e0 	! . . 
 	ld a,(hl)			;2f9d	7e 	~ 
 	add a,e			;2f9e	83 	. 
 	daa			;2f9f	27 	' 
@@ -7935,7 +7957,7 @@ l3685h:
 	ld (ix+00dh),h		;36c6	dd 74 0d 	. t . 
 	ret			;36c9	c9 	. 
 sub_36cah:
-	ld a,(0e080h)		;36ca	3a 80 e0 	: . . 
+	ld a,(DRAGONS_LEVEL)		;36ca	3a 80 e0 	: . . 
 	and 007h		;36cd	e6 07 	. . 
 	cp 003h		;36cf	fe 03 	. . 
 	jr nz,l36e4h		;36d1	20 11 	  . 
@@ -8098,7 +8120,7 @@ l3800h:
 l3804h:
 	push bc			;3804	c5 	. 
 	push hl			;3805	e5 	. 
-	ld a,(0e080h)		;3806	3a 80 e0 	: . . 
+	ld a,(DRAGONS_LEVEL)		;3806	3a 80 e0 	: . . 
 	cp 010h		;3809	fe 10 	. . 
 	ld hl,l38dbh		;380b	21 db 38 	! . 8 
 	jr c,l3813h		;380e	38 03 	8 . 
@@ -9083,7 +9105,7 @@ l3eabh:
 sub_4000h:
 	ld hl,(0e712h)
 	ld de,(0e707h)
-	ld a,(0e080h)
+	ld a,(DRAGONS_LEVEL)
 	and 001h
 	jr z,l400fh
 	ex de,hl	
@@ -9299,7 +9321,7 @@ sub_4174h:
 	ld hl,0e719h
 	dec (hl)	
 	jp nz,l419ah
-	ld a,(0e080h)
+	ld a,(DRAGONS_LEVEL)
 	and 018h
 	cp 008h
 	ld d,000h
@@ -10257,7 +10279,7 @@ l487eh:
 	ld (0e001h),a
 	ld (0e020h),a
 	ld (0e021h),a
-	ld (0e080h),a
+	ld (DRAGONS_LEVEL),a
 	ei	
 	call sub_5700h
 	call 064ah
@@ -10338,7 +10360,7 @@ l4943h:
 	jr nz,l4943h
 	xor a	
 	ld hl,0
-	ld (0e081h),a
+	ld (DRAGONS_LEVEL + 1),a
 	ld (0e082h),hl
 	inc a	
 	ld (LIVES),a
@@ -10352,7 +10374,7 @@ l4943h:
 	ld de,l4b0ah
 	ld (hl),000h
 l496fh:
-	ld (0e080h),a
+	ld (DRAGONS_LEVEL),a
 	ld (0e023h),de
 	call sub_1157h
 	ld a,001h
@@ -10361,7 +10383,7 @@ l496fh:
 	ld a,006h
 	ld (0e000h),a
 	ld hl,0
-	ld (0e081h),hl
+	ld (DRAGONS_LEVEL + 1),hl
 	ld (0e082h),hl
 	ld (0e010h),hl
 	ld (0e012h),hl
@@ -11660,10 +11682,10 @@ l5264h:
 	call sub_5700h		;53c2	cd 00 57 	. . W 
 	ld a,005h		;53c5	3e 05 	> . 
 	call 00dfeh		;53c7	cd fe 0d 	. . . 
-	ld a,(0e080h)		;53ca	3a 80 e0 	: . . 
+	ld a,(DRAGONS_LEVEL)		;53ca	3a 80 e0 	: . . 
 	push af			;53cd	f5 	. 
 	ld a,004h		;53ce	3e 04 	> . 
-	ld (0e080h),a		;53d0	32 80 e0 	2 . . 
+	ld (DRAGONS_LEVEL),a		;53d0	32 80 e0 	2 . . 
 	call 0064ah		;53d3	cd 4a 06 	. J . 
 	ld hl,05400h		;53d6	21 00 54 	! . T 
 l53d9h:
@@ -11675,7 +11697,7 @@ l53d9h:
 	ld (0e342h),hl
 l53ebh:
 	pop af	
-	ld (0e080h),a
+	ld (DRAGONS_LEVEL),a
 l53efh:
 	ld hl,l5447h
 	call sub_111ch
@@ -12156,7 +12178,7 @@ sub_5765h:
 	ld l,a	
 	ld a,(0e802h)
 	call sub_5800h
-	ld a,(0e080h)
+	ld a,(DRAGONS_LEVEL)
 	and 001h
 	jr nz,l5786h
 	call sub_585fh
@@ -12182,7 +12204,7 @@ l5796h:
 	ret nz	
 	rlc c
 	rlc c
-	ld a,(0e080h)
+	ld a,(DRAGONS_LEVEL)
 	cp 010h
 	ld hl,l5a31h
 	jr c,l57bch
@@ -12209,7 +12231,7 @@ l57c4h:
 	ld (hl),c	
 	ret	
 sub_57d4h:
-	ld a,(0e080h)
+	ld a,(DRAGONS_LEVEL)
 	and 001h
 	ld hl,l5a7ch
 	jr nz,l57e1h
@@ -12379,7 +12401,7 @@ sub_58f1h:
 	ld c,042h
 	jr sub_5909h
 sub_5903h:
-	ld a,(0e080h)
+	ld a,(DRAGONS_LEVEL)
 	and 007h
 	ret	
 sub_5909h:
