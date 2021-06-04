@@ -56,7 +56,8 @@ endm
 
 LIVES: EQU 0xE084
 DRAGONS_LEVEL: EQU 0xE080 ; 00 DDD LLL, where D is the number of dragons, and L the level - 1.
-
+ENERGY: EQU 0xE709
+ENERGY_DISP: EQU 0xE81A ; Displayed energy. Use to animate the bar when energy decreases
 
 
 ; ************************ ROM start ************************
@@ -504,7 +505,7 @@ l02c0h:
 l02d4h:
 	ld a,001h		;02d4	3e 01 	> . 
 	call sub_0582h		;02d6	cd 82 05 	. . . 
-	ld hl,0e709h		;02d9	21 09 e7 	! . . 
+	ld hl,ENERGY		;02d9	21 09 e7 	! . . 
 	ld a,(hl)			;02dc	7e 	~ 
 	and a			;02dd	a7 	. 
 	jp m,l02eah		;02de	fa ea 02 	. . . 
@@ -1062,7 +1063,7 @@ sub_06beh:
 	ld l,a			;06d9	6f 	o 
 	ld (0e003h),hl		;06da	22 03 e0 	" . . 
 	ld a,03fh		;06dd	3e 3f 	> ? 
-	ld (0e709h),a		;06df	32 09 e7 	2 . . 
+	ld (ENERGY),a		;06df	32 09 e7 	2 . . 
 	ld hl,05000h		;06e2	21 00 50 	! . P 
 	ld (0e710h),hl		;06e5	22 10 e7 	" . . 
 	ld a,(DRAGONS_LEVEL)		;06e8	3a 80 e0 	: . . 
@@ -2556,8 +2557,8 @@ sub_0e9bh:
 	call z,sub_0f1ah		;0eb4	cc 1a 0f 	. . . 
 	ld a,003h		;0eb7	3e 03 	> . 
 	ld (0e881h),a		;0eb9	32 81 e8 	2 . . 
-	ld a,(0e709h)		;0ebc	3a 09 e7 	: . . 
-	ld (0e81ah),a		;0ebf	32 1a e8 	2 . . 
+	ld a,(ENERGY)		;0ebc	3a 09 e7 	: . . 
+	ld (ENERGY_DISP),a		;0ebf	32 1a e8 	2 . . 
 	ld a,(0e2e2h)		;0ec2	3a e2 e2 	: . . 
 	ld (0e819h),a		;0ec5	32 19 e8 	2 . . 
 	call sub_0f78h		;0ec8	cd 78 0f 	. x . 
@@ -2668,8 +2669,8 @@ sub_0f6bh:
 	jr l0f83h		;0f76	18 0b 	. . 
 sub_0f78h:
 	ld de,0d096h		;0f78	11 96 d0 	. . . 
-	ld hl,0e81ah		;0f7b	21 1a e8 	! . . 
-	ld a,(0e709h)		;0f7e	3a 09 e7 	: . . 
+	ld hl,ENERGY_DISP		;0f7b	21 1a e8 	! . . 
+	ld a,(ENERGY)		;0f7e	3a 09 e7 	: . . 
 	ld c,014h		;0f81	0e 14 	. . 
 l0f83h:
 	sub (hl)			;0f83	96 	. 
@@ -3708,7 +3709,7 @@ l15ffh:
 	ld a,003h		;1613	3e 03 	> . 
 l1615h:
 	ld (ix+007h),a		;1615	dd 77 07 	. w . 
-	ld hl,0e709h		;1618	21 09 e7 	! . . 
+	ld hl,ENERGY		;1618	21 09 e7 	! . . 
 	ld a,(hl)			;161b	7e 	~ 
 	and a			;161c	a7 	. 
 	ret m			;161d	f8 	. 
@@ -6605,7 +6606,7 @@ l2c95h:
 	ld a,091h		;2c95	3e 91 	> . 
 	call sub_0dfeh		;2c97	cd fe 0d 	. . . 
 sub_2c9ah:
-	ld a,(0e709h)		;2c9a	3a 09 e7 	: . . 
+	ld a,(ENERGY)		;2c9a	3a 09 e7 	: . . 
 	sub e			;2c9d	93 	. 
 	jp p,l2cb6h		;2c9e	f2 b6 2c 	. . , 
 	call sub_1208h		;2ca1	cd 08 12 	. . . 
@@ -6984,12 +6985,12 @@ sub_2ee2h:
 	call sub_0dfeh		;2ef7	cd fe 0d 	. . . 
 	ret			;2efa	c9 	. 
 l2efbh:
-	ld a,(0e709h)		;2efb	3a 09 e7 	: . . 
+	ld a,(ENERGY)		;2efb	3a 09 e7 	: . . 
 	sub e			;2efe	93 	. 
 	jr nc,l2f02h		;2eff	30 01 	0 . 
 	xor a			;2f01	af 	. 
 l2f02h:
-	ld (0e709h),a		;2f02	32 09 e7 	2 . . 
+	ld (ENERGY),a		;2f02	32 09 e7 	2 . . 
 	ret			;2f05	c9 	. 
 sub_2f06h:
 	ld hl,0e64ch		;2f06	21 4c e6 	! L . 
@@ -7961,7 +7962,7 @@ sub_36cah:
 	and 007h		;36cd	e6 07 	. . 
 	cp 003h		;36cf	fe 03 	. . 
 	jr nz,l36e4h		;36d1	20 11 	  . 
-	ld a,(0e709h)		;36d3	3a 09 e7 	: . . 
+	ld a,(ENERGY)		;36d3	3a 09 e7 	: . . 
 	sub e			;36d6	93 	. 
 	jp p,l36e4h		;36d7	f2 e4 36 	. . 6 
 	call sub_1208h		;36da	cd 08 12 	. . . 
@@ -9881,12 +9882,12 @@ l4567h:
 	ld a,008h
 	ld (0e703h),a
 	ld hl,0e721h
-	ld a,(0e709h)
+	ld a,(ENERGY)
 	and a	
 	scf	
 	jp m,l4591h
 	sub (hl)	
-	ld (0e709h),a
+	ld (ENERGY),a
 l4591h:
 	ld hl,0e702h
 	ld (hl),00bh
@@ -10000,7 +10001,7 @@ l4658h:
 	ret	
 sub_4675h:
 	ld hl,0e721h
-	ld a,(0e709h)
+	ld a,(ENERGY)
 	and a	
 	jp m,l4684h
 	sub (hl)	
@@ -10009,7 +10010,7 @@ sub_4675h:
 l4684h:
 	ld c,002h
 l4686h:
-	ld (0e709h),a
+	ld (ENERGY),a
 	ld hl,0e71fh
 	ld (hl),c	
 	ret	
