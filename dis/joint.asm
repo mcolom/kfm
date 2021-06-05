@@ -74,6 +74,8 @@ ACTIVE_GRIPPERS: EQU 0xE71B
 
 VARS_TABLE: EQU 0xE2D8
 
+DISTANCE_TO_LEFT: EQU 0xE802
+
 ; ************************ ROM start ************************
 	org	00000h
 
@@ -12182,13 +12184,13 @@ l575ah:
 sub_5765h:
 	cp 0e0h
 	ret nc	
-	ld (0e802h),a
+	ld (DISTANCE_TO_LEFT),a
 	add a,020h
 	and 03fh
 	ld hl,0d180h
 	or l	
 	ld l,a	
-	ld a,(0e802h)
+	ld a,(DISTANCE_TO_LEFT)
 	call sub_5800h
 	ld a,(DRAGONS_LEVEL)
 	and 001h
@@ -12209,7 +12211,7 @@ l5796h:
 	call sub_5903h
 	cp 003h
 	ret nz	
-	ld a,(0e802h)
+	ld a,(DISTANCE_TO_LEFT)
 	ld bc,0006h+2
 	ld hl,l5a30h
 	cpdr
@@ -12249,14 +12251,14 @@ sub_57d4h:
 	jr nz,l57e1h
 	ld hl,l5a88h
 l57e1h:
-	ld a,(0e802h)
+	ld a,(DISTANCE_TO_LEFT)
 	ld bc,000ch
 	cpdr
 	ret nz	
 	ld hl,l5a88h+1
 	add hl,bc	
 	add hl,bc	
-	ld a,(0e802h)
+	ld a,(DISTANCE_TO_LEFT)
 	ex de,hl	
 	add a,020h
 	and 03fh
@@ -12285,7 +12287,7 @@ l5818h:
 l581ch:
 	ld c,05ch
 	call sub_5909h
-	ld a,(0e802h)
+	ld a,(DISTANCE_TO_LEFT)
 	and 007h
 	push hl	
 	ld hl,l59e1h
@@ -12299,7 +12301,7 @@ l581ch:
 	add hl,de	
 	ret	
 sub_5835h:
-	ld a,(0e802h)
+	ld a,(DISTANCE_TO_LEFT)
 	cp 0ddh
 	ret nc	
 	cp 00dh
@@ -12320,7 +12322,7 @@ l5849h:
 	ld de,l5c8eh
 	jr l58c5h
 sub_585fh:
-	ld a,(0e802h)
+	ld a,(DISTANCE_TO_LEFT)
 	cp 0ddh
 	ret nc	
 	cp 013h
@@ -12369,7 +12371,7 @@ l589fh:
 	ld de,l5ea9h
 	call l5918h
 	call sub_5903h
-	ld a,(0e802h)
+	ld a,(DISTANCE_TO_LEFT)
 	jr nz,l58beh
 	cp 003h
 	jr nc,l58c8h
@@ -12389,7 +12391,7 @@ l58c8h:
 	ret	
 sub_58d3h:
 	ld c,04fh
-	ld a,(0e802h)
+	ld a,(DISTANCE_TO_LEFT)
 	cp 0c0h
 	jr nc,l58ech
 	cp 020h
@@ -12404,7 +12406,7 @@ l58ech:
 	ld de,l62f8h
 	jr l5918h
 sub_58f1h:
-	ld a,(0e802h)
+	ld a,(DISTANCE_TO_LEFT)
 	ld de,l63a7h
 	cp 0dch
 	jr nc,l5918h
