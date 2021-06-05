@@ -76,8 +76,10 @@ VARS_TABLE: EQU 0xE2D8
 
 DISTANCE_TO_LEFT: EQU 0xE802
 
-PLAYER_BUTTONS:  EQU 0xE908
+PLAYER_BUTTONS_AND_UP:  EQU 0xE908
 PLAYER_JOYSTICK: EQU 0xE909
+
+PLAYER_STATE: EQU 0xE906
 
 ; ************************ ROM start ************************
 	org	00000h
@@ -666,14 +668,14 @@ l03bch:
 	ld de,0d427h		;03cc	11 27 d4 	. ' . 
 	call sub_0556h		;03cf	cd 56 05 	. V . 
 l03d2h:
-	ld a,(0e906h)		;03d2	3a 06 e9 	: . . 
+	ld a,(PLAYER_STATE)		;03d2	3a 06 e9 	: . . 
 	and 0a0h		;03d5	e6 a0 	. . 
 	jr nz,l03d2h		;03d7	20 f9 	  . 
 l03d9h:
 	ld hl,0e904h		;03d9	21 04 e9 	! . . 
 	bit 1,(hl)		;03dc	cb 4e 	. N 
 	jp nz,sub_0250h		;03de	c2 50 02 	. P . 
-	ld hl,0e906h		;03e1	21 06 e9 	! . . 
+	ld hl,PLAYER_STATE		;03e1	21 06 e9 	! . . 
 	bit 7,(hl)		;03e4	cb 7e 	. ~ 
 	jr nz,l03eeh		;03e6	20 06 	  . 
 	bit 5,(hl)		;03e8	cb 6e 	. n 
@@ -2318,10 +2320,10 @@ sub_0d05h:
 	jr z,l0d10h		;0d0c	28 02 	( . 
 	InP2Button		;0d0e	db 02 	. . 
 l0d10h:
-	ld hl,(0e906h)		;0d10	2a 06 e9 	* . . 
+	ld hl,(PLAYER_STATE)		;0d10	2a 06 e9 	* . . 
 	call sub_0d3bh		;0d13	cd 3b 0d 	. ; . 
-	ld (0e906h),hl		;0d16	22 06 e9 	" . . 
-	ld hl,PLAYER_BUTTONS		;0d19	21 08 e9 	! . . 
+	ld (PLAYER_STATE),hl		;0d16	22 06 e9 	" . . 
+	ld hl,PLAYER_BUTTONS_AND_UP		;0d19	21 08 e9 	! . . 
 	rla			;0d1c	17 	. 
 	rl (hl)		;0d1d	cb 16 	. . 
 	rla			;0d1f	17 	. 
@@ -10259,19 +10261,19 @@ sub_482fh:
 	ld (0e023h),hl
 	jr l4874h
 l484dh:
-	ld a,(0e906h)
+	ld a,(PLAYER_STATE)
 	and 004h
 	ld hl,0e700h
 	bit 0,(hl)
 	jr nz,l4874h
-	ld a,(0e906h)
+	ld a,(PLAYER_STATE)
 	and 007h
 	ld c,a	
 	ld a,(NUM_GRIPPING)
 	and a	
 	ld a,c	
 	jr nz,l4874h
-	ld a,(PLAYER_BUTTONS)
+	ld a,(PLAYER_BUTTONS_AND_UP)
 	cpl	
 	ld b,a	
 	cpl	
@@ -11925,7 +11927,7 @@ l55a8h:
 	ld a,(0e904h)
 	and 003h
 	jr nz,l561bh
-	ld a,(0e906h)
+	ld a,(PLAYER_STATE)
 	and 003h
 	jr z,l55deh
 	ld a,(STEP_COUNTER)
@@ -11933,7 +11935,7 @@ l55a8h:
 	jr nz,l55e2h
 	ld a,00bh
 	ld (STEP_COUNTER),a
-	ld a,(0e906h)
+	ld a,(PLAYER_STATE)
 	bit 0,a
 	ld a,(hl)	
 	jr nz,l55d5h
@@ -18404,7 +18406,7 @@ l7761h:
 	ld c,000h
 	call sub_7bd7h
 l7769h:
-	ld a,(0e906h)
+	ld a,(PLAYER_STATE)
 	and 003h
 	ld hl,0e882h
 	jr z,l7798h
@@ -18712,7 +18714,7 @@ l798dh:
 	ld a,(0e904h)
 	bit 1,a
 	jr z,l798dh
-	ld a,(0e906h)
+	ld a,(PLAYER_STATE)
 	bit 1,a
 	jr z,l798dh
 	ret	
@@ -18745,7 +18747,7 @@ l79e6h:
 	ld c,000h
 	call sub_7bceh
 l79eeh:
-	ld a,(0e906h)
+	ld a,(PLAYER_STATE)
 	and 003h
 	ld hl,0e882h
 	jr z,l7a26h
@@ -18845,7 +18847,7 @@ l7a61h:
 	ret po	
 	ld (hl),0feh
 l7a93h:
-	ld a,(0e906h)
+	ld a,(PLAYER_STATE)
 	and 003h
 	jr z,l7aa4h
 	bit 1,a
