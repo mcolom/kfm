@@ -557,7 +557,7 @@ l0307h:
 	ld (TIME),hl	;030f	22 03 e0 Store decremented time
 
 	push de			;0312	d5 	. 
-	call sub_2f9ah		;0313	cd 9a 2f 	. . / 
+	call INCREMENT_DE_POINTS		;0313	cd 9a 2f 	. . / 
 	ld a,016h		;0316	3e 16 	> . 
 	call sub_0dfeh		;0318	cd fe 0d 	. . . 
 	jr l02eeh		;031b	18 d1 	. . 
@@ -7096,60 +7096,43 @@ sub_2f60h:
 l2f85h:
 	ld (0e64ch),a		;2f85	32 4c e6 	2 L . 
 	ld d,000h		;2f88	16 00 	. . 
-	ld hl,l2fadh		;2f8a	21 ad 2f 	! . / 
+	ld hl,POINTS_TABLE		;2f8a	21 ad 2f 	! . / 
 	add hl,de			;2f8d	19 	. 
 	add hl,de			;2f8e	19 	. 
 	ld e,(hl)			;2f8f	5e 	^ 
 	inc hl			;2f90	23 	# 
 	ld d,(hl)			;2f91	56 	V 
-	call sub_2f9ah		;2f92	cd 9a 2f 	. . / 
+	call INCREMENT_DE_POINTS		;2f92	cd 9a 2f 	. . / 
 	pop bc			;2f95	c1 	. 
 l2f96h:
 	ret			;2f96	c9 	. 
 sub_2f97h:
 	ld de,000fh+1		;2f97	11 10 00 	. . . 
 
-sub_2f9ah:
-	ld hl,POINTS		;2f9a	21 81 e0 	! . . 
-	ld a,(hl)			;2f9d	7e 	~ 
-	add a,e			;2f9e	83 	. 
-	daa			;2f9f	27 	' 
-	ld (hl),a			;2fa0	77 	w 
-	inc hl			;2fa1	23 	# 
-	ld a,(hl)			;2fa2	7e 	~ 
-	adc a,d			;2fa3	8a 	. 
-	daa			;2fa4	27 	' 
-	ld (hl),a			;2fa5	77 	w 
-	inc hl			;2fa6	23 	# 
-	ld a,(hl)			;2fa7	7e 	~ 
-	adc a,000h		;2fa8	ce 00 	. . 
-	daa			;2faa	27 	' 
-	ld (hl),a			;2fab	77 	w 
-	ret			;2fac	c9 	. 
-l2fadh:
-	jr nz,l2fafh		;2fad	20 00 	  . 
-l2fafh:
-	jr nc,l2fb1h		;2faf	30 00 	0 . 
-l2fb1h:
-	ld b,b			;2fb1	40 	@ 
-	nop			;2fb2	00 	. 
-	ld d,b			;2fb3	50 	P 
-	nop			;2fb4	00 	. 
-	ld h,b			;2fb5	60 	` 
-	nop			;2fb6	00 	. 
-	add a,b			;2fb7	80 	. 
-	nop			;2fb8	00 	. 
-	sub b			;2fb9	90 	. 
-	nop			;2fba	00 	. 
-	nop			;2fbb	00 	. 
-	ld bc,00200h		;2fbc	01 00 02 	. . . 
-	nop			;2fbf	00 	. 
-	inc bc			;2fc0	03 	. 
-	nop			;2fc1	00 	. 
-	dec b			;2fc2	05 	. 
-	nop			;2fc3	00 	. 
-	djnz l2fd6h		;2fc4	10 10 	. . 
-	nop			;2fc6	00 	. 
+; Increment by DE the number of points
+INCREMENT_DE_POINTS:
+	ld hl,POINTS	;2f9a	21 81 e0
+	ld a,(hl)		;2f9d	7e
+	add a,e			;2f9e	83
+	daa			    ;2f9f	27
+	ld (hl),a	    ;2fa0	77
+	inc hl		    ;2fa1	23 Next BCD
+	ld a,(hl)	    ;2fa2	7e
+	adc a,d		    ;2fa3	8a
+	daa			    ;2fa4	27
+	ld (hl),a	    ;2fa5	77
+	inc hl		    ;2fa6	23 Next BCD
+	ld a,(hl)	    ;2fa7	7e
+	adc a,000h	    ;2fa8	ce 00
+	daa			    ;2faa	27
+	ld (hl),a	    ;2fab	77
+	ret			    ;2fac	c9
+
+POINTS_TABLE:
+    defw  0x20,  0x30,  0x40,  0x50,   0x60,   0x80, 0x90
+    defw 0x100, 0x200, 0x300, 0x500, 0x1000, 0x0010
+    
+	
 sub_2fc7h:
 	ld a,(0e381h)		;2fc7	3a 81 e3 	: . . 
 	and a			;2fca	a7 	. 
