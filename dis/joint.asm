@@ -517,7 +517,7 @@ l02d4h:
 	and a			;02dd	a7 	. 
 	jp m,l02eah		;02de	fa ea 02 	. . . 
 	dec (hl)			;02e1	35 	5 
-	call sub_2f97h		;02e2	cd 97 2f 	. . / 
+	call INCREMENT_100_POINTS		;02e2	cd 97 2f 	. . / 
 	call sub_055fh		;02e5	cd 5f 05 	. _ . 
 	jr l02d4h		;02e8	18 ea 	. . 
 l02eah:
@@ -3779,7 +3779,7 @@ l1677h:
 	ld hl,l00d2h		;1677	21 d2 00 	! . . 
 l167ah:
 	ex de,hl			;167a	eb 	. 
-	call sub_2f60h		;167b	cd 60 2f 	. ` / 
+	call ADD_POINTS		;167b	cd 60 2f 	. ` / 
 	scf			;167e	37 	7 
 	ret			;167f	c9 	. 
 l1680h:
@@ -3951,7 +3951,7 @@ l17bah:
 	jr nz,l17d7h		;17d3	20 02 	  . 
 	ld a,082h		;17d5	3e 82 	> . 
 l17d7h:
-	call sub_2f60h		;17d7	cd 60 2f 	. ` / 
+	call ADD_POINTS		;17d7	cd 60 2f 	. ` / 
 	ld a,091h		;17da	3e 91 	> . 
 	call sub_0dfeh		;17dc	cd fe 0d 	. . . 
 	ld hl,01c5bh		;17df	21 5b 1c 	! [ . 
@@ -5591,7 +5591,7 @@ l246fh:
 	ld a,009h		;2478	3e 09 	> . 
 l247ah:
 	ld hl,(0e2dah)		;247a	2a da e2 	* . . 
-	jp sub_2f60h		;247d	c3 60 2f 	. ` / 
+	jp ADD_POINTS		;247d	c3 60 2f 	. ` / 
 	call sub_2d13h		;2480	cd 13 2d 	. . - 
 	call sub_24b0h		;2483	cd b0 24 	. . $ 
 	jr c,l2448h		;2486	38 c0 	8 . 
@@ -5835,7 +5835,7 @@ l266eh:
 	ld h,(ix+003h)		;2674	dd 66 03 	. f . 
 	ld de,000d7h		;2677	11 d7 00 	. . . 
 	ld a,00ah		;267a	3e 0a 	> . 
-	jp sub_2f60h		;267c	c3 60 2f 	. ` / 
+	jp ADD_POINTS		;267c	c3 60 2f 	. ` / 
 	call l1be2h		;267f	cd e2 1b 	. . . 
 	dec (ix+007h)		;2682	dd 35 07 	. 5 . 
 	ret nz			;2685	c0 	. 
@@ -7073,7 +7073,10 @@ l2f46h:
 l2f5dh:
 	ld (hl),000h		;2f5d	36 00 	6 . 
 	ret			;2f5f	c9 	. 
-sub_2f60h:
+
+; Add points.
+; A gives the position in the table: POINTS_TABLE[A]
+ADD_POINTS:
 	push bc			;2f60	c5 	. 
 	push de			;2f61	d5 	. 
 	push hl			;2f62	e5 	. 
@@ -7081,17 +7084,18 @@ sub_2f60h:
 	ld hl,0e65dh		;2f66	21 5d e6 	! ] . 
 	ld bc,0011h+1		;2f69	01 12 00 	. . . 
 	lddr		;2f6c	ed b8 	. . 
-	ld d,a			;2f6e	57 	W 
-	and 07fh		;2f6f	e6 7f 	.  
-	ld e,a			;2f71	5f 	_ 
+	ld d,a			    ;2f6e	57
+	and 07fh		    ;2f6f	e6 7f
+	ld e,a			    ;2f71	5f E = 7 LSB of A
 	ld (0e651h),a		;2f72	32 51 e6 	2 Q . 
 	pop hl			;2f75	e1 	. 
 	ld (0e64fh),hl		;2f76	22 4f e6 	" O . 
 	pop hl			;2f79	e1 	. 
 	ld (0e64dh),hl		;2f7a	22 4d e6 	" M . 
+
 	ld a,0a9h		;2f7d	3e a9 	> . 
-	bit 7,d		;2f7f	cb 7a 	. z 
-	jr z,l2f85h		;2f81	28 02 	( . 
+	bit 7,d		;2f7f	cb 7a Check if bit 7 of input (A) was active
+	jr z,l2f85h		;2f81	28 02
 	ld a,00bh		;2f83	3e 0b 	> . 
 l2f85h:
 	ld (0e64ch),a		;2f85	32 4c e6 	2 L . 
@@ -7099,14 +7103,18 @@ l2f85h:
 	ld hl,POINTS_TABLE		;2f8a	21 ad 2f 	! . / 
 	add hl,de			;2f8d	19 	. 
 	add hl,de			;2f8e	19 	. 
-	ld e,(hl)			;2f8f	5e 	^ 
+	ld e,(hl)			;2f8f	5e HL = POINTS_TABLE[A]
 	inc hl			;2f90	23 	# 
 	ld d,(hl)			;2f91	56 	V 
 	call INCREMENT_DE_POINTS		;2f92	cd 9a 2f 	. . / 
 	pop bc			;2f95	c1 	. 
 l2f96h:
 	ret			;2f96	c9 	. 
-sub_2f97h:
+
+; Increments 100 points.
+; This is used after completing each level, to give points according to
+; the energy bar.
+INCREMENT_100_POINTS:
 	ld de,000fh+1		;2f97	11 10 00 	. . . 
 
 ; Increment by DE the number of points
@@ -7468,7 +7476,7 @@ l32a8h:
 	ld h,(ix+003h)		;32b0	dd 66 03 	. f . 
 	ld de,l00dch		;32b3	11 dc 00 	. . . 
 	ld a,088h		;32b6	3e 88 	> . 
-	call sub_2f60h		;32b8	cd 60 2f 	. ` / 
+	call ADD_POINTS		;32b8	cd 60 2f 	. ` / 
 	ld (ix+006h),016h		;32bb	dd 36 06 16 	. 6 . . 
 l32bfh:
 	ld (ix+001h),009h		;32bf	dd 36 01 09 	. 6 . . 
@@ -8751,7 +8759,7 @@ sub_3cbah:
 	ld e,h			;3cc5	5c 	\ 
 	ld l,(ix+002h)		;3cc6	dd 6e 02 	. n . 
 	ld h,(ix+003h)		;3cc9	dd 66 03 	. f . 
-	jp sub_2f60h		;3ccc	c3 60 2f 	. ` / 
+	jp ADD_POINTS		;3ccc	c3 60 2f 	. ` / 
 sub_3ccfh:
 	ld hl,l0140h		;3ccf	21 40 01 	! @ . 
 	call sub_1220h		;3cd2	cd 20 12 	.   . 
