@@ -67,6 +67,8 @@ TIME: EQU 0xE003 ; Time, encoded in BCD in 0xE003 and 0xE004
 
 POINTS: EQU 0xE081 ; Time, encoded in BCD in 0xE003 and 0xE004
 
+STEP_COUNTER: EQU 0xE883
+
 ; ************************ ROM start ************************
 	org	00000h
 
@@ -852,12 +854,13 @@ l0559h:
 sub_055bh:
 	inc a			;055b	3c 	< 
 	jp sub_1108h		;055c	c3 08 11 	. . . 
+
 sub_055fh:
-	ld a,(0e883h)		;055f	3a 83 e8 	: . . 
+	ld a,(STEP_COUNTER)		;055f	3a 83 e8 	: . . 
 	and a			;0562	a7 	. 
 	ret nz			;0563	c0 	. 
 	ld a,003h		;0564	3e 03 	> . 
-	ld (0e883h),a		;0566	32 83 e8 	2 . . 
+	ld (STEP_COUNTER),a		;0566	32 83 e8 	2 . . 
 	ld a,016h		;0569	3e 16 	> . 
 	call sub_0dfeh		;056b	cd fe 0d 	. . . 
 	ret			;056e	c9 	. 
@@ -11287,7 +11290,7 @@ l4febh:
 	xor a	
 	ld (0e702h),a
 	ld (0e020h),a
-	ld (0e883h),a
+	ld (STEP_COUNTER),a
 	ld a,008h
 	ld (0e000h),a
 	call sub_5095h
@@ -11319,7 +11322,7 @@ sub_5038h:
 	ld (0e882h),a
 	ld c,0d9h
 l5040h:
-	ld hl,0e883h
+	ld hl,STEP_COUNTER
 	ld a,(hl)	
 	and a	
 	jr nz,l5061h
@@ -11917,11 +11920,11 @@ l55a8h:
 	ld a,(0e906h)
 	and 003h
 	jr z,l55deh
-	ld a,(0e883h)
+	ld a,(STEP_COUNTER)
 	and a	
 	jr nz,l55e2h
 	ld a,00bh
-	ld (0e883h),a
+	ld (STEP_COUNTER),a
 	ld a,(0e906h)
 	bit 0,a
 	ld a,(hl)	
@@ -11939,7 +11942,7 @@ l55d5h:
 	jr l55f5h
 l55deh:
 	xor a	
-	ld (0e883h),a
+	ld (STEP_COUNTER),a
 l55e2h:
 	ld a,(0e909h)
 	and 030h
@@ -18719,7 +18722,7 @@ l79c7h:
 	bit 0,a
 	jr nz,l79c7h
 	ld a,(hl)	
-	ld (0e883h),a
+	ld (STEP_COUNTER),a
 	ld (0e81fh),a
 	inc hl	
 	ld a,000h
@@ -18770,7 +18773,7 @@ l7a26h:
 	and a	
 	jr z,l7a40h
 	ld b,a	
-	ld a,(0e883h)
+	ld a,(STEP_COUNTER)
 	and a	
 	jr z,l7a46h
 	ld a,(0e904h)
@@ -18785,7 +18788,7 @@ l7a43h:
 l7a46h:
 	ld a,b	
 	cp 0bah
-	ld (0e883h),a
+	ld (STEP_COUNTER),a
 	ld a,001h
 	ld (0e81fh),a
 	jr nc,l79eeh
