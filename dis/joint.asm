@@ -69,6 +69,9 @@ POINTS: EQU 0xE081 ; Time, encoded in BCD in 0xE003 and 0xE004
 
 STEP_COUNTER: EQU 0xE883
 
+NUM_GRIPPING: EQU 0xE71A
+ACTIVE_GRIPPERS: EQU 0xE71B
+
 ; ************************ ROM start ************************
 	org	00000h
 
@@ -3625,7 +3628,7 @@ sub_153dh:
 	ld (0e2d2h),a		;1544	32 d2 e2 	2 . . 
 l1547h:
 	ld hl,l0100h+1		;1547	21 01 01 	! . . 
-	ld (0e71bh),hl		;154a	22 1b e7 	" . . 
+	ld (ACTIVE_GRIPPERS),hl		;154a	22 1b e7 	" . . 
 	ld (0e71dh),hl		;154d	22 1d e7 	" . . 
 	ld ix,0e262h		;1550	dd 21 62 e2 	. ! b . 
 	ld b,005h		;1554	06 05 	. . 
@@ -3735,7 +3738,7 @@ l1615h:
 	set 1,(hl)		;1623	cb ce 	. . 
 	ret			;1625	c9 	. 
 l1626h:
-	ld hl,0e71ah		;1626	21 1a e7 	! . . 
+	ld hl,NUM_GRIPPING		;1626	21 1a e7 	! . . 
 	dec (hl)			;1629	35 	5 
 	ld a,009h		;162a	3e 09 	> . 
 	jp l1b90h		;162c	c3 90 1b 	. . . 
@@ -4442,7 +4445,7 @@ l1b37h:
 	ld (ix+007h),a		;1b37	dd 77 07 	. w . 
 	ld (ix+006h),009h		;1b3a	dd 36 06 09 	. 6 . . 
 	ld (ix+001h),009h		;1b3e	dd 36 01 09 	. 6 . . 
-	ld hl,0e71ah		;1b42	21 1a e7 	! . . 
+	ld hl,NUM_GRIPPING		;1b42	21 1a e7 	! . . 
 	inc (hl)			;1b45	34 	4 
 	call sub_1c61h		;1b46	cd 61 1c 	. a . 
 	ld (ix+00fh),a		;1b49	dd 77 0f 	. w . 
@@ -4450,7 +4453,7 @@ l1b37h:
 	ld (ix+00eh),005h		;1b50	dd 36 0e 05 	. 6 . . 
 sub_1b54h:
 	bit 2,(ix+000h)		;1b54	dd cb 00 56 	. . . V 
-	ld hl,0e71bh		;1b58	21 1b e7 	! . . 
+	ld hl,ACTIVE_GRIPPERS		;1b58	21 1b e7 	! . . 
 	jr z,l1b5fh		;1b5b	28 02 	( . 
 	inc hl			;1b5d	23 	# 
 	inc hl			;1b5e	23 	# 
@@ -9136,7 +9139,7 @@ l4017h:
 	call sub_0dfeh
 sub_402ch:
 	ld hl,(0e712h)
-	ld a,(0e71ah)
+	ld a,(NUM_GRIPPING)
 	and a	
 	jp nz,l40adh
 	ld a,(0e000h)
@@ -9688,7 +9691,7 @@ l4406h:
 	ld hl,0e71fh
 	bit 0,(hl)
 	jp nz,l464bh
-	ld a,(0e71ah)
+	ld a,(NUM_GRIPPING)
 	and a	
 	jp nz,l4656h
 	ld hl,(0e70ch)
@@ -10259,7 +10262,7 @@ l484dh:
 	ld a,(0e906h)
 	and 007h
 	ld c,a	
-	ld a,(0e71ah)
+	ld a,(NUM_GRIPPING)
 	and a	
 	ld a,c	
 	jr nz,l4874h
@@ -11812,7 +11815,7 @@ l550ch:
 	xor a	
 l5510h:
 	ld (0e700h),a
-	ld (0e71ah),a
+	ld (NUM_GRIPPING),a
 	ld de,POINTS + 2
 	ld hl,0ea00h
 	ld b,003h
