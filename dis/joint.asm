@@ -18377,9 +18377,9 @@ l771fh:
 	ld a,l	
 	or h	
 	ld de,0d155h
-	ld hl,l7889h
+	ld hl,RAM_NG_str
 	jr nz,l7743h
-	ld hl,l7891h
+	ld hl,RAM_OK_str
 l7743h:
 	call WRITE_TEXT
 	ei	
@@ -18480,7 +18480,7 @@ l77f6h:
 	exx	
 l77fch:
 	ld hl,0d155h
-	ld de,l7889h
+	ld de,RAM_NG_str
 	ld b,007h
 l7804h:
 	ld a,(de)	
@@ -18570,22 +18570,10 @@ l787fh:
 	res 3,h
 	inc hl	
 	jp (iy)
-l7889h:
-	ld d,d	
-	ld b,c	
-	ld c,l	
-	jr nz,$+34
-	ld c,(hl)	
-	ld b,a	
-	rst 38h	
-l7891h:
-	ld d,d	
-	ld b,c	
-	ld c,l	
-	jr nz,$+34
-	ld c,a	
-	ld c,e	
-	rst 38h	
+RAM_NG_str:
+    defb "RAM  NG", 0ffh
+RAM_OK_str:
+    defb "RAM  OK", 0ffh
 	ld hl,l7c30h
 	call WRITE_TEXT
 	call sub_7bc1h
