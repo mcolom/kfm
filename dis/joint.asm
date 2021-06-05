@@ -65,6 +65,7 @@ ENEMY_ENERGY_DISP: EQU 0xE819 ; Displayed enemy's energy. Use to animate the bar
 
 TIME: EQU 0xE003 ; Time, encoded in BCD in 0xE003 and 0xE004
 
+POINTS: EQU 0xE081 ; Time, encoded in BCD in 0xE003 and 0xE004
 
 ; ************************ ROM start ************************
 	org	00000h
@@ -426,7 +427,7 @@ l0220h:
 
     ; Reset all game variables
 	ld hl,DRAGONS_LEVEL		;022c	21 80 e0
-	ld de,DRAGONS_LEVEL + 1	;022f	11 81 e0
+	ld de,POINTS	;022f	11 81 e0
 	ld bc, 31		        ;0232	01 1f 00
 	ld (hl),000h		    ;0235	36 00
 	ldir		;0237	ed b0
@@ -2793,7 +2794,7 @@ l103ah:
 	ld a,(0e085h)		;103a	3a 85 e0 	: . . 
 	and 001h		;103d	e6 01 	. . 
 	jr nz,l105ah		;103f	20 19 	  . 
-	ld hl,(DRAGONS_LEVEL + 1)		;1041	2a 81 e0 	* . . 
+	ld hl,(POINTS)		;1041	2a 81 e0 	* . . 
 	ld de,05000h		;1044	11 00 50 	. . P 
 	sbc hl,de		;1047	ed 52 	. R 
 	jr c,l105ah		;1049	38 0f 	8 . 
@@ -2828,9 +2829,9 @@ l105ah:
 	ld (TIME),hl		;107d	22 03 e0 	" . . 
 l1080h:
 	call sub_10d9h		;1080	cd d9 10 	. . . 
-	ld a,(0e083h)		;1083	3a 83 e0 	: . . 
+	ld a,(POINTS + 2)		;1083	3a 83 e0 	: . . 
 	ld c,a			;1086	4f 	O 
-	ld de,(DRAGONS_LEVEL + 1)		;1087	ed 5b 81 e0 	. [ . . 
+	ld de,(POINTS)		;1087	ed 5b 81 e0 	. [ . . 
 	ld a,(0e982h)		;108b	3a 82 e9 	: . . 
 	ld hl,(0e980h)		;108e	2a 80 e9 	* . . 
 	sub c			;1091	91 	. 
@@ -2845,7 +2846,7 @@ l109ah:
 	call sub_10cfh		;10a2	cd cf 10 	. . . 
 sub_10a5h:
 	xor a			;10a5	af 	. 
-	ld de,0e083h		;10a6	11 83 e0 	. . . 
+	ld de,POINTS + 2		;10a6	11 83 e0 	. . . 
 	jr l10b0h		;10a9	18 05 	. . 
 sub_10abh:
 	ld a,001h		;10ab	3e 01 	> . 
@@ -7107,8 +7108,9 @@ l2f96h:
 	ret			;2f96	c9 	. 
 sub_2f97h:
 	ld de,000fh+1		;2f97	11 10 00 	. . . 
+
 sub_2f9ah:
-	ld hl,DRAGONS_LEVEL + 1		;2f9a	21 81 e0 	! . . 
+	ld hl,POINTS		;2f9a	21 81 e0 	! . . 
 	ld a,(hl)			;2f9d	7e 	~ 
 	add a,e			;2f9e	83 	. 
 	daa			;2f9f	27 	' 
@@ -10373,8 +10375,8 @@ l4943h:
 	jr nz,l4943h
 	xor a	
 	ld hl,0
-	ld (DRAGONS_LEVEL + 1),a
-	ld (0e082h),hl
+	ld (POINTS),a
+	ld (POINTS + 1),hl
 	inc a	
 	ld (LIVES),a
 	ld (0e022h),a
@@ -10396,8 +10398,8 @@ l496fh:
 	ld a,006h
 	ld (0e000h),a
 	ld hl,0
-	ld (DRAGONS_LEVEL + 1),hl
-	ld (0e082h),hl
+	ld (POINTS),hl
+	ld (POINTS + 1),hl
 	ld (0e010h),hl
 	ld (0e012h),hl
 	ei	
@@ -11817,7 +11819,7 @@ l550ch:
 l5510h:
 	ld (0e700h),a
 	ld (0e71ah),a
-	ld de,0e083h
+	ld de,POINTS + 2
 	ld hl,0ea00h
 	ld b,003h
 l551eh:
