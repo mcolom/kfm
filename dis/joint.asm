@@ -5,6 +5,16 @@
 ; $ z80asm dis/joint.asm && shasum a.bin
 ; d1d0db9da8c251c482821ce6fd4f4824e0b72d55  a.bin
 
+; BUG
+; Conditions:
+; - 4th floor
+; - the magician is blocked against the stairs
+; - its replica appears on the left
+; - Thomas is in the middle of both
+; - Thomas can reach both of two with the punch
+; - Thomas kills the replica on the left quickly
+; Then Thomas can't move right.
+
 ; Examples of macros
 makelabel: macro name
 	label_name:
@@ -75,6 +85,9 @@ ACTIVE_GRIPPERS: EQU 0xE71B
 VARS_TABLE: EQU 0xE2D8
 
 DISTANCE_TO_LEFT: EQU 0xE802
+
+; This seems to be used to make appear the final enemy and the stairs
+THOMAS_POSITION: EQU 0xE713 ; Left end is 0
 
 PLAYER_BUTTONS_AND_UP:  EQU 0xE908
 PLAYER_JOYSTICK: EQU 0xE909
@@ -3310,7 +3323,7 @@ sub_12feh:
 	jr z,l1309h		;1305	28 02 	( . 
 	ld c,01ch		;1307	0e 1c 	. . 
 l1309h:
-	ld a,(0e713h)		;1309	3a 13 e7 	: . . 
+	ld a,(THOMAS_POSITION)		;1309	3a 13 e7 	: . . 
 	add a,c			;130c	81 	. 
 	cp 0e0h		;130d	fe e0 	. . 
 	ret nc			;130f	d0 	. 
@@ -7967,7 +7980,7 @@ l3637h:
 l363dh:
 	add a,d			;363d	82 	. 
 	ld d,a			;363e	57 	W 
-	ld a,(0e713h)		;363f	3a 13 e7 	: . . 
+	ld a,(THOMAS_POSITION)		;363f	3a 13 e7 	: . . 
 	add a,d			;3642	82 	. 
 	ld d,a			;3643	57 	W 
 	set 0,d		;3644	cb c2 	. . 
