@@ -63,6 +63,8 @@ ENERGY_DISP: EQU 0xE81A ; Displayed energy. Use to animate the bar when energy c
 ENEMY_ENERGY: EQU 0xE2E2
 ENEMY_ENERGY_DISP: EQU 0xE819 ; Displayed enemy's energy. Use to animate the bar when energy changes
 
+TIME: EQU 0xE003 ; Time, encoded in BCD in 0xE003 and 0xE004
+
 
 ; ************************ ROM start ************************
 	org	00000h
@@ -524,7 +526,7 @@ l02eeh:
 	ld a,003h		;02ee	3e 03 	> . 
 	call sub_0582h		;02f0	cd 82 05 	. . . 
 	pop de			;02f3	d1 	. 
-	ld hl,(0e003h)		;02f4	2a 03 e0 	* . . 
+	ld hl,(TIME)		;02f4	2a 03 e0 	* . . 
 	ld a,l			;02f7	7d 	} 
 	or h			;02f8	b4 	. 
 	jr z,l031dh		;02f9	28 22 	( " 
@@ -547,7 +549,7 @@ l0307h:
 	sbc a,d			;030c	9a 	. 
 	daa			;030d	27 	' 
 	ld h,a			;030e	67 	g 
-	ld (0e003h),hl		;030f	22 03 e0 	" . . 
+	ld (TIME),hl		;030f	22 03 e0 	" . . 
 	push de			;0312	d5 	. 
 	call sub_2f9ah		;0313	cd 9a 2f 	. . / 
 	ld a,016h		;0316	3e 16 	> . 
@@ -570,7 +572,7 @@ l031dh:
 l033ah:
 	ld a,02dh		;033a	3e 2d 	> - 
 	call 0570fh		;033c	cd 0f 57 	. . W 
-	ld hl,(0e003h)		;033f	2a 03 e0 	* . . 
+	ld hl,(TIME)		;033f	2a 03 e0 	* . . 
 	ld a,l			;0342	7d 	} 
 	or h			;0343	b4 	. 
 	call z,056b5h		;0344	cc b5 56 	. . V 
@@ -1065,7 +1067,7 @@ sub_06beh:
 	inc hl			;06d7	23 	# 
 	ld h,(hl)			;06d8	66 	f 
 	ld l,a			;06d9	6f 	o 
-	ld (0e003h),hl		;06da	22 03 e0 	" . . 
+	ld (TIME),hl		;06da	22 03 e0 	" . . 
 	ld a,03fh		;06dd	3e 3f 	> ? 
 	ld (ENERGY),a		;06df	32 09 e7 	2 . . 
 	ld hl,05000h		;06e2	21 00 50 	! . P 
@@ -2715,8 +2717,8 @@ sub_0fb8h:
 	ld a,(0e000h)		;0fb8	3a 00 e0 	: . . 
 	cp 003h		;0fbb	fe 03 	. . 
 	jr z,sub_0fe3h		;0fbd	28 24 	( $ 
-	ld hl,(0e003h)		;0fbf	2a 03 e0 	* . . 
-	ld de,0fccdh		;0fc2	11 cd fc 	. . . 
+	ld hl,(TIME)		;0fbf	2a 03 e0 	* . . 
+	ld de, -819 		;0fc2	11 cd fc
 	add hl,de			;0fc5	19 	. 
 	jr c,sub_0fe3h		;0fc6	38 1b 	8 . 
 	ld hl,0e008h		;0fc8	21 08 e0 	! . . 
@@ -2807,7 +2809,7 @@ l105ah:
 	and a			;1069	a7 	. 
 	jr nz,l1080h		;106a	20 14 	  . 
 	ld (hl),003h		;106c	36 03 	6 . 
-	ld hl,(0e003h)		;106e	2a 03 e0 	* . . 
+	ld hl,(TIME)		;106e	2a 03 e0 	* . . 
 	ld a,l			;1071	7d 	} 
 	sub 001h		;1072	d6 01 	. . 
 	daa			;1074	27 	' 
@@ -2817,7 +2819,7 @@ l105ah:
 	daa			;1079	27 	' 
 	ld h,a			;107a	67 	g 
 	jr c,l1080h		;107b	38 03 	8 . 
-	ld (0e003h),hl		;107d	22 03 e0 	" . . 
+	ld (TIME),hl		;107d	22 03 e0 	" . . 
 l1080h:
 	call sub_10d9h		;1080	cd d9 10 	. . . 
 	ld a,(0e083h)		;1083	3a 83 e0 	: . . 
@@ -2866,8 +2868,8 @@ sub_10cfh:
 	ld c,000h		;10d5	0e 00 	. . 
 	jr l10c1h		;10d7	18 e8 	. . 
 sub_10d9h:
-	ld c,014h		;10d9	0e 14 	. . 
-	ld hl,0e004h		;10db	21 04 e0 	! . . 
+	ld c,014h		;10d9	0e 14
+	ld hl, TIME + 1	;10db	21 04 e0
 	ld de,0d0eah		;10de	11 ea d0 	. . . 
 	call sub_10fdh		;10e1	cd fd 10 	. . . 
 	jr sub_10fdh		;10e4	18 17 	. . 
@@ -4749,7 +4751,7 @@ l1db9h:
 sub_1dbfh:
 	push hl			;1dbf	e5 	. 
 	push de			;1dc0	d5 	. 
-	ld hl,(0e003h)		;1dc1	2a 03 e0 	* . . 
+	ld hl,(TIME)		;1dc1	2a 03 e0 	* . . 
 	ld de,0fccdh		;1dc4	11 cd fc 	. . . 
 	add hl,de			;1dc7	19 	. 
 	ld a,095h		;1dc8	3e 95 	> . 
@@ -4763,7 +4765,7 @@ l1dceh:
 sub_1dd4h:
 	push hl			;1dd4	e5 	. 
 	push de			;1dd5	d5 	. 
-	ld hl,(0e003h)		;1dd6	2a 03 e0 	* . . 
+	ld hl,(TIME)		;1dd6	2a 03 e0 	* . . 
 	ld de,0fccdh		;1dd9	11 cd fc 	. . . 
 	add hl,de			;1ddc	19 	. 
 	ld a,092h		;1ddd	3e 92 	> . 
@@ -9291,7 +9293,7 @@ l4134h:
 sub_413fh:
 	call sub_1208h
 	jr nz,l4150h
-	ld hl,(0e003h)
+	ld hl,(TIME)
 	ld a,h	
 	or l	
 	jr nz,l4150h
@@ -18679,11 +18681,11 @@ l7944h:
 	ld hl,l7cech
 	call sub_111ch
 	ld hl,09999h
-	ld (0e003h),hl
+	ld (TIME),hl
 l7971h:
 	ld a,038h
 	ld (0e882h),a
-	ld hl,0e003h
+	ld hl,TIME
 	ld a,(hl)	
 	add a,001h
 	daa	
