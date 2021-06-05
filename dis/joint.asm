@@ -83,11 +83,7 @@ ACTIVE_GRIPPERS: EQU 0xE71B
 	; Stack at 0f00h
 	ld sp,0f000h		;0003
 
-	; Move 0fffh (4095) bytes from 0e000h to 0e001h
-	; Pad (0e000h) = 0
-	; AM_RANGE(0xe000, 0xefff) AM_RAM
-	; This simply moves a memory region just before the stack one byte to
-	; the right (?)
+    ; Clear 4096 bytes from 0e000h
 	ld hl,0e000h
 	ld de,0e001h
 	ld bc,00fffh
