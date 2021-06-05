@@ -89,8 +89,10 @@ DISTANCE_TO_LEFT: EQU 0xE802
 ; This seems to be used to make appear the final enemy and the stairs
 THOMAS_POSITION: EQU 0xE713 ; Left end is 0
 
+PLAYER_CONTROLS: EQU 0xE907 ; It seems this contains everything in a single byte
 PLAYER_BUTTONS_AND_UP:  EQU 0xE908
 PLAYER_JOYSTICK: EQU 0xE909
+
 PLAYER_STATE: EQU 0xE906
 
 KNIFE_STATUS: EQU 0xE807
@@ -717,7 +719,7 @@ l039ch:
 	ld hl,0				;03ad	21 00 00 	! . . 
 	ld (0e902h),hl		;03b0	22 02 e9 	" . . 
 	call 0570dh		;03b3	cd 0d 57 	. . W 
-	ld hl,0595bh		;03b6	21 5b 59 	! [ Y 
+	ld hl, select_game_floor_str		;03b6	21 5b 59
 	call WRITE_TEXT		;03b9	cd 1c 11 	. . . 
 l03bch:
 	ld c,014h		;03bc	0e 14 	. . 
@@ -2657,7 +2659,7 @@ sub_0e9bh:
 	ld bc,l0594h		;0ed1	01 94 05 	. . . 
 	ld a,0a1h		;0ed4	3e a1 	> . 
 l0ed6h:
-	call sub_1110h		;0ed6	cd 10 11 	. . . 
+	call WRITE_CHAR_AT_SCREEN_DE		;0ed6	cd 10 11 	. . . 
 	inc a			;0ed9	3c 	< 
 	inc de			;0eda	13 	. 
 	djnz l0ed6h		;0edb	10 f9 	. . 
@@ -2680,7 +2682,7 @@ l0ed6h:
 sub_0f01h:
 	ld b,004h		;0f01	06 04 	. . 
 l0f03h:
-	call sub_1110h		;0f03	cd 10 11 	. . . 
+	call WRITE_CHAR_AT_SCREEN_DE		;0f03	cd 10 11 	. . . 
 	inc de			;0f06	13 	. 
 	djnz l0f03h		;0f07	10 fa 	. . 
 	ret			;0f09	c9 	. 
@@ -2689,7 +2691,7 @@ sub_0f0ah:
 	ld b,005h		;0f0b	06 05 	. . 
 	ld c,094h		;0f0d	0e 94 	. . 
 l0f0fh:
-	call sub_1110h		;0f0f	cd 10 11 	. . . 
+	call WRITE_CHAR_AT_SCREEN_DE		;0f0f	cd 10 11 	. . . 
 	inc de			;0f12	13 	. 
 	dec l			;0f13	2d 	- 
 	jr nz,l0f17h		;0f14	20 01 	  . 
@@ -2733,12 +2735,14 @@ sub_0f3fh:
 	call sub_0f4fh		;0f4a	cd 4f 0f 	. O . 
 	pop de			;0f4d	d1 	. 
 	ret			;0f4e	c9 	. 
+    
 sub_0f4fh:
-	call sub_1110h		;0f4f	cd 10 11 	. . . 
+	call WRITE_CHAR_AT_SCREEN_DE		;0f4f	cd 10 11 	. . . 
 	inc a			;0f52	3c 	< 
-	call sub_1110h		;0f53	cd 10 11 	. . . 
+	call WRITE_CHAR_AT_SCREEN_DE		;0f53	cd 10 11 	. . . 
 	inc a			;0f56	3c 	< 
 	ret			;0f57	c9 	. 
+
 sub_0f58h:
 	ld de,0d129h		;0f58	11 29 d1 	. ) . 
 	xor a			;0f5b	af 	. 
@@ -2748,7 +2752,7 @@ sub_0f58h:
 sub_0f63h:
 	ld b,006h		;0f63	06 06 	. . 
 l0f65h:
-	call sub_1110h		;0f65	cd 10 11 	. . . 
+	call WRITE_CHAR_AT_SCREEN_DE		;0f65	cd 10 11 	. . . 
 	djnz l0f65h		;0f68	10 fb 	. . 
 	ret			;0f6a	c9 	. 
 sub_0f6bh:
@@ -2793,7 +2797,7 @@ l0fadh:
 	ld l,0ffh		;0fad	2e ff 	. . 
 	ld a,003h		;0faf	3e 03 	> . 
 l0fb1h:
-	call sub_1110h		;0fb1	cd 10 11 	. . . 
+	call WRITE_CHAR_AT_SCREEN_DE		;0fb1	cd 10 11 	. . . 
 	ld a,l			;0fb4	7d 	} 
 	djnz l0f99h		;0fb5	10 e2 	. . 
 	ret			;0fb7	c9 	. 
@@ -2969,7 +2973,7 @@ l10f3h:
 	jr nz,l10f7h		;10f4	20 01 	  . 
 	xor a			;10f6	af 	. 
 l10f7h:
-	call sub_1110h		;10f7	cd 10 11 	. . . 
+	call WRITE_CHAR_AT_SCREEN_DE		;10f7	cd 10 11 	. . . 
 	djnz l10f3h		;10fa	10 f7 	. . 
 	ret			;10fc	c9 	. 
 sub_10fdh:
@@ -2989,15 +2993,20 @@ sub_1108h:
 	daa			;110c	27 	' 
 	adc a,040h		;110d	ce 40 	. @ 
 	daa			;110f	27 	' 
-sub_1110h:
+
+; Write a character on the screen
+; A: character
+; C: color
+WRITE_CHAR_AT_SCREEN_DE:
 	ex de,hl			;1110	eb 	. 
-	ld (hl),a			;1111	77 	w 
+	ld (hl),a			;1111	77 A: character
 	set 3,h		;1112	cb dc 	. . 
-	ld (hl),c			;1114	71 	q 
+	ld (hl),c			;1114	71 C: color
 	res 3,h		;1115	cb 9c 	. . 
 	inc hl			;1117	23 	# 
 	ex de,hl			;1118	eb 	. 
 	ret			;1119	c9 	. 
+
 l111ah:
 	ld c,(hl)			;111a	4e 	N 
 l111bh:
@@ -3012,7 +3021,7 @@ WRITE_TEXT:
 	inc a			;1123	3c 	< 
 	jr z,l112dh		;1124	28 07 	( . 
 	sub 003h		;1126	d6 03 	. . 
-	call sub_1110h		;1128	cd 10 11 	. . . 
+	call WRITE_CHAR_AT_SCREEN_DE		;1128	cd 10 11 	. . . 
 	jr WRITE_TEXT		;112b	18 ef 	. . 
 l112dh:
 	ld e,(hl)			;112d	5e 	^ 
@@ -3033,7 +3042,7 @@ l1134h:
 	inc a			;113b	3c 	< 
 	jr z,l114eh		;113c	28 10 	( . 
 	sub 003h		;113e	d6 03 	. . 
-	call sub_1110h		;1140	cd 10 11 	. . . 
+	call WRITE_CHAR_AT_SCREEN_DE		;1140	cd 10 11 	. . . 
 	cp 020h		;1143	fe 20 	.   
 	jr nz,l1134h		;1145	20 ed 	  . 
 	ld a,00bh		;1147	3e 0b 	> . 
@@ -4662,15 +4671,17 @@ l1c55h:
 	ld a,(bc)			;1c5d	0a 	. 
 	ex af,af'			;1c5e	08 	. 
 	rla			;1c5f	17 	. 
-	rst 38h			;1c60	ff 	. 
+	rst 38h			;1c60	ff
+
 sub_1c61h:
 	ld a,(GAME_STATE)		;1c61	3a 00 e0 	: . . 
 	cp GAME_STATE_DEMO		;1c64	fe 06
 	ld a,(PLAYER_JOYSTICK)		;1c66	3a 09 e9 	: . . 
 	ret z			;1c69	c8 	. 
-	ld a,(0e907h)		;1c6a	3a 07 e9 	: . . 
+	ld a,(PLAYER_CONTROLS)		;1c6a	3a 07 e9 	: . . 
 	and 00fh		;1c6d	e6 0f 	. . 
 	ret			;1c6f	c9 	. 
+
 sub_1c70h:
 	call sub_1c8ah		;1c70	cd 8a 1c 	. . . 
 	bit 6,c		;1c73	cb 71 	. q 
@@ -10556,15 +10567,15 @@ l4a14h:
 	push de	
 	cp 001h
 	ld a,053h
-	call nz,sub_1110h
+	call nz,WRITE_CHAR_AT_SCREEN_DE
 	pop de	
 	inc de	
 	pop hl	
 	ret	
 sub_4a2ch:
-	call sub_1110h
+	call WRITE_CHAR_AT_SCREEN_DE
 	ld a,02dh
-	jp sub_1110h
+	jp WRITE_CHAR_AT_SCREEN_DE
 
 
 COIN_STR: defb "COIN", 0ffh ;4a34
@@ -11451,7 +11462,7 @@ sub_5079h:
 	inc a	
 	jr z,l5075h
 	sub 003h
-	call sub_1110h
+	call WRITE_CHAR_AT_SCREEN_DE
 	cp 020h
 	jr nz,sub_5079h
 	ld a,00bh
@@ -12086,14 +12097,14 @@ l5648h:
 	call 10ffh
 	djnz l5648h
 	ld a,030h
-	call sub_1110h
+	call WRITE_CHAR_AT_SCREEN_DE
 	ld c,000h
 	inc de	
 	ld b,003h
 l5659h:
 	ld a,(hl)	
 	inc hl	
-	call sub_1110h
+	call WRITE_CHAR_AT_SCREEN_DE
 	djnz l5659h
 	pop af	
 	sub 001h
@@ -12155,7 +12166,7 @@ l56dbh:
 	ld e,a	
 	ld a,(ix+000h)
 	inc ix
-	call sub_1110h
+	call WRITE_CHAR_AT_SCREEN_DE
 	pop de	
 	djnz l56dbh
 	ld hl,l0040h
@@ -12211,7 +12222,7 @@ sub_572ah:
 l572dh:
 	xor a	
 l572eh:
-	call sub_1110h
+	call WRITE_CHAR_AT_SCREEN_DE
 	djnz l572eh
 	pop bc	
 	ret	
@@ -12238,7 +12249,7 @@ l5744h:
 	jr c,l5751h
 	set 7,c
 l5751h:
-	call sub_1110h
+	call WRITE_CHAR_AT_SCREEN_DE
 	jr sub_5739h
 sub_5756h:
 	ld hl,(0e817h)
@@ -12559,10 +12570,12 @@ l5950h:
 l5958h:
 	ld c,a			;5958	4f 	O 
 	jr l5927h		;5959	18 cc 	. . 
-	cp 015h		;595b	fe 15 	. . 
-
-	defb 0fdh,0d8h,0d2h	; 595d
+    
+select_game_floor_str: ; 595b
+	defb 0feh, 015h
+	defb 0fdh,0d8h,0d2h	
 	defb "SELECT GAME FLOOR"
+
 	defb 0fdh,09ah,0d3h	; 5971
 	defb "HOUSE NUMBER-"
 	defb 0fdh,01ah,0d4h	; 5981
@@ -18697,7 +18710,7 @@ l78e5h:
 	jr z,l790ah
 	ld a,041h
 l790ah:
-	call sub_1110h
+	call WRITE_CHAR_AT_SCREEN_DE
 	call sub_49f7h
 	pop af	
 	ld de,0d2d0h
@@ -18707,7 +18720,7 @@ l790ah:
 	call WRITE_TEXT
 	inc de	
 	ld a,042h
-	call sub_1110h
+	call WRITE_CHAR_AT_SCREEN_DE
 	pop hl	
 	ld l,h	
 	call sub_49f7h
@@ -19023,9 +19036,9 @@ l7b81h:
 	push hl	
 	ld b,010h
 l7b84h:
-	call sub_1110h
+	call WRITE_CHAR_AT_SCREEN_DE
 	dec a	
-	call sub_1110h
+	call WRITE_CHAR_AT_SCREEN_DE
 	inc a	
 	djnz l7b84h
 	ld hl,l0020h
@@ -19065,7 +19078,7 @@ sub_7bc1h:
 	ld a,031h
 	ld b,008h
 sub_7bc7h:
-	call sub_1110h
+	call WRITE_CHAR_AT_SCREEN_DE
 	inc a	
 	djnz sub_7bc7h
 	ret	
@@ -19106,7 +19119,7 @@ sub_7bf7h:
 	ld hl,l7c2ch
 	call WRITE_TEXT
 	pop af	
-	call sub_1110h
+	call WRITE_CHAR_AT_SCREEN_DE
 	inc de	
 	ld hl,l7c29h
 	rrc b
