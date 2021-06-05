@@ -84,6 +84,38 @@ KNIFE_STATUS: EQU 0xE807
 KNIFE_DIST: EQU 0xE32E
 NUM_KNIVES: EQU 0xE32B
 
+COINS: EQU 0xE913
+
+; Global game state
+; 0: stop
+; 1: screen clears (goes black)
+; 2: Thomas moves when starting a level
+; 3: Thomas goes upstairs, or rescues Silvia
+; 4: normal play
+; 5: initial scene with Silvia
+; 6: demo
+; 7: screen with tied Silvia, "LET'S TRY NEXT FLOOR"
+; 8: game ending, with hearts
+; B: Thomas has lost one live
+; C: level ending music sounds. Energy and time decrease to gain points.
+; Bit 7 active: shows characters: Thomas, knife-thrower, giant, Mr. X
+GAME_STATE: EQU 0xE000
+
+GAME_STATE_STOP: EQU 0
+GAME_STATE_CLEAR: EQU 1
+GAME_STATE_WALK_LEVEL_STARTS: EQU 2
+GAME_STATE_GO_UPSTAIRS_OR_SILVIA_RESCUED: EQU 3
+GAME_STATE_PLAY: EQU 4
+GAME_STATE_INTRO: EQU 5
+GAME_STATE_DEMO: EQU 6
+GAME_STATE_INTERLUDE: EQU 7
+GAME_STATE_GAME_ENDS: EQU 8
+GAME_STATE_LIFE_LOST: EQU 0xB
+GAME_STATE_LEVEL_ENDS: EQU 0xC
+GAME_STATE_SERVICE_MODE: EQU 0xFF
+
+
+
 ; ************************ ROM start ************************
 	org	00000h
 
@@ -95,8 +127,8 @@ NUM_KNIVES: EQU 0xE32B
 	; Stack at 0f00h
 	ld sp,0f000h		;0003
 
-    ; Clear 4096 bytes from 0e000h
-	ld hl,0e000h
+    ; Clear 4096 bytes from 0xe000
+	ld hl,GAME_STATE
 	ld de,0e001h
 	ld bc,00fffh
 	ld (hl),000h
@@ -198,7 +230,7 @@ l0082h:
 	ei			;0089	fb 	. 
 	jp 0487eh		;008a	c3 7e 48 	. ~ H 
 l008dh:
-	ld a,(0e000h)		;008d	3a 00 e0 	: . . 
+	ld a,(GAME_STATE)		;008d	3a 00 e0 	: . . 
 	and a			;0090	a7 	. 
 	jp m,l01f8h		;0091	fa f8 01 	. . . 
 	InDSW2		;0094	db 04 	. . 
@@ -231,8 +263,8 @@ l00c0h:
 	jp p,l01f0h		;00c8	f2 f0 01 	. . . 
 	ld (hl),008h		;00cb	36 08 	6 . 
 l00cdh:
-	ld a,(0e000h)		;00cd	3a 00 e0 	: . . 
-	cp 006h		;00d0	fe 06 	. . 
+	ld a,(GAME_STATE)		;00cd	3a 00 e0
+	cp GAME_STATE_DEMO		;00d0	fe 06
 l00d2h:
 	ld a,047h		;00d2	3e 47 	> G 
 	jr z,l00d8h		;00d4	28 02 	( . 
@@ -253,9 +285,9 @@ l00e0h:
 	and 003h		;00e5	e6 03 	. . 
 	ld d,000h		;00e7	16 00 	. . 
 	ld e,a			;00e9	5f 	_ 
-	ld a,(0e000h)		;00ea	3a 00 e0 	: . . 
+	ld a,(GAME_STATE)		;00ea	3a 00 e0 	: . . 
 	ld hl,l007dh+1		;00ed	21 7e 00 	! ~ . 
-	cp 006h		;00f0	fe 06 	. . 
+	cp GAME_STATE_DEMO	;00f0	fe 06
 	jr z,l0107h		;00f2	28 13 	( . 
 	ld hl,l006eh		;00f4	21 6e 00
 
@@ -296,13 +328,13 @@ l0120h:
 	ld a,(0e001h)		;0120	3a 01 e0 	: . . 
 	and a			;0123	a7 	. 
 	jr nz,l012dh		;0124	20 07 	  . 
-	ld a,(0e913h)		;0126	3a 13 e9 	: . . 
+	ld a,(COINS)		;0126	3a 13 e9 	: . . 
 	and a			;0129	a7 	. 
 	jp nz,l0217h		;012a	c2 17 02 	. . . 
 l012dh:
 	call sub_03f8h		;012d	cd f8 03 	. . . 
-	ld a,(0e000h)		;0130	3a 00 e0 	: . . 
-	cp 00bh		;0133	fe 0b 	. . 
+	ld a,(GAME_STATE)		;0130	3a 00 e0 	: . . 
+	cp GAME_STATE_LIFE_LOST		;0133	fe 0b
 	jp nc,l01ddh		;0135	d2 dd 01 	. . . 
 	ld a,018h		;0138	3e 18 	> . 
 	ld (0eb00h),a		;013a	32 00 eb 	2 . . 
@@ -311,7 +343,7 @@ l0140h:
 	ld (0eb03h),hl		;0140	22 03 eb 	" . . 
 l0143h:
 	ld (0eb01h),hl		;0143	22 01 eb 	" . . 
-	ld a,(0e000h)		;0146	3a 00 e0 	: . . 
+	ld a,(GAME_STATE)		;0146	3a 00 e0 	: . . 
 	add a,a			;0149	87 	. 
 	ld e,a			;014a	5f 	_ 
 l014bh:
@@ -392,9 +424,9 @@ l01d3h:
 	add iy,de		;01d9	fd 19 	. . 
 	djnz l01d3h		;01db	10 f6 	. . 
 l01ddh:
-	ld a,(0e000h)		;01dd	3a 00 e0 	: . . 
+	ld a,(GAME_STATE)		;01dd	3a 00 e0 	: . . 
 l01e0h:
-	cp 006h		;01e0	fe 06 	. . 
+	cp GAME_STATE_DEMO		;01e0	fe 06
 	ld a,037h		;01e2	3e 37 	> 7 
 	jr z,l01e8h		;01e4	28 02 	( . 
 	ld a,r		;01e6	ed 5f 	. _ 
@@ -432,7 +464,7 @@ l0217h:
 	ld (0e001h),a		;021c	32 01 e0 	2 . . 
 	xor a			;021f	af 	. 
 l0220h:
-	ld (0e000h),a		;0220	32 00 e0 	2 . . 
+	ld (GAME_STATE),a		;0220	32 00 e0 	2 . . 
 	ei			;0223	fb 	. 
 	call 05178h		;0224	cd 78 51 	. x Q 
 	ld a,0ffh		;0227	3e ff 	> . 
@@ -462,7 +494,7 @@ sub_0250h:
 	ld hl,0e005h		;0250	21 05 e0 	! . . 
 	res 7,(hl)		;0253	cb be 	. . 
 	xor a			;0255	af 	. 
-	ld (0e000h),a		;0256	32 00 e0 	2 . . 
+	ld (GAME_STATE),a		;0256	32 00 e0 	2 . . 
 	InDSW2		;0259	db 04 	. . 
 	and 002h		;025b	e6 02 	. . 
 	ld hl,0e910h		;025d	21 10 e9 	! . . 
@@ -491,8 +523,8 @@ l0285h:
 	ld (0e007h),a		;0289	32 07 e0 	2 . . 
 	ld (0e008h),a		;028c	32 08 e0 	2 . . 
 	call sub_0449h		;028f	cd 49 04 	. I . 
-	ld a,004h		;0292	3e 04 	> . 
-	ld (0e000h),a		;0294	32 00 e0 	2 . . 
+	ld a, GAME_STATE_PLAY		;0292	3e 04
+	ld (GAME_STATE),a		;0294	32 00 e0 	2 . . 
 	ld a,024h		;0297	3e 24 	> $ 
 	call sub_0dfeh		;0299	cd fe 0d 	. . . 
 l029ch:
@@ -506,8 +538,8 @@ l02a0h:
 	bit 0,(hl)		;02a9	cb 46 	. F 
 	jp nz,l039ch		;02ab	c2 9c 03 	. . . 
 l02aeh:
-	ld a,(0e000h)		;02ae	3a 00 e0 	: . . 
-	cp 00bh		;02b1	fe 0b 	. . 
+	ld a,(GAME_STATE)		;02ae	3a 00 e0 	: . . 
+	cp GAME_STATE_LIFE_LOST		;02b1	fe 0b
 	jp z,l033ah		;02b3	ca 3a 03 	. : . 
 	cp 00ch		;02b6	fe 0c 	. . 
 	jp z,l02c0h		;02b8	ca c0 02 	. . . 
@@ -639,7 +671,7 @@ l0382h:
 	res 0,(hl)		;038c	cb 86 	. . 
 	xor a			;038e	af 	. 
 	ld (0e006h),a		;038f	32 06 e0 	2 . . 
-	ld a,(0e913h)		;0392	3a 13 e9 	: . . 
+	ld a,(COINS)		;0392	3a 13 e9 	: . . 
 	and a			;0395	a7 	. 
 	jp nz,l0217h		;0396	c2 17 02 	. . . 
 	jp 0487eh		;0399	c3 7e 48 	. ~ H 
@@ -649,7 +681,7 @@ l039ch:
 	ld a,000h		;03a1	3e 00 	> . 
 	call sub_0dfeh		;03a3	cd fe 0d 	. . . 
 	xor a			;03a6	af 	. 
-	ld (0e000h),a		;03a7	32 00 e0 	2 . . 
+	ld (GAME_STATE),a		;03a7	32 00 e0 	2 . . 
 	call sub_1157h		;03aa	cd 57 11 	. W . 
 	ld hl,0				;03ad	21 00 00 	! . . 
 	ld (0e902h),hl		;03b0	22 02 e9 	" . . 
@@ -762,8 +794,8 @@ l0447h:
 
 sub_0449h:
 	ld (0e81ch),a		;0449	32 1c e8 	2 . . 
-	ld a,001h		;044c	3e 01 	> . 
-	ld (0e000h),a		;044e	32 00 e0 	2 . . 
+	ld a, GAME_STATE_CLEAR		;044c	3e 01
+	ld (GAME_STATE),a		;044e	32 00 e0 	2 . . 
 	call sub_0644h		;0451	cd 44 06 	. D . 
 	ld a,(DRAGONS_LEVEL)		;0454	3a 80 e0 	: . . 
 	and 001h		;0457	e6 01 	. . 
@@ -780,8 +812,8 @@ l0461h:
 	ld a,(0e81ch)		;046f	3a 1c e8 	: . . 
 	and a			;0472	a7 	. 
 	call z,sub_04e5h		;0473	cc e5 04 	. . . 
-	ld a,002h		;0476	3e 02 	> . 
-	ld (0e000h),a		;0478	32 00 e0 	2 . . 
+	ld a, GAME_STATE_WALK_LEVEL_STARTS		;0476	3e 02
+	ld (GAME_STATE),a		;0478	32 00 e0 	2 . . 
 	ld a,027h		;047b	3e 27 	> ' 
 	call 0570fh		;047d	cd 0f 57 	. . W 
 	ld hl,0006h+1		;0480	21 07 00 	! . . 
@@ -2407,7 +2439,7 @@ l0d94h:
 	and a			;0d9a	a7 	. 
 	ret nz			;0d9b	c0 	. 
 	ld a,002h		;0d9c	3e 02 	> . 
-	ld (0e913h),a		;0d9e	32 13 e9 	2 . . 
+	ld (COINS),a		;0d9e	32 13 e9 	2 . . 
 	ret			;0da1	c9 	. 
 sub_0da2h:
 	dec (hl)			;0da2	35 	5 
@@ -2451,7 +2483,7 @@ sub_0dd6h:
 l0dd8h:
 	sub 008h		;0dd8	d6 08 	. . 
 l0ddah:
-	ld hl,0e913h		;0dda	21 13 e9 	! . . 
+	ld hl,COINS		;0dda	21 13 e9 	! . . 
 	add a,(hl)			;0ddd	86 	. 
 	daa			;0dde	27 	' 
 	jr nc,l0de3h		;0ddf	30 02 	0 . 
@@ -2735,8 +2767,8 @@ l0fb1h:
 	djnz l0f99h		;0fb5	10 e2 	. . 
 	ret			;0fb7	c9 	. 
 sub_0fb8h:
-	ld a,(0e000h)		;0fb8	3a 00 e0 	: . . 
-	cp 003h		;0fbb	fe 03 	. . 
+	ld a,(GAME_STATE)		;0fb8	3a 00 e0 	: . . 
+	cp GAME_STATE_GO_UPSTAIRS_OR_SILVIA_RESCUED		;0fbb	fe 03
 	jr z,sub_0fe3h		;0fbd	28 24 	( $ 
 	ld hl,(TIME)		;0fbf	2a 03 e0 	* . . 
 	ld de, -819 		;0fc2	11 cd fc
@@ -2820,8 +2852,8 @@ l103ah:
 	call sub_0dfeh		;1054	cd fe 0d 	. . . 
 	call sub_10e6h		;1057	cd e6 10 	. . . 
 l105ah:
-	ld a,(0e000h)		;105a	3a 00 e0 	: . . 
-	cp 003h		;105d	fe 03 	. . 
+	ld a,(GAME_STATE)		;105a	3a 00 e0 	: . . 
+	cp GAME_STATE_GO_UPSTAIRS_OR_SILVIA_RESCUED		;105d	fe 03
 	jr z,l1080h		;105f	28 1f 	( . 
 	cp 00ch		;1061	fe 0c 	. . 
 	jr z,l1080h		;1063	28 1b 	( . 
@@ -3081,8 +3113,8 @@ l1201h:
 	add iy,de		;1204	fd 19 	. . 
 	jr l1198h		;1206	18 90 	. . 
 sub_1208h:
-	ld a,(0e000h)		;1208	3a 00 e0 	: . . 
-	cp 006h		;120b	fe 06 	. . 
+	ld a,(GAME_STATE)		;1208	3a 00 e0
+	cp GAME_STATE_DEMO		;120b	fe 06
 	ret z			;120d	c8 	. 
 	InDSW2		;120e	db 04 	. . 
 	cpl			;1210	2f 	/ 
@@ -4601,8 +4633,8 @@ l1c55h:
 	rla			;1c5f	17 	. 
 	rst 38h			;1c60	ff 	. 
 sub_1c61h:
-	ld a,(0e000h)		;1c61	3a 00 e0 	: . . 
-	cp 006h		;1c64	fe 06 	. . 
+	ld a,(GAME_STATE)		;1c61	3a 00 e0 	: . . 
+	cp GAME_STATE_DEMO		;1c64	fe 06
 	ld a,(PLAYER_JOYSTICK)		;1c66	3a 09 e9 	: . . 
 	ret z			;1c69	c8 	. 
 	ld a,(0e907h)		;1c6a	3a 07 e9 	: . . 
@@ -9152,8 +9184,8 @@ sub_402ch:
 	ld a,(NUM_GRIPPING)
 	and a	
 	jp nz,l40adh
-	ld a,(0e000h)
-	cp 003h
+	ld a,(GAME_STATE)
+	cp GAME_STATE_GO_UPSTAIRS_OR_SILVIA_RESCUED
 	jr z,l40adh
 	ld a,(0e702h)
 	cp 00bh
@@ -9272,8 +9304,8 @@ sub_40e5h:
 	and 040h
 	ld de,(0e715h)
 	call l0e20h
-	ld a,(0e000h)
-	cp 005h
+	ld a,(GAME_STATE)
+	cp GAME_STATE_INTRO
 	ret z	
 	cp 007h
 	ret z	
@@ -9361,8 +9393,8 @@ l4192h:
 	xor 080h
 	ld (hl),a	
 l419ah:
-	ld a,(0e000h)
-	cp 003h
+	ld a,(GAME_STATE)
+	cp GAME_STATE_GO_UPSTAIRS_OR_SILVIA_RESCUED
 	jp z,l46a0h
 	call sub_4704h
 	ld hl,0e702h
@@ -9874,8 +9906,8 @@ l4547h:
 	ld (0e712h),hl
 	ret	
 l454bh:
-	ld a,00bh
-	ld (0e000h),a
+	ld a, GAME_STATE_LIFE_LOST
+	ld (GAME_STATE),a
 	ret	
 l4551h:
 	ld a,(hl)	
@@ -10089,15 +10121,15 @@ l46e2h:
 	call sub_0dfeh
 	ret	
 l46eeh:
-	ld a,00ch
-	ld (0e000h),a
+	ld a,GAME_STATE_LEVEL_ENDS
+	ld (GAME_STATE),a
 	ret	
 l46f4h:
 	ld a,(0e706h)
 	cp 026h
 	ret nz	
-	ld a,00ch
-	ld (0e000h),a
+	ld a, GAME_STATE_LEVEL_ENDS
+	ld (GAME_STATE),a
 	xor a	
 l4700h:
 	ld (0e340h),a
@@ -10142,8 +10174,8 @@ l4749h:
 	ld (0e710h),iy
 	ld a,000h
 	call sub_0dfeh
-	ld a,003h
-	ld (0e000h),a
+	ld a, GAME_STATE_GO_UPSTAIRS_OR_SILVIA_RESCUED
+	ld (GAME_STATE),a
 	ex de,hl	
 	ld hl,(0e712h)
 	ld a,(0e101h)
@@ -10185,7 +10217,7 @@ l4784h:
 	dec hl	
 	res 5,(hl)
 	set 1,(hl)
-	ld (0e000h),a
+	ld (GAME_STATE),a
 	ld a,000h
 	call sub_0dfeh
 	pop af	
@@ -10246,8 +10278,8 @@ sub_4821h:
 	ld hl,l73f0h
 	jp l1a7dh
 sub_482fh:
-	ld a,(0e000h)
-	cp 006h
+	ld a,(GAME_STATE)
+	cp GAME_STATE_DEMO
 	jr nz,l484dh
 	ld hl,0e022h
 	dec (hl)	
@@ -10291,8 +10323,8 @@ l4874h:
 	ld (PLAYER_JOYSTICK),a
 	ret	
 l4878h:
-	ld a,00bh
-	ld (0e000h),a
+	ld a, GAME_STATE_LIFE_LOST
+	ld (GAME_STATE),a
 	ret	
 l487eh:
 	di	
@@ -10351,8 +10383,8 @@ l4904h:
 	ld de,0010h
 	add ix,de
 	djnz l48d2h
-	ld a,005h
-	ld (0e000h),a
+	ld a, GAME_STATE_INTRO
+	ld (GAME_STATE),a
 	ld de,0d152h
 	ld c,00bh
 	ld hl,INTRO_STR
@@ -10377,8 +10409,8 @@ l4925h:
 	call WRITE_TEXT
 l4943h:
 	call sub_49c0h
-	ld a,(0e000h)
-	cp 00bh
+	ld a,(GAME_STATE)
+	cp GAME_STATE_LIFE_LOST
 	jr nz,l4943h
 	xor a	
 	ld hl,0
@@ -10402,8 +10434,8 @@ l496fh:
 	ld a,001h
 	call sub_0449h
 	di	
-	ld a,006h
-	ld (0e000h),a
+	ld a, GAME_STATE_DEMO
+	ld (GAME_STATE),a
 	ld hl,0
 	ld (POINTS),hl
 	ld (POINTS + 1),hl
@@ -10412,8 +10444,8 @@ l496fh:
 	ei	
 l4994h:
 	call sub_0fb8h
-	ld a,(0e000h)
-	cp 00bh
+	ld a,(GAME_STATE)
+	cp GAME_STATE_LIFE_LOST
 	jr nz,l4994h
 	ld a,038h
 	call WAIT_A
@@ -10902,8 +10934,8 @@ l4d01h:
 	ld a,(hl)	
 	rst 38h	
 l4d1dh:
-	ld a,00bh
-	ld (0e000h),a
+	ld a, GAME_STATE_LIFE_LOST
+	ld (GAME_STATE),a
 	jr l4d54h
 sub_4d24h:
 	ld hl,0e703h
@@ -11304,8 +11336,8 @@ l4febh:
 	ld (0e702h),a
 	ld (0e020h),a
 	ld (STEP_COUNTER),a
-	ld a,008h
-	ld (0e000h),a
+	ld a, GAME_STATE_GAME_ENDS
+	ld (GAME_STATE),a
 	call sub_5095h
 l5000h:
 	ld c,0d9h
@@ -11495,7 +11527,7 @@ l5197h:
 	call sub_5725h
 l519ah:
 	ld de,0d319h
-	ld a,(0e913h)
+	ld a,(COINS)
 	push af	
 	cp 001h
 	ld hl, ONLY_ONE_PLAYER_STR
@@ -11516,7 +11548,7 @@ l51abh:
 	jr z,l51c9h
 	inc b	
 l51c9h:
-	ld hl,0e913h
+	ld hl,COINS
 	ld a,(hl)	
 	sub b	
 	jr c,l5183h
@@ -11723,9 +11755,9 @@ l53ebh:
 l53efh:
 	ld hl,l5447h
 	call WRITE_TEXT
-	ld a,007h
+	ld a, GAME_STATE_INTERLUDE
 l53f7h:
-	ld (0e000h),a
+	ld (GAME_STATE),a
 	ld a,070h
 	call sub_5416h
 	ld hl,54abh
@@ -12111,7 +12143,7 @@ sub_5700h:
 	call 1153h
 sub_5703h:
 	xor a	
-	ld (0e000h),a
+	ld (GAME_STATE),a
 	ld hl,0
 	ld (0e902h),hl
 
@@ -18258,8 +18290,8 @@ l7641h:
 ; Service mode
 ;l7666h:
 SERVICE_MODE:
-	ld a,0ffh
-	ld (0e000h),a
+	ld a, GAME_STATE_SERVICE_MODE
+	ld (GAME_STATE),a
 	ei	
 	call WAIT_1
 	call sub_1157h
@@ -18272,7 +18304,7 @@ l767bh:
 	ld e,a	
 	ld d,00dh
 	ld c,010h
-	ld hl,0e000h
+	ld hl,GAME_STATE
 l7683h:
 	ld (hl),a	
 	inc hl	
@@ -18286,7 +18318,7 @@ l768ch:
 	dec c	
 	jr nz,l7683h
 	ld a,e	
-	ld hl,0e000h
+	ld hl,GAME_STATE
 	ld d,00dh
 	ld c,010h
 l7699h:
@@ -18349,15 +18381,15 @@ l76dch:
 	jr nz,l76b2h
 l76e7h:
 	call sub_1157h
-	ld hl,0e000h
+	ld hl,GAME_STATE
 	ld de,0e001h
 	ld bc,0fffh
-	ld (hl),000h
+	ld (hl), GAME_STATE_STOP
 	ldir
 	ld hl,0eb25h
 	ld (0eb03h),hl
-	ld a,0ffh
-	ld (0e000h),a
+	ld a, GAME_STATE_SERVICE_MODE
+	ld (GAME_STATE),a
 	ld de,0
 	call sub_7c10h
 	ld bc,(006ah)
@@ -18461,7 +18493,7 @@ l77b1h:
 l77bdh:
 	ex af,af'	
 	exx	
-	ld de,0e000h
+	ld de,GAME_STATE
 	ld hl,0d155h
 	ld bc,l0020h
 	ldir
@@ -18473,7 +18505,7 @@ l77bdh:
 	jr l77fch
 l77dbh:
 	exx	
-	ld hl,0e000h
+	ld hl,GAME_STATE
 	ld de,0d155h
 	ld bc,l0020h
 	ldir
