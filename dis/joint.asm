@@ -526,36 +526,42 @@ l02eeh:
 	ld a,003h		;02ee	3e 03 	> . 
 	call sub_0582h		;02f0	cd 82 05 	. . . 
 	pop de			;02f3	d1 	. 
-	ld hl,(TIME)		;02f4	2a 03 e0 	* . . 
-	ld a,l			;02f7	7d 	} 
-	or h			;02f8	b4 	. 
-	jr z,l031dh		;02f9	28 22 	( " 
-	ld a,e			;02fb	7b 	{ 
-	add a,001h		;02fc	c6 01 	. . 
-	daa			;02fe	27 	' 
-	ld e,a			;02ff	5f 	_ 
+
+    ; Here it decrements time after completing a level
+	ld hl,(TIME)	;02f4	2a 03 e0
+	ld a,l			;02f7	7d
+	or h			;02f8	b4
+	jr z,time_decrement_done		;02f9	28 22    Finished if HL == 0
+	ld a,e			;02fb	7b       E is the time decrement applied to the time
+	add a,001h		;02fc	c6 01    Increase time decrement
+	daa			    ;02fe	27
+	ld e,a			;02ff	5f       Store updated time decrement
 l0300h:
-	sbc hl,de		;0300	ed 52 	. R 
-	add hl,de			;0302	19 	. 
-	jr nc,l0307h		;0303	30 02 	0 . 
-	ld e,l			;0305	5d 	] 
-	ld d,h			;0306	54 	T 
+	sbc hl,de		;0300	ed 52
+	add hl,de		;0302	19
+	jr nc,l0307h	;0303	30 02
+	ld e,l			;0305	5d
+	ld d,h			;0306	54
 l0307h:
-	ld a,l			;0307	7d 	} 
-	sub e			;0308	93 	. 
-	daa			;0309	27 	' 
-	ld l,a			;030a	6f 	o 
-	ld a,h			;030b	7c 	| 
-	sbc a,d			;030c	9a 	. 
-	daa			;030d	27 	' 
-	ld h,a			;030e	67 	g 
-	ld (TIME),hl		;030f	22 03 e0 	" . . 
+	ld a,l			;0307	7d Get time low BCD
+	sub e			;0308	93 Decrement time low BCD by E
+	daa			    ;0309	27
+	ld l,a			;030a	6f Store decrement low BCD
+
+	ld a,h			;030b	7c Get time high BCD
+	sbc a,d			;030c	9a Decrement
+	daa			    ;030d	27
+	ld h,a			;030e	67 Store high BCD
+
+	ld (TIME),hl	;030f	22 03 e0 Store decremented time
+
 	push de			;0312	d5 	. 
 	call sub_2f9ah		;0313	cd 9a 2f 	. . / 
 	ld a,016h		;0316	3e 16 	> . 
 	call sub_0dfeh		;0318	cd fe 0d 	. . . 
 	jr l02eeh		;031b	18 d1 	. . 
-l031dh:
+    
+time_decrement_done:
 	ld a,038h		;031d	3e 38 	> 8 
 	call sub_0582h		;031f	cd 82 05 	. . . 
 
