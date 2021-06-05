@@ -76,6 +76,9 @@ VARS_TABLE: EQU 0xE2D8
 
 DISTANCE_TO_LEFT: EQU 0xE802
 
+PLAYER_BUTTONS:  EQU 0xE908
+PLAYER_JOYSTICK: EQU 0xE909
+
 ; ************************ ROM start ************************
 	org	00000h
 
@@ -2318,7 +2321,7 @@ l0d10h:
 	ld hl,(0e906h)		;0d10	2a 06 e9 	* . . 
 	call sub_0d3bh		;0d13	cd 3b 0d 	. ; . 
 	ld (0e906h),hl		;0d16	22 06 e9 	" . . 
-	ld hl,0e908h		;0d19	21 08 e9 	! . . 
+	ld hl,PLAYER_BUTTONS		;0d19	21 08 e9 	! . . 
 	rla			;0d1c	17 	. 
 	rl (hl)		;0d1d	cb 16 	. . 
 	rla			;0d1f	17 	. 
@@ -4595,7 +4598,7 @@ l1c55h:
 sub_1c61h:
 	ld a,(0e000h)		;1c61	3a 00 e0 	: . . 
 	cp 006h		;1c64	fe 06 	. . 
-	ld a,(0e909h)		;1c66	3a 09 e9 	: . . 
+	ld a,(PLAYER_JOYSTICK)		;1c66	3a 09 e9 	: . . 
 	ret z			;1c69	c8 	. 
 	ld a,(0e907h)		;1c6a	3a 07 e9 	: . . 
 	and 00fh		;1c6d	e6 0f 	. . 
@@ -9371,7 +9374,7 @@ l419ah:
 	ld a,(0e71fh)
 	and 001h
 	jp nz,l4551h
-	ld a,(0e909h)
+	ld a,(PLAYER_JOYSTICK)
 	ld d,a	
 	ld a,(hl)	
 	cp 006h
@@ -9495,7 +9498,7 @@ l4289h:
 	jp m,l42a0h
 	ld (0e703h),a
 l42a0h:
-	ld a,(0e909h)
+	ld a,(PLAYER_JOYSTICK)
 	bit 5,a
 	jp nz,l4365h
 	bit 4,a
@@ -9782,7 +9785,7 @@ l44a0h:
 l44a7h:
 	bit 7,c
 	jr z,l44a0h
-	ld a,(0e909h)
+	ld a,(PLAYER_JOYSTICK)
 	and 030h
 	jr z,l44a0h
 	ld b,0f8h
@@ -10268,7 +10271,7 @@ l484dh:
 	and a	
 	ld a,c	
 	jr nz,l4874h
-	ld a,(0e908h)
+	ld a,(PLAYER_BUTTONS)
 	cpl	
 	ld b,a	
 	cpl	
@@ -10280,7 +10283,7 @@ l484dh:
 	ld b,a	
 	or c	
 l4874h:
-	ld (0e909h),a
+	ld (PLAYER_JOYSTICK),a
 	ret	
 l4878h:
 	ld a,00bh
@@ -11949,7 +11952,7 @@ l55deh:
 	xor a	
 	ld (STEP_COUNTER),a
 l55e2h:
-	ld a,(0e909h)
+	ld a,(PLAYER_JOYSTICK)
 	and 030h
 	jr z,l55f7h
 	ld a,(hl)	
