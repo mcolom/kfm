@@ -641,7 +641,7 @@ l039ch:
 	ld (0e902h),hl		;03b0	22 02 e9 	" . . 
 	call 0570dh		;03b3	cd 0d 57 	. . W 
 	ld hl,0595bh		;03b6	21 5b 59 	! [ Y 
-	call sub_111ch		;03b9	cd 1c 11 	. . . 
+	call WRITE_TEXT		;03b9	cd 1c 11 	. . . 
 l03bch:
 	ld c,014h		;03bc	0e 14 	. . 
 	ld de,0d3a7h		;03be	11 a7 d3 	. . . 
@@ -787,7 +787,7 @@ l0461h:
 	
 	defb 021h, 03fh, 005h
 	
-	call z,sub_111ch		;04a6	cc 1c 11 	. . . 
+	call z,WRITE_TEXT		;04a6	cc 1c 11 	. . . 
 	ld a,054h		;04a9	3e 54 	> T 
 	call 0570fh		;04ab	cd 0f 57 	. . W 
 	pop hl			;04ae	e1 	. 
@@ -802,13 +802,13 @@ sub_04bfh:
 	and 007h		;04c2	e6 07 	. . 
 	ret z			;04c4	c8 	. 
 	and 001h		;04c5	e6 01 	. . 
-	jp z,sub_111ch		;04c7	ca 1c 11 	. . . 
+	jp z,WRITE_TEXT		;04c7	ca 1c 11 	. . . 
 	call 05756h		;04ca	cd 56 57 	. V W 
 	ld a,(0e915h)		;04cd	3a 15 e9 	: . . 
 	cp 002h		;04d0	fe 02 	. . 
 	ret nz			;04d2	c0 	. 
 	ld hl,l04d9h		;04d3	21 d9 04 	! . . 
-	jp sub_111ch		;04d6	c3 1c 11 	. . . 
+	jp WRITE_TEXT		;04d6	c3 1c 11 	. . . 
 l04d9h:
 	defb 0fdh,067h,0d6h	;illegal sequence		;04d9	fd 67 d6 	. g . 
 	cp 092h		;04dc	fe 92 	. . 
@@ -819,14 +819,14 @@ l04d9h:
 	rst 38h			;04e4	ff 	. 
 sub_04e5h:
 	ld hl,l04fdh		;04e5	21 fd 04 	! . . 
-	call sub_111ch		;04e8	cd 1c 11 	. . . 
+	call WRITE_TEXT		;04e8	cd 1c 11 	. . . 
 	ld a,(0e002h)		;04eb	3a 02 e0 	: . . 
 	and 001h		;04ee	e6 01 	. . 
 	inc a			;04f0	3c 	< 
 	call sub_1108h		;04f1	cd 08 11 	. . . 
-	call sub_111ch		;04f4	cd 1c 11 	. . . 
+	call WRITE_TEXT		;04f4	cd 1c 11 	. . . 
 	call sub_0556h		;04f7	cd 56 05 	. V . 
-	jp sub_111ch		;04fa	c3 1c 11 	. . . 
+	jp WRITE_TEXT		;04fa	c3 1c 11 	. . . 
 l04fdh:
 	defb 0fdh,067h,0d3h	;illegal sequence		;04fd	fd 67 d3 	. g . 
 	defb 0feh, 0dbh
@@ -2558,7 +2558,7 @@ l0e92h:
 	ret			;0e9a	c9 	. 
 sub_0e9bh:
 	ld hl,059a7h		;0e9b	21 a7 59 	! . Y 
-	call sub_111ch		;0e9e	cd 1c 11 	. . . 
+	call WRITE_TEXT		;0e9e	cd 1c 11 	. . . 
 	call sub_10a5h		;0ea1	cd a5 10 	. . . 
 	call sub_10abh		;0ea4	cd ab 10 	. . . 
 	call sub_10cfh		;0ea7	cd cf 10 	. . . 
@@ -2924,7 +2924,7 @@ l111ah:
 	ld c,(hl)			;111a	4e 	N 
 l111bh:
 	inc hl			;111b	23 	# 
-sub_111ch:
+WRITE_TEXT:
 	ld a,(hl)			;111c	7e 	~ 
 	inc hl			;111d	23 	# 
 	inc a			;111e	3c 	< 
@@ -2935,7 +2935,7 @@ sub_111ch:
 	jr z,l112dh		;1124	28 07 	( . 
 	sub 003h		;1126	d6 03 	. . 
 	call sub_1110h		;1128	cd 10 11 	. . . 
-	jr sub_111ch		;112b	18 ef 	. . 
+	jr WRITE_TEXT		;112b	18 ef 	. . 
 l112dh:
 	ld e,(hl)			;112d	5e 	^ 
 	inc hl			;112e	23 	# 
@@ -10297,7 +10297,7 @@ l487eh:
 	call sub_5700h
 	call 064ah
 	ld hl,IREM_COPYRIGHT_STR
-	call sub_111ch
+	call WRITE_TEXT
 	ld hl,l4f01h
 	ld (0e70eh),hl
 	ld a,09ch
@@ -10353,7 +10353,7 @@ l491bh:
 	cp 008h
 l4920h:
 	jr nz,l491bh
-	call sub_111ch
+	call WRITE_TEXT
 l4925h:
 	ld a,(0e020h)
 	cp 00bh
@@ -10365,7 +10365,7 @@ l4925h:
 	call WAIT_A
 	call sub_49aeh
 	ld hl,l4c71h
-	call sub_111ch
+	call WRITE_TEXT
 l4943h:
 	call sub_49c0h
 	ld a,(0e000h)
@@ -10479,7 +10479,7 @@ l4a14h:
 	call sub_56f7h
 	pop bc	
 	inc de	
-	call sub_111ch
+	call WRITE_TEXT
 	pop af	
 	push de	
 	cp 001h
@@ -11301,15 +11301,15 @@ l4febh:
 l5000h:
 	ld c,0d9h
 	ld hl,l5132h
-	call sub_111ch
+	call WRITE_TEXT
 	ld hl,l5147h
-	call sub_111ch
+	call WRITE_TEXT
 	ld hl,l5157h
-	call sub_111ch
+	call WRITE_TEXT
 	ld hl,l5162h
-	call sub_111ch
+	call WRITE_TEXT
 	ld hl,l516dh
-	call sub_111ch
+	call WRITE_TEXT
 	ld hl,ENDING_STR
 	call sub_5079h
 	ld a,0f8h
@@ -11345,7 +11345,7 @@ l5053h:
 	inc hl	
 	ld h,(hl)	
 	ld l,a	
-	call sub_111ch
+	call WRITE_TEXT
 l5061h:
 	ld a,(0e882h)
 	and a	
@@ -11480,7 +11480,7 @@ l5183h:
 	and 018h
 	jr z,l5197h
 	ld hl,PUSH_BUTTON_STR
-	call sub_111ch
+	call WRITE_TEXT
 	jr l519ah
 l5197h:
 	call sub_5725h
@@ -11493,9 +11493,9 @@ l519ah:
 	jr z,l51abh
 	ld hl, ONE_OR_TWO_PLAYERS_STR
 l51abh:
-	call sub_111ch
+	call WRITE_TEXT
 	ld hl, CREDIT_STR
-	call sub_111ch
+	call WRITE_TEXT
 	pop af	
 	call 10ffh
 	ld a,(0e904h)
@@ -11713,14 +11713,14 @@ l53ebh:
 	ld (DRAGONS_LEVEL),a
 l53efh:
 	ld hl,l5447h
-	call sub_111ch
+	call WRITE_TEXT
 	ld a,007h
 l53f7h:
 	ld (0e000h),a
 	ld a,070h
 	call sub_5416h
 	ld hl,54abh
-	call sub_111ch
+	call WRITE_TEXT
 	ld a,005h
 	call sub_0dfeh
 	ld a,070h
@@ -11739,7 +11739,7 @@ l5419h:
 	jr nz,l542bh
 	ld hl,05498h
 l542bh:
-	call sub_111ch
+	call WRITE_TEXT
 	ld hl,0e882h
 	ld a,(hl)	
 	and a	
@@ -11881,7 +11881,7 @@ l555dh:
 	call sub_0dfeh
 	call sub_5620h
 	ld hl,568ah
-	call sub_111ch
+	call WRITE_TEXT
 	pop af	
 	ld de,0da11h
 	cp 00ah
@@ -11989,7 +11989,7 @@ sub_5620h:
 	call sub_1157h
 	call sub_5703h
 	ld hl,l5675h
-	call sub_111ch
+	call WRITE_TEXT
 sub_562ch:
 	ld hl,0ea06h
 	ld de,0d6a1h
@@ -18381,7 +18381,7 @@ l771fh:
 	jr nz,l7743h
 	ld hl,l7891h
 l7743h:
-	call sub_111ch
+	call WRITE_TEXT
 	ei	
 	ld a,070h
 	call WAIT_A
@@ -18391,7 +18391,7 @@ l7743h:
 l7751h:
 	call sub_1157h
 	ld hl,l7cf7h
-	call sub_111ch
+	call WRITE_TEXT
 	xor a	
 	ld (0e882h),a
 	ld a,(0e81dh)
@@ -18587,9 +18587,9 @@ l7891h:
 	ld c,e	
 	rst 38h	
 	ld hl,l7c30h
-	call sub_111ch
+	call WRITE_TEXT
 	call sub_7bc1h
-	call sub_111ch
+	call WRITE_TEXT
 l78a5h:
 	ld de,0d199h
 	InDSW1
@@ -18604,7 +18604,7 @@ l78a5h:
 	ld hl,l7c9eh
 l78c1h:
 	ld de,0d35dh
-	call sub_111ch
+	call WRITE_TEXT
 	InDSW1
 	and 001h
 	ld hl,l7ca6h
@@ -18612,7 +18612,7 @@ l78c1h:
 	ld hl,l7cb0h
 l78d3h:
 	ld de,0d39eh
-	call sub_111ch
+	call WRITE_TEXT
 	InDSW1
 	and 002h
 	ld hl,l7cbah
@@ -18620,7 +18620,7 @@ l78d3h:
 	ld hl,l7cbfh
 l78e5h:
 	ld de,0d3deh
-	call sub_111ch
+	call WRITE_TEXT
 	call sub_056fh
 	ld de,0d41fh
 	call sub_1108h
@@ -18644,7 +18644,7 @@ l790ah:
 	jr z,l7933h
 	push hl	
 	ld hl,l7c8ch
-	call sub_111ch
+	call WRITE_TEXT
 	inc de	
 	ld a,042h
 	call sub_1110h
@@ -18654,7 +18654,7 @@ l790ah:
 	jr l7936h
 l792ah:
 	ld hl,l7cc4h
-	call sub_111ch
+	call WRITE_TEXT
 	ld de,0d2d0h
 l7933h:
 	call sub_571ah
@@ -18668,7 +18668,7 @@ l7936h:
 l7944h:
 	push bc	
 	ld hl,l7cd8h
-	call sub_111ch
+	call WRITE_TEXT
 	push hl	
 	inc de	
 	ld a,b	
@@ -18678,14 +18678,14 @@ l7944h:
 	add hl,de	
 	ex de,hl	
 	pop hl	
-	call sub_111ch
+	call WRITE_TEXT
 	ld hl,0feb6h
 	add hl,de	
 	ex de,hl	
 	pop bc	
 	djnz l7944h
 	ld hl,l7cech
-	call sub_111ch
+	call WRITE_TEXT
 	ld hl,09999h
 	ld (TIME),hl
 l7971h:
@@ -18746,7 +18746,7 @@ l79c7h:
 	ld a,(hl)	
 	call sub_0dfeh
 	ld hl,l7d56h
-	call sub_111ch
+	call WRITE_TEXT
 	pop af	
 l79e6h:
 	ld (0e81eh),a
@@ -19044,7 +19044,7 @@ l7befh:
 sub_7bf7h:
 	push af	
 	ld hl,l7c2ch
-	call sub_111ch
+	call WRITE_TEXT
 	pop af	
 	call sub_1110h
 	inc de	
@@ -19053,7 +19053,7 @@ sub_7bf7h:
 	jr c,l7c0dh
 	ld hl,l7c26h
 l7c0dh:
-	jp sub_111ch
+	jp WRITE_TEXT
 sub_7c10h:
 	push af	
 	ld bc,sub_4000h
