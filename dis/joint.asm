@@ -12605,8 +12605,8 @@ l5a38h:
 	call nc,07e7ch
 	dec e	
 l5a3eh:
-	call nc,sub_7f01h
-	jp m,l7cd4h+1
+	call nc,0x7f01
+	jp m,0x7cd5
 	ld a,(hl)	
 	ei	
 	push de	
@@ -12626,11 +12626,11 @@ l5a51h:
 	call nc,07e7ch
 	dec e	
 l5a5eh:
-	call nc,sub_7f01h
-	ld a,(l7cd4h)
+	call nc,0x7f01
+	ld a,(0x7cd4)
 	ld a,(hl)	
 	dec sp	
-	call nc,sub_7f01h
+	call nc,0x7f01
 	djnz l5a3eh
 	ld a,h	
 	ld a,(hl)	
@@ -16619,7 +16619,7 @@ l6e5fh:
 	ld a,(bc)	
 l6e62h:
 	ld c,c	
-	call po,sub_7dffh
+	call po,0x7dff
 	ld l,(hl)	
 	sub d	
 	ld l,(hl)	
@@ -18643,7 +18643,7 @@ l790ah:
 	ld de,0d2d0h
 	jr z,l7933h
 	push hl	
-	ld hl,l7c8ch
+	ld hl,coin_mode_str
 	call WRITE_TEXT
 	inc de	
 	ld a,042h
@@ -19074,759 +19074,126 @@ l7c17h:
 	ret	
 
 l7c26h:
-	ld c,a			;7c26	4f 	O 
-	ld c,e			;7c27	4b 	K 
-	rst 38h			;7c28	ff 	. 
+    defb "OK", 0ffh
 l7c29h:
-	ld c,(hl)			;7c29	4e 	N 
-	ld b,a			;7c2a	47 	G 
-	rst 38h			;7c2b	ff 	. 
+    defb "NG", 0ffh
 l7c2ch:
-	ld d,d			;7c2c	52 	R 
-	ld c,a			;7c2d	4f 	O 
-	ld c,l			;7c2e	4d 	M 
-	rst 38h			;7c2f	ff 	. 
+    defb "ROM", 0ffh
 l7c30h:
-	cp 014h		;7c30	fe 14 	. . 
-	defb 0fdh,050h,0d1h	;illegal sequence		;7c32	fd 50 d1 	. P . 
-	ld b,h			;7c35	44 	D 
-	ld c,c			;7c36	49 	I 
-	ld d,b			;7c37	50 	P 
-	jr nz,l7c8dh		;7c38	20 53 	  S 
-	ld d,a			;7c3a	57 	W 
-	jr nz,$+1		;7c3b	20 ff 	  . 
-	defb 0fdh,094h,0d1h	;illegal sequence		;7c3d	fd 94 d1 	. . . 
-	ld b,h			;7c40	44 	D 
-	ld d,e			;7c41	53 	S 
-	ld d,a			;7c42	57 	W 
-	ld sp,0d4fdh		;7c43	31 fd d4 	1 . . 
-	pop de			;7c46	d1 	. 
-	ld b,h			;7c47	44 	D 
-	ld d,e			;7c48	53 	S 
-	ld d,a			;7c49	57 	W 
-	ld (0a3fdh),a		;7c4a	32 fd a3 	2 . . 
-	pop de			;7c4d	d1 	. 
-	ld sp,l4f2eh		;7c4e	31 2e 4f 	1 . O 
-	ld c,(hl)			;7c51	4e 	N 
-	ex (sp),iy		;7c52	fd e3 	. . 
-	pop de			;7c54	d1 	. 
-	jr nc,l7c85h		;7c55	30 2e 	0 . 
-	ld c,a			;7c57	4f 	O 
-	ld b,(hl)			;7c58	46 	F 
-	ld b,(hl)			;7c59	46 	F 
-	defb 0fdh,050h,0d3h	;illegal sequence		;7c5a	fd 50 d3 	. P . 
-	ld b,d			;7c5d	42 	B 
-	ld c,a			;7c5e	4f 	O 
-	ld b,h			;7c5f	44 	D 
-	ld e,c			;7c60	59 	Y 
-	jr nz,l7cb7h		;7c61	20 54 	  T 
-	ld e,c			;7c63	59 	Y 
-	ld d,b			;7c64	50 	P 
-	ld b,l			;7c65	45 	E 
-	defb 0fdh,090h,0d3h	;illegal sequence		;7c66	fd 90 d3 	. . . 
-	ld b,h			;7c69	44 	D 
-	ld c,c			;7c6a	49 	I 
-	ld b,(hl)			;7c6b	46 	F 
-	ld b,(hl)			;7c6c	46 	F 
-	ld c,c			;7c6d	49 	I 
-	ld b,e			;7c6e	43 	C 
-	ld d,l			;7c6f	55 	U 
-	ld c,h			;7c70	4c 	L 
-	ld d,h			;7c71	54 	T 
-	ld e,c			;7c72	59 	Y 
-	defb 0fdh,0d0h,0d3h	;illegal sequence		;7c73	fd d0 d3 	. . . 
-	ld b,h			;7c76	44 	D 
-	ld b,l			;7c77	45 	E 
-	ld b,e			;7c78	43 	C 
-	ld d,d			;7c79	52 	R 
-	ld b,l			;7c7a	45 	E 
-	ld b,c			;7c7b	41 	A 
-	ld d,e			;7c7c	53 	S 
-	ld b,l			;7c7d	45 	E 
-	defb 0fdh,010h,0d4h	;illegal sequence		;7c7e	fd 10 d4 	. . . 
-	ld b,(hl)			;7c81	46 	F 
-	ld c,c			;7c82	49 	I 
-	ld b,a			;7c83	47 	G 
-	ld c,b			;7c84	48 	H 
-l7c85h:
-	ld d,h			;7c85	54 	T 
-	ld b,l			;7c86	45 	E 
-	ld d,d			;7c87	52 	R 
-	ld d,e			;7c88	53 	S 
-	defb 0fdh,090h,0d2h	;illegal sequence		;7c89	fd 90 d2 	. . . 
-l7c8ch:
-	ld b,e			;7c8c	43 	C 
-l7c8dh:
-	ld c,a			;7c8d	4f 	O 
-	ld c,c			;7c8e	49 	I 
-	ld c,(hl)			;7c8f	4e 	N 
-	jr nz,l7cdfh		;7c90	20 4d 	  M 
-	ld c,a			;7c92	4f 	O 
-	ld b,h			;7c93	44 	D 
-	ld b,l			;7c94	45 	E 
-	rst 38h			;7c95	ff 	. 
+	cp 014h		;7c30	fe 14
+	defb 0fdh,050h,0d1h
+    defb "DIP SW ", 0ffh
+    
+	defb 0fdh,094h,0d1h
+    defb "DSW1"
+    defb 0fdh,0d4h,0d1h
+    defb "DSW2"
+    defb 0fdh,0a3h,0d1h
+    defb "1.ON"
+    defb 0fdh,0e3h,0d1h
+    defb "0.OFF"
+	defb 0fdh,050h,0d3h
+    defb "BODY TYPE"
+	defb 0fdh,090h,0d3h
+    defb "DIFFICULTY"
+	defb 0fdh,0d0h,0d3h
+    defb "DECREASE"
+	defb 0fdh,010h,0d4h
+    defb "FIGHTERS"
+	defb 0fdh,090h,0d2h
+coin_mode_str:
+    defb "COIN MODE", 0ffh
 l7c96h:
-	ld d,h			;7c96	54 	T 
-	ld b,c			;7c97	41 	A 
-	ld b,d			;7c98	42 	B 
-	ld c,h			;7c99	4c 	L 
-	ld b,l			;7c9a	45 	E 
-	jr nz,l7cbdh		;7c9b	20 20 	    
-	rst 38h			;7c9d	ff 	. 
+    defb "TABLE  ", 0ffh
 l7c9eh:
-	ld d,l			;7c9e	55 	U 
-	ld d,b			;7c9f	50 	P 
-	ld d,d			;7ca0	52 	R 
-	ld c,c			;7ca1	49 	I 
-	ld b,a			;7ca2	47 	G 
-	ld c,b			;7ca3	48 	H 
-	ld d,h			;7ca4	54 	T 
-	rst 38h			;7ca5	ff 	. 
+    defb "UPRIGHT", 0ffh
 l7ca6h:
-	ld b,l			;7ca6	45 	E 
-	ld b,c			;7ca7	41 	A 
-	ld d,e			;7ca8	53 	S 
-	ld e,c			;7ca9	59 	Y 
-	jr nz,l7ccch		;7caa	20 20 	    
-	jr nz,$+34		;7cac	20 20 	    
-	jr nz,$+1		;7cae	20 ff 	  . 
+    defb "EASY     ", 0ffh
 l7cb0h:
-	ld b,h			;7cb0	44 	D 
-	ld c,c			;7cb1	49 	I 
-	ld b,(hl)			;7cb2	46 	F 
-	ld b,(hl)			;7cb3	46 	F 
-	ld c,c			;7cb4	49 	I 
-	ld b,e			;7cb5	43 	C 
-	ld d,l			;7cb6	55 	U 
-l7cb7h:
-	ld c,h			;7cb7	4c 	L 
-	ld d,h			;7cb8	54 	T 
-	rst 38h			;7cb9	ff 	. 
+    defb "DIFFICULT", 0ffh
 l7cbah:
-	ld d,e			;7cba	53 	S 
-	ld c,h			;7cbb	4c 	L 
-	ld c,a			;7cbc	4f 	O 
-l7cbdh:
-	ld d,a			;7cbd	57 	W 
-	rst 38h			;7cbe	ff 	. 
+    defb "SLOW", 0ffh
 l7cbfh:
-	ld b,(hl)			;7cbf	46 	F 
-	ld b,c			;7cc0	41 	A 
-	ld d,e			;7cc1	53 	S 
-	ld d,h			;7cc2	54 	T 
-	rst 38h			;7cc3	ff 	. 
+    defb "FAST", 0ffh
 l7cc4h:
-	jr nz,l7ce6h		;7cc4	20 20 	    
-	jr nz,l7ce8h		;7cc6	20 20 	    
-	jr nz,l7d10h		;7cc8	20 46 	  F 
-	ld d,d			;7cca	52 	R 
-	ld b,l			;7ccb	45 	E 
-l7ccch:
-	ld b,l			;7ccc	45 	E 
-	jr nz,l7cefh		;7ccd	20 20 	    
-	jr nz,l7d21h		;7ccf	20 50 	  P 
-	ld c,h			;7cd1	4c 	L 
-	ld b,c			;7cd2	41 	A 
-	ld e,c			;7cd3	59 	Y 
-l7cd4h:
-	jr nz,l7cf6h		;7cd4	20 20 	    
-	jr nz,$+1		;7cd6	20 ff 	  . 
+    defb "     FREE   PLAY   ", 0ffh
 l7cd8h:
-	ld c,c			;7cd8	49 	I 
-	ld c,(hl)			;7cd9	4e 	N 
-	ld d,h			;7cda	54 	T 
-	ld b,l			;7cdb	45 	E 
-	ld d,d			;7cdc	52 	R 
-	ld b,(hl)			;7cdd	46 	F 
-	ld b,c			;7cde	41 	A 
-l7cdfh:
-	ld b,e			;7cdf	43 	C 
-	ld b,l			;7ce0	45 	E 
-	rst 38h			;7ce1	ff 	. 
-	ld d,d			;7ce2	52 	R 
-	ld b,l			;7ce3	45 	E 
-	ld b,c			;7ce4	41 	A 
-	ld b,h			;7ce5	44 	D 
-l7ce6h:
-	jr nz,l7d2ch		;7ce6	20 44 	  D 
-l7ce8h:
-	ld b,c			;7ce8	41 	A 
-	ld d,h			;7ce9	54 	T 
-	ld b,c			;7cea	41 	A 
-	rst 38h			;7ceb	ff 	. 
+    defb "INTERFACE", 0ffh
+    defb "READ DATA", 0ffh ; 7ce2
 l7cech:
-	defb 0fdh,057h,0d5h	;illegal sequence		;7cec	fd 57 d5 	. W . 
+	defb 0fdh,057h,0d5h
 l7cefh:
-	ld d,h			;7cef	54 	T 
-	ld c,c			;7cf0	49 	I 
-	ld c,l			;7cf1	4d 	M 
-	ld c,l			;7cf2	4d 	M 
-	ld c,c			;7cf3	49 	I 
-	ld c,(hl)			;7cf4	4e 	N 
-	ld b,a			;7cf5	47 	G 
-l7cf6h:
-	rst 38h			;7cf6	ff 	. 
+    defb "TIMMING", 0ffh ; (sic)
 l7cf7h:
-	cp 014h		;7cf7	fe 14 	. . 
-	defb 0fdh,050h,0d1h	;illegal sequence		;7cf9	fd 50 d1 	. P . 
-	jr nc,l7d2fh		;7cfc	30 31 	0 1 
-	jr nz,l7d44h		;7cfe	20 44 	  D 
-	ld c,c			;7d00	49 	I 
-	ld d,b			;7d01	50 	P 
-	jr nz,$+85		;7d02	20 53 	  S 
-	ld d,a			;7d04	57 	W 
-	ld c,c			;7d05	49 	I 
-	ld d,h			;7d06	54 	T 
-	ld b,e			;7d07	43 	C 
-	ld c,b			;7d08	48 	H 
-	defb 0fdh,090h,0d1h	;illegal sequence		;7d09	fd 90 d1 	. . . 
-	jr nc,$+52		;7d0c	30 32 	0 2 
-	jr nz,$+75		;7d0e	20 49 	  I 
-l7d10h:
-	cpl			;7d10	2f 	/ 
-	ld c,a			;7d11	4f 	O 
-	jr nz,$+82		;7d12	20 50 	  P 
-	ld c,a			;7d14	4f 	O 
-	ld d,d			;7d15	52 	R 
-	ld d,h			;7d16	54 	T 
-	defb 0fdh,0d0h,0d1h	;illegal sequence		;7d17	fd d0 d1 	. . . 
-	jr nc,l7d4fh		;7d1a	30 33 	0 3 
-	jr nz,l7d71h		;7d1c	20 53 	  S 
-	ld c,a			;7d1e	4f 	O 
-	ld d,l			;7d1f	55 	U 
-	ld c,(hl)			;7d20	4e 	N 
-l7d21h:
-	ld b,h			;7d21	44 	D 
-	defb 0fdh,010h,0d2h	;illegal sequence		;7d22	fd 10 d2 	. . . 
-	jr nc,l7d5bh		;7d25	30 34 	0 4 
-	jr nz,l7d6ch		;7d27	20 43 	  C 
-	ld c,b			;7d29	48 	H 
-	ld b,c			;7d2a	41 	A 
-	ld d,d			;7d2b	52 	R 
-l7d2ch:
-	ld b,c			;7d2c	41 	A 
-	ld b,e			;7d2d	43 	C 
-	ld d,h			;7d2e	54 	T 
-l7d2fh:
-	ld b,l			;7d2f	45 	E 
-	ld d,d			;7d30	52 	R 
-	defb 0fdh,050h,0d2h	;illegal sequence		;7d31	fd 50 d2 	. P . 
-	jr nc,$+55		;7d34	30 35 	0 5 
-	jr nz,l7d7bh		;7d36	20 43 	  C 
-	ld c,a			;7d38	4f 	O 
-	ld c,h			;7d39	4c 	L 
-	ld c,a			;7d3a	4f 	O 
-	ld d,d			;7d3b	52 	R 
-	defb 0fdh,090h,0d2h	;illegal sequence		;7d3c	fd 90 d2 	. . . 
-	jr nc,l7d77h		;7d3f	30 36 	0 6 
-	jr nz,l7d86h		;7d41	20 43 	  C 
-	ld d,d			;7d43	52 	R 
-l7d44h:
-	ld c,a			;7d44	4f 	O 
-	ld d,e			;7d45	53 	S 
-	ld d,e			;7d46	53 	S 
-	jr nz,$+74		;7d47	20 48 	  H 
-	ld b,c			;7d49	41 	A 
-	ld d,h			;7d4a	54 	T 
-	ld b,e			;7d4b	43 	C 
-	ld c,b			;7d4c	48 	H 
-	jr nz,l7d9fh		;7d4d	20 50 	  P 
-l7d4fh:
-	ld b,c			;7d4f	41 	A 
-	ld d,h			;7d50	54 	T 
-	ld d,h			;7d51	54 	T 
-	ld b,l			;7d52	45 	E 
-	ld d,d			;7d53	52 	R 
-	ld c,(hl)			;7d54	4e 	N 
-	rst 38h			;7d55	ff 	. 
+	cp 014h		;7cf7	fe 14
+	defb 0fdh,050h,0d1h	;7cf9
+    defb "01 DIP SWITCH"    
+	defb 0fdh,090h,0d1h
+    defb "02 I/O PORT"
+	defb 0fdh,0d0h,0d1h
+    defb "03 SOUND"
+	defb 0fdh,010h,0d2h
+    defb "04 CHARACTER"
+	defb 0fdh,050h,0d2h
+    defb "05 COLOR"
+	defb 0fdh,090h,0d2h
+    defb "06 CROSS HATCH PATTERN", 0ffh
 l7d56h:
-	cp 014h		;7d56	fe 14 	. . 
-	defb 0fdh,015h,0d1h	;illegal sequence		;7d58	fd 15 d1 	. . . 
+	cp 014h		;7d56	fe 14
+	defb 0fdh,015h,0d1h
 l7d5bh:
-	ld d,e			;7d5b	53 	S 
-	ld c,a			;7d5c	4f 	O 
-	ld d,l			;7d5d	55 	U 
-	ld c,(hl)			;7d5e	4e 	N 
-	ld b,h			;7d5f	44 	D 
-	defb 0fdh,050h,0d1h	;illegal sequence		;7d60	fd 50 d1 	. P . 
-	jr nc,l7d96h		;7d63	30 31 	0 1 
-	jr nz,l7dc0h		;7d65	20 59 	  Y 
-	ld b,l			;7d67	45 	E 
-	ld c,h			;7d68	4c 	L 
-	ld c,h			;7d69	4c 	L 
-	jr nz,$+81		;7d6a	20 4f 	  O 
-l7d6ch:
-	ld b,(hl)			;7d6c	46 	F 
-	jr nz,$+82		;7d6d	20 50 	  P 
-	ld c,h			;7d6f	4c 	L 
-	ld b,c			;7d70	41 	A 
-l7d71h:
-	ld e,c			;7d71	59 	Y 
-	ld b,l			;7d72	45 	E 
-	ld d,d			;7d73	52 	R 
-	jr z,l7dc0h		;7d74	28 4a 	( J 
-	ld d,l			;7d76	55 	U 
-l7d77h:
-	ld c,l			;7d77	4d 	M 
-	ld d,b			;7d78	50 	P 
-	dec l			;7d79	2d 	- 
-	ld c,e			;7d7a	4b 	K 
-l7d7bh:
-	ld c,c			;7d7b	49 	I 
-	ld b,e			;7d7c	43 	C 
-	ld c,e			;7d7d	4b 	K 
-	ld d,e			;7d7e	53 	S 
-	add hl,hl			;7d7f	29 	) 
-	defb 0fdh,093h,0d1h	;illegal sequence		;7d80	fd 93 d1 	. . . 
-	ld b,e			;7d83	43 	C 
-	ld d,d			;7d84	52 	R 
-	ld b,l			;7d85	45 	E 
-l7d86h:
-	ld b,h			;7d86	44 	D 
-	ld c,c			;7d87	49 	I 
-	ld d,h			;7d88	54 	T 
-	jr nz,l7dcch		;7d89	20 41 	  A 
-	ld b,h			;7d8b	44 	D 
-	ld b,h			;7d8c	44 	D 
-	ld c,c			;7d8d	49 	I 
-	ld c,(hl)			;7d8e	4e 	N 
-	ld b,a			;7d8f	47 	G 
-	jr nz,l7de5h		;7d90	20 53 	  S 
-	ld c,a			;7d92	4f 	O 
-	ld d,l			;7d93	55 	U 
-	ld c,(hl)			;7d94	4e 	N 
-	ld b,h			;7d95	44 	D 
+    defb "SOUND"
+	defb 0fdh,050h,0d1h
+    defb "01 YELL OF PLAYER(JUMP-KICKS)"
+	defb 0fdh,093h,0d1h
+    defb "CREDIT ADDING SOUND"
 l7d96h:
-	defb 0fdh,0d0h,0d1h	;illegal sequence		;7d96	fd d0 d1 	. . . 
-	jr nc,l7dcdh		;7d99	30 32 	0 2 
-	jr nz,l7df6h		;7d9b	20 59 	  Y 
-	ld b,l			;7d9d	45 	E 
-	ld c,h			;7d9e	4c 	L 
-l7d9fh:
-	ld c,h			;7d9f	4c 	L 
-	jr nz,l7df1h		;7da0	20 4f 	  O 
-	ld b,(hl)			;7da2	46 	F 
-	jr nz,l7df5h		;7da3	20 50 	  P 
-	ld c,h			;7da5	4c 	L 
-	ld b,c			;7da6	41 	A 
-	ld e,c			;7da7	59 	Y 
-	ld b,l			;7da8	45 	E 
-	ld d,d			;7da9	52 	R 
-	jr z,$+82		;7daa	28 50 	( P 
-	ld d,l			;7dac	55 	U 
-	ld c,(hl)			;7dad	4e 	N 
-	ld b,e			;7dae	43 	C 
-	ld c,b			;7daf	48 	H 
-	ld b,l			;7db0	45 	E 
-	ld d,e			;7db1	53 	S 
-	inc l			;7db2	2c 	, 
-	ld c,e			;7db3	4b 	K 
-	ld c,c			;7db4	49 	I 
-	ld b,e			;7db5	43 	C 
-	ld c,e			;7db6	4b 	K 
-	ld d,e			;7db7	53 	S 
-	add hl,hl			;7db8	29 	) 
-	defb 0fdh,010h,0d2h	;illegal sequence		;7db9	fd 10 d2 	. . . 
-	jr nc,l7df1h		;7dbc	30 33 	0 3 
-	jr nz,$+73		;7dbe	20 47 	  G 
-l7dc0h:
-	ld d,d			;7dc0	52 	R 
-	ld c,a			;7dc1	4f 	O 
-	ld b,c			;7dc2	41 	A 
-	ld c,(hl)			;7dc3	4e 	N 
-	jr nz,l7e15h		;7dc4	20 4f 	  O 
-	ld b,(hl)			;7dc6	46 	F 
-	jr nz,$+82		;7dc7	20 50 	  P 
-	ld c,h			;7dc9	4c 	L 
-	ld b,c			;7dca	41 	A 
-	ld e,c			;7dcb	59 	Y 
-l7dcch:
-	ld b,l			;7dcc	45 	E 
-l7dcdh:
-	ld d,d			;7dcd	52 	R 
-	jr nz,$+81		;7dce	20 4f 	  O 
-	ld d,d			;7dd0	52 	R 
-	jr nz,l7e18h		;7dd1	20 45 	  E 
-	ld c,(hl)			;7dd3	4e 	N 
-	ld b,l			;7dd4	45 	E 
-	ld c,l			;7dd5	4d 	M 
-	ld e,c			;7dd6	59 	Y 
-	defb 0fdh,050h,0d2h	;illegal sequence		;7dd7	fd 50 d2 	. P . 
-	jr nc,$+54		;7dda	30 34 	0 4 
-	jr nz,l7e2ah		;7ddc	20 4c 	  L 
-	ld b,c			;7dde	41 	A 
-	ld d,l			;7ddf	55 	U 
-	ld b,a			;7de0	47 	G 
-	ld c,b			;7de1	48 	H 
-	ld c,c			;7de2	49 	I 
-	ld c,(hl)			;7de3	4e 	N 
-	ld b,a			;7de4	47 	G 
-l7de5h:
-	jr nz,l7e3dh		;7de5	20 56 	  V 
-	ld c,a			;7de7	4f 	O 
-	ld c,c			;7de8	49 	I 
-	ld b,e			;7de9	43 	C 
-	ld b,l			;7dea	45 	E 
-	jr nz,l7e3ch		;7deb	20 4f 	  O 
-	ld b,(hl)			;7ded	46 	F 
-	jr nz,l7e35h		;7dee	20 45 	  E 
-	ld c,(hl)			;7df0	4e 	N 
-l7df1h:
-	ld b,l			;7df1	45 	E 
-	ld c,l			;7df2	4d 	M 
-	ld c,c			;7df3	49 	I 
-	ld b,l			;7df4	45 	E 
-l7df5h:
-	ld d,e			;7df5	53 	S 
+	defb 0fdh,0d0h,0d1h
+    defb "02 YELL OF PLAYER(PUNCHES,KICKS)"
+	defb 0fdh,010h,0d2h
+    defb "03 GROAN OF PLAYER OR ENEMY"
+	defb 0fdh,050h,0d2h
+    defb "04 LAUGHING VOICE OF ENEMIES-1"
+    defb 0fdh,090h,0d2h
 l7df6h:
-	dec l			;7df6	2d 	- 
-	ld sp,090fdh		;7df7	31 fd 90 	1 . . 
-	jp nc,03530h		;7dfa	d2 30 35 	. 0 5 
-	jr nz,l7e4bh		;7dfd	20 4c 	  L 
-sub_7dffh:
-	ld b,c			;7dff	41 	A 
-	ld d,l			;7e00	55 	U 
-	ld b,a			;7e01	47 	G 
-	ld c,b			;7e02	48 	H 
-	ld c,c			;7e03	49 	I 
-	ld c,(hl)			;7e04	4e 	N 
-	ld b,a			;7e05	47 	G 
-	jr nz,l7e5eh		;7e06	20 56 	  V 
-	ld c,a			;7e08	4f 	O 
-	ld c,c			;7e09	49 	I 
-	ld b,e			;7e0a	43 	C 
-	ld b,l			;7e0b	45 	E 
-	jr nz,$+81		;7e0c	20 4f 	  O 
-	ld b,(hl)			;7e0e	46 	F 
-	jr nz,$+71		;7e0f	20 45 	  E 
-	ld c,(hl)			;7e11	4e 	N 
-	ld b,l			;7e12	45 	E 
-	ld c,l			;7e13	4d 	M 
-	ld c,c			;7e14	49 	I 
-l7e15h:
-	ld b,l			;7e15	45 	E 
-	ld d,e			;7e16	53 	S 
-	dec l			;7e17	2d 	- 
-l7e18h:
-	ld (0d0fdh),a		;7e18	32 fd d0 	2 . . 
-	jp nc,03630h		;7e1b	d2 30 36 	. 0 6 
-	jr nz,l7e62h		;7e1e	20 42 	  B 
-	ld d,l			;7e20	55 	U 
-	ld d,d			;7e21	52 	R 
-	ld d,e			;7e22	53 	S 
-	ld d,h			;7e23	54 	T 
-	ld c,c			;7e24	49 	I 
-	ld c,(hl)			;7e25	4e 	N 
-	ld b,a			;7e26	47 	G 
-	jr nz,l7e78h		;7e27	20 4f 	  O 
-	ld b,(hl)			;7e29	46 	F 
-l7e2ah:
-	jr nz,$+82		;7e2a	20 50 	  P 
-	ld b,c			;7e2c	41 	A 
-	ld d,b			;7e2d	50 	P 
-	ld b,l			;7e2e	45 	E 
-	ld d,d			;7e2f	52 	R 
-	jr nz,l7e74h		;7e30	20 42 	  B 
-	ld b,c			;7e32	41 	A 
-	ld c,h			;7e33	4c 	L 
-	ld c,h			;7e34	4c 	L 
+    defb "05 LAUGHING VOICE OF ENEMIES-2"
+    defb 0fdh,0d0h,0d2h
+    defb "06 BURSTING OF PAPER BALL"
 l7e35h:
-	defb 0fdh,013h,0d3h	;illegal sequence		;7e35	fd 13 d3 	. . . 
-	ld b,d			;7e38	42 	B 
-	ld d,l			;7e39	55 	U 
-	ld d,d			;7e3a	52 	R 
-	ld d,e			;7e3b	53 	S 
-l7e3ch:
-	ld d,h			;7e3c	54 	T 
-l7e3dh:
-	ld c,c			;7e3d	49 	I 
-	ld c,(hl)			;7e3e	4e 	N 
-	ld b,a			;7e3f	47 	G 
-	jr nz,$+81		;7e40	20 4f 	  O 
-	ld b,(hl)			;7e42	46 	F 
-	jr nz,l7e89h		;7e43	20 44 	  D 
-	ld d,d			;7e45	52 	R 
-	ld b,c			;7e46	41 	A 
-	ld b,a			;7e47	47 	G 
-	ld c,a			;7e48	4f 	O 
-	ld c,(hl)			;7e49	4e 	N 
-	daa			;7e4a	27 	' 
-l7e4bh:
-	ld d,e			;7e4b	53 	S 
-	jr nz,l7e93h		;7e4c	20 45 	  E 
-	ld b,a			;7e4e	47 	G 
-	ld b,a			;7e4f	47 	G 
-	defb 0fdh,050h,0d3h	;illegal sequence		;7e50	fd 50 d3 	. P . 
-	jr nc,l7e8ch		;7e53	30 37 	0 7 
-	jr nz,l7eaah		;7e55	20 53 	  S 
-	ld c,b			;7e57	48 	H 
-	ld d,d			;7e58	52 	R 
-	ld c,c			;7e59	49 	I 
-	ld b,l			;7e5a	45 	E 
-	ld c,e			;7e5b	4b 	K 
-	jr nz,l7eadh		;7e5c	20 4f 	  O 
-l7e5eh:
-	ld b,(hl)			;7e5e	46 	F 
-	jr nz,l7eb1h		;7e5f	20 50 	  P 
-	ld c,h			;7e61	4c 	L 
-l7e62h:
-	ld b,c			;7e62	41 	A 
-	ld e,c			;7e63	59 	Y 
-	ld b,l			;7e64	45 	E 
-	ld d,d			;7e65	52 	R 
-	defb 0fdh,090h,0d3h	;illegal sequence		;7e66	fd 90 d3 	. . . 
-	jr nc,$+58		;7e69	30 38 	0 8 
-	jr nz,$+82		;7e6b	20 50 	  P 
-	ld c,h			;7e6d	4c 	L 
-	ld b,c			;7e6e	41 	A 
-	ld e,c			;7e6f	59 	Y 
-	ld b,l			;7e70	45 	E 
-	ld d,d			;7e71	52 	R 
-	jr nz,l7ec6h		;7e72	20 52 	  R 
-l7e74h:
-	ld d,l			;7e74	55 	U 
-	ld c,(hl)			;7e75	4e 	N 
-	ld c,(hl)			;7e76	4e 	N 
-	ld c,c			;7e77	49 	I 
-l7e78h:
-	ld c,(hl)			;7e78	4e 	N 
-	ld b,a			;7e79	47 	G 
-	defb 0fdh,0d0h,0d3h	;illegal sequence		;7e7a	fd d0 d3 	. . . 
-	jr nc,l7eb8h		;7e7d	30 39 	0 9 
-	jr nz,$+74		;7e7f	20 48 	  H 
-	ld c,c			;7e81	49 	I 
-	ld d,h			;7e82	54 	T 
-	ld d,h			;7e83	54 	T 
-	ld c,c			;7e84	49 	I 
-	ld c,(hl)			;7e85	4e 	N 
-	ld b,a			;7e86	47 	G 
-	jr nz,l7edch		;7e87	20 53 	  S 
-l7e89h:
-	ld c,a			;7e89	4f 	O 
-	ld d,l			;7e8a	55 	U 
-	ld c,(hl)			;7e8b	4e 	N 
-l7e8ch:
-	ld b,h			;7e8c	44 	D 
-	defb 0fdh,010h,0d4h	;illegal sequence		;7e8d	fd 10 d4 	. . . 
-	ld sp,02030h		;7e90	31 30 20 	1 0   
-l7e93h:
-	ld d,e			;7e93	53 	S 
-	ld d,a			;7e94	57 	W 
-	ld c,c			;7e95	49 	I 
-	ld d,e			;7e96	53 	S 
-	ld c,b			;7e97	48 	H 
-	ld c,c			;7e98	49 	I 
-	ld c,(hl)			;7e99	4e 	N 
-	ld b,a			;7e9a	47 	G 
-	jr nz,$+85		;7e9b	20 53 	  S 
-	ld c,a			;7e9d	4f 	O 
-	ld d,l			;7e9e	55 	U 
-	ld c,(hl)			;7e9f	4e 	N 
-	ld b,h			;7ea0	44 	D 
-	defb 0fdh,050h,0d4h	;illegal sequence		;7ea1	fd 50 d4 	. P . 
-	ld sp,02031h		;7ea4	31 31 20 	1 1   
-	ld b,d			;7ea7	42 	B 
-	ld d,l			;7ea8	55 	U 
-	ld d,d			;7ea9	52 	R 
-l7eaah:
-	ld d,e			;7eaa	53 	S 
-	ld d,h			;7eab	54 	T 
-	ld c,c			;7eac	49 	I 
-l7eadh:
-	ld c,(hl)			;7ead	4e 	N 
-	ld b,a			;7eae	47 	G 
-	jr nz,l7f00h		;7eaf	20 4f 	  O 
-l7eb1h:
-	ld b,(hl)			;7eb1	46 	F 
-	jr nz,$+85		;7eb2	20 53 	  S 
-	ld c,(hl)			;7eb4	4e 	N 
-	ld b,c			;7eb5	41 	A 
-	ld c,e			;7eb6	4b 	K 
-	ld b,l			;7eb7	45 	E 
-l7eb8h:
-	jr nz,l7f0ah		;7eb8	20 50 	  P 
-	ld c,a			;7eba	4f 	O 
-	ld d,h			;7ebb	54 	T 
-	defb 0fdh,090h,0d4h	;illegal sequence		;7ebc	fd 90 d4 	. . . 
-	ld sp,02032h		;7ebf	31 32 20 	1 2   
-	ld b,d			;7ec2	42 	B 
-	ld c,c			;7ec3	49 	I 
-	ld d,h			;7ec4	54 	T 
-	ld c,c			;7ec5	49 	I 
-l7ec6h:
-	ld c,(hl)			;7ec6	4e 	N 
-	ld b,a			;7ec7	47 	G 
-	jr nz,$+85		;7ec8	20 53 	  S 
-	ld c,a			;7eca	4f 	O 
-	ld d,l			;7ecb	55 	U 
-	ld c,(hl)			;7ecc	4e 	N 
-	ld b,h			;7ecd	44 	D 
-	defb 0fdh,0d0h,0d4h	;illegal sequence		;7ece	fd d0 d4 	. . . 
-	ld sp,02033h		;7ed1	31 33 20 	1 3   
-	ld d,e			;7ed4	53 	S 
-	ld c,a			;7ed5	4f 	O 
-	ld d,l			;7ed6	55 	U 
-	ld c,(hl)			;7ed7	4e 	N 
-	ld b,h			;7ed8	44 	D 
-	jr nz,l7f2ah		;7ed9	20 4f 	  O 
-	ld b,(hl)			;7edb	46 	F 
-l7edch:
-	jr nz,l7f29h		;7edc	20 4b 	  K 
-	ld c,(hl)			;7ede	4e 	N 
-	ld c,c			;7edf	49 	I 
-	ld d,(hl)			;7ee0	56 	V 
-	ld b,l			;7ee1	45 	E 
-	ld d,e			;7ee2	53 	S 
-	inc l			;7ee3	2c 	, 
-	ld b,d			;7ee4	42 	B 
-	ld c,a			;7ee5	4f 	O 
-	ld c,a			;7ee6	4f 	O 
-	ld c,l			;7ee7	4d 	M 
-	ld b,l			;7ee8	45 	E 
-	ld d,d			;7ee9	52 	R 
-	ld b,c			;7eea	41 	A 
-	ld c,(hl)			;7eeb	4e 	N 
-	ld b,a			;7eec	47 	G 
-	ld d,e			;7eed	53 	S 
-	defb 0fdh,010h,0d5h	;illegal sequence		;7eee	fd 10 d5 	. . . 
-	ld sp,02034h		;7ef1	31 34 20 	1 4   
-	ld b,e			;7ef4	43 	C 
-	ld c,a			;7ef5	4f 	O 
-	ld d,l			;7ef6	55 	U 
-	ld c,(hl)			;7ef7	4e 	N 
-	ld d,h			;7ef8	54 	T 
-	ld c,c			;7ef9	49 	I 
-	ld c,(hl)			;7efa	4e 	N 
-	ld b,a			;7efb	47 	G 
-	jr nz,l7f4eh		;7efc	20 50 	  P 
-	ld c,a			;7efe	4f 	O 
-	ld c,c			;7eff	49 	I 
-l7f00h:
-	ld c,(hl)			;7f00	4e 	N 
-sub_7f01h:
-	ld d,h			;7f01	54 	T 
-	ld d,e			;7f02	53 	S 
-	defb 0fdh,050h,0d5h	;illegal sequence		;7f03	fd 50 d5 	. P . 
-	ld sp,02035h		;7f06	31 35 20 	1 5   
-	ld b,a			;7f09	47 	G 
-l7f0ah:
-	ld b,c			;7f0a	41 	A 
-	ld c,l			;7f0b	4d 	M 
-	ld b,l			;7f0c	45 	E 
-	jr nz,l7f62h		;7f0d	20 53 	  S 
-	ld d,h			;7f0f	54 	T 
-	ld b,c			;7f10	41 	A 
-	ld d,d			;7f11	52 	R 
-	ld d,h			;7f12	54 	T 
-	defb 0fdh,090h,0d5h	;illegal sequence		;7f13	fd 90 d5 	. . . 
-	ld sp,02036h		;7f16	31 36 20 	1 6   
-	ld b,d			;7f19	42 	B 
-	ld b,a			;7f1a	47 	G 
-	ld c,l			;7f1b	4d 	M 
-	defb 0fdh,0d0h,0d5h	;illegal sequence		;7f1c	fd d0 d5 	. . . 
-	ld sp,02037h		;7f1f	31 37 20 	1 7   
-	ld b,e			;7f22	43 	C 
-	ld c,a			;7f23	4f 	O 
-	ld c,l			;7f24	4d 	M 
-	ld d,b			;7f25	50 	P 
-	ld c,h			;7f26	4c 	L 
-	ld b,l			;7f27	45 	E 
-	ld d,h			;7f28	54 	T 
-l7f29h:
-	ld c,c			;7f29	49 	I 
-l7f2ah:
-	ld c,a			;7f2a	4f 	O 
-	ld c,(hl)			;7f2b	4e 	N 
-	jr nz,$+81		;7f2c	20 4f 	  O 
-	ld b,(hl)			;7f2e	46 	F 
-	jr nz,l7f76h		;7f2f	20 45 	  E 
-	ld b,c			;7f31	41 	A 
-	ld b,e			;7f32	43 	C 
-	ld c,b			;7f33	48 	H 
-	jr nz,l7f86h		;7f34	20 50 	  P 
-	ld b,c			;7f36	41 	A 
-	ld d,h			;7f37	54 	T 
-	ld d,h			;7f38	54 	T 
-	ld b,l			;7f39	45 	E 
-	ld d,d			;7f3a	52 	R 
-	ld c,(hl)			;7f3b	4e 	N 
-	defb 0fdh,010h,0d6h	;illegal sequence		;7f3c	fd 10 d6 	. . . 
-	ld sp,02038h		;7f3f	31 38 20 	1 8   
-	ld b,e			;7f42	43 	C 
-	ld c,a			;7f43	4f 	O 
-	ld c,l			;7f44	4d 	M 
-	ld d,b			;7f45	50 	P 
-	ld c,h			;7f46	4c 	L 
-	ld b,l			;7f47	45 	E 
-	ld d,h			;7f48	54 	T 
-	ld c,c			;7f49	49 	I 
-	ld c,a			;7f4a	4f 	O 
-	ld c,(hl)			;7f4b	4e 	N 
-	jr nz,l7f9dh		;7f4c	20 4f 	  O 
-l7f4eh:
-	ld b,(hl)			;7f4e	46 	F 
-	jr nz,l7f98h		;7f4f	20 47 	  G 
-	ld b,c			;7f51	41 	A 
-	ld c,l			;7f52	4d 	M 
-	ld b,l			;7f53	45 	E 
-	defb 0fdh,050h,0d6h	;illegal sequence		;7f54	fd 50 d6 	. P . 
-	ld sp,02039h		;7f57	31 39 20 	1 9   
-	ld b,a			;7f5a	47 	G 
-	ld b,c			;7f5b	41 	A 
-	ld c,l			;7f5c	4d 	M 
-	ld b,l			;7f5d	45 	E 
-	jr nz,7fafh		;7f5e	20 4f 	  O 
-	ld d,(hl)			;7f60	56 	V 
-	ld b,l			;7f61	45 	E 
-l7f62h:
-	ld d,d			;7f62	52 	R 
-	defb 0fdh,090h,0d6h	;illegal sequence		;7f63	fd 90 d6 	. . . 
-	ld (02030h),a		;7f66	32 30 20 	2 0   
-	ld d,h			;7f69	54 	T 
-	ld c,c			;7f6a	49 	I 
-	ld c,l			;7f6b	4d 	M 
-	ld b,l			;7f6c	45 	E 
-	jr nz,7fc4h		;7f6d	20 55 	  U 
-	ld d,b			;7f6f	50 	P 
-	jr nz,7fc9h		;7f70	20 57 	  W 
-	ld b,c			;7f72	41 	A 
-	ld d,d			;7f73	52 	R 
-	ld c,(hl)			;7f74	4e 	N 
-	ld c,c			;7f75	49 	I 
-l7f76h:
-	ld c,(hl)			;7f76	4e 	N 
-	ld b,a			;7f77	47 	G 
-	defb 0fdh,0d0h,0d6h	;illegal sequence		;7f78	fd d0 d6 	. . . 
-	ld (02031h),a		;7f7b	32 31 20 	2 1   
-	ld b,c			;7f7e	41 	A 
-	ld b,h			;7f7f	44 	D 
-	ld b,h			;7f80	44 	D 
-	ld c,c			;7f81	49 	I 
-	ld d,h			;7f82	54 	T 
-	ld c,c			;7f83	49 	I 
-	ld c,a			;7f84	4f 	O 
-	ld c,(hl)			;7f85	4e 	N 
-l7f86h:
-	ld b,c			;7f86	41 	A 
-	ld c,h			;7f87	4c 	L 
-	jr nz,7fd0h		;7f88	20 46 	  F 
-	ld c,c			;7f8a	49 	I 
-	ld b,a			;7f8b	47 	G 
-	ld c,b			;7f8c	48 	H 
-	ld d,h			;7f8d	54 	T 
-	ld b,l			;7f8e	45 	E 
-	ld d,d			;7f8f	52 	R 
-	defb 0fdh,016h,0d7h	;illegal sequence		;7f90	fd 16 d7 	. . . 
-	ld c,l			;7f93	4d 	M 
-	ld d,l			;7f94	55 	U 
-	ld d,e			;7f95	53 	S 
-	ld c,c			;7f96	49 	I 
-	ld b,e			;7f97	43 	C 
-l7f98h:
-	jr nz,7fdfh		;7f98	20 45 	  E 
-	ld c,(hl)			;7f9a	4e 	N 
-	ld b,h			;7f9b	44 	D 
-	rst 38h			;7f9c	ff 	. 
+	defb 0fdh,013h,0d3h
+    defb "BURSTING OF DRAGON'S EGG"
+	defb 0fdh,050h,0d3h
+    defb "07 SHRIEK OF PLAYER"
+	defb 0fdh,090h,0d3h
+    defb "08 PLAYER RUNNING"
+	defb 0fdh,0d0h,0d3h
+    defb "09 HITTING SOUND"
+	defb 0fdh,010h,0d4h
+    defb "10 SWISHING SOUND"
+	defb 0fdh,050h,0d4h
+    defb "11 BURSTING OF SNAKE POT"
+	defb 0fdh,090h,0d4h
+    defb "12 BITING SOUND"
+	defb 0fdh,0d0h,0d4h
+    defb "13 SOUND OF KNIVES,BOOMERANGS"
+	defb 0fdh,010h,0d5h
+    defb "14 COUNTING POINTS"
+	defb 0fdh,050h,0d5h
+    defb "15 GAME START"
+	defb 0fdh,090h,0d5h
+    defb "16 BGM"
+	defb 0fdh,0d0h,0d5h
+    defb "17 COMPLETION OF EACH PATTERN"
+	defb 0fdh,010h,0d6h
+    defb "18 COMPLETION OF GAME"
+	defb 0fdh,050h,0d6h
+    defb "19 GAME OVER"
+	defb 0fdh,090h,0d6h
+    defb "20 TIME UP WARNING"
+	defb 0fdh,0d0h,0d6h
+    defb "21 ADDITIONAL FIGHTER"
+	defb 0fdh,016h,0d7h
+    defb "MUSIC END", 0ffh
 
 l7f9dh:
 	; 7f9dh: The ROM finishes with 99 bytes of value 0c7h
