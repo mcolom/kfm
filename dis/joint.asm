@@ -78,8 +78,11 @@ DISTANCE_TO_LEFT: EQU 0xE802
 
 PLAYER_BUTTONS_AND_UP:  EQU 0xE908
 PLAYER_JOYSTICK: EQU 0xE909
-
 PLAYER_STATE: EQU 0xE906
+
+KNIFE_STATUS: EQU 0xE807
+KNIFE_DIST: EQU 0xE32E
+NUM_KNIVES: EQU 0xE32B
 
 ; ************************ ROM start ************************
 	org	00000h
@@ -2540,7 +2543,7 @@ l0e5bh:
 	ld a,(hl)			;0e63	7e 	~ 
 	sub e			;0e64	93 	. 
 	ld e,a			;0e65	5f 	_ 
-	ld a,(0e807h)		;0e66	3a 07 e8 	: . . 
+	ld a,(KNIFE_STATUS)		;0e66	3a 07 e8 	: . . 
 	add a,e			;0e69	83 	. 
 	ld (iy+002h),a		;0e6a	fd 77 02 	. w . 
 	ld a,(0e808h)		;0e6d	3a 08 e8 	: . . 
@@ -4135,7 +4138,7 @@ l18eah:
 l18ffh:
 	and a			;18ff	a7 	. 
 	jp nz,l1942h		;1900	c2 42 19 	. B . 
-	ld hl,0e32bh		;1903	21 2b e3 	! + . 
+	ld hl,NUM_KNIVES		;1903	21 2b e3 	! + . 
 	ld a,(hl)			;1906	7e 	~ 
 	cp 003h		;1907	fe 03 	. . 
 	inc (ix+007h)		;1909	dd 34 07 	. 4 . 
@@ -4341,7 +4344,7 @@ l1a80h:
 	ld l,h			;1a8c	6c 	l 
 	ld h,000h		;1a8d	26 00 	& . 
 	rl h		;1a8f	cb 14 	. . 
-	ld (0e807h),hl		;1a91	22 07 e8 	" . . 
+	ld (KNIFE_STATUS),hl		;1a91	22 07 e8 	" . . 
 	ld hl,(0e80ah)		;1a94	2a 0a e8 	* . . 
 	ld c,(ix+006h)		;1a97	dd 4e 06 	. N . 
 sub_1a9ah:
@@ -6798,7 +6801,7 @@ l2d86h:
 	ex de,hl			;2d8f	eb 	. 
 	pop hl			;2d90	e1 	. 
 l2d91h:
-	ld (0e807h),de		;2d91	ed 53 07 e8 	. S . . 
+	ld (KNIFE_STATUS),de		;2d91	ed 53 07 e8 	. S . . 
 	inc hl			;2d95	23 	# 
 	ld e,(hl)			;2d96	5e 	^ 
 	push hl			;2d97	e5 	. 
@@ -6881,7 +6884,7 @@ l2e12h:
 l2e19h:
 	pop hl			;2e19	e1 	. 
 l2e1ah:
-	ld hl,0e32bh		;2e1a	21 2b e3 	! + . 
+	ld hl,NUM_KNIVES		;2e1a	21 2b e3 	! + . 
 	ld a,(hl)			;2e1d	7e 	~ 
 	dec (hl)			;2e1e	35 	5 
 	add a,a			;2e1f	87 	. 
@@ -6942,7 +6945,7 @@ l2e70h:
 	ret z			;2e77	c8 	. 
 	ld hl,(0e336h)		;2e78	2a 36 e3 	* 6 . 
 	push bc			;2e7b	c5 	. 
-	ld (0e807h),hl		;2e7c	22 07 e8 	" . . 
+	ld (KNIFE_STATUS),hl		;2e7c	22 07 e8 	" . . 
 	ld hl,(0e338h)		;2e7f	2a 38 e3 	* 8 . 
 	ld de,(0e803h)		;2e82	ed 5b 03 e8 	. [ . . 
 	add hl,de			;2e86	19 	. 
@@ -6986,7 +6989,7 @@ sub_2ec1h:
 	ret z			;2ec8	c8 	. 
 	ld hl,(0e33bh)		;2ec9	2a 3b e3 	* ; . 
 	push bc			;2ecc	c5 	. 
-	ld (0e807h),hl		;2ecd	22 07 e8 	" . . 
+	ld (KNIFE_STATUS),hl		;2ecd	22 07 e8 	" . . 
 	ld hl,(0e33dh)		;2ed0	2a 3d e3 	* = . 
 	ld de,(0e715h)		;2ed3	ed 5b 15 e7 	. [ . . 
 	add hl,de			;2ed7	19 	. 
@@ -7032,7 +7035,7 @@ l2f0bh:
 	ld e,(hl)			;2f13	5e 	^ 
 	inc hl			;2f14	23 	# 
 	ld d,(hl)			;2f15	56 	V 
-	ld (0e807h),de		;2f16	ed 53 07 e8 	. S . . 
+	ld (KNIFE_STATUS),de		;2f16	ed 53 07 e8 	. S . . 
 	inc hl			;2f1a	23 	# 
 	ld e,(hl)			;2f1b	5e 	^ 
 	inc hl			;2f1c	23 	# 
@@ -9254,7 +9257,7 @@ l40d6h:
 	ret	
 sub_40e5h:
 	ld hl,(0e717h)
-	ld (0e807h),hl
+	ld (KNIFE_STATUS),hl
 	ld a,(0e706h)
 	add a,a	
 	ld hl,l65ffh
@@ -11075,7 +11078,7 @@ l4e43h:
 	and a	
 	jr z,l4e64h
 	push hl	
-	ld hl,0e32bh
+	ld hl,NUM_KNIVES
 	ld (hl),001h
 	inc hl	
 	ld (hl),a	
@@ -18882,12 +18885,12 @@ sub_7aaeh:
 	ld de,l0120h
 	ld a,0c0h
 sub_7adch:
-	ld (0e807h),hl
+	ld (KNIFE_STATUS),hl
 	ld hl,l75deh
 	jp l0e20h
 l7ae5h:
 	ld hl,l00c0h
-	ld (0e807h),hl
+	ld (KNIFE_STATUS),hl
 	ld de,00d0h
 	ld hl,l669bh
 	call sub_7b0ch
