@@ -72,6 +72,8 @@ STEP_COUNTER: EQU 0xE883
 NUM_GRIPPING: EQU 0xE71A
 ACTIVE_GRIPPERS: EQU 0xE71B
 
+VARS_TABLE: EQU 0xE2D8
+
 ; ************************ ROM start ************************
 	org	00000h
 
@@ -1150,8 +1152,8 @@ sub_074dh:
 	ld a,005h		;078c	3e 05 	> . 
 	ld (0e347h),a		;078e	32 47 e3 	2 G . 
 l0791h:
-	ld ix,0e2d8h		;0791	dd 21 d8 e2 	. ! . . 
-	ld (ix+00ah),03fh		;0795	dd 36 0a 3f 	. 6 . ? 
+	ld ix,VARS_TABLE		;0791	dd 21 d8 e2 	. ! . . 
+	ld (ix+00ah),03fh		;0795	dd 36 0a 3f VARS_TABLE + 0xa = 0xE2E2 = ENEMY_ENERGY
 	ld (ix+007h),007h		;0799	dd 36 07 07 	. 6 . . 
 	ld hl,05000h		;079d	21 00 50 	! . P 
 	ld (0e2dch),hl		;07a0	22 dc e2 	" . . 
@@ -3454,7 +3456,7 @@ sub_143fh:
 	ld b,a			;1442	47 	G 
 	xor 028h		;1443	ee 28 	. ( 
 	ret z			;1445	c8 	. 
-	ld a,(0e2d8h)		;1446	3a d8 e2 	: . . 
+	ld a,(VARS_TABLE)		;1446	3a d8 e2 	: . . 
 	and 010h		;1449	e6 10 	. . 
 	ld a,(0e196h)		;144b	3a 96 e1 	: . . 
 	jr z,l1453h		;144e	28 03 	( . 
@@ -3499,7 +3501,7 @@ l1479h:
 	add hl,de			;148c	19 	. 
 	ex de,hl			;148d	eb 	. 
 l148eh:
-	ld a,(0e2d8h)		;148e	3a d8 e2 	: . . 
+	ld a,(VARS_TABLE)		;148e	3a d8 e2 	: . . 
 	ld l,a			;1491	6f 	o 
 	bit 4,l		;1492	cb 65 	. e 
 	jr z,l14b1h		;1494	28 1b 	( . 
@@ -3541,7 +3543,7 @@ l14bfh:
 	add hl,de			;14d1	19 	. 
 	ex de,hl			;14d2	eb 	. 
 l14d3h:
-	ld a,(0e2d8h)		;14d3	3a d8 e2 	: . . 
+	ld a,(VARS_TABLE)		;14d3	3a d8 e2 	: . . 
 	ld l,a			;14d6	6f 	o 
 	bit 4,l		;14d7	cb 65 	. e 
 	jr z,l14f1h		;14d9	28 16 	( . 
@@ -4660,7 +4662,7 @@ sub_1cc4h:
 	ld a,(0e2d9h)		;1ce0	3a d9 e2 	: . . 
 	cp 001h		;1ce3	fe 01 	. . 
 	jr z,l1ceeh		;1ce5	28 07 	( . 
-	ld a,(0e2d8h)		;1ce7	3a d8 e2 	: . . 
+	ld a,(VARS_TABLE)		;1ce7	3a d8 e2 	: . . 
 	and 010h		;1cea	e6 10 	. . 
 	jr nz,l1d5bh		;1cec	20 6d 	  m 
 l1ceeh:
@@ -4828,7 +4830,7 @@ l1e45h:
 	ld (ix+000h),000h		;1e45	dd 36 00 00 	. 6 . . 
 	ret			;1e49	c9 	. 
 sub_1e4ah:
-	ld a,(0e2d8h)		;1e4a	3a d8 e2 	: . . 
+	ld a,(VARS_TABLE)		;1e4a	3a d8 e2 	: . . 
 	ld c,a			;1e4d	4f 	O 
 	and a			;1e4e	a7 	. 
 	jr z,$+63		;1e4f	28 3d 	( = 
@@ -4840,7 +4842,7 @@ sub_1e4ah:
 	jr nz,l1e5fh		;1e5a	20 03 	  . 
 	ld (0e2e0h),hl		;1e5c	22 e0 e2 	" . . 
 l1e5fh:
-	ld ix,0e2d8h		;1e5f	dd 21 d8 e2 	. ! . . 
+	ld ix,VARS_TABLE		;1e5f	dd 21 d8 e2 	. ! . . 
 	ld a,(ENEMY_ENERGY)		;1e63	3a e2 e2 	: . . 
 	ld hl,0e2fah		;1e66	21 fa e2 	! . . 
 	and a			;1e69	a7 	. 
@@ -4849,7 +4851,9 @@ l1e5fh:
 	jr z,l1e77h		;1e6f	28 06 	( . 
 	dec (hl)			;1e71	35 	5 
 	jr nz,l1e79h		;1e72	20 05 	  . 
-	inc (ix+00ah)		;1e74	dd 34 0a 	. 4 . 
+
+    ; Increment enemy's energy
+	inc (ix+00ah)		;1e74	dd 34 0a VARS_TABLE + 0xa = 0xE2E2 = ENEMY_ENERGY
 l1e77h:
 	ld (hl),070h		;1e77	36 70 	6 p 
 l1e79h:
@@ -4887,7 +4891,7 @@ l1each:
 	jr nz,l1eb5h		;1eb1	20 02 	  . 
 	ld a,052h		;1eb3	3e 52 	> R 
 l1eb5h:
-	ld (0e2d8h),a		;1eb5	32 d8 e2 	2 . . 
+	ld (VARS_TABLE),a		;1eb5	32 d8 e2 	2 . . 
 	ld a,070h		;1eb8	3e 70 	> p 
 	ld (0e2fah),a		;1eba	32 fa e2 	2 . . 
 	ld a,(0e261h)		;1ebd	3a 61 e2 	: a . 
@@ -5057,7 +5061,7 @@ l1ff9h:
 	bit 4,(ix+000h)		;1ffc	dd cb 00 66 	. . . f 
 	ret nz			;2000	c0 	. 
 	pop hl			;2001	e1 	. 
-	ld hl,0e2d8h		;2002	21 d8 e2 	! . . 
+	ld hl,VARS_TABLE		;2002	21 d8 e2 	! . . 
 	res 4,(hl)		;2005	cb a6 	. . 
 	ld hl,0e2e8h		;2007	21 e8 e2 	! . . 
 	res 4,(hl)		;200a	cb a6 	. . 
@@ -5340,7 +5344,7 @@ l2239h:
 	call sub_20a2h		;2245	cd a2 20 	. .   
 	jp l2e70h		;2248	c3 70 2e 	. p . 
 sub_224bh:
-	ld a,(0e2d8h)		;224b	3a d8 e2 	: . . 
+	ld a,(VARS_TABLE)		;224b	3a d8 e2 	: . . 
 	and 020h		;224e	e6 20 	.   
 	ret nz			;2250	c0 	. 
 	ld hl,l00e0h		;2251	21 e0 00 	! . . 
@@ -5992,7 +5996,7 @@ l27dfh:
 	and 010h		;27e7	e6 10 	. . 
 	jr z,l284fh		;27e9	28 64 	( d 
 	push ix		;27eb	dd e5 	. . 
-	ld ix,0e2d8h		;27ed	dd 21 d8 e2 	. ! . . 
+	ld ix,VARS_TABLE		;27ed	dd 21 d8 e2 	. ! . . 
 	call sub_287eh		;27f1	cd 7e 28 	. ~ ( 
 	ld (ix+017h),008h		;27f4	dd 36 17 08 	. 6 . . 
 	ld (ix+016h),01ah		;27f8	dd 36 16 1a 	. 6 . . 
