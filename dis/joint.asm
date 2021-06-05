@@ -65,7 +65,7 @@ ENEMY_ENERGY_DISP: EQU 0xE819 ; Displayed enemy's energy. Use to animate the bar
 
 TIME: EQU 0xE003 ; Time, encoded in BCD in 0xE003 and 0xE004
 
-POINTS: EQU 0xE081 ; Time, encoded in BCD in 0xE003 and 0xE004
+POINTS: EQU 0xE081 ; Points, E081... E083
 
 STEP_COUNTER: EQU 0xE883
 
@@ -86,6 +86,23 @@ NUM_KNIVES: EQU 0xE32B
 
 COINS: EQU 0xE913
 
+; Tip: in the intro screen, set 0xE000 (GAME_STATE) to 2, and
+; change THOMAS_FRAME to see the sprite parts.
+; Interesting: 11, 20, 21, 24, 25, 27, 2F, 47, 4E, 54 (old man??), 59
+THOMAS_FRAME: EQU 0xE706
+;
+THOMAS_FRAME_NORMAL: EQU 0
+THOMAS_FRAME_STANDING: EQU 3
+THOMAS_FRAME_READY: EQU 4
+THOMAS_FRAME_DOWN: EQU 5
+THOMAS_FRAME_KICK: EQU 6
+THOMAS_FRAME_START_KICK_DOWN: EQU 0xB
+THOMAS_FRAME_JUMP_IMPULSE: EQU 0x10
+THOMAS_FRAME_JUMP_KICK: EQU 0x1C
+THOMAS_FRAME_START_JUMP: EQU 0x1F
+THOMAS_FRAME_JUMP_PAIN: EQU 0x20
+THOMAS_FRAME_WITH_SILVIA: EQU 0x26
+
 ; Global game state
 ; 0: stop
 ; 1: screen clears (goes black)
@@ -96,6 +113,7 @@ COINS: EQU 0xE913
 ; 6: demo
 ; 7: screen with tied Silvia, "LET'S TRY NEXT FLOOR"
 ; 8: game ending, with hearts
+; 9: reset
 ; B: Thomas has lost one live
 ; C: level ending music sounds. Energy and time decrease to gain points.
 ; Bit 7 active: shows characters: Thomas, knife-thrower, giant, Mr. X
@@ -3045,7 +3063,7 @@ sub_1172h:
 	ld (0e815h),hl		;117d	22 15 e8 	" . . 
 	add hl,de			;1180	19 	. 
 	ld (0e813h),hl		;1181	22 13 e8 	" . . 
-	ld a,(0e706h)		;1184	3a 06 e7 	: . . 
+	ld a,(THOMAS_FRAME)		;1184	3a 06 e7 	: . . 
 	add a,a			;1187	87 	. 
 	ld e,a			;1188	5f 	_ 
 	ld d,000h		;1189	16 00 	. . 
@@ -3134,7 +3152,7 @@ l121ch:
 	ret			;121f	c9 	. 
 sub_1220h:
 	ld (0e805h),hl		;1220	22 05 e8 	" . . 
-	ld a,(0e706h)		;1223	3a 06 e7 	: . . 
+	ld a,(THOMAS_FRAME)		;1223	3a 06 e7 	: . . 
 	ld hl,l126eh		;1226	21 6e 12 	! n . 
 	ld d,000h		;1229	16 00 	. . 
 	ld e,a			;122b	5f 	_ 
@@ -6747,7 +6765,7 @@ sub_2d19h:
 	ld a,091h		;2d1e	3e 91 	> . 
 	call sub_0dfeh		;2d20	cd fe 0d 	. . . 
 	push de			;2d23	d5 	. 
-	ld a,(0e706h)		;2d24	3a 06 e7 	: . . 
+	ld a,(THOMAS_FRAME)		;2d24	3a 06 e7 	: . . 
 	push hl			;2d27	e5 	. 
 	ld hl,l2d42h		;2d28	21 42 2d 	! B - 
 	ld e,a			;2d2b	5f 	_ 
@@ -6947,8 +6965,8 @@ l2e42h:
 	ret z			;2e47	c8 	. 
 	cp 007h		;2e48	fe 07 	. . 
 	ret z			;2e4a	c8 	. 
-	ld a,(0e706h)		;2e4b	3a 06 e7 	: . . 
-	cp 005h		;2e4e	fe 05 	. . 
+	ld a,(THOMAS_FRAME)		;2e4b	3a 06 e7 	: . . 
+	cp THOMAS_FRAME_DOWN		;2e4e	fe 05
 	ret z			;2e50	c8 	. 
 	ld hl,06900h		;2e51	21 00 69 	! . i 
 l2e54h:
@@ -7472,8 +7490,8 @@ l323dh:
 	jr z,l3275h		;323f	28 34 	( 4 
 	cp 007h		;3241	fe 07 	. . 
 	jr z,l3275h		;3243	28 30 	( 0 
-	ld a,(0e706h)		;3245	3a 06 e7 	: . . 
-	cp 005h		;3248	fe 05 	. . 
+	ld a,(THOMAS_FRAME)		;3245	3a 06 e7 	: . . 
+	cp THOMAS_FRAME_DOWN		;3248	fe 05
 	jr z,l3275h		;324a	28 29 	( ) 
 	bit 5,c		;324c	cb 69 	. i 
 	jr nz,l3275h		;324e	20 25 	  % 
@@ -9195,8 +9213,8 @@ sub_402ch:
 	jr nc,l4055h
 	cp 001h
 	jr nz,l40adh
-	ld a,(0e706h)
-	cp 004h
+	ld a,(THOMAS_FRAME)
+	cp THOMAS_FRAME_READY
 	jr z,l40adh
 l4055h:
 	ld a,(0e700h)
@@ -9290,7 +9308,7 @@ l40d6h:
 sub_40e5h:
 	ld hl,(0e717h)
 	ld (KNIFE_STATUS),hl
-	ld a,(0e706h)
+	ld a,(THOMAS_FRAME)
 	add a,a	
 	ld hl,l65ffh
 	ld b,000h
@@ -9449,7 +9467,7 @@ l41eah:
 	ld (0e701h),a
 	inc hl	
 	ld a,(hl)	
-	ld (0e706h),a
+	ld (THOMAS_FRAME),a
 	ret	
 l4212h:
 	ld hl,0e702h
@@ -9461,7 +9479,7 @@ l4212h:
 l4220h:
 	ld (hl),c	
 	ld a,b	
-	ld (0e706h),a
+	ld (THOMAS_FRAME),a
 	inc hl	
 	ld (hl),005h
 	ret	
@@ -9513,7 +9531,7 @@ l4244h:
 	jr z,l4275h
 	inc a	
 l4275h:
-	ld (0e706h),a
+	ld (THOMAS_FRAME),a
 	inc (hl)	
 sub_4279h:
 	ld a,(0e884h)
@@ -9618,15 +9636,15 @@ l4331h:
 	and a	
 	ret nz	
 sub_433fh:
-	ld a,(0e706h)
+	ld a,(THOMAS_FRAME)
 	inc a	
-	cp 004h
+	cp THOMAS_FRAME_READY
 	jr c,l4349h
 l4347h:
-	ld a,000h
+	ld a,THOMAS_FRAME_NORMAL
 l4349h:
-	ld (0e706h),a
-	ld a,005h
+	ld (THOMAS_FRAME),a
+	ld a, THOMAS_FRAME_DOWN
 	ld (0e703h),a
 	ret	
 l4352h:
@@ -9652,7 +9670,7 @@ l4365h:
 	ld a,00bh
 l4377h:
 	ld (hl),c	
-	ld (0e706h),a
+	ld (THOMAS_FRAME),a
 	ld a,0ffh
 	ld (0e704h),a
 	ld hl,(0e712h)
@@ -9679,8 +9697,8 @@ l43a5h:
 	ret nz	
 	ld a,003h
 	ld (0e702h),a
-	ld a,005h
-	ld (0e706h),a
+	ld a, THOMAS_FRAME_DOWN
+	ld (THOMAS_FRAME),a
 	ret	
 l43b5h:
 	ld a,(0e701h)
@@ -9727,7 +9745,7 @@ l43d8h:
 	xor a	
 	ld (de),a	
 	ld a,(hl)	
-	ld (0e706h),a
+	ld (THOMAS_FRAME),a
 	ret	
 l4406h:
 	ld hl,0e71fh
@@ -9791,8 +9809,8 @@ l4460h:
 l446eh:
 	ld hl,0500h
 	ld (0e702h),hl
-	ld a,004h
-	ld (0e706h),a
+	ld a, THOMAS_FRAME_READY
+	ld (THOMAS_FRAME),a
 	ld hl,l5000h
 	ld (0e710h),hl
 	ld hl,(0e712h)
@@ -9817,7 +9835,7 @@ l449dh:
 l44a0h:
 	ld a,c	
 	and 01fh
-	ld (0e706h),a
+	ld (THOMAS_FRAME),a
 	ret	
 l44a7h:
 	bit 7,c
@@ -9859,14 +9877,14 @@ l44deh:
 	dec (hl)	
 	ret nz	
 	ld hl,0e702h
-	ld a,(0e706h)
-	cp 005h
+	ld a,(THOMAS_FRAME)
+	cp THOMAS_FRAME_DOWN
 	ld (hl),003h
 	ret z	
 	ld (hl),000h
 	ld a,000h
-	ld (0e706h),a
-	ld a,005h
+	ld (THOMAS_FRAME),a
+	ld a,THOMAS_FRAME_DOWN
 	ld (0e703h),a
 	ret	
 l4502h:
@@ -9877,7 +9895,7 @@ l4502h:
 	ld a,(hl)	
 	cp 0ffh
 	jr z,l454bh
-	ld (0e706h),a
+	ld (THOMAS_FRAME),a
 	inc hl	
 	ld a,(hl)	
 	inc hl	
@@ -9916,13 +9934,13 @@ l4551h:
 	jr nc,l4564h
 	jr l4561h
 l455ah:
-	ld a,(0e706h)
-	cp 005h
+	ld a,(THOMAS_FRAME)
+	cp THOMAS_FRAME_DOWN
 	jr z,l4567h
 l4561h:
 	call sub_468eh
 l4564h:
-	ld (0e706h),a
+	ld (THOMAS_FRAME),a
 l4567h:
 	call 2e91h
 	ld hl,(0e712h)
@@ -10000,7 +10018,7 @@ l45f6h:
 	call 2e91h
 	call sub_4675h
 	call sub_468eh
-	ld (0e706h),a
+	ld (THOMAS_FRAME),a
 l4609h:
 	ld de,(0e70eh)
 	ld hl,0012h
@@ -10039,9 +10057,9 @@ l464bh:
 	call sub_468eh
 	jr l4658h
 l4656h:
-	ld a,010h
+	ld a, THOMAS_FRAME_JUMP_IMPULSE
 l4658h:
-	ld (0e706h),a
+	ld (THOMAS_FRAME),a
 	ld a,00dh
 	ld (0e702h),a
 	ld hl,l0080h
@@ -10108,13 +10126,13 @@ l46cbh:
 	add hl,de	
 	ld (0e710h),hl
 l46d8h:
-	ld a,(0e706h)
+	ld a,(THOMAS_FRAME)
 	inc a	
-	cp 020h
+	cp THOMAS_FRAME_JUMP_PAIN
 	jr nz,l46e2h
 	ld a,01ch
 l46e2h:
-	ld (0e706h),a
+	ld (THOMAS_FRAME),a
 	and 001h
 	ret nz	
 	ld a,090h
@@ -10125,8 +10143,8 @@ l46eeh:
 	ld (GAME_STATE),a
 	ret	
 l46f4h:
-	ld a,(0e706h)
-	cp 026h
+	ld a,(THOMAS_FRAME)
+	cp THOMAS_FRAME_WITH_SILVIA
 	ret nz	
 	ld a, GAME_STATE_LEVEL_ENDS
 	ld (GAME_STATE),a
@@ -10188,8 +10206,8 @@ l4766h:
 	ld (0e712h),hl
 	ld hl,0e700h
 	set 1,(hl)
-	ld a,01ch
-	ld (0e706h),a
+	ld a, THOMAS_FRAME_JUMP_KICK
+	ld (THOMAS_FRAME),a
 	ld a,008h
 	ld (0e703h),a
 	ld a,001h
@@ -10221,8 +10239,8 @@ l4784h:
 	ld a,000h
 	call sub_0dfeh
 	pop af	
-	ld a,003h
-	ld (0e706h),a
+	ld a, THOMAS_FRAME_STANDING
+	ld (THOMAS_FRAME),a
 	ret	
 sub_47b6h:
 	ld ix,0e34ch
@@ -10242,8 +10260,8 @@ sub_47d4h:
 	ld de,0ff20h
 	add hl,de	
 	jr c,sub_4821h
-	ld a,026h
-	ld (0e706h),a
+	ld a, THOMAS_FRAME_WITH_SILVIA
+	ld (THOMAS_FRAME),a
 	jr sub_4821h
 l47e7h:
 	dec (ix+007h)
@@ -10986,7 +11004,7 @@ l4d6ah:
 	ld (0e705h),a
 	inc de	
 	ld a,(de)	
-	ld (0e706h),a
+	ld (THOMAS_FRAME),a
 	inc de	
 	ld (0e70eh),de
 l4d7fh:
