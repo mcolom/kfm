@@ -103,6 +103,7 @@ ENEMY_STATE: EQU VARS_TABLE + ENEMY_STATE_IDX
 ; Position of the enemy
 ENEMY_POS_L_IDX: EQU 2
 ENEMY_POS_H_IDX: EQU 3
+ENEMY_POS: EQU VARS_TABLE + ENEMY_POS_L_IDX
 ;
 ; Height where to draw the enemy
 ENEMY_HEIGHT_IDX: EQU 5
@@ -1297,7 +1298,7 @@ l0791h:
 	ld hl,0cc00h		;07b0	21 00 cc 	! . . 
 	ld de,0b000h		;07b3	11 00 b0 	. . . 
 l07b6h:
-	ld (0e2dah),hl		;07b6	22 da e2 	" . . 
+	ld (ENEMY_POS),hl		;07b6	22 da e2 	" . . 
 	ld (0e2d3h),de		;07b9	ed 53 d3 e2 	. S . . 
 	call sub_0866h		;07bd	cd 66 08 	. f . 
 	push bc			;07c0	c5 	. 
@@ -3649,7 +3650,7 @@ l148eh:
 	jr z,l14a7h		;149a	28 0b 	( . 
 	bit 6,l		;149c	cb 75 	. u 
 	jr z,l14b1h		;149e	28 11 	( . 
-	ld hl,(0e2dah)		;14a0	2a da e2 	* . . 
+	ld hl,(ENEMY_POS)		;14a0	2a da e2 	* . . 
 	sbc hl,de		;14a3	ed 52 	. R 
 	jr c,l14b1h		;14a5	38 0a 	8 . 
 l14a7h:
@@ -3691,7 +3692,7 @@ l14d3h:
 	jr z,l14ech		;14df	28 0b 	( . 
 	bit 6,l		;14e1	cb 75 	. u 
 	jr nz,l14f1h		;14e3	20 0c 	  . 
-	ld hl,(0e2dah)		;14e5	2a da e2 	* . . 
+	ld hl,(ENEMY_POS)		;14e5	2a da e2 	* . . 
 	sbc hl,de		;14e8	ed 52 	. R 
 	jr nc,l14f1h		;14ea	30 05 	0 . 
 l14ech:
@@ -5110,7 +5111,7 @@ l1f33h:
 	add hl,de			;1f36	19 	. 
 	jp nc,l1fcfh		;1f37	d2 cf 1f 	. . . 
 	ld de,0c000h		;1f3a	11 00 c0 	. . . 
-	ld hl,(0e2dah)		;1f3d	2a da e2 	* . . 
+	ld hl,(ENEMY_POS)		;1f3d	2a da e2 	* . . 
 	add hl,de			;1f40	19 	. 
 	jp c,l1f50h		;1f41	da 50 1f 	. P . 
 	ret			;1f44	c9 	. 
@@ -5144,7 +5145,7 @@ l1f50h:
 	ld hl,0fe00h		;1f87	21 00 fe 	! . . 
 	add hl,de			;1f8a	19 	. 
 	ret nc			;1f8b	d0 	. 
-	ld hl,(0e2dah)		;1f8c	2a da e2 	* . . 
+	ld hl,(ENEMY_POS)		;1f8c	2a da e2 	* . . 
 	ld de,00200h		;1f8f	11 00 02 	. . . 
 	add hl,de			;1f92	19 	. 
 	ld (0e80fh),hl		;1f93	22 0f e8 	" . . 
@@ -5377,7 +5378,7 @@ l213eh:
 	add hl,de			;214e	19 	. 
 	jp nc,l21dch		;214f	d2 dc 21 	. . ! 
 	ld de,0c000h		;2152	11 00 c0 	. . . 
-	ld hl,(0e2dah)		;2155	2a da e2 	* . . 
+	ld hl,(ENEMY_POS)		;2155	2a da e2 	* . . 
 	add hl,de			;2158	19 	. 
 	jp c,l1f50h		;2159	da 50 1f 	. P . 
 	ret			;215c	c9 	. 
@@ -5400,7 +5401,7 @@ l215dh:
 	cp 002h		;2183	fe 02 	. . 
 	ret nz			;2185	c0 	. 
 	call sub_1dd4h		;2186	cd d4 1d 	. . . 
-	ld hl,(0e2dah)		;2189	2a da e2 	* . . 
+	ld hl,(ENEMY_POS)		;2189	2a da e2 	* . . 
 	ld a,(ENEMY_FRAME)		;218c	3a de e2 	: . . 
 	cp 007h		;218f	fe 07 	. . 
 	jr c,l21a9h		;2191	38 16 	8 . 
@@ -5537,7 +5538,7 @@ l228ah:
 	add hl,de			;22ab	19 	. 
 	jp nc,l23c6h		;22ac	d2 c6 23 	. . # 
 	ld de,05f00h		;22af	11 00 5f 	. . _ 
-	ld hl,(0e2dah)		;22b2	2a da e2 	* . . 
+	ld hl,(ENEMY_POS)		;22b2	2a da e2 	* . . 
 	add hl,de			;22b5	19 	. 
 	jp nc,l1f50h		;22b6	d2 50 1f 	. P . 
 	ret			;22b9	c9 	. 
@@ -5576,7 +5577,7 @@ l2309h:
 	ld (iy+004h),l		;2309	fd 75 04 	. u . 
 	ld (iy+005h),h		;230c	fd 74 05 	. t . 
 	ld (iy+00bh),a		;230f	fd 77 0b 	. w . 
-	ld hl,(0e2dah)		;2312	2a da e2 	* . . 
+	ld hl,(ENEMY_POS)		;2312	2a da e2 	* . . 
 	ld de,0ff00h		;2315	11 00 ff 	. . . 
 	add hl,de			;2318	19 	. 
 	ld (iy+002h),l		;2319	fd 75 02 	. u . 
@@ -5625,7 +5626,7 @@ l237fh:
 	ld a,00ch		;237f	3e 0c 	> . 
 l2381h:
 	ld (ix + ENEMY_FRAME_IDX),a		;2381	dd 77 06 	. w . 
-	ld hl,(0e2dah)		;2384	2a da e2 	* . . 
+	ld hl,(ENEMY_POS)		;2384	2a da e2 	* . . 
 	ld de,0fec0h		;2387	11 c0 fe 	. . . 
 	add hl,de			;238a	19 	. 
 	ld e,(iy+002h)		;238b	fd 5e 02 	. ^ . 
@@ -5737,7 +5738,7 @@ l246fh:
 	ld de,l00dch		;2475	11 dc 00 	. . . 
 	ld a,009h		;2478	3e 09 	> . 
 l247ah:
-	ld hl,(0e2dah)		;247a	2a da e2 	* . . 
+	ld hl,(ENEMY_POS)		;247a	2a da e2 	* . . 
 	jp ADD_POINTS		;247d	c3 60 2f 	. ` / 
 	call sub_2d13h		;2480	cd 13 2d 	. . - 
 	call sub_24b0h		;2483	cd b0 24 	. . $ 
@@ -6285,7 +6286,7 @@ l2914h:
 	jr c,l2907h		;2921	38 e4 	8 . 
 l2923h:
 	ld de,0c000h		;2923	11 00 c0 	. . . 
-	ld hl,(0e2dah)		;2926	2a da e2 	* . . 
+	ld hl,(ENEMY_POS)		;2926	2a da e2 	* . . 
 	add hl,de			;2929	19 	. 
 	jp c,l1f50h		;292a	da 50 1f 	. P . 
 	jr l2965h		;292d	18 36 	. 6 
@@ -6437,7 +6438,7 @@ l2a4fh:
 	ld (0e2dch),hl		;2a52	22 dc e2 	" . . 
 l2a55h:
 	ld (ix + ENEMY_FRAME_IDX),004h		;2a55	dd 36 06 04 	. 6 . . 
-	ld hl,(0e2dah)		;2a59	2a da e2 	* . . 
+	ld hl,(ENEMY_POS)		;2a59	2a da e2 	* . . 
 	ld de,0fe00h		;2a5c	11 00 fe 	. . . 
 	add hl,de			;2a5f	19 	. 
 	ld de,(0e104h)		;2a60	ed 5b 04 e1 	. [ . . 
@@ -6478,17 +6479,17 @@ l2a87h:
 	ld de,0fb00h		;2aa2	11 00 fb 	. . . 
 	add hl,de			;2aa5	19 	. 
 	jp c,l2937h		;2aa6	da 37 29 	. 7 ) 
-	ld hl,(0e2dah)		;2aa9	2a da e2 	* . . 
+	ld hl,(ENEMY_POS)		;2aa9	2a da e2 	* . . 
 	ld de,(0e104h)		;2aac	ed 5b 04 e1 	. [ . . 
 	sbc hl,de		;2ab0	ed 52 	. R 
 	jp c,l2977h		;2ab2	da 77 29 	. w ) 
 	ret			;2ab5	c9 	. 
 sub_2ab6h:
-	ld hl,(0e2dah)		;2ab6	2a da e2 	* . . 
+	ld hl,(ENEMY_POS)		;2ab6	2a da e2 	* . . 
 	ld de,(0e104h)		;2ab9	ed 5b 04 e1 	. [ . . 
 	sbc hl,de		;2abd	ed 52 	. R 
 	jr nc,l2ac5h		;2abf	30 04 	0 . 
-	ld (0e2dah),de		;2ac1	ed 53 da e2 	. S . . 
+	ld (ENEMY_POS),de		;2ac1	ed 53 da e2 	. S . . 
 l2ac5h:
 	jp l1be2h		;2ac5	c3 e2 1b 	. . . 
 	ld de,(0e1abh)		;2ac8	ed 5b ab e1 	. [ . . 
@@ -10061,7 +10062,7 @@ l459fh:
 	ld bc,0012h
 	jr nz,l45dah
 	ld hl,(0e712h)
-	ld de,(0e2dah)
+	ld de,(ENEMY_POS)
 	sbc hl,de
 	ld hl,0e701h
 	jr c,l45cch
