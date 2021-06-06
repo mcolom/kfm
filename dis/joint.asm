@@ -118,6 +118,9 @@ THOMAS_FRAME_START_JUMP: EQU 0x1F
 THOMAS_FRAME_JUMP_PAIN: EQU 0x20
 THOMAS_FRAME_WITH_SILVIA: EQU 0x26
 
+; This is used to count the ticks Thomas is jumping or going upstairs
+THOMAS_HEIGHT_COUNTER: EQU 0xE704
+
 ; Global game state
 ; 0: stop
 ; 1: screen clears (goes black)
@@ -9475,13 +9478,13 @@ l41eah:
 	ld hl,0e703h
 	dec (hl)	
 	jr nz,l4229h
-	ld a,(0e704h)
+	ld a,(THOMAS_HEIGHT_COUNTER)
 	inc a	
 	jr z,l4240h
 	dec a	
 	jr nz,l4212h
 	inc a	
-	ld (0e704h),a
+	ld (THOMAS_HEIGHT_COUNTER),a
 	ld hl,(0e70ah)
 	ld a,(hl)	
 	ld (0e703h),a
@@ -9508,7 +9511,7 @@ l4220h:
 	ld (hl),005h
 	ret	
 l4229h:
-	ld a,(0e704h)
+	ld a,(THOMAS_HEIGHT_COUNTER)
 	dec a	
 	ret nz	
 	ld hl,(0e70ah)
@@ -9527,7 +9530,7 @@ l4240h:
 	ld (0e705h),a
 l4244h:
 	xor a	
-	ld (0e704h),a
+	ld (THOMAS_HEIGHT_COUNTER),a
 	ld d,a	
 	ld a,(0e702h)
 	sub 004h
@@ -9696,7 +9699,7 @@ l4377h:
 	ld (hl),c	
 	ld (THOMAS_FRAME),a
 	ld a,0ffh
-	ld (0e704h),a
+	ld (THOMAS_HEIGHT_COUNTER),a
 	ld hl,(0e712h)
 	ld (0e707h),hl
 	ret	
@@ -9798,7 +9801,7 @@ l4420h:
 l4430h:
 	ld (0e703h),a
 	ld hl,(0e70eh)
-	ld a,(0e704h)
+	ld a,(THOMAS_HEIGHT_COUNTER)
 	dec a	
 	jr nz,l4445h
 	inc hl	
@@ -9808,7 +9811,7 @@ l4430h:
 	inc hl	
 	ld (0e70eh),hl
 l4445h:
-	ld (0e704h),a
+	ld (THOMAS_HEIGHT_COUNTER),a
 	ld c,(hl)	
 	ld a,(0e705h)
 	and a	
@@ -10237,7 +10240,7 @@ l4766h:
 	ld a,001h
 	ld (0e705h),a
 	ld a,b	
-	ld (0e704h),a
+	ld (THOMAS_HEIGHT_COUNTER),a
 l4782h:
 	pop af	
 	ret	
