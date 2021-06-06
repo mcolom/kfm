@@ -2807,6 +2807,7 @@ l0f39h:
 	call sub_0f3fh		;0f39	cd 3f 0f 	. ? . 
 	djnz l0f39h		;0f3c	10 fb 	. . 
 	ret			;0f3e	c9 	. 
+
 sub_0f3fh:
 	ld a,0b8h		;0f3f	3e b8 	> . 
 	call sub_0f4fh		;0f41	cd 4f 0f 	. O . 
@@ -3069,6 +3070,7 @@ l1100h:
 	rrca			;1103	0f 	. 
 	call sub_1108h		;1104	cd 08 11 	. . . 
 	pop af			;1107	f1 	. 
+
 sub_1108h:
 	and 00fh		;1108	e6 0f 	. . 
 	add a,090h		;110a	c6 90 	. . 
@@ -4025,9 +4027,9 @@ l170bh:
 	pop af			;171d	f1 	. 
 	jr z,l173dh		;171e	28 1d 	( . 
 	ld de,0ffd6h		;1720	11 d6 ff 	. . . 
-	call sub_1cach		;1723	cd ac 1c 	. . . 
+	call GET_MR_REACTION_IN_HL		;1723	cd ac 1c 	. . . 
 	add hl,de			;1726	19 	. 
-	call sub_1ca5h		;1727	cd a5 1c 	. . . 
+	call SET_MR_REACTION_FROM_HL		;1727	cd a5 1c 	. . . 
 	ex de,hl			;172a	eb 	. 
 	call sub_1c9eh		;172b	cd 9e 1c 	. . . 
 	add hl,de			;172e	19 	. 
@@ -4094,11 +4096,11 @@ l1796h:
 	call sub_2ee2h		;17a1	cd e2 2e 	. . . 
 	ld a,007h		;17a4	3e 07 	> . 
 	push af			;17a6	f5 	. 
-	call sub_1cach		;17a7	cd ac 1c 	. . . 
+	call GET_MR_REACTION_IN_HL		;17a7	cd ac 1c 	. . . 
 	ex de,hl			;17aa	eb 	. 
 	ld hl,0		;17ab	21 00 00 	! . . 
 	sbc hl,de		;17ae	ed 52 	. R 
-	call sub_1ca5h		;17b0	cd a5 1c 	. . . 
+	call SET_MR_REACTION_FROM_HL		;17b0	cd a5 1c 	. . . 
 	set 1,(ix + ENEMY_STEADY_COUNTER_IDX)		;17b3	dd cb 0b ce 	. . . . 
 	pop af			;17b7	f1 	. 
 	jr l1768h		;17b8	18 ae 	. . 
@@ -4127,7 +4129,7 @@ l17d7h:
 l17e5h:
 	ld (ix + ENEMY_STATE_IDX),00ah		;17e5	dd 36 01 0a 	. 6 . . 
 	ld hl,003a0h		;17e9	21 a0 03 	! . . 
-	call sub_1ca5h		;17ec	cd a5 1c 	. . . 
+	call SET_MR_REACTION_FROM_HL		;17ec	cd a5 1c 	. . . 
 	ld hl,00028h		;17ef	21 28 00 	! ( . 
 	ld (ix + ENEMY_ATTACK_STEP_IDX),l		;17f2	dd 75 0e 	. u . 
 	ld (ix + ENEMY_BOOMERANG_TYPE_IDX),h		;17f5	dd 74 0f 	. t . 
@@ -4534,18 +4536,20 @@ sub_1ab8h:
 l1ac6h:
 	sbc hl,de		;1ac6	ed 52 	. R 
 	ret			;1ac8	c9 	. 
+
 sub_1ac9h:
 	ld a,(0e702h)		;1ac9	3a 02 e7 	: . . 
 	cp 008h		;1acc	fe 08 	. . 
 	ret z			;1ace	c8 	. 
 	cp 009h		;1acf	fe 09 	. . 
 	ret			;1ad1	c9 	. 
+
 sub_1ad2h:
 	push de			;1ad2	d5 	. 
 	call sub_1ae7h		;1ad3	cd e7 1a 	. . . 
 	pop hl			;1ad6	e1 	. 
 	ret nc			;1ad7	d0 	. 
-	call sub_1b18h		;1ad8	cd 18 1b 	. . . 
+	call CHECK_VAL_HL_PLUS_B_0XFF		;1ad8	cd 18 1b 	. . . 
 	ret nc			;1adb	d0 	. 
 	push af			;1adc	f5 	. 
 	and 00fh		;1add	e6 0f 	. . 
@@ -4584,13 +4588,15 @@ l1b06h:
 	ld b,a			;1b15	47 	G 
 	scf			;1b16	37 	7 
 	ret			;1b17	c9 	. 
-sub_1b18h:
-	ld e,b			;1b18	58 	X 
-	ld d,000h		;1b19	16 00 	. . 
-	add hl,de			;1b1b	19 	. 
-	ld a,(hl)			;1b1c	7e 	~ 
-	cp 0ffh		;1b1d	fe ff 	. . 
-	ret			;1b1f	c9 	. 
+
+CHECK_VAL_HL_PLUS_B_0XFF:
+	ld e,b		;1b18	58
+	ld d,000h	;1b19	16 00
+	add hl,de	;1b1b	19
+	ld a,(hl)	;1b1c	7e A = HL[B]
+	cp 0ffh		;1b1d	fe ff Check if HL[B] != 0xFF
+	ret			;1b1f	c9
+
 l1b20h:
 	call sub_1208h		;1b20	cd 08 12 	. . . 
 	jr nz,sub_1b7ah		;1b23	20 55 	  U 
@@ -4654,7 +4660,7 @@ l1b96h:
 	ld a,(hl)			;1b9a	7e 	~ 
 	inc hl			;1b9b	23 	# 
 	ld (ix + ENEMY_FRAME_COUNTER_IDX),a		;1b9c	dd 77 07 	. w . 
-	call sub_1ca5h		;1b9f	cd a5 1c 	. . . 
+	call SET_MR_REACTION_FROM_HL		;1b9f	cd a5 1c 	. . . 
 	xor a			;1ba2	af 	. 
 	ld (ix + ENEMY_ATTACK_STEP_IDX),a		;1ba3	dd 77 0e 	. w . 
 	ld (ix + ENEMY_BOOMERANG_TYPE_IDX),a		;1ba6	dd 77 0f 	. w . 
@@ -4662,7 +4668,7 @@ l1b96h:
 l1baah:
 	dec (ix + ENEMY_FRAME_COUNTER_IDX)		;1baa	dd 35 07 	. 5 . 
 	jp nz,l1bc4h		;1bad	c2 c4 1b 	. . . 
-	call sub_1cach		;1bb0	cd ac 1c 	. . . 
+	call GET_MR_REACTION_IN_HL		;1bb0	cd ac 1c 	. . . 
 	ld a,(hl)			;1bb3	7e 	~ 
 	and a			;1bb4	a7 	. 
 	jp m,sub_1b7ah		;1bb5	fa 7a 1b 	. z . 
@@ -4671,7 +4677,7 @@ l1baah:
 	ld a,(hl)			;1bbc	7e 	~ 
 	inc hl			;1bbd	23 	# 
 	ld (ix + ENEMY_FRAME_COUNTER_IDX),a		;1bbe	dd 77 07 	. w . 
-	call sub_1ca5h		;1bc1	cd a5 1c 	. . . 
+	call SET_MR_REACTION_FROM_HL		;1bc1	cd a5 1c 	. . . 
 l1bc4h:
 	ld e,(ix + ENEMY_ATTACK_STEP_IDX)		;1bc4	dd 5e 0e 	. ^ . 
 	ld d,(ix + ENEMY_BOOMERANG_TYPE_IDX)		;1bc7	dd 56 0f 	. V . 
@@ -4798,14 +4804,17 @@ sub_1c9eh:
 	ld l,(ix+004h)		;1c9e	dd 6e 04 	. n . 
 	ld h,(ix + ENEMY_HEIGHT_IDX)		;1ca1	dd 66 05 	. f . 
 	ret			;1ca4	c9 	. 
-sub_1ca5h:
+
+SET_MR_REACTION_FROM_HL:
 	ld (ix + MR_REACTION_L_IDX),l		;1ca5	dd 75 0c 	. u . 
 	ld (ix + MR_REACTION_H_IDX),h		;1ca8	dd 74 0d 	. t . 
 	ret			;1cab	c9 	. 
-sub_1cach:
-	ld l,(ix + MR_REACTION_L_IDX)		;1cac	dd 6e 0c 	. n . 
-	ld h,(ix + MR_REACTION_H_IDX)		;1caf	dd 66 0d 	. f . 
+
+GET_MR_REACTION_IN_HL:
+	ld l,(ix + MR_REACTION_L_IDX)		;1cac	dd 6e 0c
+	ld h,(ix + MR_REACTION_H_IDX)		;1caf	dd 66 0d
 	ret			;1cb2	c9 	. 
+
 sub_1cb3h:
 	call sub_1e4ah		;1cb3	cd 4a 1e 	. J . 
 	call sub_1dfdh		;1cb6	cd fd 1d 	. . . 
@@ -5349,7 +5358,7 @@ sub_20e3h:
 l20fdh:
 	ld hl,l211ch		;20fd	21 1c 21 	! . ! 
 l2100h:
-	call sub_1b18h		;2100	cd 18 1b 	. . . 
+	call CHECK_VAL_HL_PLUS_B_0XFF		;2100	cd 18 1b 	. . . 
 	ret nc			;2103	d0 	. 
 	set 5,(ix + ENEMY_LOOKAT_IDX)		;2104	dd cb 00 ee 	. . . . 
 	ret			;2108	c9 	. 
@@ -6257,7 +6266,7 @@ sub_28bah:
 	add hl,de			;28c4	19 	. 
 	ret nc			;28c5	d0 	. 
 	ld hl,l28cch		;28c6	21 cc 28 	! . ( 
-	jp sub_1b18h		;28c9	c3 18 1b 	. . . 
+	jp CHECK_VAL_HL_PLUS_B_0XFF		;28c9	c3 18 1b 	. . . 
 l28cch:
 	nop			;28cc	00 	. 
 	rst 38h			;28cd	ff 	. 
@@ -6639,7 +6648,7 @@ sub_2ba0h:
 	call sub_1ae7h		;2ba0	cd e7 1a 	. . . 
 	ret nc			;2ba3	d0 	. 
 	ld hl,l2c36h		;2ba4	21 36 2c 	! 6 , 
-	call sub_1b18h		;2ba7	cd 18 1b 	. . . 
+	call CHECK_VAL_HL_PLUS_B_0XFF		;2ba7	cd 18 1b 	. . . 
 	ret nc			;2baa	d0 	. 
 	ld b,a			;2bab	47 	G 
 	ld e,(ix + ENEMY_FRAME_IDX)		;2bac	dd 5e 06 	. ^ . 
