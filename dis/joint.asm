@@ -89,8 +89,6 @@ ACTIVE_GRIPPERS: EQU 0xE71B
 VARS_TABLE: EQU 0xE2D8
 ;
 
-;
-
 ; Enemy's look at
 ; 0x0: enemy not visible yet
 ; 0x52, 0x56: look right
@@ -128,8 +126,6 @@ ENEMY_MOVE_COUNTER_L: EQU VARS_TABLE + ENEMY_MOVE_COUNTER_L_IDX
 ENEMY_MOVE_COUNTER_H_IDX: EQU 9
 ENEMY_MOVE_COUNTER_H: EQU VARS_TABLE + ENEMY_MOVE_COUNTER_H_IDX
 
-;ENEMY_MOVE_COUNTER_L
-
 ;
 ; Enemy's energy
 ENEMY_ENERGY_IDX: EQU 10
@@ -163,6 +159,12 @@ ENEMY_ATTACK_STEP: EQU VARS_TABLE + ENEMY_ATTACK_STEP_IDX
 ENEMY_BOOMERANG_TYPE_IDX: EQU 15
 ENEMY_BOOMERANG_TYPE: EQU VARS_TABLE + ENEMY_BOOMERANG_TYPE_IDX
 
+MAGICIAN_REPLICA_STATE_IDX: EQU 18
+MAGICIAN_REPLICA_STATE: EQU VARS_TABLE + MAGICIAN_REPLICA_STATE_IDX
+
+
+; Another table of variables
+VARS_TABLE2: EQU 0xE2E8
 
 
 
@@ -4793,6 +4795,7 @@ sub_1c83h:
 	ld (ix + ENEMY_POS_H_IDX),h		;1c86	dd 74 03 	. t . 
 	ret			;1c89	c9 	. 
 sub_1c8ah:
+    ; ToDo: here IX refers to table 2 so, so this is probably not ENEMY_POS_L_IDX
 	ld l,(ix + ENEMY_POS_L_IDX)		;1c8a	dd 6e 02 	. n . 
 	ld h,(ix + ENEMY_POS_H_IDX) ;1c8d	dd 66 03
 	ret			;1c90	c9 	. 
@@ -5243,7 +5246,7 @@ l1ff9h:
 	pop hl			;2001	e1 	. 
 	ld hl,VARS_TABLE		;2002	21 d8 e2 	! . . 
 	res 4,(hl)		;2005	cb a6 	. . 
-	ld hl,0e2e8h		;2007	21 e8 e2 	! . . 
+	ld hl,VARS_TABLE2		;2007	21 e8 e2 	! . . 
 	res 4,(hl)		;200a	cb a6 	. . 
 	ret			;200c	c9 	. 
 l200dh:
@@ -5858,7 +5861,7 @@ l24fbh:
 	dec (hl)			;2502	35 	5 
 l2503h:
 	call sub_250fh		;2503	cd 0f 25 	. . % 
-	ld ix,0e2e8h		;2506	dd 21 e8 e2 	. ! . . 
+	ld ix,VARS_TABLE2		;2506	dd 21 e8 e2 	. ! . . 
 	bit 4,(ix + ENEMY_LOOKAT_IDX)		;250a	dd cb 00 66 	. . . f 
 	ret z			;250e	c8 	. 
 sub_250fh:
@@ -6172,7 +6175,7 @@ l27b0h:
 l27dfh:
 	ld hl,0e700h		;27df	21 00 e7 	! . . 
 	set 0,(hl)		;27e2	cb c6 	. . 
-	ld a,(0e2e8h)		;27e4	3a e8 e2 	: . . 
+	ld a,(VARS_TABLE2)		;27e4	3a e8 e2 	: . . 
 	and 010h		;27e7	e6 10 	. . 
 	jr z,l284fh		;27e9	28 64 	( d 
 	push ix		;27eb	dd e5 	. . 
@@ -6223,7 +6226,7 @@ l285ch:
 	ld hl,(0e712h)		;285c	2a 12 e7 	* . . 
 	ld (0e2f4h),de		;285f	ed 53 f4 e2 	. S . . 
 	sbc hl,de		;2863	ed 52 	. R 
-	ld (0e2eah),hl		;2865	22 ea e2 	" . . 
+	ld (MAGICIAN_REPLICA_STATE),hl		;2865	22 ea e2 	" . . 
 	ld hl,05000h		;2868	21 00 50 	! . P 
 	ld (0e2ech),hl		;286b	22 ec e2 	" . . 
 	ld (ix+010h),050h		;286e	dd 36 10 50 	. 6 . P 
@@ -6249,7 +6252,7 @@ l2893h:
 	ld hl,0e197h		;289a	21 97 e1 	! . . 
 	ld de,0e198h		;289d	11 98 e1 	. . . 
 	jr nc,l28aah		;28a0	30 08 	0 . 
-	ld a,(0e2e8h)		;28a2	3a e8 e2 	: . . 
+	ld a,(VARS_TABLE2)		;28a2	3a e8 e2 	: . . 
 	and 010h		;28a5	e6 10 	. . 
 	jr nz,l28aah		;28a7	20 01 	  . 
 	ex de,hl			;28a9	eb 	. 
@@ -8107,7 +8110,7 @@ l3650h:
 	cp 009h		;3663	fe 09 	. . 
 	jr nc,l366ch		;3665	30 05 	0 . 
 l3667h:
-	ld a,(ix+012h)		;3667	dd 7e 12 	. ~ . 
+	ld a,(ix + MAGICIAN_REPLICA_STATE_IDX)		;3667	dd 7e 12 	. ~ . 
 	cp h			;366a	bc 	. 
 	ret z			;366b	c8 	. 
 l366ch:
@@ -8132,7 +8135,7 @@ l3685h:
 	ld (ix + ENEMY_LOOKAT_IDX),a		;3693	dd 77 00 	. w . 
 	ld (ix + ENEMY_STATE_IDX),e		;3696	dd 73 01 	. s . 
 	ld (ix + ENEMY_FRAME_IDX),e		;3699	dd 73 06 	. s . 
-	ld (ix+012h),d		;369c	dd 72 12 	. r . 
+	ld (ix + MAGICIAN_REPLICA_STATE_IDX),d		;369c	dd 72 12 	. r . 
 	ld (ix + ENEMY_POS_H_IDX),d		;369f	dd 72 03 	. r . 
 	ld (ix + ENEMY_POS_L_IDX),000h		;36a2	dd 36 02 00 	. 6 . . 
 	ld hl,09000h		;36a6	21 00 90 	! . . 
@@ -8626,7 +8629,7 @@ l3a1eh:
 l3a26h:
 	bit 0,(ix+014h)		;3a26	dd cb 14 46 	. . . F 
 	jr z,l3a32h		;3a2a	28 06 	( . 
-	dec (ix+012h)		;3a2c	dd 35 12 	. 5 . 
+	dec (ix + MAGICIAN_REPLICA_STATE_IDX)		;3a2c	dd 35 12 	. 5 . 
 	jp z,l3b92h		;3a2f	ca 92 3b 	. . ; 
 l3a32h:
 	ld l,(ix + ENEMY_POS_L_IDX)		;3a32	dd 6e 02 	. n . 
