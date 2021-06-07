@@ -110,7 +110,8 @@ ENEMY_POS_H_IDX: EQU 3
 ENEMY_POS: EQU VARS_TABLE + ENEMY_POS_L_IDX
 ;
 ; Height where to draw the enemy
-ENEMY_HEIGHT_IDX: EQU 5
+ENEMY_HEIGHT_L_IDX: EQU 4
+ENEMY_HEIGHT_H_IDX: EQU 5
 ;ENEMY_HEIGHT: EQU VARS_TABLE + ENEMY_FRAME_IDX
 ;
 ; Enemy's displayed frame
@@ -4801,12 +4802,12 @@ sub_1c91h:
 	ex de,hl			;1c95	eb 	. 
 	ret			;1c96	c9 	. 
 sub_1c97h:
-	ld (ix+004h),l		;1c97	dd 75 04 	. u . 
-	ld (ix + ENEMY_HEIGHT_IDX),h		;1c9a	dd 74 05 	. t . 
+	ld (ix + ENEMY_HEIGHT_L_IDX),l		;1c97	dd 75 04 	. u . 
+	ld (ix + ENEMY_HEIGHT_H_IDX),h		;1c9a	dd 74 05 	. t . 
 	ret			;1c9d	c9 	. 
 sub_1c9eh:
-	ld l,(ix+004h)		;1c9e	dd 6e 04 	. n . 
-	ld h,(ix + ENEMY_HEIGHT_IDX)		;1ca1	dd 66 05 	. f . 
+	ld l,(ix + ENEMY_HEIGHT_L_IDX)		;1c9e	dd 6e 04 	. n . 
+	ld h,(ix + ENEMY_HEIGHT_H_IDX)		;1ca1	dd 66 05 	. f . 
 	ret			;1ca4	c9 	. 
 
 SET_MR_REACTION_FROM_HL:
@@ -4855,8 +4856,8 @@ l1ceeh:
 	jr l1d5bh		;1d01	18 58 	. X 
 l1d03h:
 	ld a,(ix + ENEMY_STEADY_COUNTER_IDX)		;1d03	dd 7e 0b 	. ~ . 
-	ld l,(ix+004h)		;1d06	dd 6e 04 	. n . 
-	ld h,(ix + ENEMY_HEIGHT_IDX)		;1d09	dd 66 05 	. f . 
+	ld l,(ix + ENEMY_HEIGHT_L_IDX)		;1d06	dd 6e 04 	. n . 
+	ld h,(ix + ENEMY_HEIGHT_H_IDX)		;1d09	dd 66 05 	. f . 
 	bit 0,a		;1d0c	cb 47 	. G 
 	jr z,l1d1ch		;1d0e	28 0c 	( . 
 	ld de,(0e1bfh)		;1d10	ed 5b bf e1 	. [ . . 
@@ -4869,8 +4870,8 @@ l1d1ch:
 l1d20h:
 	add hl,de			;1d20	19 	. 
 l1d21h:
-	ld (ix+004h),l		;1d21	dd 75 04 	. u . 
-	ld (ix + ENEMY_HEIGHT_IDX),h		;1d24	dd 74 05 	. t . 
+	ld (ix + ENEMY_HEIGHT_L_IDX),l		;1d21	dd 75 04 	. u . 
+	ld (ix + ENEMY_HEIGHT_H_IDX),h		;1d24	dd 74 05 	. t . 
 	ld l,(ix + MR_REACTION_L_IDX)		;1d27	dd 6e 0c 	. n . 
 	ld h,(ix + MR_REACTION_H_IDX)		;1d2a	dd 66 0d 	. f . 
 	ld de,(0e1bbh)		;1d2d	ed 5b bb e1 	. [ . . 
@@ -4903,8 +4904,8 @@ l1d5bh:
 	ld de,l017fh+1		;1d6e	11 80 01 	. . . 
 	add hl,de			;1d71	19 	. 
 	ld (0e811h),hl		;1d72	22 11 e8 	" . . 
-	ld l,(ix+004h)		;1d75	dd 6e 04 	. n . 
-	ld h,(ix + ENEMY_HEIGHT_IDX)		;1d78	dd 66 05 	. f . 
+	ld l,(ix + ENEMY_HEIGHT_L_IDX)		;1d75	dd 6e 04 	. n . 
+	ld h,(ix + ENEMY_HEIGHT_H_IDX)		;1d78	dd 66 05 	. f . 
 	ld de,0006h+2		;1d7b	11 08 00 	. . . 
 	push hl			;1d7e	e5 	. 
 	call sub_1172h		;1d7f	cd 72 11 	. r . 
@@ -6609,12 +6610,12 @@ l2b4eh:
 	ld (MR_REACTION_L),hl		;2b67	22 e4 e2 	" . . 
 l2b6ah:
 	ld a,(hl)			;2b6a	7e 	~ 
-	add a,(ix+004h)		;2b6b	dd 86 04 	. . . 
-	ld (ix+004h),a		;2b6e	dd 77 04 	. w . 
+	add a,(ix + ENEMY_HEIGHT_L_IDX)		;2b6b	dd 86 04 	. . . 
+	ld (ix + ENEMY_HEIGHT_L_IDX),a		;2b6e	dd 77 04 	. w . 
 	inc hl			;2b71	23 	# 
 	ld a,(hl)			;2b72	7e 	~ 
-	adc a,(ix + ENEMY_HEIGHT_IDX)		;2b73	dd 8e 05 	. . . 
-	ld (ix + ENEMY_HEIGHT_IDX),a		;2b76	dd 77 05 	. w . 
+	adc a,(ix + ENEMY_HEIGHT_H_IDX)		;2b73	dd 8e 05 	. . . 
+	ld (ix + ENEMY_HEIGHT_H_IDX),a		;2b76	dd 77 05 	. w . 
 	ret			;2b79	c9 	. 
 l2b7ah:
 	jr nz,$+3		;2b7a	20 01 	  . 
@@ -7452,8 +7453,8 @@ l30b7h:
 	ld e,(ix + MR_REACTION_L_IDX)		;30bd	dd 5e 0c 	. ^ . 
 	ld d,(ix + MR_REACTION_H_IDX)		;30c0	dd 56 0d 	. V . 
 	add hl,de			;30c3	19 	. 
-	ld (ix+004h),l		;30c4	dd 75 04 	. u . 
-	ld (ix + ENEMY_HEIGHT_IDX),h		;30c7	dd 74 05 	. t . 
+	ld (ix + ENEMY_HEIGHT_L_IDX),l		;30c4	dd 75 04 	. u . 
+	ld (ix + ENEMY_HEIGHT_H_IDX),h		;30c7	dd 74 05 	. t . 
 	jp l3025h		;30ca	c3 25 30 	. % 0 
 l30cdh:
 	ld (ix + ENEMY_STATE_IDX),006h		;30cd	dd 36 01 06 	. 6 . . 
@@ -7468,8 +7469,8 @@ l30cdh:
 	ld (ix + ENEMY_ATTACK_STEP_IDX),e		;30e8	dd 73 0e 	. s . 
 	ld (ix + ENEMY_BOOMERANG_TYPE_IDX),d		;30eb	dd 72 0f 	. r . 
 	ld de,l0100h		;30ee	11 00 01 	. . . 
-	ld l,(ix+004h)		;30f1	dd 6e 04 	. n . 
-	ld h,(ix + ENEMY_HEIGHT_IDX)		;30f4	dd 66 05 	. f . 
+	ld l,(ix + ENEMY_HEIGHT_L_IDX)		;30f1	dd 6e 04 	. n . 
+	ld h,(ix + ENEMY_HEIGHT_H_IDX)		;30f4	dd 66 05 	. f . 
 	sbc hl,de		;30f7	ed 52 	. R 
 	ld (ix + MR_REACTION_L_IDX),l		;30f9	dd 75 0c 	. u . 
 	ld (ix + MR_REACTION_H_IDX),h		;30fc	dd 74 0d 	. t . 
@@ -7537,8 +7538,8 @@ l3174h:
 	ld hl,l0020h		;3194	21 20 00 	!   . 
 	add hl,de			;3197	19 	. 
 	ld (0e811h),hl		;3198	22 11 e8 	" . . 
-	ld l,(ix+004h)		;319b	dd 6e 04 	. n . 
-	ld h,(ix + ENEMY_HEIGHT_IDX)		;319e	dd 66 05 	. f . 
+	ld l,(ix + ENEMY_HEIGHT_L_IDX)		;319b	dd 6e 04 	. n . 
+	ld h,(ix + ENEMY_HEIGHT_H_IDX)		;319e	dd 66 05 	. f . 
 	ld de,0001h		;31a1	11 01 00 	. . . 
 	call sub_1172h		;31a4	cd 72 11 	. r . 
 	jp c,l31c0h		;31a7	da c0 31 	. . 1 
@@ -7555,8 +7556,8 @@ l31bch:
 	ld (ix + ENEMY_FRAME_IDX),a		;31bc	dd 77 06 	. w . 
 	ret			;31bf	c9 	. 
 l31c0h:
-	ld l,(ix+004h)		;31c0	dd 6e 04 	. n . 
-	ld h,(ix + ENEMY_HEIGHT_IDX)		;31c3	dd 66 05 	. f . 
+	ld l,(ix + ENEMY_HEIGHT_L_IDX)		;31c0	dd 6e 04 	. n . 
+	ld h,(ix + ENEMY_HEIGHT_H_IDX)		;31c3	dd 66 05 	. f . 
 	ld de,l0120h		;31c6	11 20 01 	.   . 
 	ld a,091h		;31c9	3e 91 	> . 
 	call sub_0dfeh		;31cb	cd fe 0d 	. . . 
@@ -7718,8 +7719,8 @@ l331eh:
 	jr l333ch		;3325	18 15 	. . 
 l3327h:
 	call sub_0dfeh		;3327	cd fe 0d 	. . . 
-	ld l,(ix+004h)		;332a	dd 6e 04 	. n . 
-	ld h,(ix + ENEMY_HEIGHT_IDX)		;332d	dd 66 05 	. f . 
+	ld l,(ix + ENEMY_HEIGHT_L_IDX)		;332a	dd 6e 04 	. n . 
+	ld h,(ix + ENEMY_HEIGHT_H_IDX)		;332d	dd 66 05 	. f . 
 	ld de,l0280h		;3330	11 80 02 	. . . 
 	add hl,de			;3333	19 	. 
 	ld de,l0120h		;3334	11 20 01 	.   . 
@@ -7742,9 +7743,9 @@ sub_3353h:
 	ld (iy+002h),a		;3359	fd 77 02 	. w . 
 	ld a,(ix + ENEMY_POS_H_IDX)		;335c	dd 7e 03 	. ~ . 
 	ld (iy+003h),a		;335f	fd 77 03 	. w . 
-	ld a,(ix+004h)		;3362	dd 7e 04 	. ~ . 
+	ld a,(ix + ENEMY_HEIGHT_L_IDX)		;3362	dd 7e 04 	. ~ . 
 	ld (iy+004h),a		;3365	fd 77 04 	. w . 
-	ld a,(ix + ENEMY_HEIGHT_IDX)		;3368	dd 7e 05 	. ~ . 
+	ld a,(ix + ENEMY_HEIGHT_H_IDX)		;3368	dd 7e 05 	. ~ . 
 	ld (iy+005h),a		;336b	fd 77 05 	. w . 
 	set 4,(iy+000h)		;336e	fd cb 00 e6 	. . . . 
 	ld (iy+007h),007h		;3372	fd 36 07 07 	. 6 . . 
@@ -8135,8 +8136,8 @@ l3685h:
 	ld (ix + ENEMY_POS_H_IDX),d		;369f	dd 72 03 	. r . 
 	ld (ix + ENEMY_POS_L_IDX),000h		;36a2	dd 36 02 00 	. 6 . . 
 	ld hl,09000h		;36a6	21 00 90 	! . . 
-	ld (ix+004h),l		;36a9	dd 75 04 	. u . 
-	ld (ix + ENEMY_HEIGHT_IDX),h		;36ac	dd 74 05 	. t . 
+	ld (ix + ENEMY_HEIGHT_L_IDX),l		;36a9	dd 75 04 	. u . 
+	ld (ix + ENEMY_HEIGHT_H_IDX),h		;36ac	dd 74 05 	. t . 
 	ld (ix + ENEMY_FRAME_COUNTER_IDX),003h		;36af	dd 36 07 03 	. 6 . . 
 	ld hl,0000ah		;36b3	21 0a 00 	! . . 
 	ld de,l007dh		;36b6	11 7d 00 	. } . 
@@ -8204,11 +8205,11 @@ sub_371dh:
 sub_3732h:
 	push hl			;3732	e5 	. 
 	and a			;3733	a7 	. 
-	ld l,(ix+004h)		;3734	dd 6e 04 	. n . 
-	ld h,(ix + ENEMY_HEIGHT_IDX)		;3737	dd 66 05 	. f . 
+	ld l,(ix + ENEMY_HEIGHT_L_IDX)		;3734	dd 6e 04 	. n . 
+	ld h,(ix + ENEMY_HEIGHT_H_IDX)		;3737	dd 66 05 	. f . 
 	sbc hl,de		;373a	ed 52 	. R 
-	ld (ix+004h),l		;373c	dd 75 04 	. u . 
-	ld (ix + ENEMY_HEIGHT_IDX),h		;373f	dd 74 05 	. t . 
+	ld (ix + ENEMY_HEIGHT_L_IDX),l		;373c	dd 75 04 	. u . 
+	ld (ix + ENEMY_HEIGHT_H_IDX),h		;373f	dd 74 05 	. t . 
 	pop de			;3742	d1 	. 
 	sbc hl,de		;3743	ed 52 	. R 
 	ret			;3745	c9 	. 
@@ -8226,8 +8227,8 @@ sub_3746h:
 	add hl,de			;375f	19 	. 
 	ld (0e811h),hl		;3760	22 11 e8 	" . . 
 l3763h:
-	ld l,(ix+004h)		;3763	dd 6e 04 	. n . 
-	ld h,(ix + ENEMY_HEIGHT_IDX)		;3766	dd 66 05 	. f . 
+	ld l,(ix + ENEMY_HEIGHT_L_IDX)		;3763	dd 6e 04 	. n . 
+	ld h,(ix + ENEMY_HEIGHT_H_IDX)		;3766	dd 66 05 	. f . 
 	ld de,l0080h		;3769	11 80 00 	. . . 
 	add hl,de			;376c	19 	. 
 	ld de,0006h+2		;376d	11 08 00 	. . . 
@@ -8237,14 +8238,14 @@ sub_3773h:
 	call sub_1220h		;3776	cd 20 12 	.   . 
 	ret nc			;3779	d0 	. 
 	and a			;377a	a7 	. 
-	ld l,(ix+004h)		;377b	dd 6e 04 	. n . 
-	ld h,(ix + ENEMY_HEIGHT_IDX)		;377e	dd 66 05 	. f . 
+	ld l,(ix + ENEMY_HEIGHT_L_IDX)		;377b	dd 6e 04 	. n . 
+	ld h,(ix + ENEMY_HEIGHT_H_IDX)		;377e	dd 66 05 	. f . 
 	sbc hl,de		;3781	ed 52 	. R 
 	ret nc			;3783	d0 	. 
 	ld hl,0f800h		;3784	21 00 f8 	! . . 
 	add hl,de			;3787	19 	. 
-	ld e,(ix+004h)		;3788	dd 5e 04 	. ^ . 
-	ld d,(ix + ENEMY_HEIGHT_IDX)		;378b	dd 56 05 	. V . 
+	ld e,(ix + ENEMY_HEIGHT_L_IDX)		;3788	dd 5e 04 	. ^ . 
+	ld d,(ix + ENEMY_HEIGHT_H_IDX)		;378b	dd 56 05 	. V . 
 	and a			;378e	a7 	. 
 	sbc hl,de		;378f	ed 52 	. R 
 	ret			;3791	c9 	. 
@@ -8261,8 +8262,8 @@ sub_3792h:
 	ld hl,l0040h		;37a8	21 40 00 	! @ . 
 	add hl,de			;37ab	19 	. 
 	ld (0e811h),hl		;37ac	22 11 e8 	" . . 
-	ld l,(ix+004h)		;37af	dd 6e 04 	. n . 
-	ld h,(ix + ENEMY_HEIGHT_IDX)		;37b2	dd 66 05 	. f . 
+	ld l,(ix + ENEMY_HEIGHT_L_IDX)		;37af	dd 6e 04 	. n . 
+	ld h,(ix + ENEMY_HEIGHT_H_IDX)		;37b2	dd 66 05 	. f . 
 	ld de,l0080h		;37b5	11 80 00 	. . . 
 	add hl,de			;37b8	19 	. 
 	ld de,4				;37b9	11 04 00 	. . . 
@@ -8272,14 +8273,14 @@ sub_37bfh:
 	call sub_1220h		;37c2	cd 20 12 	.   . 
 	ret nc			;37c5	d0 	. 
 	and a			;37c6	a7 	. 
-	ld l,(ix+004h)		;37c7	dd 6e 04 	. n . 
-	ld h,(ix + ENEMY_HEIGHT_IDX)		;37ca	dd 66 05 	. f . 
+	ld l,(ix + ENEMY_HEIGHT_L_IDX)		;37c7	dd 6e 04 	. n . 
+	ld h,(ix + ENEMY_HEIGHT_H_IDX)		;37ca	dd 66 05 	. f . 
 	sbc hl,de		;37cd	ed 52 	. R 
 	ret nc			;37cf	d0 	. 
 	ld hl,0fb80h		;37d0	21 80 fb 	! . . 
 	add hl,de			;37d3	19 	. 
-	ld e,(ix+004h)		;37d4	dd 5e 04 	. ^ . 
-	ld d,(ix + ENEMY_HEIGHT_IDX)		;37d7	dd 56 05 	. V . 
+	ld e,(ix + ENEMY_HEIGHT_L_IDX)		;37d4	dd 5e 04 	. ^ . 
+	ld d,(ix + ENEMY_HEIGHT_H_IDX)		;37d7	dd 56 05 	. V . 
 	and a			;37da	a7 	. 
 	sbc hl,de		;37db	ed 52 	. R 
 	ret			;37dd	c9 	. 
@@ -8722,8 +8723,8 @@ l3ae4h:
 	ld l,(ix + ENEMY_MOVE_COUNTER_L_IDX)		;3ae4	dd 6e 08 	. n . 
 	ld h,(ix + ENEMY_MOVE_COUNTER_H_IDX)		;3ae7	dd 66 09 	. f . 
 	add hl,de			;3aea	19 	. 
-	ld (ix+004h),l		;3aeb	dd 75 04 	. u . 
-	ld (ix + ENEMY_HEIGHT_IDX),h		;3aee	dd 74 05 	. t . 
+	ld (ix + ENEMY_HEIGHT_L_IDX),l		;3aeb	dd 75 04 	. u . 
+	ld (ix + ENEMY_HEIGHT_H_IDX),h		;3aee	dd 74 05 	. t . 
 	jp l3c7ah		;3af1	c3 7a 3c 	. z < 
 l3af4h:
 	call sub_3d22h		;3af4	cd 22 3d 	. " = 
@@ -8767,12 +8768,12 @@ l3b33h:
 	ld (ix + ENEMY_POS_H_IDX),a		;3b3f	dd 77 03 	. w . 
 	inc hl			;3b42	23 	# 
 	ld a,(hl)			;3b43	7e 	~ 
-	add a,(ix+004h)		;3b44	dd 86 04 	. . . 
-	ld (ix+004h),a		;3b47	dd 77 04 	. w . 
+	add a,(ix + ENEMY_HEIGHT_L_IDX)		;3b44	dd 86 04 	. . . 
+	ld (ix + ENEMY_HEIGHT_L_IDX),a		;3b47	dd 77 04 	. w . 
 	inc hl			;3b4a	23 	# 
 	ld a,(hl)			;3b4b	7e 	~ 
-	adc a,(ix + ENEMY_HEIGHT_IDX)		;3b4c	dd 8e 05 	. . . 
-	ld (ix + ENEMY_HEIGHT_IDX),a		;3b4f	dd 77 05 	. w . 
+	adc a,(ix + ENEMY_HEIGHT_H_IDX)		;3b4c	dd 8e 05 	. . . 
+	ld (ix + ENEMY_HEIGHT_H_IDX),a		;3b4f	dd 77 05 	. w . 
 	inc hl			;3b52	23 	# 
 	ld c,(hl)			;3b53	4e 	N 
 	jp l3c7ah		;3b54	c3 7a 3c 	. z < 
@@ -8780,8 +8781,8 @@ l3b57h:
 	ld (ix + ENEMY_ENERGY_IDX),000h		;3b57	dd 36 0a 00 	. 6 . . 
 	ld (ix + ENEMY_FRAME_IDX),000h		;3b5b	dd 36 06 00 	. 6 . . 
 	ld (ix + ENEMY_FRAME_COUNTER_IDX),005h		;3b5f	dd 36 07 05 	. 6 . . 
-	ld l,(ix+004h)		;3b63	dd 6e 04 	. n . 
-	ld h,(ix + ENEMY_HEIGHT_IDX)		;3b66	dd 66 05 	. f . 
+	ld l,(ix + ENEMY_HEIGHT_L_IDX)		;3b63	dd 6e 04 	. n . 
+	ld h,(ix + ENEMY_HEIGHT_H_IDX)		;3b66	dd 66 05 	. f . 
 	ld e,(ix + ENEMY_MOVE_COUNTER_L_IDX)		;3b69	dd 5e 08 	. ^ . 
 	ld d,(ix + ENEMY_MOVE_COUNTER_H_IDX)		;3b6c	dd 56 09 	. V . 
 	sbc hl,de		;3b6f	ed 52 	. R 
@@ -8808,8 +8809,8 @@ l3b92h:
 	ld hl,l3eabh		;3ba7	21 ab 3e 	! . > 
 l3baah:
 	push hl			;3baa	e5 	. 
-	ld l,(ix+004h)		;3bab	dd 6e 04 	. n . 
-	ld h,(ix + ENEMY_HEIGHT_IDX)		;3bae	dd 66 05 	. f . 
+	ld l,(ix + ENEMY_HEIGHT_L_IDX)		;3bab	dd 6e 04 	. n . 
+	ld h,(ix + ENEMY_HEIGHT_H_IDX)		;3bae	dd 66 05 	. f . 
 	ld de,09800h		;3bb1	11 00 98 	. . . 
 	add hl,de			;3bb4	19 	. 
 	pop hl			;3bb5	e1 	. 
@@ -8917,8 +8918,8 @@ l3c7ah:
 	ld hl,l0080h		;3c8d	21 80 00 	! . . 
 	add hl,de			;3c90	19 	. 
 	ld (0e811h),hl		;3c91	22 11 e8 	" . . 
-	ld l,(ix+004h)		;3c94	dd 6e 04 	. n . 
-	ld h,(ix + ENEMY_HEIGHT_IDX)		;3c97	dd 66 05 	. f . 
+	ld l,(ix + ENEMY_HEIGHT_L_IDX)		;3c94	dd 6e 04 	. n . 
+	ld h,(ix + ENEMY_HEIGHT_H_IDX)		;3c97	dd 66 05 	. f . 
 	ld de,00200h		;3c9a	11 00 02 	. . . 
 	add hl,de			;3c9d	19 	. 
 	ld de,0006h		;3c9e	11 06 00 	. . . 
@@ -8936,8 +8937,8 @@ l3ca9h:
 	xor 040h		;3cb5	ee 40 	. @ 
 	jp l1a80h		;3cb7	c3 80 1a 	. . . 
 sub_3cbah:
-	ld l,(ix+004h)		;3cba	dd 6e 04 	. n . 
-	ld h,(ix + ENEMY_HEIGHT_IDX)		;3cbd	dd 66 05 	. f . 
+	ld l,(ix + ENEMY_HEIGHT_L_IDX)		;3cba	dd 6e 04 	. n . 
+	ld h,(ix + ENEMY_HEIGHT_H_IDX)		;3cbd	dd 66 05 	. f . 
 	add hl,hl			;3cc0	29 	) 
 	ld d,000h		;3cc1	16 00 	. . 
 	rl d		;3cc3	cb 12 	. . 
@@ -8952,14 +8953,14 @@ sub_3ccfh:
 	ld hl,l017fh+1		;3cd6	21 80 01 	! . . 
 	add hl,de			;3cd9	19 	. 
 	ex de,hl			;3cda	eb 	. 
-	ld l,(ix+004h)		;3cdb	dd 6e 04 	. n . 
-	ld h,(ix + ENEMY_HEIGHT_IDX)		;3cde	dd 66 05 	. f . 
+	ld l,(ix + ENEMY_HEIGHT_L_IDX)		;3cdb	dd 6e 04 	. n . 
+	ld h,(ix + ENEMY_HEIGHT_H_IDX)		;3cde	dd 66 05 	. f . 
 	sbc hl,de		;3ce1	ed 52 	. R 
 	ret nc			;3ce3	d0 	. 
 	ld hl,0f380h		;3ce4	21 80 f3 	! . . 
 	add hl,de			;3ce7	19 	. 
-	ld e,(ix+004h)		;3ce8	dd 5e 04 	. ^ . 
-	ld d,(ix + ENEMY_HEIGHT_IDX)		;3ceb	dd 56 05 	. V . 
+	ld e,(ix + ENEMY_HEIGHT_L_IDX)		;3ce8	dd 5e 04 	. ^ . 
+	ld d,(ix + ENEMY_HEIGHT_H_IDX)		;3ceb	dd 56 05 	. V . 
 	and a			;3cee	a7 	. 
 	sbc hl,de		;3cef	ed 52 	. R 
 	ret			;3cf1	c9 	. 
@@ -10496,8 +10497,8 @@ l487eh:
 	ld hl,0f00h
 	ld b,007h
 l48d2h:
-	ld (ix+004h),000h
-	ld (ix + ENEMY_HEIGHT_IDX),05ch
+	ld (ix + ENEMY_HEIGHT_L_IDX),000h
+	ld (ix + ENEMY_HEIGHT_H_IDX),05ch
 	ld (ix + ENEMY_FRAME_COUNTER_IDX),007h
 	ld (ix + ENEMY_ATTACK_STEP_IDX),038h
 	ld (ix + ENEMY_BOOMERANG_TYPE_IDX),b
