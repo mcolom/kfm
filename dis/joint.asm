@@ -64,6 +64,10 @@ CHECKSERVICEMODE: macro
 	bit 7,a
 endm
 
+; Screen is character-based and memory-mapped
+SCREEN_ADDR: EQU 0xD010
+
+
 LIVES: EQU 0xE084
 DRAGONS_LEVEL: EQU 0xE080 ; 00 DDD LLL, where D is the number of dragons, and L the level - 1.
 
@@ -19120,7 +19124,7 @@ l7b65h:
 	jr nz,l7b61h
 	jp sub_7be8h
 	ld c,000h
-	ld de,0d010h
+	ld de,SCREEN_ADDR
 	ld a,00bh
 	ld l,020h
 l7b81h:
