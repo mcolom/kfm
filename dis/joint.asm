@@ -70,6 +70,9 @@ SCREEN_ADDR: EQU 0xD010
 M62_HSCROLL_LOW_W: EQU 0xA000
 M62_HSCROLL_HIGH_W: EQU 0xB000
 
+HSCROLL_LOW_W: EQU 0xE902
+HSCROLL_HIGH_W: EQU HSCROLL_LOW_W + 1
+
 
 LIVES: EQU 0xE084
 DRAGONS_LEVEL: EQU 0xE080 ; 00 DDD LLL, where D is the number of dragons, and L the level - 1.
@@ -307,9 +310,9 @@ l0039h:
 l0040h:
 	ld bc,l00c0h		;0040	01 c0 00 	. . . 
 	ldir		;0043	ed b0 	. . 
-	ld a,(0e902h)		;0045	3a 02 e9 	: . . 
+	ld a,(HSCROLL_LOW_W)		;0045	3a 02 e9 	: . . 
 	ld (M62_HSCROLL_LOW_W),a		;0048	32 00 a0 	2 . . 
-	ld a,(0e903h)		;004b	3a 03 e9 	: . . 
+	ld a,(HSCROLL_HIGH_W)		;004b	3a 03 e9 	: . . 
 	ld (M62_HSCROLL_HIGH_W),a		;004e	32 00 b0 	2 . . 
 	push iy		;0051	fd e5 	. . 
 	push ix		;0053	dd e5 	. . 
@@ -824,7 +827,7 @@ l039ch:
 	ld (GAME_STATE),a		;03a7	32 00 e0 	2 . . 
 	call sub_1157h		;03aa	cd 57 11 	. W . 
 	ld hl,0				;03ad	21 00 00 	! . . 
-	ld (0e902h),hl		;03b0	22 02 e9 	" . . 
+	ld (HSCROLL_LOW_W),hl		;03b0	22 02 e9 	" . . 
 	call 0570dh		;03b3	cd 0d 57 	. . W 
 	ld hl, select_game_floor_str		;03b6	21 5b 59
 	call WRITE_TEXT		;03b9	cd 1c 11 	. . . 
@@ -1187,7 +1190,7 @@ l05cch:
 
 sub_0644h:
 	ld hl,l0080h		;0644	21 80 00 	! . . 
-	ld (0e902h),hl		;0647	22 02 e9 	" . . 
+	ld (HSCROLL_LOW_W),hl		;0647	22 02 e9 	" . . 
 	ld hl,0eb25h		;064a	21 25 eb 	! % . 
 	ld de,0eb26h		;064d	11 26 eb 	. & . 
 	ld bc,000bfh		;0650	01 bf 00 	. . . 
@@ -9475,7 +9478,7 @@ sub_40e5h:
 	ld hl,(0e900h)
 	jr nz,l4134h
 	ex de,hl	
-	ld hl,(0e902h)
+	ld hl,(HSCROLL_LOW_W)
 	ld a,(0e101h)
 	ld bc,2
 	and a	
@@ -9494,7 +9497,7 @@ l4130h:
 l4133h:
 	ex de,hl	
 l4134h:
-	ld (0e902h),hl
+	ld (HSCROLL_LOW_W),hl
 	ld a,(0e33fh)
 	and a	
 	call z,sub_2ec1h
@@ -12257,7 +12260,7 @@ l56beh:
 l56c0h:
 	jp WAIT_A
 sub_56c3h:
-	ld hl,(0e902h)
+	ld hl,(HSCROLL_LOW_W)
 	ld de,4
 	add hl,de	
 	add hl,hl	
@@ -12307,7 +12310,7 @@ sub_5703h:
 	xor a	
 	ld (GAME_STATE),a
 	ld hl,0
-	ld (0e902h),hl
+	ld (HSCROLL_LOW_W),hl
 
 ; Write 1 to (0e882h) and wait until (0e882h) is 0
 WAIT_1:
