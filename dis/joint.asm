@@ -67,6 +67,9 @@ endm
 ; Screen is character-based and memory-mapped
 SCREEN_ADDR: EQU 0xD010
 
+M62_HSCROLL_LOW_W: EQU 0xA000
+M62_HSCROLL_HIGH_W: EQU 0xB000
+
 
 LIVES: EQU 0xE084
 DRAGONS_LEVEL: EQU 0xE080 ; 00 DDD LLL, where D is the number of dragons, and L the level - 1.
@@ -305,9 +308,9 @@ l0040h:
 	ld bc,l00c0h		;0040	01 c0 00 	. . . 
 	ldir		;0043	ed b0 	. . 
 	ld a,(0e902h)		;0045	3a 02 e9 	: . . 
-	ld (0a000h),a		;0048	32 00 a0 	2 . . 
+	ld (M62_HSCROLL_LOW_W),a		;0048	32 00 a0 	2 . . 
 	ld a,(0e903h)		;004b	3a 03 e9 	: . . 
-	ld (0b000h),a		;004e	32 00 b0 	2 . . 
+	ld (M62_HSCROLL_HIGH_W),a		;004e	32 00 b0 	2 . . 
 	push iy		;0051	fd e5 	. . 
 	push ix		;0053	dd e5 	. . 
 l0055h:
@@ -1345,7 +1348,7 @@ l0791h:
 	ld de,03100h		;07ab	11 00 31 	. . 1 
 	jr z,l07b6h		;07ae	28 06 	( . 
 	ld hl,0cc00h		;07b0	21 00 cc 	! . . 
-	ld de,0b000h		;07b3	11 00 b0 	. . . 
+	ld de,M62_HSCROLL_HIGH_W		;07b3	11 00 b0 	. . . 
 l07b6h:
 	ld (ENEMY_POS),hl		;07b6	22 da e2 	" . . 
 	ld (0e2d3h),de		;07b9	ed 53 d3 e2 	. S . . 
@@ -10169,7 +10172,7 @@ l4610h:
 	ld hl,(0e710h)
 	sbc hl,de
 	ex de,hl	
-	ld hl,0b000h
+	ld hl,M62_HSCROLL_HIGH_W
 	add hl,de	
 	jr nc,l4625h
 	ld (0e710h),de
