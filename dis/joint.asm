@@ -86,6 +86,30 @@ STEP_COUNTER: EQU 0xE883
 NUM_GRIPPING: EQU 0xE71A
 ACTIVE_GRIPPERS: EQU 0xE71B
 
+TBL_E262: EQU 0xE262
+TBL_E282: EQU 0xE282
+TBL_E2A2: EQU 0xE2A2
+;TBL_E2D8: EQU 0xE2D8
+TBL_E2FB: EQU 0xE2FB
+TBL_E31B: EQU 0xE31B
+TBL_E382: EQU 0xE382
+
+; Seem related to the moths at 4th floor
+TBL_E520: EQU 0xE520
+
+
+
+
+; Unknown yet. I only know each element of the table has length 19
+TABLE_WIDTH_19: EQU 0xE36F
+
+TABLE_WIDTH_41: EQU 0xE54A
+
+TBL_WIDTH_21: EQU 0xE577
+
+
+
+
 VARS_TABLE: EQU 0xE2D8
 ;
 
@@ -147,6 +171,14 @@ VARS_TABLE2: EQU 0xE2E8
 
 
 DISTANCE_TO_LEFT: EQU 0xE802
+
+; 10: Silvia look left and moves right when kidnapped
+; 50: the opposite
+SILVIA_LEFT_OR_RIGHT: EQU 0xE340
+
+; This activates during just before interlude and when Silvia get untied
+; Values: 0 (clean up), 0x10, 0x40
+SILVIA_STATE: EQU 0xE34C
 
 ; This seems to be used to make appear the final enemy and the stairs
 THOMAS_POSITION: EQU 0xE713 ; Left end is 0
@@ -1175,11 +1207,14 @@ l067eh:
 	ld a,001h		;0684	3e 01 	> . 
 	ld (0e380h),a		;0686	32 80 e3 	2 . . 
 l0689h:
-	ld hl,0e520h		;0689	21 20 e5 	!   . 
-	ld de,0e521h		;068c	11 21 e5 	. ! . 
-	ld bc,l0143h		;068f	01 43 01 	. C . 
-	ld (hl),000h		;0692	36 00 	6 . 
-	ldir		;0694	ed b0 	. . 
+	
+    ; Set to zero 324 bytes in TBL_E520
+    ld hl,TBL_E520		;0689	21 20 e5
+	ld de,TBL_E520+1	;068c	11 21 e5
+	ld bc, 323  		;068f	01 43 01
+	ld (hl),000h		;0692	36 00
+	ldir		        ;0694	ed b0
+    
 	call sub_0866h		;0696	cd 66 08 	. f . 
 	ld hl,l089eh		;0699	21 9e 08 	! . . 
 	add hl,bc			;069c	09 	. 
@@ -1288,9 +1323,9 @@ sub_074dh:
 	ld a,007h		;077d	3e 07 	> . 
 	ld (0e352h),a		;077f	32 52 e3 	2 R . 
 	ld a,040h		;0782	3e 40 	> @ 
-	ld (0e34ch),a		;0784	32 4c e3 	2 L . 
+	ld (SILVIA_STATE),a		;0784	32 4c e3 	2 L . 
 	ld a,050h		;0787	3e 50 	> P 
-	ld (0e340h),a		;0789	32 40 e3 	2 @ . 
+	ld (SILVIA_LEFT_OR_RIGHT),a		;0789	32 40 e3 	2 @ . 
 	ld a,005h		;078c	3e 05 	> . 
 	ld (0e347h),a		;078e	32 47 e3 	2 G . 
 l0791h:
@@ -3779,7 +3814,7 @@ l1547h:
 	ld hl,l0100h+1		;1547	21 01 01 	! . . 
 	ld (ACTIVE_GRIPPERS),hl		;154a	22 1b e7 	" . . 
 	ld (0e71dh),hl		;154d	22 1d e7 	" . . 
-	ld ix,0e262h		;1550	dd 21 62 e2 	. ! b . 
+	ld ix,TBL_E262		;1550	dd 21 62 e2 	. ! b . 
 	ld b,005h		;1554	06 05 	. . 
 l1556h:
 	push bc			;1556	c5 	. 
@@ -4804,7 +4839,7 @@ GET_MR_REACTION_IN_HL:
 sub_1cb3h:
 	call sub_1e4ah		;1cb3	cd 4a 1e 	. J . 
 	call sub_1dfdh		;1cb6	cd fd 1d 	. . . 
-	ld ix,0e2fbh		;1cb9	dd 21 fb e2 	. ! . . 
+	ld ix,TBL_E2FB		;1cb9	dd 21 fb e2 	. ! . . 
 	call sub_1cc4h		;1cbd	cd c4 1c 	. . . 
 	ld ix,0e30bh		;1cc0	dd 21 0b e3 	. ! . . 
 sub_1cc4h:
@@ -4959,7 +4994,7 @@ sub_1defh:
 	ld (ix + 3),h		;1df9	dd 74 03 	. t . 
 	ret			;1dfc	c9 	. 
 sub_1dfdh:
-	ld ix,0e31bh		;1dfd	dd 21 1b e3 	. ! . . 
+	ld ix,TBL_E31B		;1dfd	dd 21 1b e3 	. ! . . 
 	ld c,(ix + 0)		;1e01	dd 4e 00 	. N . 
 	bit 4,c		;1e04	cb 61 	. a 
 	ret z			;1e06	c8 	. 
@@ -4985,7 +5020,7 @@ l1e20h:
 	sbc hl,de		;1e37	ed 52 	. R 
 	ld (0e31fh),hl		;1e39	22 1f e3 	" . . 
 	ld hl,073d2h		;1e3c	21 d2 73 	! . s 
-	ld a,(0e31bh)		;1e3f	3a 1b e3 	: . . 
+	ld a,(TBL_E31B)		;1e3f	3a 1b e3 	: . . 
 	jp l1a7eh		;1e42	c3 7e 1a 	. ~ . 
 l1e45h:
 	ld (ix + 0),000h		;1e45	dd 36 00 00 	. 6 . . 
@@ -5061,7 +5096,7 @@ l1eb5h:
 	ret c			;1ec4	d8 	. 
 	ret z			;1ec5	c8 	. 
 	ld b,005h		;1ec6	06 05 	. . 
-	ld ix,0e262h		;1ec8	dd 21 62 e2 	. ! b . 
+	ld ix,TBL_E262		;1ec8	dd 21 62 e2 	. ! b . 
 l1ecch:
 	bit 0,(ix + 0)		;1ecc	dd cb 00 46 	. . . F 
 	jr nz,l1f03h		;1ed0	20 31 	  1 
@@ -5582,7 +5617,7 @@ l22d2h:
 	jp m,l23b4h		;22e4	fa b4 23 	. . # 
 	inc (ix + 6)		;22e7	dd 34 06 	. 4 . 
 	ld (ix + 7),00bh		;22ea	dd 36 07 0b 	. 6 . . 
-	ld iy,0e2fbh		;22ee	fd 21 fb e2 	. ! . . 
+	ld iy,TBL_E2FB		;22ee	fd 21 fb e2 	. ! . . 
 	bit 4,(iy+000h)		;22f2	fd cb 00 66 	. . . f 
 	jr z,l22fch		;22f6	28 04 	( . 
 	ld iy,0e30bh		;22f8	fd 21 0b e3 	. ! . . 
@@ -5619,7 +5654,7 @@ l2309h:
 l2344h:
 	inc (ix + 14)		;2344	dd 34 0e 	. 4 . 
 	inc (ix + 7)		;2347	dd 34 07 	. 4 . 
-	ld iy,0e2fbh		;234a	fd 21 fb e2 	. ! . . 
+	ld iy,TBL_E2FB		;234a	fd 21 fb e2 	. ! . . 
 	bit 4,(iy+000h)		;234e	fd cb 00 66 	. . . f 
 	jr z,l2368h		;2352	28 14 	( . 
 	bit 7,(iy+00dh)		;2354	fd cb 0d 7e 	. . . ~ 
@@ -5718,7 +5753,7 @@ l2409h:
 	ld a,(0e30bh)		;2413	3a 0b e3 	: . . 
 	and 010h		;2416	e6 10 	. . 
 	jr nz,l2427h		;2418	20 0d 	  . 
-	ld a,(0e2fbh)		;241a	3a fb e2 	: . . 
+	ld a,(TBL_E2FB)		;241a	3a fb e2 	: . . 
 	and 010h		;241d	e6 10 	. . 
 	jr z,l23c6h		;241f	28 a5 	( . 
 	bit 0,(ix-001h)		;2421	dd cb ff 46 	. . . F 
@@ -6022,7 +6057,7 @@ l2698h:
 	ld (0e31dh),hl		;26a3	22 1d e3 	" . . 
 	ld a,(ix + 0)		;26a6	dd 7e 00 	. ~ . 
 	and 050h		;26a9	e6 50 	. P 
-	ld (0e31bh),a		;26ab	32 1b e3 	2 . . 
+	ld (TBL_E31B),a		;26ab	32 1b e3 	2 . . 
 	ld hl,06500h		;26ae	21 00 65 	! . e 
 	ld (0e31fh),hl		;26b1	22 1f e3 	" . . 
 	ld hl,l005bh		;26b4	21 5b 00 	! [ . 
@@ -7312,7 +7347,7 @@ sub_2fc7h:
 	ld a,(0e381h)		;2fc7	3a 81 e3 	: . . 
 	and a			;2fca	a7 	. 
 	ret z			;2fcb	c8 	. 
-	ld ix,0e382h		;2fcc	dd 21 82 e3 	. ! . . 
+	ld ix,TBL_E382		;2fcc	dd 21 82 e3 	. ! . . 
 	ld b,010h		;2fd0	06 10 	. . 
 l2fd2h:
 	push bc			;2fd2	c5 	. 
@@ -7462,7 +7497,7 @@ l3106h:
 	call sub_333ah		;3106	cd 3a 33 	. : 3 
 	ld a,086h		;3109	3e 86 	> . 
 	call sub_0dfeh		;310b	cd fe 0d 	. . . 
-	ld iy,0e382h		;310e	fd 21 82 e3 	. ! . . 
+	ld iy,TBL_E382		;310e	fd 21 82 e3 	. ! . . 
 	ld b,010h		;3112	06 10 	. . 
 	ld c,00ah		;3114	0e 0a 	. . 
 	ld l,(ix + 2)		;3116	dd 6e 02 	. n . 
@@ -8071,10 +8106,10 @@ l363dh:
 	ld a,(THOMAS_POSITION)		;363f	3a 13 e7 	: . . 
 	add a,d			;3642	82 	. 
 	ld d,a			;3643	57 	W 
-	set 0,d		;3644	cb c2 	. . 
-	ex de,hl			;3646	eb 	. 
-	ld ix,0e36fh		;3647	dd 21 6f e3 	. ! o . 
-	ld de,0013h		;364b	11 13 00 	. . . 
+	set 0,d		    ;3644	cb c2 	. . 
+	ex de,hl		;3646	eb 	. 
+	ld ix,TABLE_WIDTH_19	;3647	dd 21 6f e3 	. ! o . 
+	ld de, 19		;364b	11 13 00 	. . . 
 	ld b,010h		;364e	06 10 	. . 
 l3650h:
 	add ix,de		;3650	dd 19 	. . 
@@ -8101,8 +8136,8 @@ l366ch:
 	ld (hl),a			;367b	77 	w 
 	inc hl			;367c	23 	# 
 	inc (hl)			;367d	34 	4 
-	ld ix,0e36fh		;367e	dd 21 6f e3 	. ! o . 
-	ld bc,0013h		;3682	01 13 00 	. . . 
+	ld ix,TABLE_WIDTH_19		;367e	dd 21 6f e3 	. ! o . 
+	ld bc, 19   		;3682	01 13 00 	. . . 
 l3685h:
 	add ix,bc		;3685	dd 09 	. . 
 	bit 4,(ix + 0)		;3687	dd cb 00 66 	. . . f 
@@ -8157,8 +8192,8 @@ sub_36f6h:
 	jr nc,l3711h		;36fb	30 14 	0 . 
 	inc a			;36fd	3c 	< 
 	ld (0e381h),a		;36fe	32 81 e3 	2 . . 
-	ld iy,0e36fh		;3701	fd 21 6f e3 	. ! o . 
-	ld de,0013h		;3705	11 13 00 	. . . 
+	ld iy,TABLE_WIDTH_19	;3701	fd 21 6f e3 	. ! o . 
+	ld de, 19		        ;3705	11 13 00 	. . . 
 l3708h:
 	add iy,de		;3708	fd 19 	. . 
 	bit 4,(iy+000h)		;370a	fd cb 00 66 	. . . f 
@@ -8440,7 +8475,7 @@ l38ebh:
 	nop			;38fd	00 	. 
 	add a,b			;38fe	80 	. 
 sub_38ffh:
-	ld a,(0e520h)		;38ff	3a 20 e5 	:   . 
+	ld a,(TBL_E520)		;38ff	3a 20 e5 	:   . 
 	and a			;3902	a7 	. 
 	ret z			;3903	c8 	. 
 	ld b,a			;3904	47 	G 
@@ -8478,7 +8513,7 @@ l3940h:
 	call sub_3d55h		;3941	cd 55 3d 	. U = 
 	pop bc			;3944	c1 	. 
 l3945h:
-	ld hl,0e520h		;3945	21 20 e5 	!   . 
+	ld hl,TBL_E520		;3945	21 20 e5 	!   . 
 	dec (hl)			;3948	35 	5 
 	ret z			;3949	c8 	. 
 	dec b			;394a	05 	. 
@@ -8504,12 +8539,12 @@ sub_3960h:
 	and a			;3963	a7 	. 
 	ret z			;3964	c8 	. 
 	ld b,a			;3965	47 	G 
-	ld ix,0e54ah		;3966	dd 21 4a e5 	. ! J . 
+	ld ix,TABLE_WIDTH_41		;3966	dd 21 4a e5 	. ! J . 
 l396ah:
 	ld l,(ix + 0)		;396a	dd 6e 00 	. n . 
 	ld h,(ix + 1)		;396d	dd 66 01 	. f . 
 l3970h:
-	ld de,l0029h		;3970	11 29 00 	. ) . 
+	ld de, 41		;3970	11 29 00 	. ) . 
 	add hl,de			;3973	19 	. 
 	ex de,hl			;3974	eb 	. 
 	ld hl,08000h		;3975	21 00 80 	! . . 
@@ -8563,7 +8598,7 @@ sub_39c0h:
 	ld a,(0e576h)		;39c0	3a 76 e5 	: v . 
 	and a			;39c3	a7 	. 
 	ret z			;39c4	c8 	. 
-	ld ix,0e577h		;39c5	dd 21 77 e5 	. ! w . 
+	ld ix,TBL_WIDTH_21		;39c5	dd 21 77 e5 	. ! w . 
 	ld a,(0e50bh)		;39c9	3a 0b e5 	: . . 
 	ld b,a			;39cc	47 	G 
 l39cdh:
@@ -8572,7 +8607,7 @@ l39cdh:
 	bit 4,c		;39d1	cb 61 	. a 
 	call nz,sub_39dfh		;39d3	c4 df 39 	. . 9 
 	pop bc			;39d6	c1 	. 
-	ld de,0013h+2		;39d7	11 15 00 	. . . 
+	ld de, 21		;39d7	11 15 00 	. . . 
 	add ix,de		;39da	dd 19 	. . 
 	djnz l39cdh		;39dc	10 ef 	. . 
 	ret			;39de	c9 	. 
@@ -8957,7 +8992,7 @@ l3cfbh:
 	ld (ix + 0),000h		;3d03	dd 36 00 00 	. 6 . . 
 	jr nz,sub_3d0eh		;3d07	20 05 	  . 
 sub_3d09h:
-	ld hl,0e520h		;3d09	21 20 e5 	!   . 
+	ld hl,TBL_E520		;3d09	21 20 e5 	!   . 
 	jr l3d11h		;3d0c	18 03 	. . 
 sub_3d0eh:
 	ld hl,0e549h		;3d0e	21 49 e5 	! I . 
@@ -10251,7 +10286,7 @@ l46f4h:
 	ld (GAME_STATE),a
 	xor a	
 l4700h:
-	ld (0e340h),a
+	ld (SILVIA_LEFT_OR_RIGHT),a
 	ret	
 sub_4704h:
 	ld hl,(0e102h)
@@ -10344,10 +10379,10 @@ l4784h:
 	ld (THOMAS_FRAME),a
 	ret	
 sub_47b6h:
-	ld ix,0e34ch
+	ld ix,SILVIA_STATE
 	bit 4,(ix + 0)
 	call nz,sub_4821h
-	ld ix,0e340h
+	ld ix,SILVIA_LEFT_OR_RIGHT
 	ld c,(ix + 0)
 	bit 4,c
 	ret z	
@@ -10470,10 +10505,10 @@ l487eh:
 	ld hl,034a0h
 	ld (0e342h),hl
 	ld a,010h
-	ld (0e340h),a
+	ld (SILVIA_LEFT_OR_RIGHT),a
 	ld a,005h
 	ld (0e347h),a
-	ld ix,0e262h
+	ld ix,TBL_E262
 	ld bc,0750h
 	ld hl,0f00h
 	ld b,007h
@@ -11113,7 +11148,7 @@ l4d7fh:
 	ld hl,l4dbch
 	call l1f26h
 	ld a,(0e020h)
-	ld ix,0e340h
+	ld ix,SILVIA_LEFT_OR_RIGHT
 	ld c,(ix + 0)
 	cp 00ah
 	jr z,l4da0h
@@ -11129,7 +11164,7 @@ l4da6h:
 	call sub_4821h
 l4da9h:
 	ld a,(0e020h)
-	ld ix,0e262h
+	ld ix,TBL_E262
 	ld c,(ix + 0)
 	ld hl,04dc2h
 	call l1f26h
@@ -11254,7 +11289,7 @@ l4e76h:
 	inc (hl)	
 	call 17dfh
 	jr l4e68h
-	ld hl,0e2a2h
+	ld hl,TBL_E2A2
 	ld de,0010h
 	ld b,003h
 l4e87h:
@@ -11265,9 +11300,9 @@ l4e87h:
 	call sub_4ed7h
 	ld ix,0e2b2h
 	call sub_4ed7h
-	ld ix,0e2a2h
+	ld ix,TBL_E2A2
 	call sub_4ed7h
-	ld ix,0e282h
+	ld ix,TBL_E282
 	call sub_4eb3h
 	ld ix,0e292h
 	call sub_4eb3h
