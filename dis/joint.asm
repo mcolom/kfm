@@ -73,6 +73,11 @@ M62_HSCROLL_HIGH_W: EQU 0xB000
 HSCROLL_LOW_W: EQU 0xE902
 HSCROLL_HIGH_W: EQU HSCROLL_LOW_W + 1
 
+M62_SPRITERAM: EQU 0xC000
+M62_TILERAM: EQU 0xD000
+
+
+
 
 LIVES: EQU 0xE084
 DRAGONS_LEVEL: EQU 0xE080 ; 00 DDD LLL, where D is the number of dragons, and L the level - 1.
@@ -1302,7 +1307,7 @@ l072ch:
 	ld (0e102h),hl		;072c	22 02 e1 	" . . 
 	ld hl,0d560h		;072f	21 60 d5 	! ` . 
 	ld (0e712h),hl		;0732	22 12 e7 	" . . 
-	ld hl,0d000h		;0735	21 00 d0 	! . . 
+	ld hl,M62_TILERAM		;0735	21 00 d0 	! . . 
 	ld (0e707h),hl		;0738	22 07 e7 	" . . 
 	ld hl,0dc40h		;073b	21 40 dc 	! @ . 
 	ld (0e106h),hl		;073e	22 06 e1 	" . . 
@@ -3175,7 +3180,7 @@ sub_1157h:
 l1159h:
 	ld e,020h		;1159	1e 20 	.   
 	ld bc,l0800h		;115b	01 00 08 	. . . 
-	ld hl,0d000h		;115e	21 00 d0 	! . . 
+	ld hl,M62_TILERAM		;115e	21 00 d0 	! . . 
 	ld iy,0d800h		;1161	fd 21 00 d8 	. ! . . 
 l1165h:
 	ld (hl),e			;1165	73 	s 
@@ -5175,7 +5180,7 @@ l1f33h:
 	ld de,0fa00h		;1f33	11 00 fa 	. . . 
 	add hl,de			;1f36	19 	. 
 	jp nc,l1fcfh		;1f37	d2 cf 1f 	. . . 
-	ld de,0c000h		;1f3a	11 00 c0 	. . . 
+	ld de,M62_SPRITERAM		;1f3a	11 00 c0 	. . . 
 	ld hl,(ENEMY_POS)		;1f3d	2a da e2 	* . . 
 	add hl,de			;1f40	19 	. 
 	jp c,l1f50h		;1f41	da 50 1f 	. P . 
@@ -5442,7 +5447,7 @@ l213eh:
 	ld de,0fb00h		;214b	11 00 fb 	. . . 
 	add hl,de			;214e	19 	. 
 	jp nc,l21dch		;214f	d2 dc 21 	. . ! 
-	ld de,0c000h		;2152	11 00 c0 	. . . 
+	ld de,M62_SPRITERAM		;2152	11 00 c0 	. . . 
 	ld hl,(ENEMY_POS)		;2155	2a da e2 	* . . 
 	add hl,de			;2158	19 	. 
 	jp c,l1f50h		;2159	da 50 1f 	. P . 
@@ -6350,7 +6355,7 @@ l2914h:
 	add hl,de			;2920	19 	. 
 	jr c,l2907h		;2921	38 e4 	8 . 
 l2923h:
-	ld de,0c000h		;2923	11 00 c0 	. . . 
+	ld de,M62_SPRITERAM		;2923	11 00 c0 	. . . 
 	ld hl,(ENEMY_POS)		;2926	2a da e2 	* . . 
 	add hl,de			;2929	19 	. 
 	jp c,l1f50h		;292a	da 50 1f 	. P . 
@@ -18511,7 +18516,7 @@ l76b2h:
 	ld e,a	
 	ld d,00dh
 	ld c,010h
-	ld hl,0d000h
+	ld hl,M62_TILERAM
 l76bah:
 	ld (hl),a	
 	inc hl	
@@ -18525,7 +18530,7 @@ l76c3h:
 	dec c	
 	jr nz,l76bah
 	ld a,e	
-	ld hl,0d000h
+	ld hl,M62_TILERAM
 	ld d,00dh
 	ld c,010h
 l76d0h:
