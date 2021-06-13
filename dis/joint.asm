@@ -119,10 +119,10 @@ TABLE_WIDTH_41: EQU 0xE54A
 TBL_WIDTH_21: EQU 0xE577
 
 
-
-
 VARS_TABLE: EQU 0xE2D8
-;
+
+
+MAGICAL_ELEMENT_FRAME_COUNTER_IDX: EQU 7
 
 ; Enemy's look at
 ; 0x0: enemy not visible yet
@@ -7360,22 +7360,25 @@ POINTS_TABLE:
     
 	
 sub_2fc7h:
-	ld a,(NUM_MAGICAL_ELEMENTS)		;2fc7	3a 81 e3 	: . . 
-	and a			;2fca	a7 	. 
-	ret z			;2fcb	c8 	. 
-	ld ix,TBL_E382		;2fcc	dd 21 82 e3 	. ! . . 
-	ld b,010h		;2fd0	06 10 	. . 
+	ld a,(NUM_MAGICAL_ELEMENTS)	    ;2fc7	3a 81 e3
+	and a			;2fca	a7
+	ret z			;2fcb	c8
+	ld ix,TBL_E382	;2fcc	dd 21 82 e3
+    
+    ; Iterate 16 elements
+	ld b, 16		;2fd0	06 10
 l2fd2h:
 	push bc			;2fd2	c5 	. 
-	ld c,(ix + 0)		;2fd3	dd 4e 00 	. N . 
+	ld c,(ix + 0)	;2fd3	dd 4e 00   Reads 0x50
 l2fd6h:
-	bit 4,c		;2fd6	cb 61 	. a 
-	call nz,sub_2fe4h		;2fd8	c4 e4 2f 	. . / 
+	bit 4,c		    ;2fd6	cb 61
+	call nz,sub_2fe4h	;2fd8	c4 e4 2f No carry ==> Jump!
 	pop bc			;2fdb	c1 	. 
-	ld de,0013h		;2fdc	11 13 00 	. . . 
+	ld de, 19		;2fdc	11 13 00 	. . . 
 	add ix,de		;2fdf	dd 19 	. . 
 	djnz l2fd2h		;2fe1	10 ef 	. . 
-	ret			;2fe3	c9 	. 
+	ret			    ;2fe3	c9
+
 sub_2fe4h:
 	ld hl,l36e7h		;2fe4	21 e7 36 	! . 6 
 	push hl			;2fe7	e5 	. 
@@ -7576,9 +7579,9 @@ l3174h:
 	call sub_1172h		;31a4	cd 72 11 	. r . 
 	jp c,l31c0h		;31a7	da c0 31 	. . 1 
 l31aah:
-	dec (ix + 7)		;31aa	dd 35 07 	. 5 . 
+	dec (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX)		;31aa	dd 35 07 	. 5 . 
 	ret nz			;31ad	c0 	. 
-	ld (ix + 7),003h		;31ae	dd 36 07 03 	. 6 . . 
+	ld (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX),003h		;31ae	dd 36 07 03 	. 6 . . 
 	ld a,(ix + 6)		;31b2	dd 7e 06 	. ~ . 
 	inc a			;31b5	3c 	< 
 	cp 016h		;31b6	fe 16 	. . 
@@ -7606,7 +7609,7 @@ l31c0h:
 	jr c,l3213h		;31eb	38 26 	8 & 
 	ret			;31ed	c9 	. 
 	call l1be2h		;31ee	cd e2 1b 	. . . 
-	dec (ix + 7)		;31f1	dd 35 07 	. 5 . 
+	dec (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX)		;31f1	dd 35 07 	. 5 . 
 	ret nz			;31f4	c0 	. 
 	inc (ix + 6)		;31f5	dd 34 06 	. 4 . 
 	ld a,(ix + 6)		;31f8	dd 7e 06 	. ~ . 
@@ -7626,7 +7629,7 @@ l3218h:
 	ld (ix + 1),007h		;3218	dd 36 01 07 	. 6 . . 
 	ld (ix + 6),00dh		;321c	dd 36 06 0d 	. 6 . . 
 l3220h:
-	ld (ix + 7),007h		;3220	dd 36 07 07 	. 6 . . 
+	ld (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX),007h		;3220	dd 36 07 07 	. 6 . . 
 	ret			;3224	c9 	. 
 	call l1be2h		;3225	cd e2 1b 	. . . 
 	ld hl,l0140h		;3228	21 40 01 	! @ . 
@@ -7665,24 +7668,24 @@ l3266h:
 	call sub_36cah		;326e	cd ca 36 	. . 6 
 	set 5,(ix + 0)		;3271	dd cb 00 ee 	. . . . 
 l3275h:
-	dec (ix + 7)		;3275	dd 35 07 	. 5 . 
+	dec (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX)		;3275	dd 35 07 	. 5 . 
 	ret nz			;3278	c0 	. 
 	ld a,(ix + 6)		;3279	dd 7e 06 	. ~ . 
 	cp 013h		;327c	fe 13 	. . 
 	jp z,l32a2h		;327e	ca a2 32 	. . 2 
 	inc (ix + 6)		;3281	dd 34 06 	. 4 . 
 	ld a,(0e370h)		;3284	3a 70 e3 	: p . 
-	ld (ix + 7),a		;3287	dd 77 07 	. w . 
+	ld (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX),a		;3287	dd 77 07 	. w . 
 	ret			;328a	c9 	. 
 l328bh:
 	call l1be2h		;328b	cd e2 1b 	. . . 
-	dec (ix + 7)		;328e	dd 35 07 	. 5 . 
+	dec (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX)		;328e	dd 35 07 	. 5 . 
 	ret nz			;3291	c0 	. 
 	ld a,(ix + 6)		;3292	dd 7e 06 	. ~ . 
 	cp 018h		;3295	fe 18 	. . 
 	jp z,l3713h		;3297	ca 13 37 	. . 7 
 	inc (ix + 6)		;329a	dd 34 06 	. 4 . 
-	ld (ix + 7),007h		;329d	dd 36 07 07 	. 6 . . 
+	ld (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX),007h		;329d	dd 36 07 07 	. 6 . . 
 	ret			;32a1	c9 	. 
 l32a2h:
 	ld (ix + 6),017h		;32a2	dd 36 06 17 	. 6 . . 
@@ -7698,14 +7701,14 @@ l32a8h:
 	ld (ix + 6),016h		;32bb	dd 36 06 16 	. 6 . . 
 l32bfh:
 	ld (ix + 1),009h		;32bf	dd 36 01 09 	. 6 . . 
-	ld (ix + 7),007h		;32c3	dd 36 07 07 	. 6 . . 
+	ld (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX),007h		;32c3	dd 36 07 07 	. 6 . . 
 	ret			;32c7	c9 	. 
 	call l1be2h		;32c8	cd e2 1b 	. . . 
-	dec (ix + 7)		;32cb	dd 35 07 	. 5 . 
+	dec (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX)		;32cb	dd 35 07 	. 5 . 
 	ret nz			;32ce	c0 	. 
 	ld a,(ix + 6)		;32cf	dd 7e 06 	. ~ . 
 	inc (ix + 6)		;32d2	dd 34 06 	. 4 . 
-	ld (ix + 7),007h		;32d5	dd 36 07 07 	. 6 . . 
+	ld (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX),007h		;32d5	dd 36 07 07 	. 6 . . 
 	cp 00ch		;32d9	fe 0c 	. . 
 	ret nz			;32db	c0 	. 
 	ld a,(ix + 14)		;32dc	dd 7e 0e 	. ~ . 
@@ -7761,7 +7764,7 @@ sub_333ah:
 	ld b,000h		;333a	06 00 	. . 
 l333ch:
 	ld (ix + 14),b		;333c	dd 70 0e 	. p . 
-	ld (ix + 7),007h		;333f	dd 36 07 07 	. 6 . . 
+	ld (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX),007h		;333f	dd 36 07 07 	. 6 . . 
 	ld (ix + 1),005h		;3343	dd 36 01 05 	. 6 . . 
 	ld (ix + 6),00ah		;3347	dd 36 06 0a 	. 6 . . 
 	ret			;334b	c9 	. 
@@ -7797,9 +7800,9 @@ sub_3353h:
 	call l1be2h		;3398	cd e2 1b 	. . . 
 	call sub_3773h		;339b	cd 73 37 	. s 7 
 	jp c,l32f2h		;339e	da f2 32 	. . 2 
-	dec (ix + 7)		;33a1	dd 35 07 	. 5 . 
+	dec (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX)		;33a1	dd 35 07 	. 5 . 
 	ret nz			;33a4	c0 	. 
-	ld (ix + 7),005h		;33a5	dd 36 07 05 	. 6 . . 
+	ld (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX),005h		;33a5	dd 36 07 05 	. 6 . . 
 	inc (ix + 6)		;33a9	dd 34 06 	. 4 . 
 	ld a,(ix + 6)		;33ac	dd 7e 06 	. ~ . 
 	cp 007h		;33af	fe 07 	. . 
@@ -7812,9 +7815,9 @@ l33b3h:
 	res 6,(ix + 0)		;33bd	dd cb 00 b6 	. . . . 
 	ret			;33c1	c9 	. 
 l33c2h:
-	ld (ix + 1),003h		;33c2	dd 36 01 03 	. 6 . . 
-	ld (ix + 7),005h		;33c6	dd 36 07 05 	. 6 . . 
-	ld (ix + 6),004h		;33ca	dd 36 06 04 	. 6 . . 
+	ld (ix + 1),003h		;33c2	dd 36 01 03
+	ld (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX),005h		;33c6	dd 36 07 05
+	ld (ix + 6),004h		;33ca	dd 36 06 04
 	ld a,093h		;33ce	3e 93 	> . 
 	call sub_0dfeh		;33d0	cd fe 0d 	. . . 
 	ret			;33d3	c9 	. 
@@ -7850,9 +7853,9 @@ l33ffh:
 	call sub_36cah		;3415	cd ca 36 	. . 6 
 	set 5,(ix + 0)		;3418	dd cb 00 ee 	. . . . 
 l341ch:
-	dec (ix + 7)		;341c	dd 35 07 	. 5 . 
+	dec (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX)	;341c	dd 35 07 	. 5 . 
 	ret nz			;341f	c0 	. 
-	ld (ix + 7),009h		;3420	dd 36 07 09 	. 6 . . 
+	ld (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX),009h		;3420	dd 36 07 09 	. 6 . . 
 	ld a,(ix + 6)		;3424	dd 7e 06 	. ~ . 
 	inc a			;3427	3c 	< 
 	cp 00ah		;3428	fe 0a 	. . 
@@ -7867,7 +7870,7 @@ l3432h:
 l3435h:
 	ld (ix + 1),004h		;3435	dd 36 01 04 	. 6 . . 
 	ld (ix + 6),008h		;3439	dd 36 06 08 	. 6 . . 
-	ld (ix + 7),009h		;343d	dd 36 07 09 	. 6 . . 
+	ld (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX),009h		;343d	dd 36 07 09 	. 6 . . 
 	jp l33b3h		;3441	c3 b3 33 	. . 3 
 l3444h:
 	ld de,(0e372h)		;3444	ed 5b 72 e3 	. [ r . 
@@ -7880,9 +7883,9 @@ l3444h:
 	jp c,l3327h		;3459	da 27 33 	. ' 3 
 	dec (ix + 8)		;345c	dd 35 08 	. 5 . 
 	jp z,l356bh		;345f	ca 6b 35 	. k 5 
-	dec (ix + 7)		;3462	dd 35 07 	. 5 . 
+	dec (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX)		;3462	dd 35 07 	. 5 . 
 	ret z			;3465	c8 	. 
-	ld (ix + 7),00bh		;3466	dd 36 07 0b 	. 6 . . 
+	ld (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX),00bh		;3466	dd 36 07 0b 	. 6 . . 
 	ld a,(ix + 6)		;346a	dd 7e 06 	. ~ . 
 	inc a			;346d	3c 	< 
 	cp 01bh		;346e	fe 1b 	. . 
@@ -7990,9 +7993,9 @@ l352ch:
 	jp c,l3327h		;354c	da 27 33 	. ' 3 
 	dec (ix + 8)		;354f	dd 35 08 	. 5 . 
 	jp z,l334ch		;3552	ca 4c 33 	. L 3 
-	dec (ix + 7)		;3555	dd 35 07 	. 5 . 
+	dec (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX)		;3555	dd 35 07 	. 5 . 
 	ret nz			;3558	c0 	. 
-	ld (ix + 7),00bh		;3559	dd 36 07 0b 	. 6 . . 
+	ld (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX),00bh		;3559	dd 36 07 0b 	. 6 . . 
 	ld a,(ix + 6)		;355d	dd 7e 06 	. ~ . 
 	inc a			;3560	3c 	< 
 	cp 01fh		;3561	fe 1f 	. . 
@@ -8013,7 +8016,7 @@ l356bh:
 	ld (ix + 0),a		;357f	dd 77 00 	. w . 
 	ld (ix + 1),010h		;3582	dd 36 01 10 	. 6 . . 
 	ld (ix + 6),01dh		;3586	dd 36 06 1d 	. 6 . . 
-	ld (ix + 7),00bh		;358a	dd 36 07 0b 	. 6 . . 
+	ld (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX),00bh		;358a	dd 36 07 0b 	. 6 . . 
 	ld a,(0e366h)		;358e	3a 66 e3 	: f . 
 	ld (ix + 8),a		;3591	dd 77 08 	. w . 
 	ret			;3594	c9 	. 
@@ -8170,7 +8173,7 @@ l3685h:
 	ld hl,09000h		;36a6	21 00 90 	! . . 
 	ld (ix + 4),l		;36a9	dd 75 04 	. u . 
 	ld (ix + 5),h		;36ac	dd 74 05 	. t . 
-	ld (ix + 7),003h		;36af	dd 36 07 03 	. 6 . . 
+	ld (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX),003h		;36af	dd 36 07 03 	. 6 . . 
 	ld hl,0000ah		;36b3	21 0a 00 	! . . 
 	ld de,l007dh		;36b6	11 7d 00 	. } . 
 	ld (ix + 10),l		;36b9	dd 75 0a 	. u . 
