@@ -194,7 +194,7 @@ SILVIA_STATE: EQU 0xE34C
 ; Number of "magic elements".
 ; At floor 2: dragons, snakes, bursting balls, ...
 ; Also at floor 4, with elements thrown by the magician
-NUM_MAGIC_ELEMENTS: EQU 0xE381
+NUM_MAGICAL_ELEMENTS: EQU 0xE381
 
 ; This seems to be used to make appear the final enemy and the stairs
 THOMAS_POSITION: EQU 0xE713 ; Left end is 0
@@ -1204,7 +1204,7 @@ sub_0644h:
 	call sub_074dh		;0657	cd 4d 07 	. M . 
 	call sub_06beh		;065a	cd be 06 	. . . 
 	ld hl,0e380h		;065d	21 80 e3 	! . . 
-	ld de,NUM_MAGIC_ELEMENTS		;0660	11 81 e3 	. . . 
+	ld de,NUM_MAGICAL_ELEMENTS		;0660	11 81 e3 	. . . 
 	ld bc,00131h		;0663	01 31 01 	. 1 . 
 	ld (hl),000h		;0666	36 00 	6 . 
 	ldir		;0668	ed b0 	. . 
@@ -7360,7 +7360,7 @@ POINTS_TABLE:
     
 	
 sub_2fc7h:
-	ld a,(NUM_MAGIC_ELEMENTS)		;2fc7	3a 81 e3 	: . . 
+	ld a,(NUM_MAGICAL_ELEMENTS)		;2fc7	3a 81 e3 	: . . 
 	and a			;2fca	a7 	. 
 	ret z			;2fcb	c8 	. 
 	ld ix,TBL_E382		;2fcc	dd 21 82 e3 	. ! . . 
@@ -7530,9 +7530,9 @@ l311ch:
 	ld (iy+004h),e		;3137	fd 73 04 	. s . 
 	ld (iy+005h),d		;313a	fd 72 05 	. r . 
 	ld (iy+001h),c		;313d	fd 71 01 	. q . 
-	ld a,(NUM_MAGIC_ELEMENTS)		;3140	3a 81 e3 	: . . 
+	ld a,(NUM_MAGICAL_ELEMENTS)		;3140	3a 81 e3 	: . . 
 	inc a			;3143	3c 	< 
-	ld (NUM_MAGIC_ELEMENTS),a		;3144	32 81 e3 	2 . . 
+	ld (NUM_MAGICAL_ELEMENTS),a		;3144	32 81 e3 	2 . . 
 	ld a,c			;3147	79 	y 
 	inc c			;3148	0c 	. 
 	cp 00ch		;3149	fe 0c 	. . 
@@ -8203,11 +8203,11 @@ l36e7h:
 	ld a,c			;36f2	79 	y 
 	jp l1a7eh		;36f3	c3 7e 1a 	. ~ . 
 sub_36f6h:
-	ld a,(NUM_MAGIC_ELEMENTS)		;36f6	3a 81 e3 	: . . 
+	ld a,(NUM_MAGICAL_ELEMENTS)		;36f6	3a 81 e3 	: . . 
 	cp 010h		;36f9	fe 10 	. . 
 	jr nc,l3711h		;36fb	30 14 	0 . 
 	inc a			;36fd	3c 	< 
-	ld (NUM_MAGIC_ELEMENTS),a		;36fe	32 81 e3 	2 . . 
+	ld (NUM_MAGICAL_ELEMENTS),a		;36fe	32 81 e3 	2 . . 
 	ld iy,TABLE_WIDTH_19	;3701	fd 21 6f e3 	. ! o . 
 	ld de, 19		        ;3705	11 13 00 	. . . 
 l3708h:
@@ -8220,7 +8220,7 @@ l3711h:
 	ret			;3712	c9 	. 
 l3713h:
 	ld (ix + 0),000h		;3713	dd 36 00 00 	. 6 . . 
-	ld hl,NUM_MAGIC_ELEMENTS		;3717	21 81 e3 	! . . 
+	ld hl,NUM_MAGICAL_ELEMENTS		;3717	21 81 e3 	! . . 
 	dec (hl)			;371a	35 	5 
 	pop af			;371b	f1 	. 
 	ret			;371c	c9 	. 
