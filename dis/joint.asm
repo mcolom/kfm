@@ -126,6 +126,11 @@ VARS_TABLE: EQU 0xE2D8
 MAGICAL_ELEMENT_STATE_IDX: EQU 1 ; E383
 MAGICAL_ELEMENT_DISTANCE_L_IDX: EQU 2 ; E384
 MAGICAL_ELEMENT_DISTANCE_H_IDX: EQU 3 ; E385
+
+; Height of falling or floating magical elements
+MAGICAL_ELEMENT_HEIGHT_L_IDX: EQU 4 ; E386
+MAGICAL_ELEMENT_HEIGHT_H_IDX: EQU 5 ; E387
+
 MAGICAL_ELEMENT_CURRENT_FRAME_IDX: EQU 6 ; E388
 MAGICAL_ELEMENT_FRAME_COUNTER_IDX: EQU 7 ; E389
 
@@ -4087,7 +4092,7 @@ l170bh:
 	add hl,de			;1726	19 	. 
 	call SET_MR_REACTION_FROM_HL		;1727	cd a5 1c 	. . . 
 	ex de,hl			;172a	eb 	. 
-	call sub_1c9eh		;172b	cd 9e 1c 	. . . 
+	call GET_MAGICAL_ELEMENT_HEIGHT_IN_HL		;172b	cd 9e 1c 	. . . 
 	add hl,de			;172e	19 	. 
 	ld de,05000h		;172f	11 00 50 	. . P 
 	sbc hl,de		;1732	ed 52 	. R 
@@ -4107,7 +4112,7 @@ l173dh:
 	ld de,l0140h		;174d	11 40 01 	. @ . 
 	add hl,de			;1750	19 	. 
 	ld (0e811h),hl		;1751	22 11 e8 	" . . 
-	call sub_1c9eh		;1754	cd 9e 1c 	. . . 
+	call GET_MAGICAL_ELEMENT_HEIGHT_IN_HL		;1754	cd 9e 1c 	. . . 
 	ld de,0013h+1		;1757	11 14 00 	. . . 
 	call sub_1172h		;175a	cd 72 11 	. r . 
 	jr c,l1787h		;175d	38 28 	8 ( 
@@ -4145,7 +4150,7 @@ l1787h:
 	cp 007h		;1792	fe 07 	. . 
 	jr nz,l17bah		;1794	20 24 	  $ 
 l1796h:
-	call sub_1c9eh		;1796	cd 9e 1c 	. . . 
+	call GET_MAGICAL_ELEMENT_HEIGHT_IN_HL		;1796	cd 9e 1c 	. . . 
 	ld de,l010ch		;1799	11 0c 01 	. . . 
 	ld a,091h		;179c	3e 91 	> . 
 	call sub_0dfeh		;179e	cd fe 0d 	. . . 
@@ -4161,8 +4166,8 @@ l1796h:
 	pop af			;17b7	f1 	. 
 	jr l1768h		;17b8	18 ae 	. . 
 l17bah:
-	ld (ix + 6),009h		;17ba	dd 36 06 09 	. 6 . . 
-	call sub_1c9eh		;17be	cd 9e 1c 	. . . 
+	ld (ix + MAGICAL_ELEMENT_CURRENT_FRAME_IDX),9	;17ba	dd 36 06 09
+	call GET_MAGICAL_ELEMENT_HEIGHT_IN_HL		    ;17be	cd 9e 1c
 	ld de,l0a00h		;17c1	11 00 0a 	. . . 
 	add hl,de			;17c4	19 	. 
 	xor a			;17c5	af 	. 
@@ -4551,7 +4556,7 @@ l1a80h:
 	bit 4,(ix + 0)		;1a82	dd cb 00 66 	. . . f 
 	ret z			;1a86	c8 	. 
 	ex de,hl			;1a87	eb 	. 
-	call sub_1c9eh		;1a88	cd 9e 1c 	. . . 
+	call GET_MAGICAL_ELEMENT_HEIGHT_IN_HL		;1a88	cd 9e 1c 	. . . 
 	add hl,hl			;1a8b	29 	) 
 	ld l,h			;1a8c	6c 	l 
 	ld h,000h		;1a8d	26 00 	& . 
@@ -4741,7 +4746,7 @@ l1bc4h:
 	add hl,de			;1bcd	19 	. 
 	ld (ix + 14),l		;1bce	dd 75 0e 	. u . 
 	ld (ix + 15),h		;1bd1	dd 74 0f 	. t . 
-	call sub_1c9eh		;1bd4	cd 9e 1c 	. . . 
+	call GET_MAGICAL_ELEMENT_HEIGHT_IN_HL		;1bd4	cd 9e 1c 	. . . 
 	sbc hl,de		;1bd7	ed 52 	. R 
 	call sub_1c97h		;1bd9	cd 97 1c 	. . . 
 	ld de,l0039h		;1bdc	11 39 00 	. 9 . 
@@ -4859,9 +4864,10 @@ sub_1c97h:
 	ld (ix + 4),l		;1c97	dd 75 04 	. u . 
 	ld (ix + 5),h		;1c9a	dd 74 05 	. t . 
 	ret			;1c9d	c9 	. 
-sub_1c9eh:
-	ld l,(ix + 4)		;1c9e	dd 6e 04 	. n . 
-	ld h,(ix + 5)		;1ca1	dd 66 05 	. f . 
+
+GET_MAGICAL_ELEMENT_HEIGHT_IN_HL:
+	ld l,(ix + MAGICAL_ELEMENT_HEIGHT_L_IDX)		;1c9e	dd 6e 04
+	ld h,(ix + MAGICAL_ELEMENT_HEIGHT_H_IDX)		;1ca1	dd 66 05
 	ret			;1ca4	c9 	. 
 
 SET_MR_REACTION_FROM_HL:
@@ -4870,6 +4876,7 @@ SET_MR_REACTION_FROM_HL:
 	ret			;1cab	c9 	. 
 
 GET_MR_REACTION_IN_HL:
+    ; ToDo This must be when the confetti ball is bouncing
 	ld l,(ix + 12)		;1cac	dd 6e 0c
 	ld h,(ix + 13)		;1caf	dd 66 0d
 	ret			;1cb2	c9 	. 
@@ -7510,8 +7517,8 @@ l30b7h:
 	ld e,(ix + 12)		;30bd	dd 5e 0c 	. ^ . 
 	ld d,(ix + 13)		;30c0	dd 56 0d 	. V . 
 	add hl,de			;30c3	19 	. 
-	ld (ix + 4),l		;30c4	dd 75 04 	. u . 
-	ld (ix + 5),h		;30c7	dd 74 05 	. t . 
+	ld (ix + MAGICAL_ELEMENT_HEIGHT_L_IDX),l		;30c4	dd 75 04
+	ld (ix + MAGICAL_ELEMENT_HEIGHT_H_IDX),h		;30c7	dd 74 05
 	jp l3025h		;30ca	c3 25 30 	. % 0 
 l30cdh:
 	ld (ix + MAGICAL_ELEMENT_STATE_IDX), ME_STATE_CONFETTI_FALLS_AND_FLOATS ;30cd	dd 36 01 06
@@ -7526,8 +7533,8 @@ l30cdh:
 	ld (ix + 14),e		;30e8	dd 73 0e 	. s . 
 	ld (ix + 15),d		;30eb	dd 72 0f 	. r . 
 	ld de,l0100h		;30ee	11 00 01 	. . . 
-	ld l,(ix + 4)		;30f1	dd 6e 04 	. n . 
-	ld h,(ix + 5)		;30f4	dd 66 05 	. f . 
+	ld l,(ix + MAGICAL_ELEMENT_HEIGHT_L_IDX)		;30f1	dd 6e 04
+	ld h,(ix + MAGICAL_ELEMENT_HEIGHT_H_IDX)		;30f4	dd 66 05
 	sbc hl,de		;30f7	ed 52 	. R 
 	ld (ix + 12),l		;30f9	dd 75 0c 	. u . 
 	ld (ix + 13),h		;30fc	dd 74 0d 	. t . 
@@ -8193,8 +8200,8 @@ l3685h:
 	ld (ix + MAGICAL_ELEMENT_DISTANCE_H_IDX),d	;369f	dd 72 03
 	ld (ix + MAGICAL_ELEMENT_DISTANCE_L_IDX),0	;36a2	dd 36 02
 	ld hl,09000h		;36a6	21 00 90 	! . . 
-	ld (ix + 4),l		;36a9	dd 75 04 	. u . 
-	ld (ix + 5),h		;36ac	dd 74 05 	. t . 
+	ld (ix + MAGICAL_ELEMENT_HEIGHT_L_IDX),l		;36a9	dd 75 04 	. u . 
+	ld (ix + MAGICAL_ELEMENT_HEIGHT_H_IDX),h		;36ac	dd 74 05 	. t . 
 	ld (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX), 3	;36af	dd 36 07 03
 	ld hl,0000ah		;36b3	21 0a 00 	! . . 
 	ld de,l007dh		;36b6	11 7d 00 	. } . 
@@ -8262,8 +8269,8 @@ sub_371dh:
 sub_3732h:
 	push hl			;3732	e5 	. 
 	and a			;3733	a7 	. 
-	ld l,(ix + 4)		;3734	dd 6e 04 	. n . 
-	ld h,(ix + 5)		;3737	dd 66 05 	. f . 
+	ld l,(ix + MAGICAL_ELEMENT_HEIGHT_L_IDX)		;3734	dd 6e 04
+	ld h,(ix + MAGICAL_ELEMENT_HEIGHT_H_IDX)		;3737	dd 66 05
 	sbc hl,de		;373a	ed 52 	. R 
 	ld (ix + 4),l		;373c	dd 75 04 	. u . 
 	ld (ix + 5),h		;373f	dd 74 05 	. t . 
