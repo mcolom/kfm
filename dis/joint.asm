@@ -7425,9 +7425,9 @@ l3025h:
 	call sub_3746h		;302b	cd 46 37 	. F 7 
 	ld a,091h		;302e	3e 91 	> . 
 	jp c,l3327h		;3030	da 27 33 	. ' 3 
-	dec (ix + 7)		;3033	dd 35 07 	. 5 . 
+	dec (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX)		;3033	dd 35 07 	. 5 . 
 	ret nz			;3036	c0 	. 
-	ld (ix + 7),003h		;3037	dd 36 07 03 	. 6 . . 
+	ld (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX),003h		;3037	dd 36 07 03 	. 6 . . 
 	ld a,(ix + MAGICAL_ELEMENT_CURRENT_FRAME_IDX) ;303b	dd 7e 06
 	inc a			;303e	3c 	< 
 	cp 4		    ;303f	fe 04
