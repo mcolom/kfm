@@ -122,9 +122,21 @@ TBL_WIDTH_21: EQU 0xE577
 VARS_TABLE: EQU 0xE2D8
 
 ; This counter controls how many ticks the falling magical element will
-; stay in that state.
+; stay in that state
+MAGICAL_ELEMENT_STATE_IDX: EQU 1 ; E383
 MAGICAL_ELEMENT_CURRENT_FRAME_IDX: EQU 6 ; E388
 MAGICAL_ELEMENT_FRAME_COUNTER_IDX: EQU 7 ; E389
+
+ME_STATE_POT_FALLS: EQU 0
+ME_STATE_POT_TOUCHES_FLOOR: EQU 3
+ME_STATE_SNAKE_WALKING: EQU 4
+ME_STATE_CONFETTI_EXPLODES: EQU 5
+ME_STATE_CONFETTI_FALLS_AND_FLOATS: EQU 6
+ME_STATE_DRAGON_FALLS: EQU 1
+ME_STATE_DRAGON_SMOKE_APPEARS: EQU 7
+ME_STATE_DRAGON_OUT_AND_WILL_FIRE: EQU 8
+ME_STATE_DRAGON_DISAPPEARS: EQU 9
+ME_STATE_CONFETTI_MOVES_DIAGONAL: EQU 10
 
 ; Enemy's look at
 ; 0x0: enemy not visible yet
@@ -2779,6 +2791,7 @@ sub_0e9bh:
 	ld bc,l0594h		;0ed1	01 94 05 	. . . 
 	ld a,0a1h		;0ed4	3e a1 	> . 
 l0ed6h:
+    ; ToDo: this must draw the upper panel
 	call WRITE_CHAR_AT_SCREEN_DE		;0ed6	cd 10 11 	. . . 
 	inc a			;0ed9	3c 	< 
 	inc de			;0eda	13 	. 
@@ -7385,7 +7398,7 @@ sub_2fe4h:
 	ld hl,l36e7h		;2fe4	21 e7 36 	! . 6 
 	push hl			;2fe7	e5 	. 
 	ld hl,l2ff7h		;2fe8	21 f7 2f 	! . / 
-	ld e,(ix + 1)		;2feb	dd 5e 01 	. ^ . 
+	ld e,(ix + MAGICAL_ELEMENT_STATE_IDX)		;2feb	dd 5e 01
 	ld d,000h		;2fee	16 00 	. . 
 	add hl,de			;2ff0	19 	. 
 	add hl,de			;2ff1	19 	. 
@@ -7494,7 +7507,7 @@ l30b7h:
 	ld (ix + 5),h		;30c7	dd 74 05 	. t . 
 	jp l3025h		;30ca	c3 25 30 	. % 0 
 l30cdh:
-	ld (ix + 1),006h		;30cd	dd 36 01 06 	. 6 . . 
+	ld (ix + MAGICAL_ELEMENT_STATE_IDX), ME_STATE_CONFETTI_FALLS_AND_FLOATS ;30cd	dd 36 01 06
 	ld a,(0e371h)		;30d1	3a 71 e3 	: q . 
 	ld (ix + 8),a		;30d4	dd 77 08 	. w . 
 	ld de,l0040h		;30d7	11 40 00 	. @ . 
@@ -7617,7 +7630,7 @@ l31c0h:
 	ld a,(ix + MAGICAL_ELEMENT_CURRENT_FRAME_IDX)		;31f8	dd 7e 06
 	cp 010h		;31fb	fe 10 	. . 
 	jr nz,l3220h		;31fd	20 21 	  ! 
-	inc (ix + 1)		;31ff	dd 34 01 	. 4 . 
+	inc (ix + MAGICAL_ELEMENT_STATE_IDX)		;31ff	dd 34 01
 	ld a,(0e80bh)		;3202	3a 0b e8 	: . . 
 	bit 7,a		;3205	cb 7f 	.  
 	set 6,(ix + 0)		;3207	dd cb 00 f6 	. . . . 
@@ -7628,7 +7641,7 @@ l3213h:
 	ld a,086h		;3213	3e 86 	> . 
 	call sub_0dfeh		;3215	cd fe 0d 	. . . 
 l3218h:
-	ld (ix + 1),007h		;3218	dd 36 01 07 	. 6 . . 
+	ld (ix + MAGICAL_ELEMENT_STATE_IDX), ME_STATE_DRAGON_SMOKE_APPEARS ;3218	dd 36 01 07
 	ld (ix + MAGICAL_ELEMENT_CURRENT_FRAME_IDX), 13 ;321c	dd 36 06 0d
 l3220h:
 	ld (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX), 7	;3220	dd 36 07 07
@@ -7702,7 +7715,7 @@ l32a8h:
 	call ADD_POINTS		;32b8	cd 60 2f 	. ` / 
 	ld (ix + 6),016h		;32bb	dd 36 06 16 	. 6 . . 
 l32bfh:
-	ld (ix + 1),009h		;32bf	dd 36 01 09 	. 6 . . 
+	ld (ix + MAGICAL_ELEMENT_STATE_IDX), ME_STATE_DRAGON_DISAPPEARS	;32bf	dd 36 01 09
 	ld (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX), 7	;32c3	dd 36 07 07
 	ret			;32c7	c9 	. 
 	call l1be2h		;32c8	cd e2 1b 	. . . 
@@ -7767,8 +7780,8 @@ sub_333ah:
 l333ch:
 	ld (ix + 14),b		;333c	dd 70 0e 	. p . 
 	ld (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX), 7	;333f	dd 36 07 07
-	ld (ix + 1),005h		;3343	dd 36 01 05
-	ld (ix + MAGICAL_ELEMENT_CURRENT_FRAME_IDX), 10		;3347	dd 36 06 0a
+	ld (ix + MAGICAL_ELEMENT_STATE_IDX), ME_STATE_CONFETTI_EXPLODES    ;3343	dd 36 01 05
+	ld (ix + MAGICAL_ELEMENT_CURRENT_FRAME_IDX), 10	;3347	dd 36 06 0a
 	ret			;334b	c9 	. 
 l334ch:
 	ld a,086h		;334c	3e 86 	> . 
@@ -7817,9 +7830,9 @@ l33b3h:
 	res 6,(ix + 0)		;33bd	dd cb 00 b6 	. . . . 
 	ret			;33c1	c9 	. 
 l33c2h:
-	ld (ix + 1),003h		;33c2	dd 36 01 03
-	ld (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX), 5	    ;33c6	dd 36 07 05
-	ld (ix + MAGICAL_ELEMENT_CURRENT_FRAME_IDX),004h	;33ca	dd 36 06 04
+	ld (ix + MAGICAL_ELEMENT_STATE_IDX), ME_STATE_POT_TOUCHES_FLOOR ;33c2	dd 36 01 03
+	ld (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX), 5	 ;33c6	dd 36 07 05
+	ld (ix + MAGICAL_ELEMENT_CURRENT_FRAME_IDX),004h ;33ca	dd 36 06 04
 	ld a,093h		;33ce	3e 93 	> . 
 	call sub_0dfeh		;33d0	cd fe 0d 	. . . 
 	ret			;33d3	c9 	. 
@@ -7870,7 +7883,7 @@ l3432h:
 	cp 008h		;3432	fe 08 	. . 
 	ret nz			;3434	c0 	. 
 l3435h:
-	ld (ix + 1),004h		;3435	dd 36 01 04 	. 6 . . 
+	ld (ix + MAGICAL_ELEMENT_STATE_IDX), ME_STATE_SNAKE_WALKING ;3435	dd 36 01 04
 	ld (ix + MAGICAL_ELEMENT_CURRENT_FRAME_IDX), 8	;3439	dd 36 06 08
 	ld (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX), 9	;343d	dd 36 07 09
 	jp l33b3h		;3441	c3 b3 33 	. . 3 
@@ -7998,13 +8011,13 @@ l352ch:
 	dec (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX)		;3555	dd 35 07
 	ret nz			;3558	c0 	. 
 	ld (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX), 11	;   3559	dd 36 07 0b
-	ld a,(ix + 6)		;355d	dd 7e 06 	. ~ . 
+	ld a,(ix + MAGICAL_ELEMENT_CURRENT_FRAME_IDX)		;355d	dd 7e 06
 	inc a			;3560	3c 	< 
 	cp 01fh		;3561	fe 1f 	. . 
 	jr c,l3567h		;3563	38 02 	8 . 
 	ld a,01dh		;3565	3e 1d 	> . 
 l3567h:
-	ld (ix + 6),a		;3567	dd 70e381h7 06 	. w . 
+	ld (ix + MAGICAL_ELEMENT_CURRENT_FRAME_IDX),a		;3567
 	ret			;356a	c9 	. 
 l356bh:
 	call sub_3353h		;356b	cd 53 33 	. S 3 
@@ -8016,8 +8029,8 @@ l356bh:
 	ld a,040h		;357a	3e 40 	> @ 
 	xor (ix + 0)		;357c	dd ae 00 	. . . 
 	ld (ix + 0),a		;357f	dd 77 00 	. w . 
-	ld (ix + 1),010h		;3582	dd 36 01 10 	. 6 . . 
-	ld (ix + 6),01dh		;3586	dd 36 06 1d 	. 6 . . 
+	ld (ix + MAGICAL_ELEMENT_STATE_IDX),010h		;3582	dd 36 01 10 	. 6 . . 
+	ld (ix + MAGICAL_ELEMENT_CURRENT_FRAME_IDX),01dh		;3586	dd 36 06 1d 	. 6 . . 
 	ld (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX), 11 ;358a	dd 36 07 0b
 	ld a,(0e366h)		;358e	3a 66 e3 	: f . 
 	ld (ix + 8),a		;3591	dd 77 08 	. w . 
@@ -8136,13 +8149,13 @@ l3650h:
 	add ix,de		;3650	dd 19 	. . 
 	bit 4,(ix + 0)		;3652	dd cb 00 66 	. . . f 
 	jr z,l366ch		;3656	28 14 	( . 
-	ld a,(ix + 1)		;3658	dd 7e 01 	. ~ . 
-	cp 003h		;365b	fe 03 	. . 
-	jr c,l3667h		;365d	38 08 	8 . 
-	cp 006h		;365f	fe 06 	. . 
-	jr c,l366ch		;3661	38 09 	8 . 
-	cp 009h		;3663	fe 09 	. . 
-	jr nc,l366ch		;3665	30 05 	0 . 
+	ld a,(ix + MAGICAL_ELEMENT_STATE_IDX)		;3658	dd 7e 01
+	cp ME_STATE_POT_TOUCHES_FLOOR		;365b	fe 03
+	jr c,l3667h		;365d	38 08
+	cp ME_STATE_CONFETTI_FALLS_AND_FLOATS		;365f	fe 06
+	jr c,l366ch		;3661	38 09
+	cp ME_STATE_DRAGON_DISAPPEARS	;3663	fe 09
+	jr nc,l366ch		;3665	30 05
 l3667h:
 	ld a,(ix + 18)		;3667	dd 7e 12 	. ~ . 
 	cp h			;366a	bc 	. 
@@ -8167,7 +8180,7 @@ l3685h:
 	and 040h		;368f	e6 40 	. @ 
 	or 010h		;3691	f6 10 	. . 
 	ld (ix + 0),a		;3693	dd 77 00 	. w . 
-	ld (ix + 1),e		;3696	dd 73 01 	. s . 
+	ld (ix + MAGICAL_ELEMENT_STATE_IDX),e		;3696	dd 73 01
 	ld (ix + MAGICAL_ELEMENT_CURRENT_FRAME_IDX),e	;3699	dd 73 06
 	ld (ix + 18),d		;369c	dd 72 12 	. r . 
 	ld (ix + 3),d		;369f	dd 72 03 	. r . 
