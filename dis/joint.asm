@@ -4100,7 +4100,7 @@ l1738h:
 l173dh:
 	bit 1,(ix + 11)		;173d	dd cb 0b 4e 	. . . N 
 	jr nz,l175fh		;1741	20 1c 	  . 
-	call sub_1c8ah		;1743	cd 8a 1c 	. . . 
+	call GET_MAGICAL_ELEMENT_DISTANCE_IN_HL		;1743	cd 8a 1c 	. . . 
 	ld de,0ff60h		;1746	11 60 ff 	. ` . 
 	add hl,de			;1749	19 	. 
 	ld (0e80fh),hl		;174a	22 0f e8 	" . . 
@@ -4171,7 +4171,7 @@ l17bah:
 	ld l,h			;17c8	6c 	l 
 	ld h,a			;17c9	67 	g 
 	ex de,hl			;17ca	eb 	. 
-	call sub_1c8ah		;17cb	cd 8a 1c 	. . . 
+	call GET_MAGICAL_ELEMENT_DISTANCE_IN_HL		;17cb	cd 8a 1c 	. . . 
 	call sub_1ac9h		;17ce	cd c9 1a 	. . . 
 	ld a,080h		;17d1	3e 80 	> . 
 	jr nz,l17d7h		;17d3	20 02 	  . 
@@ -4363,7 +4363,7 @@ l18ffh:
 	ld e,a			;1913	5f 	_ 
 	add hl,de			;1914	19 	. 
 	push hl			;1915	e5 	. 
-	call sub_1c8ah		;1916	cd 8a 1c 	. . . 
+	call GET_MAGICAL_ELEMENT_DISTANCE_IN_HL		;1916	cd 8a 1c 	. . . 
 	ld de,l00c0h		;1919	11 c0 00 	. . . 
 	ld a,c			;191c	79 	y 
 	and 040h		;191d	e6 40 	. @ 
@@ -4694,7 +4694,7 @@ l1b6ch:
 l1b71h:
 	add hl,de			;1b71	19 	. 
 	djnz l1b71h		;1b72	10 fd 	. . 
-	call sub_1c83h		;1b74	cd 83 1c 	. . . 
+	call SET_MAGICAL_ELEMENT_DISTANCE		;1b74	cd 83 1c 	. . . 
 	jp l1be2h		;1b77	c3 e2 1b 	. . . 
 sub_1b7ah:
 	bit 1,(ix + 0)		;1b7a	dd cb 00 4e 	. . . N 
@@ -4747,7 +4747,7 @@ l1bc4h:
 	ld de,l0039h		;1bdc	11 39 00 	. 9 . 
 	call sub_1c7ah		;1bdf	cd 7a 1c 	. z . 
 l1be2h:
-	call sub_1c8ah		;1be2	cd 8a 1c 	. . . 
+	call GET_MAGICAL_ELEMENT_DISTANCE_IN_HL		;1be2	cd 8a 1c 	. . . 
 	jr l1c08h		;1be5	18 21 	. ! 
 sub_1be7h:
 	ld de,l0036h		;1be7	11 36 00 	. 6 . 
@@ -4795,7 +4795,7 @@ sub_1c26h:
 	res 5,(hl)		;1c3a	cb ae 	. . 
 	ret			;1c3c	c9 	. 
 sub_1c3dh:
-	call sub_1c8ah		;1c3d	cd 8a 1c 	. . . 
+	call GET_MAGICAL_ELEMENT_DISTANCE_IN_HL		;1c3d	cd 8a 1c 	. . . 
 	ld de,l1000h		;1c40	11 00 10 	. . . 
 	add hl,de			;1c43	19 	. 
 	ld de,(0e712h)		;1c44	ed 5b 12 e7 	. [ . . 
@@ -4827,30 +4827,32 @@ sub_1c61h:
 	ret			;1c6f	c9 	. 
 
 sub_1c70h:
-	call sub_1c8ah		;1c70	cd 8a 1c 	. . . 
+	call GET_MAGICAL_ELEMENT_DISTANCE_IN_HL		;1c70	cd 8a 1c 	. . . 
 	bit 6,c		;1c73	cb 71 	. q 
 	jr z,l1c81h		;1c75	28 0a 	( . 
 l1c77h:
 	add hl,de			;1c77	19 	. 
-	jr sub_1c83h		;1c78	18 09 	. . 
+	jr SET_MAGICAL_ELEMENT_DISTANCE		;1c78	18 09 	. . 
 sub_1c7ah:
-	call sub_1c8ah		;1c7a	cd 8a 1c 	. . . 
+	call GET_MAGICAL_ELEMENT_DISTANCE_IN_HL		;1c7a	cd 8a 1c 	. . . 
 	bit 6,c		;1c7d	cb 71 	. q 
 	jr z,l1c77h		;1c7f	28 f6 	( . 
 l1c81h:
-	sbc hl,de		;1c81	ed 52 	. R 
-sub_1c83h:
+	sbc hl,de		;1c81	ed 52 	. R
+
+SET_MAGICAL_ELEMENT_DISTANCE:
 	ld (ix + MAGICAL_ELEMENT_DISTANCE_L_IDX),l		;1c83	dd 75 02
-	ld (ix + 3),h		;1c86	dd 74 03 	. t . 
-	ret			;1c89	c9 	. 
-sub_1c8ah:
-    ; ToDo: here IX refers to table 2 so, so this is probably not 2
-	ld l,(ix + MAGICAL_ELEMENT_DISTANCE_L_IDX)		;1c8a	dd 6e 02 	. n . 
-	ld h,(ix + 3) ;1c8d	dd 66 03
-	ret			;1c90	c9 	. 
+	ld (ix + MAGICAL_ELEMENT_DISTANCE_H_IDX),h		;1c86	dd 74 03
+	ret			;1c89	c9
+
+GET_MAGICAL_ELEMENT_DISTANCE_IN_HL:
+	ld l,(ix + MAGICAL_ELEMENT_DISTANCE_L_IDX)		;1c8a	dd 6e 02
+	ld h,(ix + MAGICAL_ELEMENT_DISTANCE_H_IDX)      ;1c8d	dd 66 03
+	ret			;1c90	c9
+
 sub_1c91h:
 	ex de,hl			;1c91	eb 	. 
-	call sub_1c8ah		;1c92	cd 8a 1c 	. . . 
+	call GET_MAGICAL_ELEMENT_DISTANCE_IN_HL		;1c92	cd 8a 1c 	. . . 
 	ex de,hl			;1c95	eb 	. 
 	ret			;1c96	c9 	. 
 sub_1c97h:
@@ -7483,7 +7485,7 @@ l307bh:
 	ld d,(ix + 11)		;3084	dd 56 0b 	. V . 
 	add hl,de			;3087	19 	. 
 	ld (ix + MAGICAL_ELEMENT_DISTANCE_L_IDX),l		;3088	dd 75 02
-	ld (ix + 3),h		;308b	dd 74 03 	. t . 
+	ld (ix + MAGICAL_ELEMENT_DISTANCE_H_IDX),h		;308b	dd 74 03
 	ld l,(ix+010h)		;308e	dd 6e 10 	. n . 
 	ld h,(ix+011h)		;3091	dd 66 11 	. f . 
 	ld de,00049h		;3094	11 49 00 	. I . 
@@ -7517,7 +7519,7 @@ l30cdh:
 	ld (ix + 8),a		;30d4	dd 77 08 	. w . 
 	ld de,l0040h		;30d7	11 40 00 	. @ . 
 	ld l,(ix + MAGICAL_ELEMENT_DISTANCE_L_IDX)		;30da	dd 6e 02
-	ld h,(ix + 3)		;30dd	dd 66 03 	. f . 
+	ld h,(ix + MAGICAL_ELEMENT_DISTANCE_H_IDX)		;30dd	dd 66 03
 	sbc hl,de		;30e0	ed 52 	. R 
 	ld (ix + 10),l		;30e2	dd 75 0a 	. u . 
 	ld (ix + 11),h		;30e5	dd 74 0b 	. t . 
@@ -7540,7 +7542,7 @@ l3106h:
 	ld b,010h		;3112	06 10 	. . 
 	ld c,00ah		;3114	0e 0a 	. . 
 	ld l,(ix + MAGICAL_ELEMENT_DISTANCE_L_IDX)		;3116	dd 6e 02
-	ld h,(ix + 3)		;3119	dd 66 03 	. f . 
+	ld h,(ix + MAGICAL_ELEMENT_DISTANCE_H_IDX)		;3119	dd 66 03
 l311ch:
 	bit 4,(iy+000h)		;311c	fd cb 00 66 	. . . f 
 	jr nz,l314ch		;3120	20 2a 	  * 
@@ -8188,7 +8190,7 @@ l3685h:
 	ld (ix + MAGICAL_ELEMENT_STATE_IDX),e		;3696	dd 73 01
 	ld (ix + MAGICAL_ELEMENT_CURRENT_FRAME_IDX),e	;3699	dd 73 06
 	ld (ix + 18),d		;369c	dd 72 12 	. r . 
-	ld (ix + 3),d		;369f	dd 72 03 	. r . 
+	ld (ix + MAGICAL_ELEMENT_DISTANCE_H_IDX),d	;369f	dd 72 03
 	ld (ix + MAGICAL_ELEMENT_DISTANCE_L_IDX),0	;36a2	dd 36 02
 	ld hl,09000h		;36a6	21 00 90 	! . . 
 	ld (ix + 4),l		;36a9	dd 75 04 	. u . 
@@ -8274,7 +8276,7 @@ sub_3746h:
 	sbc hl,de		;374c	ed 52 	. R 
 	ret nc			;374e	d0 	. 
 	ld e,(ix + MAGICAL_ELEMENT_DISTANCE_L_IDX)		;374f	dd 5e 02
-	ld d,(ix + 3)		;3752	dd 56 03 	. V . 
+	ld d,(ix + MAGICAL_ELEMENT_DISTANCE_H_IDX)		;3752	dd 56 03
 	ld hl,0ff80h		;3755	21 80 ff 	! . . 
 	add hl,de			;3758	19 	. 
 	ld (0e80fh),hl		;3759	22 0f e8 	" . . 
