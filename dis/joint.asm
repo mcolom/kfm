@@ -127,6 +127,9 @@ MAGICAL_ELEMENT_STATE_IDX: EQU 1 ; E383
 MAGICAL_ELEMENT_CURRENT_FRAME_IDX: EQU 6 ; E388
 MAGICAL_ELEMENT_FRAME_COUNTER_IDX: EQU 7 ; E389
 
+; Ticks left before the magician's fireballs turns into a bat
+MAGICIAN_FIREBALL_COUNTER: EQU 8 ; 0xE38A
+
 ME_STATE_POT_FALLS: EQU 0
 ME_STATE_POT_TOUCHES_FLOOR: EQU 3
 ME_STATE_SNAKE_WALKING: EQU 4
@@ -7896,18 +7899,18 @@ l3444h:
 	call sub_3792h		;3454	cd 92 37 	. . 7 
 	ld a,091h		;3457	3e 91 	> . 
 	jp c,l3327h		;3459	da 27 33 	. ' 3 
-	dec (ix + 8)		;345c	dd 35 08 	. 5 . 
+	dec (ix + MAGICIAN_FIREBALL_COUNTER)		;345c	dd 35 08
 	jp z,l356bh		;345f	ca 6b 35 	. k 5 
 	dec (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX)		;3462	dd 35 07
 	ret z			;3465	c8 	. 
 	ld (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX), 11		;3466	dd 36 07 0b
-	ld a,(ix + 6)		;346a	dd 7e 06 	. ~ . 
+	ld a,(ix + MAGICAL_ELEMENT_CURRENT_FRAME_IDX)		;346a	dd 7e 06 	. ~ . 
 	inc a			;346d	3c 	< 
 	cp 01bh		;346e	fe 1b 	. . 
 	jr c,l3474h		;3470	38 02 	8 . 
 	ld a,019h		;3472	3e 19 	> . 
 l3474h:
-	ld (ix + 6),a		;3474	dd 77 06 	. w . 
+	ld (ix + MAGICAL_ELEMENT_CURRENT_FRAME_IDX),a		;3474	dd 77 06 	. w . 
 	ret			;3477	c9 	. 
 	ld de,(0e374h)		;3478	ed 5b 74 e3 	. [ t . 
 	call sub_1c7ah		;347c	cd 7a 1c 	. z . 
@@ -8006,7 +8009,7 @@ l352ch:
 	call sub_3746h		;3547	cd 46 37 	. F 7 
 	ld a,094h		;354a	3e 94 	> . 
 	jp c,l3327h		;354c	da 27 33 	. ' 3 
-	dec (ix + 8)		;354f	dd 35 08 	. 5 . 
+	dec (ix + MAGICIAN_FIREBALL_COUNTER)		;354f	dd 35 08
 	jp z,l334ch		;3552	ca 4c 33 	. L 3 
 	dec (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX)		;3555	dd 35 07
 	ret nz			;3558	c0 	. 
@@ -8033,7 +8036,7 @@ l356bh:
 	ld (ix + MAGICAL_ELEMENT_CURRENT_FRAME_IDX),01dh		;3586	dd 36 06 1d 	. 6 . . 
 	ld (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX), 11 ;358a	dd 36 07 0b
 	ld a,(0e366h)		;358e	3a 66 e3 	: f . 
-	ld (ix + 8),a		;3591	dd 77 08 	. w . 
+	ld (ix + MAGICIAN_FIREBALL_COUNTER),a		;3591	dd 77 08
 	ret			;3594	c9 	. 
 sub_3595h:
 	ld a,(0e360h)		;3595	3a 60 e3 	: ` . 
