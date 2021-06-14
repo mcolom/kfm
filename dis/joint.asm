@@ -124,6 +124,8 @@ VARS_TABLE: EQU 0xE2D8
 ; This counter controls how many ticks the falling magical element will
 ; stay in that state
 MAGICAL_ELEMENT_STATE_IDX: EQU 1 ; E383
+MAGICAL_ELEMENT_DISTANCE_L_IDX: EQU 2 ; E384
+MAGICAL_ELEMENT_DISTANCE_H_IDX: EQU 3 ; E385
 MAGICAL_ELEMENT_CURRENT_FRAME_IDX: EQU 6 ; E388
 MAGICAL_ELEMENT_FRAME_COUNTER_IDX: EQU 7 ; E389
 
@@ -4838,12 +4840,12 @@ sub_1c7ah:
 l1c81h:
 	sbc hl,de		;1c81	ed 52 	. R 
 sub_1c83h:
-	ld (ix + 2),l		;1c83	dd 75 02 	. u . 
+	ld (ix + MAGICAL_ELEMENT_DISTANCE_L_IDX),l		;1c83	dd 75 02
 	ld (ix + 3),h		;1c86	dd 74 03 	. t . 
 	ret			;1c89	c9 	. 
 sub_1c8ah:
     ; ToDo: here IX refers to table 2 so, so this is probably not 2
-	ld l,(ix + 2)		;1c8a	dd 6e 02 	. n . 
+	ld l,(ix + MAGICAL_ELEMENT_DISTANCE_L_IDX)		;1c8a	dd 6e 02 	. n . 
 	ld h,(ix + 3) ;1c8d	dd 66 03
 	ret			;1c90	c9 	. 
 sub_1c91h:
@@ -7480,7 +7482,7 @@ l307bh:
 	ld e,(ix + 10)		;3081	dd 5e 0a 	. ^ . 
 	ld d,(ix + 11)		;3084	dd 56 0b 	. V . 
 	add hl,de			;3087	19 	. 
-	ld (ix + 2),l		;3088	dd 75 02 	. u . 
+	ld (ix + MAGICAL_ELEMENT_DISTANCE_L_IDX),l		;3088	dd 75 02
 	ld (ix + 3),h		;308b	dd 74 03 	. t . 
 	ld l,(ix+010h)		;308e	dd 6e 10 	. n . 
 	ld h,(ix+011h)		;3091	dd 66 11 	. f . 
@@ -7514,7 +7516,7 @@ l30cdh:
 	ld a,(0e371h)		;30d1	3a 71 e3 	: q . 
 	ld (ix + 8),a		;30d4	dd 77 08 	. w . 
 	ld de,l0040h		;30d7	11 40 00 	. @ . 
-	ld l,(ix + 2)		;30da	dd 6e 02 	. n . 
+	ld l,(ix + MAGICAL_ELEMENT_DISTANCE_L_IDX)		;30da	dd 6e 02
 	ld h,(ix + 3)		;30dd	dd 66 03 	. f . 
 	sbc hl,de		;30e0	ed 52 	. R 
 	ld (ix + 10),l		;30e2	dd 75 0a 	. u . 
@@ -7537,7 +7539,7 @@ l3106h:
 	ld iy,TBL_E382		;310e	fd 21 82 e3 	. ! . . 
 	ld b,010h		;3112	06 10 	. . 
 	ld c,00ah		;3114	0e 0a 	. . 
-	ld l,(ix + 2)		;3116	dd 6e 02 	. n . 
+	ld l,(ix + MAGICAL_ELEMENT_DISTANCE_L_IDX)		;3116	dd 6e 02
 	ld h,(ix + 3)		;3119	dd 66 03 	. f . 
 l311ch:
 	bit 4,(iy+000h)		;311c	fd cb 00 66 	. . . f 
@@ -8187,7 +8189,7 @@ l3685h:
 	ld (ix + MAGICAL_ELEMENT_CURRENT_FRAME_IDX),e	;3699	dd 73 06
 	ld (ix + 18),d		;369c	dd 72 12 	. r . 
 	ld (ix + 3),d		;369f	dd 72 03 	. r . 
-	ld (ix + 2),000h		;36a2	dd 36 02 00 	. 6 . . 
+	ld (ix + MAGICAL_ELEMENT_DISTANCE_L_IDX),0	;36a2	dd 36 02
 	ld hl,09000h		;36a6	21 00 90 	! . . 
 	ld (ix + 4),l		;36a9	dd 75 04 	. u . 
 	ld (ix + 5),h		;36ac	dd 74 05 	. t . 
@@ -8271,7 +8273,7 @@ sub_3746h:
 	ld de,l0300h		;3749	11 00 03 	. . . 
 	sbc hl,de		;374c	ed 52 	. R 
 	ret nc			;374e	d0 	. 
-	ld e,(ix + 2)		;374f	dd 5e 02 	. ^ . 
+	ld e,(ix + MAGICAL_ELEMENT_DISTANCE_L_IDX)		;374f	dd 5e 02
 	ld d,(ix + 3)		;3752	dd 56 03 	. V . 
 	ld hl,0ff80h		;3755	21 80 ff 	! . . 
 	add hl,de			;3758	19 	. 
