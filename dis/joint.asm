@@ -8276,8 +8276,8 @@ sub_3732h:
 	ld l,(ix + MAGICAL_ELEMENT_HEIGHT_L_IDX)		;3734	dd 6e 04
 	ld h,(ix + MAGICAL_ELEMENT_HEIGHT_H_IDX)		;3737	dd 66 05
 	sbc hl,de		;373a	ed 52 	. R 
-	ld (ix + 4),l		;373c	dd 75 04 	. u . 
-	ld (ix + 5),h		;373f	dd 74 05 	. t . 
+	ld (ix + MAGICAL_ELEMENT_HEIGHT_L_IDX),l		;373c	dd 75 04 	. u . 
+	ld (ix + MAGICAL_ELEMENT_HEIGHT_H_IDX),h		;373f	dd 74 05 	. t . 
 	pop de			;3742	d1 	. 
 	sbc hl,de		;3743	ed 52 	. R 
 	ret			;3745	c9 	. 
