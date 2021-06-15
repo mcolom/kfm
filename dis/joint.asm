@@ -134,6 +134,10 @@ MAGICAL_ELEMENT_HEIGHT_H_IDX: EQU 5 ; E387
 MAGICAL_ELEMENT_CURRENT_FRAME_IDX: EQU 6 ; E388
 MAGICAL_ELEMENT_FRAME_COUNTER_IDX: EQU 7 ; E389
 
+MAGICAL_ELEMENT_FALL_SPEED_L_IDX: EQU 10 ; E38C
+MAGICAL_ELEMENT_FALL_SPEED_H_IDX: EQU 11 ; E38D
+
+
 ; Ticks left before the magician's fireballs turns into a bat
 MAGICIAN_FIREBALL_COUNTER_IDX: EQU 8 ; 0xE38A
 
@@ -7488,8 +7492,8 @@ l306eh:
 l307bh:
 	ld (ix + 14),l		;307b	dd 75 0e 	. u . 
 	ld (ix + 15),h		;307e	dd 74 0f 	. t . 
-	ld e,(ix + 10)		;3081	dd 5e 0a 	. ^ . 
-	ld d,(ix + 11)		;3084	dd 56 0b 	. V . 
+	ld e,(ix + MAGICAL_ELEMENT_FALL_SPEED_L_IDX)	;3081	dd 5e 0a
+	ld d,(ix + MAGICAL_ELEMENT_FALL_SPEED_H_IDX)	;3084	dd 56 0b
 	add hl,de			;3087	19 	. 
 	ld (ix + MAGICAL_ELEMENT_DISTANCE_L_IDX),l		;3088	dd 75 02
 	ld (ix + MAGICAL_ELEMENT_DISTANCE_H_IDX),h		;308b	dd 74 03
@@ -7528,8 +7532,8 @@ l30cdh:
 	ld l,(ix + MAGICAL_ELEMENT_DISTANCE_L_IDX)		;30da	dd 6e 02
 	ld h,(ix + MAGICAL_ELEMENT_DISTANCE_H_IDX)		;30dd	dd 66 03
 	sbc hl,de		;30e0	ed 52 	. R 
-	ld (ix + 10),l		;30e2	dd 75 0a 	. u . 
-	ld (ix + 11),h		;30e5	dd 74 0b 	. t . 
+	ld (ix + MAGICAL_ELEMENT_FALL_SPEED_L_IDX),l		;30e2	dd 75 0a
+	ld (ix + MAGICAL_ELEMENT_FALL_SPEED_H_IDX),h		;30e5	dd 74 0b
 	ld (ix + 14),e		;30e8	dd 73 0e 	. s . 
 	ld (ix + 15),d		;30eb	dd 72 0f 	. r . 
 	ld de,l0100h		;30ee	11 00 01 	. . . 
@@ -8205,8 +8209,8 @@ l3685h:
 	ld (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX), 3	;36af	dd 36 07 03
 	ld hl,0000ah		;36b3	21 0a 00 	! . . 
 	ld de,l007dh		;36b6	11 7d 00 	. } . 
-	ld (ix + 10),l		;36b9	dd 75 0a 	. u . 
-	ld (ix + 11),h		;36bc	dd 74 0b 	. t . 
+	ld (ix + MAGICAL_ELEMENT_FALL_SPEED_L_IDX),l		;36b9	dd 75 0a
+	ld (ix + MAGICAL_ELEMENT_FALL_SPEED_H_IDX),h		;36bc	dd 74 0b
 	ld hl,(0e36ch)		;36bf	2a 6c e3 	* l . 
 	add hl,de			;36c2	19 	. 
 	ld (ix + 12),l		;36c3	dd 75 0c 	. u . 
@@ -8258,8 +8262,8 @@ l3713h:
 	ret			;371c	c9 	. 
 sub_371dh:
 	push hl			;371d	e5 	. 
-	ld l,(ix + 10)		;371e	dd 6e 0a 	. n . 
-	ld h,(ix + 11)		;3721	dd 66 0b 	. f . 
+	ld l,(ix + MAGICAL_ELEMENT_FALL_SPEED_L_IDX)	;371e	dd 6e 0a
+	ld h,(ix + MAGICAL_ELEMENT_FALL_SPEED_H_IDX)	;3721	dd 66 0b
 	ld e,(ix + 12)		;3724	dd 5e 0c 	. ^ . 
 	ld d,(ix + 13)		;3727	dd 56 0d 	. V . 
 	add hl,de			;372a	19 	. 
