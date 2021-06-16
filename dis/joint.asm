@@ -144,7 +144,8 @@ MAGICAL_ELEMENT_FALL_ACCELERATION_H_IDX: EQU 11 ; E38D
 MAGICAL_ELEMENT_FALL_SPEED_L_IDX: EQU 12 ; E38E
 MAGICAL_ELEMENT_FALL_SPEED_H_IDX: EQU 13 ; E38F
 
-
+ME_INITIAL_FALL_SPEED: EQU 0xE36C
+ME_INITIAL_FALL_SPEED_COPY: EQU 0xE80C
 
 ME_STATE_POT_FALLS: EQU 0
 ME_STATE_POT_TOUCHES_FLOOR: EQU 3
@@ -156,6 +157,8 @@ ME_STATE_DRAGON_SMOKE_APPEARS: EQU 7
 ME_STATE_DRAGON_OUT_AND_WILL_FIRE: EQU 8
 ME_STATE_DRAGON_DISAPPEARS: EQU 9
 ME_STATE_CONFETTI_MOVES_DIAGONAL: EQU 10
+
+
 
 ; Enemy's look at
 ; 0x0: enemy not visible yet
@@ -3917,7 +3920,7 @@ l15b6h:
 	call sub_163eh		;15b6	cd 3e 16 	. > . 
 	ret c			;15b9	d8 	. 
 	ld de,0ff00h		;15ba	11 00 ff 	. . . 
-	ld hl,(0e80ch)		;15bd	2a 0c e8 	* . . 
+	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;15bd	2a 0c e8 	* . . 
 	add hl,de			;15c0	19 	. 
 	jp nc,l1b20h		;15c1	d2 20 1b 	.   . 
 	ret			;15c4	c9 	. 
@@ -4042,13 +4045,13 @@ l168ah:
 	call sub_1be7h		;16a6	cd e7 1b 	. . . 
 	call sub_1828h		;16a9	cd 28 18 	. ( . 
 	ret c			;16ac	d8 	. 
-	ld hl,(0e80ch)		;16ad	2a 0c e8 	* . . 
+	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;16ad	2a 0c e8 	* . . 
 	ld de,0e100h		;16b0	11 00 e1 	. . . 
 	add hl,de			;16b3	19 	. 
 	jp c,sub_1b7ah		;16b4	da 7a 1b 	. z . 
 	bit 0,(ix + 11)		;16b7	dd cb 0b 46 	. . . F 
 	jr nz,l16e3h		;16bb	20 26 	  & 
-	ld hl,(0e80ch)		;16bd	2a 0c e8 	* . . 
+	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;16bd	2a 0c e8 	* . . 
 	ld de,0fa00h		;16c0	11 00 fa 	. . . 
 	add hl,de			;16c3	19 	. 
 	jr c,l16e3h		;16c4	38 1d 	8 . 
@@ -4344,7 +4347,7 @@ l18d3h:
 	ret			;18d5	c9 	. 
 l18d6h:
 	ld de,0ff00h		;18d6	11 00 ff 	. . . 
-	ld hl,(0e80ch)		;18d9	2a 0c e8 	* . . 
+	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;18d9	2a 0c e8 	* . . 
 	add hl,de			;18dc	19 	. 
 	jr c,l18eah		;18dd	38 0b 	8 . 
 	ld a,005h		;18df	3e 05 	> . 
@@ -4417,7 +4420,7 @@ l194fh:
 	ld (ix + 7),002h		;1958	dd 36 07 02 	. 6 . . 
 	ret			;195c	c9 	. 
 l195dh:
-	ld hl,(0e80ch)		;195d	2a 0c e8 	* . . 
+	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;195d	2a 0c e8 	* . . 
 	ld de,0f5a0h		;1960	11 a0 f5 	. . . 
 	add hl,de			;1963	19 	. 
 	ld hl,l005ah		;1964	21 5a 00 	! Z . 
@@ -4453,7 +4456,7 @@ l1982h:
 	jr z,l19f3h		;19ac	28 45 	( E 
 l19aeh:
 	ld de,0f600h		;19ae	11 00 f6 	. . . 
-	ld hl,(0e80ch)		;19b1	2a 0c e8 	* . . 
+	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;19b1	2a 0c e8 	* . . 
 	add hl,de			;19b4	19 	. 
 	jp c,l1a3ch		;19b5	da 3c 1a 	. < . 
 	call sub_1ab8h		;19b8	cd b8 1a 	. . . 
@@ -4474,7 +4477,7 @@ l19bdh:
 	jr z,l19f3h		;19d5	28 1c 	( . 
 l19d7h:
 	ld de,0f700h		;19d7	11 00 f7 	. . . 
-	ld hl,(0e80ch)		;19da	2a 0c e8 	* . . 
+	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;19da	2a 0c e8 	* . . 
 	add hl,de			;19dd	19 	. 
 	jr nc,l19eah		;19de	30 0a 	0 . 
 	ld de,0fe00h		;19e0	11 00 fe 	. . . 
@@ -4551,7 +4554,7 @@ l1a70h:
 	scf			;1a70	37 	7 
 	ret			;1a71	c9 	. 
 l1a72h:
-	ld hl,(0e80ch)		;1a72	2a 0c e8 	* . . 
+	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;1a72	2a 0c e8 	* . . 
 	ld de,0e400h		;1a75	11 00 e4 	. . . 
 	add hl,de			;1a78	19 	. 
 	ret c			;1a79	d8 	. 
@@ -4794,7 +4797,7 @@ l1c08h:
 	ex de,hl			;1c1e	eb 	. 
 	sbc hl,de		;1c1f	ed 52 	. R 
 l1c21h:
-	ld (0e80ch),hl		;1c21	22 0c e8 	" . . 
+	ld (ME_INITIAL_FALL_SPEED_COPY),hl		;1c21	22 0c e8 	" . . 
 	and a			;1c24	a7 	. 
 	ret			;1c25	c9 	. 
 sub_1c26h:
@@ -5246,7 +5249,7 @@ l1f50h:
 	cp 002h		;1f78	fe 02 	. . 
 	ret nz			;1f7a	c0 	. 
 	call sub_1dd4h		;1f7b	cd d4 1d 	. . . 
-	ld de,(0e80ch)		;1f7e	ed 5b 0c e8 	. [ . . 
+	ld de,(ME_INITIAL_FALL_SPEED_COPY)		;1f7e	ed 5b 0c e8 	. [ . . 
 	ld hl,0fa60h		;1f82	21 60 fa 	! ` . 
 	add hl,de			;1f85	19 	. 
 	ret c			;1f86	d8 	. 
@@ -5392,7 +5395,7 @@ l20adh:
 	ld a,(ix + 1)		;20ae	dd 7e 01 	. ~ . 
 	cp 001h		;20b1	fe 01 	. . 
 	jr z,l20d2h		;20b3	28 1d 	( . 
-	ld hl,(0e80ch)		;20b5	2a 0c e8 	* . . 
+	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;20b5	2a 0c e8 	* . . 
 	add hl,de			;20b8	19 	. 
 	ld hl,0e701h		;20b9	21 01 e7 	! . . 
 	bit 6,(ix + 0)		;20bc	dd cb 00 76 	. . . v 
@@ -5420,7 +5423,7 @@ l20d9h:
 sub_20e3h:
 	call sub_2109h		;20e3	cd 09 21 	. . ! 
 	ret nc			;20e6	d0 	. 
-	ld hl,(0e80ch)		;20e7	2a 0c e8 	* . . 
+	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;20e7	2a 0c e8 	* . . 
 	ld de,0fe60h		;20ea	11 60 fe 	. ` . 
 	add hl,de			;20ed	19 	. 
 	ret nc			;20ee	d0 	. 
@@ -5755,7 +5758,7 @@ l23b0h:
 	ld (ENEMY_FRAME_COUNTER),a		;23b0	32 df e2 	2 . . 
 	ret			;23b3	c9 	. 
 l23b4h:
-	ld hl,(0e80ch)		;23b4	2a 0c e8 	* . . 
+	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;23b4	2a 0c e8 	* . . 
 	ld de,0f500h		;23b7	11 00 f5 	. . . 
 	add hl,de			;23ba	19 	. 
 	jp c,l22bah		;23bb	da ba 22 	. . " 
@@ -5871,7 +5874,7 @@ l249fh:
 sub_24b0h:
 	call sub_2109h		;24b0	cd 09 21 	. . ! 
 	ret nc			;24b3	d0 	. 
-	ld hl,(0e80ch)		;24b4	2a 0c e8 	* . . 
+	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;24b4	2a 0c e8 	* . . 
 	ld de,0fe60h		;24b7	11 60 fe 	. ` . 
 	add hl,de			;24ba	19 	. 
 	ret nc			;24bb	d0 	. 
@@ -6004,7 +6007,7 @@ l25a3h:
 	ld (ix + 7),00bh		;25aa	dd 36 07 0b 	. 6 . . 
 	ret			;25ae	c9 	. 
 sub_25afh:
-	ld hl,(0e80ch)		;25af	2a 0c e8 	* . . 
+	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;25af	2a 0c e8 	* . . 
 	ld de,0f380h		;25b2	11 80 f3 	. . . 
 	add hl,de			;25b5	19 	. 
 	ret nc			;25b6	d0 	. 
@@ -6313,7 +6316,7 @@ sub_2887h:
 	cp 00ah		;2890	fe 0a 	. . 
 	ret			;2892	c9 	. 
 l2893h:
-	ld hl,(0e80ch)		;2893	2a 0c e8 	* . . 
+	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;2893	2a 0c e8 	* . . 
 	ld de,0e800h		;2896	11 00 e8 	. . . 
 	add hl,de			;2899	19 	. 
 	ld hl,0e197h		;289a	21 97 e1 	! . . 
@@ -6336,7 +6339,7 @@ l28b1h:
 sub_28bah:
 	call sub_1ae7h		;28ba	cd e7 1a 	. . . 
 	ret nc			;28bd	d0 	. 
-	ld hl,(0e80ch)		;28be	2a 0c e8 	* . . 
+	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;28be	2a 0c e8 	* . . 
 	ld de,0fe60h		;28c1	11 60 fe 	. ` . 
 	add hl,de			;28c4	19 	. 
 	ret nc			;28c5	d0 	. 
@@ -6428,7 +6431,7 @@ l2962h:
 	ld (ix + 6),a		;2962	dd 77 06 	. w . 
 l2965h:
 	call sub_2ba0h		;2965	cd a0 2b 	. . + 
-	ld hl,(0e80ch)		;2968	2a 0c e8 	* . . 
+	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;2968	2a 0c e8 	* . . 
 	ld de,0fb80h		;296b	11 80 fb 	. . . 
 	add hl,de			;296e	19 	. 
 	ret c			;296f	d8 	. 
@@ -6437,7 +6440,7 @@ l2965h:
 	jp nz,l2ae9h		;2974	c2 e9 2a 	. . * 
 l2977h:
 	ld (ix + 6),004h		;2977	dd 36 06 04 	. 6 . . 
-	ld hl,(0e80ch)		;297b	2a 0c e8 	* . . 
+	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;297b	2a 0c e8 	* . . 
 	ld de,0fd00h		;297e	11 00 fd 	. . . 
 	add hl,de			;2981	19 	. 
 	jr nc,l29a0h		;2982	30 1c 	0 . 
@@ -6454,7 +6457,7 @@ l2977h:
 l29a0h:
 	call sub_2ce8h		;29a0	cd e8 2c 	. . , 
 l29a3h:
-	ld hl,(0e80ch)		;29a3	2a 0c e8 	* . . 
+	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;29a3	2a 0c e8 	* . . 
 	ld de,0fc80h		;29a6	11 80 fc 	. . . 
 	add hl,de			;29a9	19 	. 
 	jp c,l2a55h		;29aa	da 55 2a 	. U * 
@@ -6583,7 +6586,7 @@ l2a87h:
 	ld a,(ix + 8)		;2a98	dd 7e 08 	. ~ . 
 	and a			;2a9b	a7 	. 
 	jp z,l2977h		;2a9c	ca 77 29 	. w ) 
-	ld hl,(0e80ch)		;2a9f	2a 0c e8 	* . . 
+	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;2a9f	2a 0c e8 	* . . 
 	ld de,0fb00h		;2aa2	11 00 fb 	. . . 
 	add hl,de			;2aa5	19 	. 
 	jp c,l2937h		;2aa6	da 37 29 	. 7 ) 
@@ -6857,7 +6860,7 @@ sub_2c78h:
 	and 0fch		;2c7b	e6 fc 	. . 
 	ret nz			;2c7d	c0 	. 
 sub_2c7eh:
-	ld hl,(0e80ch)		;2c7e	2a 0c e8 	* . . 
+	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;2c7e	2a 0c e8 	* . . 
 	ld de,0e800h		;2c81	11 00 e8 	. . . 
 	add hl,de			;2c84	19 	. 
 	ld hl,0e198h		;2c85	21 98 e1 	! . . 
@@ -6891,7 +6894,7 @@ l2cb3h:
 l2cb6h:
 	jp sub_2ee2h		;2cb6	c3 e2 2e 	. . . 
 sub_2cb9h:
-	ld hl,(0e80ch)		;2cb9	2a 0c e8 	* . . 
+	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;2cb9	2a 0c e8 	* . . 
 	ld de,0f760h		;2cbc	11 60 f7 	. ` . 
 	add hl,de			;2cbf	19 	. 
 	ld hl,0e700h		;2cc0	21 00 e7 	! . . 
@@ -6936,7 +6939,7 @@ l2cf9h:
 	ret			;2d00	c9 	. 
 sub_2d01h:
 	push hl			;2d01	e5 	. 
-	ld hl,(0e80ch)		;2d02	2a 0c e8 	* . . 
+	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;2d02	2a 0c e8 	* . . 
 	ld de,0ee00h		;2d05	11 00 ee 	. . . 
 	add hl,de			;2d08	19 	. 
 	pop hl			;2d09	e1 	. 
@@ -7599,7 +7602,7 @@ l3174h:
 	ld hl,05000h		;3174	21 00 50 	! . P 
 	call sub_3732h		;3177	cd 32 37 	. 2 7 
 	jp c,l3713h		;317a	da 13 37 	. . 7 
-	ld hl,(0e80ch)		;317d	2a 0c e8 	* . . 
+	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;317d	2a 0c e8 	* . . 
 	ld de,l0300h		;3180	11 00 03 	. . . 
 	sbc hl,de		;3183	ed 52 	. R 
 	jr nc,l31aah		;3185	30 23 	0 # 
@@ -7938,7 +7941,7 @@ l3474h:
 	jr l348eh		;3482	18 0a 	. . 
 	ld de,(0e376h)		;3484	ed 5b 76 e3 	. [ v . 
 	call sub_1c7ah		;3488	cd 7a 1c 	. z . 
-	ld hl,(0e36ch)		;348b	2a 6c e3 	* l . 
+	ld hl,(ME_INITIAL_FALL_SPEED)		;348b	2a 6c e3 	* l . 
 l348eh:
 	ld (0e800h),hl		;348e	22 00 e8 	" . . 
 	call l1be2h		;3491	cd e2 1b 	. . . 
@@ -8217,7 +8220,7 @@ l3685h:
 	ld (ix + MAGICAL_ELEMENT_FALL_ACCELERATION_L_IDX),l		;36b9	dd 75 0a
 	ld (ix + MAGICAL_ELEMENT_FALL_ACCELERATION_H_IDX),h		;36bc	dd 74 0b
 
-	ld hl,(0e36ch)		;36bf	2a 6c e3 	* l . 
+	ld hl,(ME_INITIAL_FALL_SPEED)		;36bf	2a 6c e3 	* l . 
 	add hl,de			;36c2	19 	. 
 	ld (ix + MAGICAL_ELEMENT_FALL_SPEED_L_IDX),l		;36c3	dd 75 0c 	. u . 
 	ld (ix + MAGICAL_ELEMENT_FALL_SPEED_H_IDX),h		;36c6	dd 74 0d 	. t . 
@@ -8237,7 +8240,7 @@ sub_36cah:
 l36e4h:
 	jp sub_2ee2h		;36e4	c3 e2 2e 	. . . 
 l36e7h:
-	ld hl,(0e80ch)		;36e7	2a 0c e8 	* . . 
+	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;36e7	2a 0c e8 	* . . 
 	ld de,0e400h		;36ea	11 00 e4 	. . . 
 	add hl,de			;36ed	19 	. 
 	ret c			;36ee	d8 	. 
@@ -8290,7 +8293,7 @@ sub_3732h:
 	sbc hl,de		;3743	ed 52 	. R 
 	ret			;3745	c9 	. 
 sub_3746h:
-	ld hl,(0e80ch)		;3746	2a 0c e8 	* . . 
+	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;3746	2a 0c e8 	* . . 
 	ld de,l0300h		;3749	11 00 03 	. . . 
 	sbc hl,de		;374c	ed 52 	. R 
 	ret nc			;374e	d0 	. 
@@ -8326,7 +8329,7 @@ sub_3773h:
 	sbc hl,de		;378f	ed 52 	. R 
 	ret			;3791	c9 	. 
 sub_3792h:
-	ld hl,(0e80ch)		;3792	2a 0c e8 	* . . 
+	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;3792	2a 0c e8 	* . . 
 	ld de,l0300h		;3795	11 00 03 	. . . 
 	sbc hl,de		;3798	ed 52 	. R 
 	ret nc			;379a	d0 	. 
