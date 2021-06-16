@@ -7456,7 +7456,7 @@ l2ff7h:
 	dec (hl)			;3018	35 	5 
 	call l1be2h		;3019	cd e2 1b 	. . . 
 	ld hl,07000h		;301c	21 00 70 	! . p 
-	call sub_371dh		;301f	cd 1d 37 	. . 7 
+	call CHANGE_HEIGHT_WITH_SPEED_AND_ACCELERATION		;301f	cd 1d 37 	. . 7 
 	jp c,l30cdh		;3022	da cd 30 	. . 0 
 l3025h:
 	call sub_3773h		;3025	cd 73 37 	. s 7 
@@ -7600,7 +7600,7 @@ l316dh:
 	ld de,(0e374h)		;3170	ed 5b 74 e3 	. [ t . 
 l3174h:
 	ld hl,05000h		;3174	21 00 50 	! . P 
-	call sub_3732h		;3177	cd 32 37 	. 2 7 
+	call CHANGE_HEIGHT_WITH_SPEED		;3177	cd 32 37 	. 2 7 
 	jp c,l3713h		;317a	da 13 37 	. . 7 
 	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;317d	2a 0c e8 	* . . 
 	ld de,l0300h		;3180	11 00 03 	. . . 
@@ -7646,7 +7646,7 @@ l31c0h:
 	ld a,091h		;31e0	3e 91 	> . 
 	jp c,l3327h		;31e2	da 27 33 	. ' 3 
 	ld hl,05000h		;31e5	21 00 50 	! . P 
-	call sub_371dh		;31e8	cd 1d 37 	. . 7 
+	call CHANGE_HEIGHT_WITH_SPEED_AND_ACCELERATION		;31e8	cd 1d 37 	. . 7 
 	jr c,l3213h		;31eb	38 26 	8 & 
 	ret			;31ed	c9 	. 
 	call l1be2h		;31ee	cd e2 1b 	. . . 
@@ -7835,7 +7835,7 @@ sub_3353h:
 	ld a,093h		;338b	3e 93 	> . 
 	jr c,l3327h		;338d	38 98 	8 . 
 	ld hl,05000h		;338f	21 00 50 	! . P 
-	call sub_371dh		;3392	cd 1d 37 	. . 7 
+	call CHANGE_HEIGHT_WITH_SPEED_AND_ACCELERATION		;3392	cd 1d 37 	. . 7 
 	jr c,l33c2h		;3395	38 2b 	8 + 
 	ret			;3397	c9 	. 
 	call l1be2h		;3398	cd e2 1b 	. . . 
@@ -7952,7 +7952,7 @@ l348eh:
 	jp c,l3327h		;349f	da 27 33 	. ' 3 
 	ld de,(0e800h)		;34a2	ed 5b 00 e8 	. [ . . 
 	ld hl,05000h		;34a6	21 00 50 	! . P 
-	call sub_3732h		;34a9	cd 32 37 	. 2 7 
+	call CHANGE_HEIGHT_WITH_SPEED		;34a9	cd 32 37 	. 2 7 
 	jr c,l34c4h		;34ac	38 16 	8 . 
 	dec (ix + 7)		;34ae	dd 35 07 	. 5 . 
 	ret z			;34b1	c8 	. 
@@ -8269,19 +8269,21 @@ l3713h:
 	dec (hl)			;371a	35 	5 
 	pop af			;371b	f1 	. 
 	ret			;371c	c9 	. 
-sub_371dh:
-    ; V12 += SPEED
+
+CHANGE_HEIGHT_WITH_SPEED_AND_ACCELERATION:
+    ; SPEED += ACCELERATION
 	push hl			;371d	e5 	. 
 	ld l,(ix + MAGICAL_ELEMENT_FALL_ACCELERATION_L_IDX)	;371e	dd 6e 0a
 	ld h,(ix + MAGICAL_ELEMENT_FALL_ACCELERATION_H_IDX)	;3721	dd 66 0b
 	ld e,(ix + MAGICAL_ELEMENT_FALL_SPEED_L_IDX)		;3724	dd 5e 0c
 	ld d,(ix + MAGICAL_ELEMENT_FALL_SPEED_H_IDX)		;3727	dd 56 0d
-	add hl,de			;372a	19 	. 
+	add hl,de			                                ;372a	19
 	ld (ix + MAGICAL_ELEMENT_FALL_SPEED_L_IDX),l		;372b	dd 75 0c
 	ld (ix + MAGICAL_ELEMENT_FALL_SPEED_H_IDX),h		;372e	dd 74 0d
 	pop hl			;3731	e1 	. 
-sub_3732h:
-    ; HEIGHT -= DE
+    ;
+CHANGE_HEIGHT_WITH_SPEED:
+    ; HEIGHT -= DE (SPEED)
 	push hl			;3732	e5 	. 
 	and a			;3733	a7 	. 
 	ld l,(ix + MAGICAL_ELEMENT_HEIGHT_L_IDX)		;3734	dd 6e 04
@@ -8291,7 +8293,8 @@ sub_3732h:
 	ld (ix + MAGICAL_ELEMENT_HEIGHT_H_IDX),h		;373f	dd 74 05 	. t . 
 	pop de			;3742	d1 	. 
 	sbc hl,de		;3743	ed 52 	. R 
-	ret			;3745	c9 	. 
+	ret			;3745	c9
+
 sub_3746h:
 	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;3746	2a 0c e8 	* . . 
 	ld de,l0300h		;3749	11 00 03 	. . . 
