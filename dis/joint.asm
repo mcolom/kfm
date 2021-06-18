@@ -7752,16 +7752,16 @@ l32a2h:
 l32a8h:
 	ld a,086h		;32a8	3e 86 	> . 
 	call sub_0dfeh		;32aa	cd fe 0d 	. . . 
-	ld l,(ix + 2)		;32ad	dd 6e 02 	. n . 
-	ld h,(ix + 3)		;32b0	dd 66 03 	. f . 
+	ld l,(ix + MAGICAL_ELEMENT_DISTANCE_L_IDX)	;32ad	dd 6e 02
+	ld h,(ix + MAGICAL_ELEMENT_DISTANCE_H_IDX)	;32b0	dd 66 03
 	ld de,l00dch		;32b3	11 dc 00 	. . . 
 	ld a,088h		;32b6	3e 88 	> . 
 	call ADD_POINTS		;32b8	cd 60 2f 	. ` / 
-	ld (ix + 6),016h		;32bb	dd 36 06 16 	. 6 . . 
+	ld (ix + MAGICAL_ELEMENT_CURRENT_FRAME_IDX), 22	;32bb	dd 36 06 16
 l32bfh:
 	ld (ix + MAGICAL_ELEMENT_STATE_IDX), ME_STATE_DRAGON_DISAPPEARS	;32bf	dd 36 01 09
 	ld (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX), 7	;32c3	dd 36 07 07
-	ret			;32c7	c9 	. 
+	ret			;32c7	c9 QUESTION: Why a RET here?
 	call l1be2h		;32c8	cd e2 1b 	. . . 
 	dec (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX)	;32cb	dd 35 07
 	ret nz			;32ce	c0 	. 
