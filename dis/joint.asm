@@ -8354,16 +8354,16 @@ sub_3792h:
 	ld de,l0300h		;3795	11 00 03 	. . . 
 	sbc hl,de		;3798	ed 52 	. R 
 	ret nc			;379a	d0 	. 
-	ld e,(ix + 2)		;379b	dd 5e 02 	. ^ . 
-	ld d,(ix + 3)		;379e	dd 56 03 	. V . 
+	ld e,(ix + MAGICAL_ELEMENT_DISTANCE_L_IDX)		;379b	dd 5e 02
+	ld d,(ix + MAGICAL_ELEMENT_DISTANCE_H_IDX)		;379e	dd 56 03
 	ld hl,0ffc0h		;37a1	21 c0 ff 	! . . 
 	add hl,de			;37a4	19 	. 
 	ld (0e80fh),hl		;37a5	22 0f e8 	" . . 
 	ld hl,l0040h		;37a8	21 40 00 	! @ . 
 	add hl,de			;37ab	19 	. 
 	ld (0e811h),hl		;37ac	22 11 e8 	" . . 
-	ld l,(ix + 4)		;37af	dd 6e 04 	. n . 
-	ld h,(ix + 5)		;37b2	dd 66 05 	. f . 
+	ld l,(ix + MAGICAL_ELEMENT_HEIGHT_L_IDX)	;37af	dd 6e 04
+	ld h,(ix + MAGICAL_ELEMENT_HEIGHT_H_IDX)	;37b2	dd 66 05
 	ld de,l0080h		;37b5	11 80 00 	. . . 
 	add hl,de			;37b8	19 	. 
 	ld de,4				;37b9	11 04 00 	. . . 
@@ -8373,14 +8373,14 @@ sub_37bfh:
 	call sub_1220h		;37c2	cd 20 12 	.   . 
 	ret nc			;37c5	d0 	. 
 	and a			;37c6	a7 	. 
-	ld l,(ix + 4)		;37c7	dd 6e 04 	. n . 
-	ld h,(ix + 5)		;37ca	dd 66 05 	. f . 
+	ld l,(ix + MAGICAL_ELEMENT_HEIGHT_L_IDX)		;37c7	dd 6e 04
+	ld h,(ix + MAGICAL_ELEMENT_HEIGHT_H_IDX)		;37ca	dd 66 05
 	sbc hl,de		;37cd	ed 52 	. R 
 	ret nc			;37cf	d0 	. 
 	ld hl,0fb80h		;37d0	21 80 fb 	! . . 
 	add hl,de			;37d3	19 	. 
-	ld e,(ix + 4)		;37d4	dd 5e 04 	. ^ . 
-	ld d,(ix + 5)		;37d7	dd 56 05 	. V . 
+	ld e,(ix + MAGICAL_ELEMENT_HEIGHT_L_IDX)		;37d4	dd 5e 04
+	ld d,(ix + MAGICAL_ELEMENT_HEIGHT_H_IDX)		;37d7	dd 56 05
 	and a			;37da	a7 	. 
 	sbc hl,de		;37db	ed 52 	. R 
 	ret			;37dd	c9 	. 
