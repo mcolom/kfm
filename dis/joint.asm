@@ -103,7 +103,7 @@ TBL_E2A2: EQU 0xE2A2
 ;TBL_E2D8: EQU 0xE2D8
 TBL_E2FB: EQU 0xE2FB
 TBL_E31B: EQU 0xE31B
-TBL_E382: EQU 0xE382
+TBL_MAGICAL_ELEMENTS: EQU 0xE382
 
 ; Seem related to the moths at 4th floor
 TBL_E520: EQU 0xE520
@@ -7415,7 +7415,7 @@ sub_2fc7h:
 	ld a,(NUM_MAGICAL_ELEMENTS)	    ;2fc7	3a 81 e3
 	and a			;2fca	a7
 	ret z			;2fcb	c8
-	ld ix,TBL_E382	;2fcc	dd 21 82 e3
+	ld ix,TBL_MAGICAL_ELEMENTS	;2fcc	dd 21 82 e3
     
     ; Iterate 16 elements
 	ld b, 16		;2fd0	06 10
@@ -7568,7 +7568,7 @@ l3106h:
 	call sub_333ah		;3106	cd 3a 33 	. : 3 
 	ld a,086h		;3109	3e 86 	> . 
 	call sub_0dfeh		;310b	cd fe 0d 	. . . 
-	ld iy,TBL_E382		;310e	fd 21 82 e3 	. ! . . 
+	ld iy,TBL_MAGICAL_ELEMENTS		;310e	fd 21 82 e3 	. ! . . 
 	ld b,010h		;3112	06 10 	. . 
 	ld c,00ah		;3114	0e 0a 	. . 
 	ld l,(ix + MAGICAL_ELEMENT_DISTANCE_L_IDX)		;3116	dd 6e 02
