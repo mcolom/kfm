@@ -138,15 +138,22 @@ MAGICAL_ELEMENT_FRAME_COUNTER_IDX: EQU 7 ; E389
 ; Ticks before the confetti ball explodes.
 FIREBALL_TIMEOUT_IDX: EQU 8 ; 0xE38A
 
+; (IDX 9 unused)
+
 MAGICAL_ELEMENT_FALL_ACCELERATION_L_IDX: EQU 10 ; E38C
 MAGICAL_ELEMENT_FALL_ACCELERATION_H_IDX: EQU 11 ; E38D
 
 MAGICAL_ELEMENT_FALL_SPEED_L_IDX: EQU 12 ; E38E
 MAGICAL_ELEMENT_FALL_SPEED_H_IDX: EQU 13 ; E38F
 
+
+MAGICAL_ELEMENT_HOR_OFFSET_L_IDX: EQU 14; E390
+MAGICAL_ELEMENT_HOR_OFFSET_H_IDX: EQU 15; E391
+
 ; This seems to control the falling height of the confetti ball
 MAGICAL_ELEMENT_HEIGHT_OFFSET_L_IDX: EQU 16; E392
 MAGICAL_ELEMENT_HEIGHT_OFFSET_H_IDX: EQU 17; E393
+
 
 ME_INITIAL_FALL_SPEED: EQU 0xE36C
 ME_INITIAL_FALL_SPEED_COPY: EQU 0xE80C
@@ -7483,8 +7490,8 @@ l3049h:
 	call l1be2h		;3049	cd e2 1b 	. . . 
 	dec (ix + FIREBALL_TIMEOUT_IDX)		;304c	dd 35 08
 	jp z,l3106h		;304f	ca 06 31 	. . 1 
-	ld l,(ix + 14)		;3052	dd 6e 0e 	. n . 
-	ld h,(ix + 15)		;3055	dd 66 0f 	. f . 
+	ld l,(ix + MAGICAL_ELEMENT_HOR_OFFSET_L_IDX)		;3052	dd 6e 0e
+	ld h,(ix + MAGICAL_ELEMENT_HOR_OFFSET_H_IDX)		;3055	dd 66 0f
 	ld de,l0020h		;3058	11 20 00 	.   . 
 	bit 2,(ix + 0)		;305b	dd cb 00 56 	. . . V 
 	jr z,l306eh		;305f	28 0d 	( . 
@@ -7502,8 +7509,8 @@ l306eh:
 	jr nc,l307bh		;3075	30 04 	0 . 
 	set 2,(ix + 0)		;3077	dd cb 00 d6 	. . . . 
 l307bh:
-	ld (ix + 14),l		;307b	dd 75 0e 	. u . 
-	ld (ix + 15),h		;307e	dd 74 0f 	. t . 
+	ld (ix + MAGICAL_ELEMENT_HOR_OFFSET_L_IDX),l		;307b	dd 75 0e
+	ld (ix + MAGICAL_ELEMENT_HOR_OFFSET_H_IDX),h		;307e	dd 74 0f 	. t . 
 	ld e,(ix + MAGICAL_ELEMENT_FALL_ACCELERATION_L_IDX)	;3081	dd 5e 0a
 	ld d,(ix + MAGICAL_ELEMENT_FALL_ACCELERATION_H_IDX)	;3084	dd 56 0b
 	add hl,de			;3087	19 	. 
@@ -7546,8 +7553,8 @@ l30cdh:
 	sbc hl,de		;30e0	ed 52 	. R 
 	ld (ix + MAGICAL_ELEMENT_FALL_ACCELERATION_L_IDX),l		;30e2	dd 75 0a
 	ld (ix + MAGICAL_ELEMENT_FALL_ACCELERATION_H_IDX),h		;30e5	dd 74 0b
-	ld (ix + 14),e		;30e8	dd 73 0e
-	ld (ix + 15),d		;30eb	dd 72 0f
+	ld (ix + MAGICAL_ELEMENT_HOR_OFFSET_L_IDX),e		;30e8	dd 73 0e
+	ld (ix + MAGICAL_ELEMENT_HOR_OFFSET_H_IDX),d		;30eb	dd 72 0f
 	ld de,l0100h		;30ee	11 00 01
 	ld l,(ix + MAGICAL_ELEMENT_HEIGHT_L_IDX)		;30f1	dd 6e 04
 	ld h,(ix + MAGICAL_ELEMENT_HEIGHT_H_IDX)		;30f4	dd 66 05
@@ -7756,7 +7763,7 @@ l32bfh:
 	ld (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX), 7	;32d5	dd 36 07 07
 	cp 00ch		;32d9	fe 0c 	. . 
 	ret nz			;32db	c0 	. 
-	ld a,(ix + 14)		;32dc	dd 7e 0e 	. ~ . 
+	ld a,(ix + MAGICAL_ELEMENT_HOR_OFFSET_L_IDX)		;32dc	dd 7e 0e 	. ~ . 
 	and a			;32df	a7 	. 
 	call m,sub_3cbah		;32e0	fc ba 3c 	. . < 
 	jp l3713h		;32e3	c3 13 37 	. . 7 
@@ -7808,7 +7815,7 @@ l3327h:
 sub_333ah:
 	ld b,000h		;333a	06 00 	. . 
 l333ch:
-	ld (ix + 14),b		;333c	dd 70 0e 	. p . 
+	ld (ix + MAGICAL_ELEMENT_HOR_OFFSET_L_IDX),b		;333c	dd 70 0e 	. p . 
 	ld (ix + MAGICAL_ELEMENT_FRAME_COUNTER_IDX), 7	;333f	dd 36 07 07
 	ld (ix + MAGICAL_ELEMENT_STATE_IDX), ME_STATE_CONFETTI_EXPLODES    ;3343	dd 36 01 05
 	ld (ix + MAGICAL_ELEMENT_CURRENT_FRAME_IDX), 10	;3347	dd 36 06 0a
