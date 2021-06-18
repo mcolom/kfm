@@ -190,7 +190,10 @@ TBL_ENEMIES: EQU 0xE2D8
 ENEMY_LOOKAT_IDX: EQU 0
 
 
-ENEMY_STATE: EQU TBL_ENEMIES + 1 ; Enemy's state
+ENEMY_STATE_IDX: EQU 1
+ENEMY_STATE: EQU TBL_ENEMIES + ENEMY_STATE_IDX ; Enemy's state
+
+
 ENEMY_POS: EQU TBL_ENEMIES + 2 ; Position of the enemy
 ENEMY_FRAME: EQU TBL_ENEMIES + 6 ; Enemy's displayed frame
 ENEMY_FRAME_COUNTER: EQU TBL_ENEMIES + 7 ; Ticks the enemy stays in its current frame
@@ -4741,7 +4744,7 @@ l1b90h:
 	ld (ix + 6),a		;1b90	dd 77 06 	. w . 
 	ld hl,l1c55h		;1b93	21 55 1c 	! U . 
 l1b96h:
-	ld (ix + 1),001h		;1b96	dd 36 01 01 	. 6 . . 
+	ld (ix + ENEMY_STATE_IDX), 1 ;1b96	dd 36 01 01
 	ld a,(hl)			;1b9a	7e 	~ 
 	inc hl			;1b9b	23 	# 
 	ld (ix + 7),a		;1b9c	dd 77 07 	. w . 
@@ -5216,7 +5219,7 @@ l1f0bh:
 	push hl			;1f1f	e5 	. 
 	ld hl,l1f0bh		;1f20	21 0b 1f 	! . . 
 l1f23h:
-	ld a,(ix + 1)		;1f23	dd 7e 01 	. ~ . 
+	ld a,(ix + ENEMY_STATE_IDX)		;1f23	dd 7e 01
 l1f26h:
 	add a,a			;1f26	87 	. 
 	ld d,000h		;1f27	16 00 	. . 
@@ -5244,7 +5247,7 @@ l1f33h:
 	jp nc,l1fcfh		;1f4c	d2 cf 1f 	. . . 
 	ret			;1f4f	c9 	. 
 l1f50h:
-	ld (ix + 1),003h		;1f50	dd 36 01 03 	. 6 . . 
+	ld (ix + ENEMY_STATE_IDX), 3    ;1f50	dd 36 01 03
 	ld (ix + 6),000h		;1f54	dd 36 06 00 	. 6 . . 
 	ret			;1f58	c9 	. 
 	call l1be2h		;1f59	cd e2 1b 	. . . 
@@ -5367,7 +5370,7 @@ l2045h:
 	ld (ix-002h),01ch		;2059	dd 36 fe 1c 	. 6 . . 
 	and a			;205d	a7 	. 
 	jr nz,l2031h		;205e	20 d1 	  . 
-	inc (ix + 1)		;2060	dd 34 01 	. 4 . 
+	inc (ix + ENEMY_STATE_IDX)	;2060	dd 34 01
 	ret			;2063	c9 	. 
 	call sub_2d13h		;2064	cd 13 2d 	. . - 
 	call sub_20e3h		;2067	cd e3 20 	. .   
@@ -5383,12 +5386,12 @@ l2071h:
 	and a			;207e	a7 	. 
 	ret nz			;207f	c0 	. 
 l2080h:
-	ld (ix + 1),000h		;2080	dd 36 01 00 	. 6 . . 
+	ld (ix + ENEMY_STATE_IDX), 0 ;2080	dd 36 01 00
 	ret			;2084	c9 	. 
 l2085h:
 	ld (ix + 6),000h		;2085	dd 36 06 00 	. 6 . . 
 	ld (ix + 7),007h		;2089	dd 36 07 07 	. 6 . . 
-	ld (ix + 1),005h		;208d	dd 36 01 05 	. 6 . . 
+	ld (ix + ENEMY_STATE_IDX), 5    ;208d	dd 36 01 05
 	ld (ix + 8),025h		;2091	dd 36 08 25 	. 6 . % 
 	ret			;2095	c9 	. 
 l2096h:
@@ -5404,7 +5407,7 @@ sub_20a2h:
 	res 5,(ix + ENEMY_LOOKAT_IDX)	;20a9	dd cb 00 ae
 l20adh:
 	push hl			;20ad	e5 	. 
-	ld a,(ix + 1)		;20ae	dd 7e 01 	. ~ . 
+	ld a,(ix + ENEMY_STATE_IDX)		;20ae	dd 7e 01
 	cp 001h		;20b1	fe 01 	. . 
 	jr z,l20d2h		;20b3	28 1d 	( . 
 	ld hl,(ME_INITIAL_FALL_SPEED_COPY)	;20b5	2a 0c e8
@@ -5586,7 +5589,7 @@ l2200h:
 l220ah:
 	ld (ix + 6),000h		;220a	dd 36 06 00 	. 6 . . 
 	ld (ix + 7),00bh		;220e	dd 36 07 0b 	. 6 . . 
-	ld (ix + 1),002h		;2212	dd 36 01 02 	. 6 . . 
+	ld (ix + ENEMY_STATE_IDX), 2    ;2212	dd 36 01 02
 	ret			;2216	c9 	. 
 l2217h:
 	call sub_2d13h		;2217	cd 13 2d 	. . - 
@@ -5595,7 +5598,7 @@ l2217h:
 l2220h:
 	ld (ix + 6),000h		;2220	dd 36 06 00 	. 6 . . 
 	ld (ix + 7),007h		;2224	dd 36 07 07 	. 6 . . 
-	ld (ix + 1),005h		;2228	dd 36 01 05 	. 6 . . 
+	ld (ix + ENEMY_STATE_IDX), 5	;2228	dd 36 01 05
 	ld a,(0e013h)		;222c	3a 13 e0 	: . . 
 	ld hl,0e1a0h		;222f	21 a0 e1 	! . . 
 	call sub_1214h		;2232	cd 14 12 	. . . 
@@ -5785,7 +5788,7 @@ l23cch:
 	and 001h		;23ce	e6 01 	. . 
 	ld (ix-001h),a		;23d0	dd 77 ff 	. w . 
 l23d3h:
-	ld (ix + 1),004h		;23d3	dd 36 01 04 	. 6 . . 
+	ld (ix + ENEMY_STATE_IDX), 4 ;23d3	dd 36 01 04
 	ld a,(0e010h)		;23d7	3a 10 e0 	: . . 
 	ld hl,0e19ch		;23da	21 9c e1 	! . . 
 	ld b,000h		;23dd	06 00 	. . 
@@ -5853,7 +5856,7 @@ l2448h:
 	ld (ix-002h),01ch		;2462	dd 36 fe 1c 	. 6 . . 
 	and a			;2466	a7 	. 
 	jp nz,l2031h		;2467	c2 31 20 	. 1   
-	ld (ix + 1),002h		;246a	dd 36 01 02 	. 6 . . 
+	ld (ix + ENEMY_STATE_IDX), 2    ;246a	dd 36 01 02
 	ret			;246e	c9 	. 
 l246fh:
 	ld hl,l24cch		;246f	21 cc 24 	! . $ 
@@ -6093,7 +6096,7 @@ l264bh:
 	jr c,l266eh		;265b	38 11 	8 . 
 	ld a,(hl)			;265d	7e 	~ 
 	ld (ix + 7),a		;265e	dd 77 07 	. w . 
-	ld (ix + 1),002h		;2661	dd 36 01 02 	. 6 . . 
+	ld (ix + ENEMY_STATE_IDX), 2    ;2661	dd 36 01 02
 	ld hl,0e2d6h		;2665	21 d6 e2 	! . . 
 	ld a,(hl)			;2668	7e 	~ 
 	ld (hl),01ch		;2669	36 1c 	6 . 
@@ -6137,7 +6140,7 @@ l2698h:
 	ld (0e321h),a		;26c0	32 21 e3 	2 ! . 
 	ld hl,0e700h		;26c3	21 00 e7 	! . . 
 	set 0,(hl)		;26c6	cb c6 	. . 
-	ld (ix + 1),006h		;26c8	dd 36 01 06 	. 6 . . 
+	ld (ix + ENEMY_STATE_IDX), 6    ;26c8	dd 36 01 06
 	ld a,00bh		;26cc	3e 0b 	> . 
 l26ceh:
 	ld (ix + 7),008h		;26ce	dd 36 07 08 	. 6 . . 
@@ -6155,7 +6158,7 @@ l26d2h:
 	res 0,(hl)		;26e8	cb 86 	. . 
 	jp l2589h		;26ea	c3 89 25 	. . % 
 l26edh:
-	inc (ix + 1)		;26ed	dd 34 01 	. 4 . 
+	inc (ix + ENEMY_STATE_IDX)		;26ed	dd 34 01
 	ld l,(ix + 2)		;26f0	dd 6e 02 	. n . 
 	ld h,(ix + 3)		;26f3	dd 66 03 	. f . 
 	ld de,l0280h		;26f6	11 80 02 	. . . 
@@ -6234,10 +6237,10 @@ l277bh:
 l27a3h:
 	ld (ix + 6),000h		;27a3	dd 36 06 00 	. 6 . . 
 	ld (ix + 7),002h		;27a7	dd 36 07 02 	. 6 . . 
-	ld (ix + 1),00bh		;27ab	dd 36 01 0b 	. 6 . . 
+	ld (ix + ENEMY_STATE_IDX), 11	;27ab	dd 36 01 0b
 	ret			;27af	c9 	. 
 l27b0h:
-	ld (ix + 1),00ch		;27b0	dd 36 01 0c 	. 6 . . 
+	ld (ix + ENEMY_STATE_IDX), 12	;27b0	dd 36 01 0c
 	call l2592h		;27b4	cd 92 25 	. . % 
 	jp l1be2h		;27b7	c3 e2 1b 	. . . 
 	call l1be2h		;27ba	cd e2 1b 	. . . 
@@ -6284,8 +6287,8 @@ l2800h:
 	ld a,r		;2823	ed 5f 	. _ 
 	and 001h		;2825	e6 01 	. . 
 	ret z			;2827	c8 	. 
-	ld (ix-00fh),00bh		;2828	dd 36 f1 0b 	. 6 . . 
-	ld (ix + 1),000h		;282c	dd 36 01 00 	. 6 . . 
+	ld (ix-00fh),00bh		;2828	dd 36 f1 0b
+	ld (ix + ENEMY_STATE_IDX), 0	;282c	dd 36 01 00
 	ld hl,0		;2830	21 00 00 	! . . 
 	ld de,(0e2f4h)		;2833	ed 5b f4 e2 	. [ . . 
 	sbc hl,de		;2837	ed 52 	. R 
@@ -6294,7 +6297,7 @@ l2800h:
 l283dh:
 	ld (ix-00ah),000h		;283d	dd 36 f6 00 	. 6 . . 
 	ld (ix-009h),002h		;2841	dd 36 f7 02 	. 6 . . 
-	ld (ix-00fh),000h		;2845	dd 36 f1 00 	. 6 . . 
+	ld (ix-00fh),000h		;2845	dd 36 f1 00   It seems this is also ENEMY_STATE
 	ld hl,0e700h		;2849	21 00 e7 	! . . 
 	res 0,(hl)		;284c	cb 86 	. . 
 	ret			;284e	c9 	. 
@@ -6316,7 +6319,7 @@ l285ch:
 	ld (ix+016h),01eh		;2876	dd 36 16 1e 	. 6 . . 
 	ld (ix+011h),009h		;287a	dd 36 11 09 	. 6 . . 
 sub_287eh:
-	ld (ix + 1),008h		;287e	dd 36 01 08 	. 6 . . 
+	ld (ix + ENEMY_STATE_IDX), 8	;287e	dd 36 01 08
 	ld (ix + 6),01ah		;2882	dd 36 06 1a 	. 6 . . 
 	ret			;2886	c9 	. 
 sub_2887h:
@@ -6417,7 +6420,7 @@ l292fh:
 	ld (ix + 7),009h		;292f	dd 36 07 09 	. 6 . . 
 	ld (ix + 6),004h		;2933	dd 36 06 04 	. 6 . . 
 l2937h:
-	ld (ix + 1),006h		;2937	dd 36 01 06 	. 6 . . 
+	ld (ix + ENEMY_STATE_IDX), 6	;2937	dd 36 01 06
 	ret			;293b	c9 	. 
 sub_293ch:
 	dec (ix + 7)		;293c	dd 35 07 	. 5 . 
@@ -6458,7 +6461,7 @@ l2977h:
 	jr nc,l29a0h		;2982	30 1c 	0 . 
 	ld a,(0e1aah)		;2984	3a aa e1 	: . . 
 	ld (ix + 7),a		;2987	dd 77 07 	. w . 
-	ld (ix + 1),007h		;298a	dd 36 01 07 	. 6 . . 
+	ld (ix + ENEMY_STATE_IDX), 7    ;298a	dd 36 01 07
 	ret			;298e	c9 	. 
 	ld de,(0e1abh)		;298f	ed 5b ab e1 	. [ . . 
 	call sub_1c70h		;2993	cd 70 1c 	. p . 
@@ -6567,7 +6570,7 @@ l2a55h:
 	ld de,(0e104h)		;2a60	ed 5b 04 e1 	. [ . . 
 	sbc hl,de		;2a64	ed 52 	. R 
 	jr c,l2ad9h		;2a66	38 71 	8 q 
-	ld (ix + 1),008h		;2a68	dd 36 01 08 	. 6 . . 
+	ld (ix + ENEMY_STATE_IDX),8 	;2a68	dd 36 01 08
 	ld a,(0e1aah)		;2a6c	3a aa e1 	: . . 
 	ld (ix + 7),a		;2a6f	dd 77 07 	. w . 
 	ret			;2a72	c9 	. 
@@ -6628,7 +6631,7 @@ l2ad9h:
 	ld (ix + 8),a		;2ae2	dd 77 08 	. w . 
 	ld (ix + 7),009h		;2ae5	dd 36 07 09 	. 6 . . 
 l2ae9h:
-	ld (ix + 1),005h		;2ae9	dd 36 01 05 	. 6 . . 
+	ld (ix + ENEMY_STATE_IDX), 5    ;2ae9	dd 36 01 05
 	ret			;2aed	c9 	. 
 	call l1be2h		;2aee	cd e2 1b 	. . . 
 	dec (ix + 7)		;2af1	dd 35 07 	. 5 . 
@@ -6659,7 +6662,7 @@ l2b10h:
 	call sub_2d19h		;2b1c	cd 19 2d 	. . - 
 	ld a,00bh		;2b1f	3e 0b 	> . 
 	jp c,l247ah		;2b21	da 7a 24 	. z $ 
-	inc (ix + 1)		;2b24	dd 34 01 	. 4 . 
+	inc (ix + ENEMY_STATE_IDX)	;2b24	dd 34 01
 	ret			;2b27	c9 	. 
 l2b28h:
 	call l1be2h		;2b28	cd e2 1b 	. . . 
@@ -6776,7 +6779,7 @@ l2bddh:
 	jr z,l2c1bh		;2be1	28 38 	( 8 
 	jr c,l2c17h		;2be3	38 32 	8 2 
 	ld (ix + 7),005h		;2be5	dd 36 07 05 	. 6 . . 
-	ld (ix + 1),00ah		;2be9	dd 36 01 0a 	. 6 . . 
+	ld (ix + ENEMY_STATE_IDX), 10   ;2be9	dd 36 01 0a
 	ld (ix + 6),017h		;2bed	dd 36 06 17 	. 6 . . 
 	ld a,(DRAGONS_LEVEL)		;2bf1	3a 80 e0 	: . . 
 	rrca			;2bf4	0f 	. 
@@ -6805,7 +6808,7 @@ l2c1bh:
 	ld a,016h		;2c1b	3e 16 	> . 
 l2c1dh:
 	ld (ix + 6),a		;2c1d	dd 77 06 	. w . 
-	ld (ix + 1),009h		;2c20	dd 36 01 09 	. 6 . . 
+	ld (ix + ENEMY_STATE_IDX), 9	;2c20	dd 36 01 09
 	ld (ix + 7),00bh		;2c24	dd 36 07 0b 	. 6 . . 
 	ld a,091h		;2c28	3e 91 	> . 
 	call sub_0dfeh		;2c2a	cd fe 0d 	. . . 
@@ -6912,7 +6915,7 @@ sub_2cb9h:
 	ld hl,0e700h		;2cc0	21 00 e7 	! . . 
 	res 4,(hl)		;2cc3	cb a6 	. . 
 	ret c			;2cc5	d8 	. 
-	ld a,(ix + 1)		;2cc6	dd 7e 01 	. ~ . 
+	ld a,(ix + ENEMY_STATE_IDX)		;2cc6	dd 7e 01
 	cp 001h		;2cc9	fe 01 	. . 
 	ret z			;2ccb	c8 	. 
 	ld a,(0e261h)		;2ccc	3a 61 e2 	: a . 
@@ -6947,7 +6950,7 @@ sub_2ce8h:
 	inc b			;2cf8	04 	. 
 l2cf9h:
 	ld (ix + 11),b		;2cf9	dd 70 0b 	. p . 
-	ld (ix + 1),004h		;2cfc	dd 36 01 04 	. 6 . . 
+	ld (ix + ENEMY_STATE_IDX), 4	;2cfc	dd 36 01 04
 	ret			;2d00	c9 	. 
 sub_2d01h:
 	push hl			;2d01	e5 	. 
