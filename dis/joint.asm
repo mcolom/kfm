@@ -100,10 +100,15 @@ ACTIVE_GRIPPERS: EQU 0xE71B
 TBL_E262: EQU 0xE262
 TBL_E282: EQU 0xE282
 TBL_E2A2: EQU 0xE2A2
-;TBL_E2D8: EQU 0xE2D8
+TBL_E2B2: EQU 0xE2B2
 TBL_E2FB: EQU 0xE2FB
 TBL_E31B: EQU 0xE31B
+TBL_E292: EQU 0xE292
+TBL_E272: EQU 0xE272
 
+TBL_E2C2: EQU 0xE2C2
+
+	;ld ix,
 
 ; Seem related to the moths at 4th floor
 TBL_E520: EQU 0xE520
@@ -117,9 +122,6 @@ TABLE_WIDTH_19: EQU 0xE36F
 TABLE_WIDTH_41: EQU 0xE54A
 
 TBL_WIDTH_21: EQU 0xE577
-
-
-TBL_ENEMIES: EQU 0xE2D8
 
 
 ; *******************************************************************
@@ -176,6 +178,9 @@ BOUNCING_BALL_EXPLODE_TIMEOUT_INIT: EQU 0xE371
 ; *******************************************************************
 
 
+; *******************************************************************
+TBL_ENEMIES: EQU 0xE2D8
+
 ; Enemy's look at
 ; 0x0: enemy not visible yet
 ; 0x52, 0x56: look right
@@ -184,28 +189,15 @@ BOUNCING_BALL_EXPLODE_TIMEOUT_INIT: EQU 0xE371
 ; Actually it's bitwise
 ENEMY_LOOKAT_IDX: EQU 0
 
-; Enemy's state
-ENEMY_STATE: EQU TBL_ENEMIES + 1
-;
-; Position of the enemy
-ENEMY_POS: EQU TBL_ENEMIES + 2
 
-; Enemy's displayed frame
-ENEMY_FRAME: EQU TBL_ENEMIES + 6
-;
-; Time the enemy stays in its current frame
-ENEMY_FRAME_COUNTER: EQU TBL_ENEMIES + 7
-
-; 8, 9: enemy moving counter
+ENEMY_STATE: EQU TBL_ENEMIES + 1 ; Enemy's state
+ENEMY_POS: EQU TBL_ENEMIES + 2 ; Position of the enemy
+ENEMY_FRAME: EQU TBL_ENEMIES + 6 ; Enemy's displayed frame
+ENEMY_FRAME_COUNTER: EQU TBL_ENEMIES + 7 ; Ticks the enemy stays in its current frame
 ENEMY_MOVE_COUNTER_L: EQU TBL_ENEMIES + 8
-ENEMY_MOVE_COUNTER_H: EQU TBL_ENEMIES + 9
-
-;
-; Enemy's energy
-ENEMY_ENERGY: EQU TBL_ENEMIES + 10
-;
-; This controls the time left the energy is standing without moving.
-ENEMY_STEADY_COUNTER: EQU TBL_ENEMIES + 11
+ENEMY_MOVE_COUNTER_H: EQU TBL_ENEMIES + 9 ; 8, 9: enemy moving counter
+ENEMY_ENERGY: EQU TBL_ENEMIES + 10 ; Enemy's energy
+ENEMY_STEADY_COUNTER: EQU TBL_ENEMIES + 11 ; This controls the time left the energy is standing without moving.
 ;
 ; This mainly controls how Mr. X reacts to attacks
 ; 7A: low kick, that he avoids by jumping
@@ -214,9 +206,9 @@ ENEMY_STEADY_COUNTER: EQU TBL_ENEMIES + 11
 ; For the stick guy: 27: punch, kick
 
 MR_REACTION_L: EQU TBL_ENEMIES + 12
-;
-; Enemy attack step
-ENEMY_ATTACK_STEP: EQU TBL_ENEMIES + 14
+
+
+ENEMY_ATTACK_STEP: EQU TBL_ENEMIES + 14 ; Enemy attack step
 ;
 ; Enemy attack type
 ; 0: boomerang goes up, returns up
@@ -226,6 +218,10 @@ ENEMY_ATTACK_STEP: EQU TBL_ENEMIES + 14
 ENEMY_BOOMERANG_TYPE: EQU TBL_ENEMIES + 15
 
 MAGICIAN_REPLICA_STATE: EQU TBL_ENEMIES + 18
+; *******************************************************************
+
+
+
 
 
 ; Another table of variables
@@ -11380,15 +11376,15 @@ l4e87h:
 	djnz l4e87h
 	ld ix,0e2c2h
 	call sub_4ed7h
-	ld ix,0e2b2h
+	ld ix,TBL_E2B2
 	call sub_4ed7h
 	ld ix,TBL_E2A2
 	call sub_4ed7h
 	ld ix,TBL_E282
 	call sub_4eb3h
-	ld ix,0e292h
+	ld ix,TBL_E292
 	call sub_4eb3h
-	ld ix,0e272h
+	ld ix,TBL_E272
 sub_4eb3h:
 	ld c,(ix + 0)
 	ld hl,l4ed1h
