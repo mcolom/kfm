@@ -714,10 +714,10 @@ l026fh:
 	set 1,(hl)		;0276	cb ce 	. . 
 	call 0520dh		;0278	cd 0d 52 	. . R 
 	ld a,0e1h		;027b	3e e1 	> . 
-	call 0570fh		;027d	cd 0f 57 	. . W 
+	call WAIT_A		;027d	cd 0f 57 	. . W 
 l0280h:
 	ld a,070h		;0280	3e 70 	> p 
-	call 0570fh		;0282	cd 0f 57 	. . W 
+	call WAIT_A		;0282	cd 0f 57 	. . W 
 l0285h:
 	call sub_1157h		;0285	cd 57 11 	. W . 
 	xor a			;0288	af 	. 
@@ -824,7 +824,7 @@ time_decrement_done:
 	call sub_0250h		;0337	cd 50 02 	. P . 
 l033ah:
 	ld a,02dh		;033a	3e 2d 	> - 
-	call 0570fh		;033c	cd 0f 57 	. . W 
+	call WAIT_A		;033c	cd 0f 57 	. . W 
 	ld hl,(TIME)		;033f	2a 03 e0 	* . . 
 	ld a,l			;0342	7d 	} 
 	or h			;0343	b4 	. 
@@ -837,7 +837,7 @@ l033ah:
 	jr z,l0360h		;0351	28 0d 	( . 
 	call sub_0dfeh		;0353	cd fe 0d 	. . . 
 	ld a,0a9h		;0356	3e a9 	> . 
-	call 0570fh		;0358	cd 0f 57 	. . W 
+	call WAIT_A		;0358	cd 0f 57 	. . W 
 	jr l0360h		;035b	18 03 	. . 
 l035dh:
 	call 054f4h		;035d	cd f4 54 	. . T 
@@ -1016,7 +1016,7 @@ l0461h:
 	ld a, GAME_STATE_WALK_LEVEL_STARTS		;0476	3e 02
 	ld (GAME_STATE),a		;0478	32 00 e0 	2 . . 
 	ld a,027h		;047b	3e 27 	> ' 
-	call 0570fh		;047d	cd 0f 57 	. . W 
+	call WAIT_A		;047d	cd 0f 57 	. . W 
 	ld hl,0006h+1		;0480	21 07 00 	! . . 
 	ld (0e817h),hl		;0483	22 17 e8 	" . . 
 	ld hl,0e915h		;0486	21 15 e9 	! . . 
@@ -1024,19 +1024,18 @@ l0461h:
 	ld hl,05aa1h		;048a	21 a1 5a 	! . Z 
 	call sub_04bfh		;048d	cd bf 04 	. . . 
 	ld a,00bh		;0490	3e 0b 	> . 
-	call 0570fh		;0492	cd 0f 57 	. . W 
+	call WAIT_A		;0492	cd 0f 57 	. . W 
 	ld hl,0e915h		;0495	21 15 e9 	! . . 
 	inc (hl)			;0498	34 	4 
 	ld hl,05af0h		;0499	21 f0 5a 	! . Z 
 	call sub_04bfh		;049c	cd bf 04 	. . . 
 	ld a,(0e81ch)		;049f	3a 1c e8 	: . . 
 	and a			;04a2	a7 	. 
-	
-	defb 021h, 03fh, 005h
+    ld hl, 0x053f; z80asm wrote this as defb 021h, 03fh, 005h (bug z80dasm?)
 	
 	call z,WRITE_TEXT		;04a6	cc 1c 11 	. . . 
 	ld a,054h		;04a9	3e 54 	> T 
-	call 0570fh		;04ab	cd 0f 57 	. . W 
+	call WAIT_A		;04ab	cd 0f 57 	. . W 
 	pop hl			;04ae	e1 	. 
 	ld (0e817h),hl		;04af	22 17 e8 	" . . 
 	call 05756h		;04b2	cd 56 57 	. V W 
@@ -3220,7 +3219,7 @@ l1134h:
 	cp 020h		;1143	fe 20 	.   
 	jr nz,l1134h		;1145	20 ed 	  . 
 	ld a,00bh		;1147	3e 0b 	> . 
-	call 0570fh		;1149	cd 0f 57 	. . W 
+	call WAIT_A		;1149	cd 0f 57 	. . W 
 	jr l1134h		;114c	18 e6 	. . 
 l114eh:
 	ld e,(hl)			;114e	5e 	^ 
