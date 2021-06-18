@@ -4617,7 +4617,7 @@ l1aa3h:
 	ld l,c			;1ab4	69 	i 
 	jp l0e20h		;1ab5	c3 20 0e 	.   . 
 sub_1ab8h:
-	call sub_1c91h		;1ab8	cd 91 1c 	. . . 
+	call GET_ENEMY_POS_IN_DE		;1ab8	cd 91 1c 	. . . 
 	ld hl,(0e106h)		;1abb	2a 06 e1 	* . . 
 	bit 6,c		;1abe	cb 71 	. q 
 	jr z,l1ac6h		;1ac0	28 04 	( . 
@@ -4644,7 +4644,7 @@ sub_1ad2h:
 	push af			;1adc	f5 	. 
 	and 00fh		;1add	e6 0f 	. . 
 	call sub_1b8eh		;1adf	cd 8e 1b 	. . . 
-	call sub_1c91h		;1ae2	cd 91 1c 	. . . 
+	call GET_ENEMY_POS_IN_DE		;1ae2	cd 91 1c 	. . . 
 	pop af			;1ae5	f1 	. 
 	ret			;1ae6	c9 	. 
 sub_1ae7h:
@@ -4821,7 +4821,7 @@ sub_1c26h:
 	ld hl,(0e712h)		;1c26	2a 12 e7 	* . . 
 	ld de,l1000h		;1c29	11 00 10 	. . . 
 	add hl,de			;1c2c	19 	. 
-	call sub_1c91h		;1c2d	cd 91 1c 	. . . 
+	call GET_ENEMY_POS_IN_DE		;1c2d	cd 91 1c 	. . . 
 	sbc hl,de		;1c30	ed 52 	. R 
 	ret c			;1c32	d8 	. 
 	res 5,(ix + 0)		;1c33	dd cb 00 ae 	. . . . 
@@ -4884,11 +4884,12 @@ GET_ENEMY_POS_IN_HL:
 	ld h,(ix + ENEMY_POS_H_IDX)     ;1c8d	dd 66 03
 	ret			;1c90	c9
 
-sub_1c91h:
+GET_ENEMY_POS_IN_DE:
 	ex de,hl			;1c91	eb 	. 
 	call GET_ENEMY_POS_IN_HL		;1c92	cd 8a 1c 	. . . 
 	ex de,hl			;1c95	eb 	. 
 	ret			;1c96	c9 	. 
+
 sub_1c97h:
 	ld (ix + 4),l		;1c97	dd 75 04 	. u . 
 	ld (ix + 5),h		;1c9a	dd 74 05 	. t . 
