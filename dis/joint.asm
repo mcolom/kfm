@@ -144,6 +144,10 @@ MAGICAL_ELEMENT_FALL_ACCELERATION_H_IDX: EQU 11 ; E38D
 MAGICAL_ELEMENT_FALL_SPEED_L_IDX: EQU 12 ; E38E
 MAGICAL_ELEMENT_FALL_SPEED_H_IDX: EQU 13 ; E38F
 
+; This seems to control the falling height of the confetti ball
+MAGICAL_ELEMENT_HEIGHT_OFFSET_L_IDX: EQU 16; E392
+MAGICAL_ELEMENT_HEIGHT_OFFSET_H_IDX: EQU 17; E393
+
 ME_INITIAL_FALL_SPEED: EQU 0xE36C
 ME_INITIAL_FALL_SPEED_COPY: EQU 0xE80C
 
@@ -7505,8 +7509,8 @@ l307bh:
 	add hl,de			;3087	19 	. 
 	ld (ix + MAGICAL_ELEMENT_DISTANCE_L_IDX),l		;3088	dd 75 02
 	ld (ix + MAGICAL_ELEMENT_DISTANCE_H_IDX),h		;308b	dd 74 03
-	ld l,(ix+010h)		;308e	dd 6e 10 	. n . 
-	ld h,(ix+011h)		;3091	dd 66 11 	. f . 
+	ld l,(ix+MAGICAL_ELEMENT_HEIGHT_OFFSET_L_IDX)	;308e	dd 6e 10
+	ld h,(ix+MAGICAL_ELEMENT_HEIGHT_OFFSET_H_IDX)		;3091	dd 66 11 	. f . 
 	ld de,00049h		;3094	11 49 00 	. I . 
 	bit 0,(ix + 0)		;3097	dd cb 00 46 	. . . F 
 	jr z,l30aah		;309b	28 0d 	( . 
@@ -7524,8 +7528,8 @@ l30aah:
 	jr nc,l30b7h		;30b1	30 04 	0 . 
 	set 0,(ix + 0)		;30b3	dd cb 00 c6 	. . . . 
 l30b7h:
-	ld (ix+010h),l		;30b7	dd 75 10 	. u . 
-	ld (ix+011h),h		;30ba	dd 74 11 	. t . 
+	ld (ix+MAGICAL_ELEMENT_HEIGHT_OFFSET_L_IDX),l		;30b7	dd 75 10
+	ld (ix+MAGICAL_ELEMENT_HEIGHT_OFFSET_H_IDX),h		;30ba	dd 74 11
 	ld e,(ix + MAGICAL_ELEMENT_FALL_SPEED_L_IDX)		;30bd	dd 5e 0c
 	ld d,(ix + MAGICAL_ELEMENT_FALL_SPEED_H_IDX)		;30c0	dd 56 0d
 	add hl,de			;30c3	19 	. 
@@ -7550,8 +7554,8 @@ l30cdh:
 	sbc hl,de		;30f7	ed 52 	. R 
 	ld (ix + MAGICAL_ELEMENT_FALL_SPEED_L_IDX),l		;30f9	dd 75 0c
 	ld (ix + MAGICAL_ELEMENT_FALL_SPEED_H_IDX),h		;30fc	dd 74 0d
-	ld (ix+010h),e		;30ff	dd 73 10 	. s . 
-	ld (ix+011h),d		;3102	dd 72 11 	. r . 
+	ld (ix+MAGICAL_ELEMENT_HEIGHT_OFFSET_L_IDX),e		;30ff	dd 73 10
+	ld (ix+MAGICAL_ELEMENT_HEIGHT_OFFSET_H_IDX),d		;3102	dd 72 11
 	ret			;3105	c9 	. 
 l3106h:
 	call sub_333ah		;3106	cd 3a 33 	. : 3 
