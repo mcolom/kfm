@@ -197,6 +197,9 @@ ENEMY_POS_L_IDX: EQU 2
 ENEMY_POS_H_IDX: EQU 3
 ENEMY_POS: EQU TBL_ENEMIES + ENEMY_POS_L_IDX ; Position of the enemy
 
+ENEMY_FALLING_HEIGHT_L_IDX: EQU 4
+ENEMY_FALLING_HEIGHT_H_IDX: EQU 5 ; Height of boss when falling after being defeated
+
 ENEMY_FRAME: EQU TBL_ENEMIES + 6 ; Enemy's displayed frame
 ENEMY_FRAME_COUNTER: EQU TBL_ENEMIES + 7 ; Ticks the enemy stays in its current frame
 ENEMY_MOVE_COUNTER_L: EQU TBL_ENEMIES + 8
@@ -4120,7 +4123,7 @@ l170bh:
 	add hl,de			;1726	19 	. 
 	call SET_MR_REACTION_FROM_HL		;1727	cd a5 1c 	. . . 
 	ex de,hl			;172a	eb 	. 
-	call GET_MAGICAL_ELEMENT_HEIGHT_IN_HL		;172b	cd 9e 1c 	. . . 
+	call GET_ENEMY_FALLING_HEIGHT_IN_HL		;172b	cd 9e 1c 	. . . 
 	add hl,de			;172e	19 	. 
 	ld de,05000h		;172f	11 00 50 	. . P 
 	sbc hl,de		;1732	ed 52 	. R 
@@ -4128,7 +4131,7 @@ l170bh:
 	jr nc,l1738h		;1735	30 01 	0 . 
 	ex de,hl			;1737	eb 	. 
 l1738h:
-	call sub_1c97h		;1738	cd 97 1c 	. . . 
+	call SET_ENEMY_FALLING_HEIGHT_FROM_HL		;1738	cd 97 1c 	. . . 
 	jr c,l16feh		;173b	38 c1 	8 . 
 l173dh:
 	bit 1,(ix + 11)		;173d	dd cb 0b 4e 	. . . N 
@@ -4140,7 +4143,7 @@ l173dh:
 	ld de,l0140h		;174d	11 40 01 	. @ . 
 	add hl,de			;1750	19 	. 
 	ld (0e811h),hl		;1751	22 11 e8 	" . . 
-	call GET_MAGICAL_ELEMENT_HEIGHT_IN_HL		;1754	cd 9e 1c 	. . . 
+	call GET_ENEMY_FALLING_HEIGHT_IN_HL		;1754	cd 9e 1c 	. . . 
 	ld de,0013h+1		;1757	11 14 00 	. . . 
 	call sub_1172h		;175a	cd 72 11 	. r . 
 	jr c,l1787h		;175d	38 28 	8 ( 
@@ -4178,7 +4181,7 @@ l1787h:
 	cp 007h		;1792	fe 07 	. . 
 	jr nz,l17bah		;1794	20 24 	  $ 
 l1796h:
-	call GET_MAGICAL_ELEMENT_HEIGHT_IN_HL		;1796	cd 9e 1c 	. . . 
+	call GET_ENEMY_FALLING_HEIGHT_IN_HL		;1796	cd 9e 1c 	. . . 
 	ld de,l010ch		;1799	11 0c 01 	. . . 
 	ld a,091h		;179c	3e 91 	> . 
 	call sub_0dfeh		;179e	cd fe 0d 	. . . 
@@ -4195,7 +4198,7 @@ l1796h:
 	jr l1768h		;17b8	18 ae 	. . 
 l17bah:
 	ld (ix + MAGICAL_ELEMENT_CURRENT_FRAME_IDX),9	;17ba	dd 36 06 09
-	call GET_MAGICAL_ELEMENT_HEIGHT_IN_HL		    ;17be	cd 9e 1c
+	call GET_ENEMY_FALLING_HEIGHT_IN_HL		    ;17be	cd 9e 1c
 	ld de,l0a00h		;17c1	11 00 0a 	. . . 
 	add hl,de			;17c4	19 	. 
 	xor a			;17c5	af 	. 
@@ -4584,7 +4587,7 @@ l1a80h:
 	bit 4,(ix + ENEMY_LOOKAT_IDX)	;1a82	dd cb 00 66
 	ret z			;1a86	c8 	. 
 	ex de,hl			;1a87	eb 	. 
-	call GET_MAGICAL_ELEMENT_HEIGHT_IN_HL		;1a88	cd 9e 1c
+	call GET_ENEMY_FALLING_HEIGHT_IN_HL		;1a88	cd 9e 1c
 	add hl,hl			;1a8b	29 	) 
 	ld l,h			;1a8c	6c 	l 
 	ld h,000h		;1a8d	26 00 	& . 
@@ -4774,9 +4777,9 @@ l1bc4h:
 	add hl,de			;1bcd	19 	. 
 	ld (ix + 14),l		;1bce	dd 75 0e 	. u . 
 	ld (ix + 15),h		;1bd1	dd 74 0f 	. t . 
-	call GET_MAGICAL_ELEMENT_HEIGHT_IN_HL		;1bd4	cd 9e 1c 	. . . 
+	call GET_ENEMY_FALLING_HEIGHT_IN_HL		;1bd4	cd 9e 1c 	. . . 
 	sbc hl,de		;1bd7	ed 52 	. R 
-	call sub_1c97h		;1bd9	cd 97 1c 	. . . 
+	call SET_ENEMY_FALLING_HEIGHT_FROM_HL		;1bd9	cd 97 1c 	. . . 
 	ld de,l0039h		;1bdc	11 39 00 	. 9 . 
 	call sub_1c7ah		;1bdf	cd 7a 1c 	. z . 
 l1be2h:
@@ -4889,14 +4892,14 @@ GET_ENEMY_POS_IN_DE:
 	ex de,hl			;1c95	eb 	. 
 	ret			;1c96	c9 	. 
 
-sub_1c97h:
-	ld (ix + 4),l		;1c97	dd 75 04 	. u . 
-	ld (ix + 5),h		;1c9a	dd 74 05 	. t . 
+SET_ENEMY_FALLING_HEIGHT_FROM_HL:
+	ld (ix + ENEMY_FALLING_HEIGHT_L_IDX),l		;1c97	dd 75 04
+	ld (ix + ENEMY_FALLING_HEIGHT_H_IDX),h		;1c9a	dd 74 05
 	ret			;1c9d	c9 	. 
 
-GET_MAGICAL_ELEMENT_HEIGHT_IN_HL:
-	ld l,(ix + MAGICAL_ELEMENT_HEIGHT_L_IDX)		;1c9e	dd 6e 04
-	ld h,(ix + MAGICAL_ELEMENT_HEIGHT_H_IDX)		;1ca1	dd 66 05
+GET_ENEMY_FALLING_HEIGHT_IN_HL:
+	ld l,(ix + ENEMY_FALLING_HEIGHT_L_IDX)		;1c9e	dd 6e 04
+	ld h,(ix + ENEMY_FALLING_HEIGHT_H_IDX)		;1ca1	dd 66 05
 	ret			;1ca4	c9 	. 
 
 SET_MR_REACTION_FROM_HL:
