@@ -170,6 +170,8 @@ ME_STATE_DRAGON_DISAPPEARS: EQU 9
 ME_STATE_CONFETTI_MOVES_DIAGONAL: EQU 10
 
 
+BOUNCING_BALL_EXPLODE_TIMEOUT_INIT: EQU 0xE371
+
 
 ; Enemy's look at
 ; 0x0: enemy not visible yet
@@ -7545,7 +7547,7 @@ l30b7h:
 	jp l3025h		;30ca	c3 25 30 	. % 0 
 l30cdh:
 	ld (ix + MAGICAL_ELEMENT_STATE_IDX), ME_STATE_CONFETTI_FALLS_AND_FLOATS ;30cd	dd 36 01 06
-	ld a,(0e371h)		;30d1	3a 71 e3 	: q . 
+	ld a,(BOUNCING_BALL_EXPLODE_TIMEOUT_INIT)		;30d1	3a 71 e3 	: q . 
 	ld (ix + FIREBALL_TIMEOUT_IDX),a	;30d4	dd 77 08
 	ld de,l0040h		;30d7	11 40 00 	. @ . 
 	ld l,(ix + MAGICAL_ELEMENT_DISTANCE_L_IDX)		;30da	dd 6e 02
