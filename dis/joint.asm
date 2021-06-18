@@ -103,7 +103,7 @@ TBL_E2A2: EQU 0xE2A2
 ;TBL_E2D8: EQU 0xE2D8
 TBL_E2FB: EQU 0xE2FB
 TBL_E31B: EQU 0xE31B
-TBL_MAGICAL_ELEMENTS: EQU 0xE382
+
 
 ; Seem related to the moths at 4th floor
 TBL_E520: EQU 0xE520
@@ -119,7 +119,11 @@ TABLE_WIDTH_41: EQU 0xE54A
 TBL_WIDTH_21: EQU 0xE577
 
 
-VARS_TABLE: EQU 0xE2D8
+TBL_ENEMIES: EQU 0xE2D8
+
+
+; *******************************************************************
+TBL_MAGICAL_ELEMENTS: EQU 0xE382
 
 ; This counter controls how many ticks the falling magical element will
 ; stay in that state
@@ -154,7 +158,6 @@ MAGICAL_ELEMENT_HOR_OFFSET_H_IDX: EQU 15; E391
 MAGICAL_ELEMENT_HEIGHT_OFFSET_L_IDX: EQU 16; E392
 MAGICAL_ELEMENT_HEIGHT_OFFSET_H_IDX: EQU 17; E393
 
-
 ME_INITIAL_FALL_SPEED: EQU 0xE36C
 ME_INITIAL_FALL_SPEED_COPY: EQU 0xE80C
 
@@ -169,8 +172,8 @@ ME_STATE_DRAGON_OUT_AND_WILL_FIRE: EQU 8
 ME_STATE_DRAGON_DISAPPEARS: EQU 9
 ME_STATE_CONFETTI_MOVES_DIAGONAL: EQU 10
 
-
 BOUNCING_BALL_EXPLODE_TIMEOUT_INIT: EQU 0xE371
+; *******************************************************************
 
 
 ; Enemy's look at
@@ -179,30 +182,30 @@ BOUNCING_BALL_EXPLODE_TIMEOUT_INIT: EQU 0xE371
 ; 0x12: look left
 ; 0x2, 0x46: no enemy (defeated)
 ; Actually it's bitwise
-ENEMY_LOOKAT: EQU VARS_TABLE + 0
+ENEMY_LOOKAT_IDX: EQU 0
 
 ; Enemy's state
-ENEMY_STATE: EQU VARS_TABLE + 1
+ENEMY_STATE: EQU TBL_ENEMIES + 1
 ;
 ; Position of the enemy
-ENEMY_POS: EQU VARS_TABLE + 2
+ENEMY_POS: EQU TBL_ENEMIES + 2
 
 ; Enemy's displayed frame
-ENEMY_FRAME: EQU VARS_TABLE + 6
+ENEMY_FRAME: EQU TBL_ENEMIES + 6
 ;
 ; Time the enemy stays in its current frame
-ENEMY_FRAME_COUNTER: EQU VARS_TABLE + 7
+ENEMY_FRAME_COUNTER: EQU TBL_ENEMIES + 7
 
 ; 8, 9: enemy moving counter
-ENEMY_MOVE_COUNTER_L: EQU VARS_TABLE + 8
-ENEMY_MOVE_COUNTER_H: EQU VARS_TABLE + 9
+ENEMY_MOVE_COUNTER_L: EQU TBL_ENEMIES + 8
+ENEMY_MOVE_COUNTER_H: EQU TBL_ENEMIES + 9
 
 ;
 ; Enemy's energy
-ENEMY_ENERGY: EQU VARS_TABLE + 10
+ENEMY_ENERGY: EQU TBL_ENEMIES + 10
 ;
 ; This controls the time left the energy is standing without moving.
-ENEMY_STEADY_COUNTER: EQU VARS_TABLE + 11
+ENEMY_STEADY_COUNTER: EQU TBL_ENEMIES + 11
 ;
 ; This mainly controls how Mr. X reacts to attacks
 ; 7A: low kick, that he avoids by jumping
@@ -210,19 +213,19 @@ ENEMY_STEADY_COUNTER: EQU VARS_TABLE + 11
 ;
 ; For the stick guy: 27: punch, kick
 
-MR_REACTION_L: EQU VARS_TABLE + 12
+MR_REACTION_L: EQU TBL_ENEMIES + 12
 ;
 ; Enemy attack step
-ENEMY_ATTACK_STEP: EQU VARS_TABLE + 14
+ENEMY_ATTACK_STEP: EQU TBL_ENEMIES + 14
 ;
 ; Enemy attack type
 ; 0: boomerang goes up, returns up
 ; 1: boomerang goes up, returns down
 ; 2: boomerang goes down, returns down
 ; 3: boomerang goes down, returns up
-ENEMY_BOOMERANG_TYPE: EQU VARS_TABLE + 15
+ENEMY_BOOMERANG_TYPE: EQU TBL_ENEMIES + 15
 
-MAGICIAN_REPLICA_STATE: EQU VARS_TABLE + 18
+MAGICIAN_REPLICA_STATE: EQU TBL_ENEMIES + 18
 
 
 ; Another table of variables
@@ -1394,8 +1397,8 @@ sub_074dh:
 	ld a,005h		;078c	3e 05 	> . 
 	ld (0e347h),a		;078e	32 47 e3 	2 G . 
 l0791h:
-	ld ix,VARS_TABLE		;0791	dd 21 d8 e2 	. ! . . 
-	ld (ix + 10),03fh		;0795	dd 36 0a 3f VARS_TABLE + 0xa = 0xE2E2 = ENEMY_ENERGY
+	ld ix,TBL_ENEMIES		;0791	dd 21 d8 e2 	. ! . . 
+	ld (ix + 10),03fh		;0795	dd 36 0a 3f TBL_ENEMIES + 0xa = 0xE2E2 = ENEMY_ENERGY
 	ld (ix + 7),007h		;0799	dd 36 07 07 	. 6 . . 
 	ld hl,05000h		;079d	21 00 50 	! . P 
 	ld (0e2dch),hl		;07a0	22 dc e2 	" . . 
@@ -3708,7 +3711,7 @@ sub_143fh:
 	ld b,a			;1442	47 	G 
 	xor 028h		;1443	ee 28 	. ( 
 	ret z			;1445	c8 	. 
-	ld a,(VARS_TABLE)		;1446	3a d8 e2 	: . . 
+	ld a,(TBL_ENEMIES)		;1446	3a d8 e2 	: . . 
 	and 010h		;1449	e6 10 	. . 
 	ld a,(0e196h)		;144b	3a 96 e1 	: . . 
 	jr z,l1453h		;144e	28 03 	( . 
@@ -3753,7 +3756,7 @@ l1479h:
 	add hl,de			;148c	19 	. 
 	ex de,hl			;148d	eb 	. 
 l148eh:
-	ld a,(VARS_TABLE)		;148e	3a d8 e2 	: . . 
+	ld a,(TBL_ENEMIES)		;148e	3a d8 e2 	: . . 
 	ld l,a			;1491	6f 	o 
 	bit 4,l		;1492	cb 65 	. e 
 	jr z,l14b1h		;1494	28 1b 	( . 
@@ -3795,7 +3798,7 @@ l14bfh:
 	add hl,de			;14d1	19 	. 
 	ex de,hl			;14d2	eb 	. 
 l14d3h:
-	ld a,(VARS_TABLE)		;14d3	3a d8 e2 	: . . 
+	ld a,(TBL_ENEMIES)		;14d3	3a d8 e2 	: . . 
 	ld l,a			;14d6	6f 	o 
 	bit 4,l		;14d7	cb 65 	. e 
 	jr z,l14f1h		;14d9	28 16 	( . 
@@ -4578,17 +4581,17 @@ l1a7eh:
 	xor 040h		;1a7e	ee 40 	. @ 
 l1a80h:
 	and 0c0h		;1a80	e6 c0 	. . 
-	bit 4,(ix + 0)		;1a82	dd cb 00 66 	. . . f 
+	bit 4,(ix + ENEMY_LOOKAT_IDX)	;1a82	dd cb 00 66
 	ret z			;1a86	c8 	. 
 	ex de,hl			;1a87	eb 	. 
-	call GET_MAGICAL_ELEMENT_HEIGHT_IN_HL		;1a88	cd 9e 1c 	. . . 
+	call GET_MAGICAL_ELEMENT_HEIGHT_IN_HL		;1a88	cd 9e 1c
 	add hl,hl			;1a8b	29 	) 
 	ld l,h			;1a8c	6c 	l 
 	ld h,000h		;1a8d	26 00 	& . 
 	rl h		;1a8f	cb 14 	. . 
 	ld (KNIFE_STATUS),hl		;1a91	22 07 e8 	" . . 
 	ld hl,(0e80ah)		;1a94	2a 0a e8 	* . . 
-	ld c,(ix + MAGICAL_ELEMENT_CURRENT_FRAME_IDX)		;1a97	dd 4e 06 	. N . 
+	ld c,(ix + MAGICAL_ELEMENT_CURRENT_FRAME_IDX)		;1a97	dd 4e 06
 sub_1a9ah:
 	push de			;1a9a	d5 	. 
 	ld b,000h		;1a9b	06 00 	. . 
@@ -4928,7 +4931,7 @@ sub_1cc4h:
 	ld a,(ENEMY_STATE)		;1ce0	3a d9 e2 	: . . 
 	cp 001h		;1ce3	fe 01 	. . 
 	jr z,l1ceeh		;1ce5	28 07 	( . 
-	ld a,(VARS_TABLE)		;1ce7	3a d8 e2 	: . . 
+	ld a,(TBL_ENEMIES)		;1ce7	3a d8 e2 	: . . 
 	and 010h		;1cea	e6 10 	. . 
 	jr nz,l1d5bh		;1cec	20 6d 	  m 
 l1ceeh:
@@ -5096,7 +5099,7 @@ l1e45h:
 	ld (ix + 0),000h		;1e45	dd 36 00 00 	. 6 . . 
 	ret			;1e49	c9 	. 
 sub_1e4ah:
-	ld a,(VARS_TABLE)		;1e4a	3a d8 e2 	: . . 
+	ld a,(TBL_ENEMIES)		;1e4a	3a d8 e2 	: . . 
 	ld c,a			;1e4d	4f 	O 
 	and a			;1e4e	a7 	. 
 	jr z,$+63		;1e4f	28 3d 	( = 
@@ -5108,7 +5111,7 @@ sub_1e4ah:
 	jr nz,l1e5fh		;1e5a	20 03 	  . 
 	ld (ENEMY_MOVE_COUNTER_L),hl		;1e5c	22 e0 e2 	" . . 
 l1e5fh:
-	ld ix,VARS_TABLE		;1e5f	dd 21 d8 e2 	. ! . . 
+	ld ix,TBL_ENEMIES		;1e5f	dd 21 d8 e2 	. ! . . 
 	ld a,(ENEMY_ENERGY)		;1e63	3a e2 e2 	: . . 
 	ld hl,0e2fah		;1e66	21 fa e2 	! . . 
 	and a			;1e69	a7 	. 
@@ -5119,7 +5122,7 @@ l1e5fh:
 	jr nz,l1e79h		;1e72	20 05 	  . 
 
     ; Increment enemy's energy
-	inc (ix + 10)		;1e74	dd 34 0a VARS_TABLE + 0xa = 0xE2E2 = ENEMY_ENERGY
+	inc (ix + 10)		;1e74	dd 34 0a TBL_ENEMIES + 0xa = 0xE2E2 = ENEMY_ENERGY
 l1e77h:
 	ld (hl),070h		;1e77	36 70 	6 p 
 l1e79h:
@@ -5157,7 +5160,7 @@ l1each:
 	jr nz,l1eb5h		;1eb1	20 02 	  . 
 	ld a,052h		;1eb3	3e 52 	> R 
 l1eb5h:
-	ld (VARS_TABLE),a		;1eb5	32 d8 e2 	2 . . 
+	ld (TBL_ENEMIES),a		;1eb5	32 d8 e2 	2 . . 
 	ld a,070h		;1eb8	3e 70 	> p 
 	ld (0e2fah),a		;1eba	32 fa e2 	2 . . 
 	ld a,(0e261h)		;1ebd	3a 61 e2 	: a . 
@@ -5327,7 +5330,7 @@ l1ff9h:
 	bit 4,(ix + 0)		;1ffc	dd cb 00 66 	. . . f 
 	ret nz			;2000	c0 	. 
 	pop hl			;2001	e1 	. 
-	ld hl,VARS_TABLE		;2002	21 d8 e2 	! . . 
+	ld hl,TBL_ENEMIES		;2002	21 d8 e2 	! . . 
 	res 4,(hl)		;2005	cb a6 	. . 
 	ld hl,VARS_TABLE2		;2007	21 e8 e2 	! . . 
 	res 4,(hl)		;200a	cb a6 	. . 
@@ -5402,16 +5405,16 @@ sub_20a2h:
 	ld a,(0e701h)		;20a2	3a 01 e7 	: . . 
 	and 003h		;20a5	e6 03 	. . 
 	jr nz,l20adh		;20a7	20 04 	  . 
-	res 5,(ix + 0)		;20a9	dd cb 00 ae 	. . . . 
+	res 5,(ix + ENEMY_LOOKAT_IDX)	;20a9	dd cb 00 ae
 l20adh:
 	push hl			;20ad	e5 	. 
 	ld a,(ix + 1)		;20ae	dd 7e 01 	. ~ . 
 	cp 001h		;20b1	fe 01 	. . 
 	jr z,l20d2h		;20b3	28 1d 	( . 
-	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;20b5	2a 0c e8 	* . . 
-	add hl,de			;20b8	19 	. 
-	ld hl,0e701h		;20b9	21 01 e7 	! . . 
-	bit 6,(ix + 0)		;20bc	dd cb 00 76 	. . . v 
+	ld hl,(ME_INITIAL_FALL_SPEED_COPY)	;20b5	2a 0c e8
+	add hl,de			                ;20b8	19
+	ld hl,0e701h		                ;20b9	21 01 e7
+	bit 6,(ix + ENEMY_LOOKAT_IDX)		;20bc	dd cb 00 76
 	jr z,l20cch		;20c0	28 0a 	( . 
 	jr c,l20c8h		;20c2	38 04 	8 . 
 	set 4,(hl)		;20c4	cb e6 	. . 
@@ -5431,7 +5434,7 @@ l20d7h:
 l20d9h:
 	pop hl			;20d9	e1 	. 
 	call sub_2d01h		;20da	cd 01 2d 	. . - 
-	ld a,(ix + 0)		;20dd	dd 7e 00 	. ~ . 
+	ld a,(ix + ENEMY_LOOKAT_IDX)	;20dd	dd 7e 00
 	jp l1a7eh		;20e0	c3 7e 1a 	. ~ . 
 sub_20e3h:
 	call sub_2109h		;20e3	cd 09 21 	. . ! 
@@ -5449,12 +5452,12 @@ sub_20e3h:
 l20fdh:
 	ld hl,l211ch		;20fd	21 1c 21 	! . ! 
 l2100h:
-	call CHECK_VAL_HL_PLUS_B_0XFF		;2100	cd 18 1b 	. . . 
-	ret nc			;2103	d0 	. 
-	set 5,(ix + 0)		;2104	dd cb 00 ee 	. . . . 
-	ret			;2108	c9 	. 
+	call CHECK_VAL_HL_PLUS_B_0XFF		;2100	cd 18 1b
+	ret nc			                    ;2103	d0 	. 
+	set 5,(ix + ENEMY_LOOKAT_IDX)		;2104	dd cb 00 ee
+	ret			                        ;2108	c9
 sub_2109h:
-	ld a,(ix + 0)		;2109	dd 7e 00 	. ~ . 
+	ld a,(ix + ENEMY_LOOKAT_IDX)		;2109	dd 7e 00
 	and 020h		;210c	e6 20 	.   
 	ret nz			;210e	c0 	. 
 	jp sub_1ae7h		;210f	c3 e7 1a 	. . . 
@@ -5610,7 +5613,7 @@ l2239h:
 	call sub_20a2h		;2245	cd a2 20 	. .   
 	jp l2e70h		;2248	c3 70 2e 	. p . 
 sub_224bh:
-	ld a,(VARS_TABLE)		;224b	3a d8 e2 	: . . 
+	ld a,(TBL_ENEMIES)		;224b	3a d8 e2 	: . . 
 	and 020h		;224e	e6 20 	.   
 	ret nz			;2250	c0 	. 
 	ld hl,l00e0h		;2251	21 e0 00 	! . . 
@@ -6262,7 +6265,7 @@ l27dfh:
 	and 010h		;27e7	e6 10 	. . 
 	jr z,l284fh		;27e9	28 64 	( d 
 	push ix		;27eb	dd e5 	. . 
-	ld ix,VARS_TABLE		;27ed	dd 21 d8 e2 	. ! . . 
+	ld ix,TBL_ENEMIES		;27ed	dd 21 d8 e2 	. ! . . 
 	call sub_287eh		;27f1	cd 7e 28 	. ~ ( 
 	ld (ix+017h),008h		;27f4	dd 36 17 08 	. 6 . . 
 	ld (ix+016h),01ah		;27f8	dd 36 16 1a 	. 6 . . 
