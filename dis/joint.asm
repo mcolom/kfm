@@ -208,8 +208,14 @@ ENEMY_FRAME: EQU TBL_ENEMIES + ENEMY_FRAME_IDX
 ENEMY_FRAME_COUNTER_IDX: EQU 7
 ENEMY_FRAME_COUNTER: EQU TBL_ENEMIES + ENEMY_FRAME_COUNTER_IDX ; Ticks the enemy stays in its current frame
 
-ENEMY_MOVE_COUNTER_L: EQU TBL_ENEMIES + 8
-ENEMY_MOVE_COUNTER_H: EQU TBL_ENEMIES + 9 ; 8, 9: enemy moving counter
+; Surprisingly only for levels 1, 2, and 5
+ENEMY_MOVE_COUNTER_L_IDX: EQU 8
+ENEMY_MOVE_COUNTER_H_IDX: EQU 9
+ENEMY_MOVE_COUNTER_L: EQU TBL_ENEMIES + ENEMY_MOVE_COUNTER_L_IDX
+ENEMY_MOVE_COUNTER_H: EQU TBL_ENEMIES + ENEMY_MOVE_COUNTER_H_IDX ; 8, 9: enemy moving counter
+
+
+
 ENEMY_ENERGY: EQU TBL_ENEMIES + 10 ; Enemy's energy
 ENEMY_STEADY_COUNTER: EQU TBL_ENEMIES + 11 ; This controls the time left the energy is standing without moving.
 ;
@@ -5398,7 +5404,7 @@ l2071h:
 	ld h,(ix + ENEMY_POS_H_IDX)		;2074	dd 66 03
 	sbc hl,de		;2077	ed 52 	. R 
 	jr c,l2080h		;2079	38 05 	8 . 
-	ld a,(ix + 8)		;207b	dd 7e 08 	. ~ . 
+	ld a,(ix + ENEMY_MOVE_COUNTER_L_IDX)		;207b	dd 7e 08 level 1
 	and a			;207e	a7 	. 
 	ret nz			;207f	c0 	. 
 l2080h:
@@ -5408,7 +5414,7 @@ l2085h:
 	ld (ix + CURRENT_FRAME_IDX), 0	        ;2085	dd 36 06 00
 	ld (ix + ENEMY_FRAME_COUNTER_IDX), 7	;2089	dd 36 07 07 level 1
 	ld (ix + ENEMY_STATE_IDX), 5            ;208d	dd 36 01 05
-	ld (ix + 8), 37 		                ;2091	dd 36 08 25
+	ld (ix + ENEMY_MOVE_COUNTER_L_IDX), 37  ;2091	dd 36 08 25 level 1
 	ret			                            ;2095	c9
 l2096h:
 	call sub_2cb9h		;2096	cd b9 2c 	. . , 
@@ -5618,7 +5624,7 @@ l2220h:
 	ld a,(0e013h)		;222c	3a 13 e0 	: . . 
 	ld hl,0e1a0h		;222f	21 a0 e1 	! . . 
 	call sub_1214h		;2232	cd 14 12 	. . . 
-	ld (ix + 8),a		;2235	dd 77 08 	. w . 
+	ld (ix + ENEMY_MOVE_COUNTER_L_IDX),a	;2235	dd 77 08 level 2
 	ret			;2238	c9 	. 
 l2239h:
 	call sub_2cb9h		;2239	cd b9 2c 	. . , 
@@ -5891,7 +5897,7 @@ l2488h:
 	ld h,(ix + ENEMY_POS_H_IDX)		;248f	dd 66 03
 	sbc hl,de		;2492	ed 52 	. R 
 	jp nc,l2080h		;2494	d2 80 20 	. .   
-	ld a,(ix + 8)		;2497	dd 7e 08 	. ~ . 
+	ld a,(ix + ENEMY_MOVE_COUNTER_L_IDX)	;2497	dd 7e 08 level 2
 	and a			;249a	a7 	. 
 	jp z,l2080h		;249b	ca 80 20 	. .   
 	ret			;249e	c9 	. 
@@ -6465,11 +6471,11 @@ l2962h:
 	ld (ix + 6),a		;2962	dd 77 06 	. w . 
 l2965h:
 	call sub_2ba0h		;2965	cd a0 2b 	. . + 
-	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;2968	2a 0c e8 	* . . 
+	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;2968	2a 0c e8
 	ld de,0fb80h		;296b	11 80 fb 	. . . 
 	add hl,de			;296e	19 	. 
 	ret c			;296f	d8 	. 
-	ld a,(ix + 8)		;2970	dd 7e 08 	. ~ . 
+	ld a,(ix + ENEMY_MOVE_COUNTER_L_IDX)	;2970	dd 7e 08 level 5
 	and a			;2973	a7 	. 
 	jp nz,l2ae9h		;2974	c2 e9 2a 	. . * 
 l2977h:
@@ -6613,14 +6619,14 @@ l2a87h:
 	ld bc,l0b10h		;2a88	01 10 0b 	. . . 
 	djnz $-49		;2a8b	10 cd 	. . 
 	inc a			;2a8d	3c 	< 
-	add hl,hl			;2a8e	29 	) 
-	call sub_1c7ah		;2a8f	cd 7a 1c 	. z . 
-	call sub_2ab6h		;2a92	cd b6 2a 	. . * 
-	call sub_2ba0h		;2a95	cd a0 2b 	. . + 
-	ld a,(ix + 8)		;2a98	dd 7e 08 	. ~ . 
-	and a			;2a9b	a7 	. 
-	jp z,l2977h		;2a9c	ca 77 29 	. w ) 
-	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;2a9f	2a 0c e8 	* . . 
+	add hl,hl			;2a8e	29
+	call sub_1c7ah		;2a8f	cd 7a 1c
+	call sub_2ab6h		;2a92	cd b6 2a
+	call sub_2ba0h		;2a95	cd a0 2b
+	ld a,(ix + ENEMY_MOVE_COUNTER_L_IDX)		;2a98	dd 7e 08 level 5
+	and a			;2a9b	a7
+	jp z,l2977h		;2a9c	ca 77 29
+	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;2a9f	2a 0c e8
 	ld de,0fb00h		;2aa2	11 00 fb 	. . . 
 	add hl,de			;2aa5	19 	. 
 	jp c,l2937h		;2aa6	da 37 29 	. 7 ) 
@@ -6647,7 +6653,7 @@ l2ad9h:
 	ld a,(0e012h)		;2ad9	3a 12 e0 	: . . 
 	ld hl,0e1a0h		;2adc	21 a0 e1 	! . . 
 	call sub_1214h		;2adf	cd 14 12 	. . . 
-	ld (ix + 8),a		;2ae2	dd 77 08 	. w . 
+	ld (ix + ENEMY_MOVE_COUNTER_L_IDX),a	;2ae2	dd 77 08 level 5
 	ld (ix + ENEMY_FRAME_COUNTER_IDX), 9	;2ae5	dd 36 07 09 level 5
 l2ae9h:
 	ld (ix + ENEMY_STATE_IDX), 5    ;2ae9	dd 36 01 05
