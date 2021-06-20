@@ -205,7 +205,8 @@ ENEMY_FALLING_HEIGHT_H_IDX: EQU 5 ; Height of boss when falling after being defe
 ENEMY_FRAME_IDX: EQU 6 ; Enemy's displayed frame
 ENEMY_FRAME: EQU TBL_ENEMIES + ENEMY_FRAME_IDX
 
-ENEMY_FRAME_COUNTER: EQU TBL_ENEMIES + 7 ; Ticks the enemy stays in its current frame
+ENEMY_FRAME_COUNTER_IDX: EQU 7
+ENEMY_FRAME_COUNTER: EQU TBL_ENEMIES + ENEMY_FRAME_COUNTER_IDX ; Ticks the enemy stays in its current frame
 
 ENEMY_MOVE_COUNTER_L: EQU TBL_ENEMIES + 8
 ENEMY_MOVE_COUNTER_H: EQU TBL_ENEMIES + 9 ; 8, 9: enemy moving counter
@@ -4759,16 +4760,16 @@ l1b96h:
 	ld (ix + ENEMY_STATE_IDX), 1 ;1b96	dd 36 01 01
 	ld a,(hl)			;1b9a	7e 	~ 
 	inc hl			;1b9b	23 	# 
-	ld (ix + 7),a		;1b9c	dd 77 07 	. w . 
-	call SET_MR_REACTION_FROM_HL		;1b9f	cd a5 1c 	. . . 
+	ld (ix + ENEMY_FRAME_COUNTER_IDX),a		;1b9c	dd 77 07 level 1
+	call SET_MR_REACTION_FROM_HL		    ;1b9f	cd a5 1c
 	xor a			;1ba2	af 	. 
 	ld (ix + 14),a		;1ba3	dd 77 0e 	. w . 
 	ld (ix + 15),a		;1ba6	dd 77 0f 	. w . 
 	ret			;1ba9	c9 	. 
 l1baah:
-	dec (ix + FRAME_COUNTER_IDX)		;1baa	dd 35 07
-	jp nz,l1bc4h		;1bad	c2 c4 1b 	. . . 
-	call GET_MR_REACTION_IN_HL		;1bb0	cd ac 1c
+	dec (ix + ENEMY_FRAME_COUNTER_IDX)	;1baa	dd 35 07 level 1
+	jp nz,l1bc4h		                ;1bad	c2 c4 1b
+	call GET_MR_REACTION_IN_HL		    ;1bb0	cd ac 1c
 	ld a,(hl)			;1bb3	7e 	~ 
 	and a			;1bb4	a7 	. 
 	jp m,sub_1b7ah		;1bb5	fa 7a 1b 	. z . 
@@ -4776,8 +4777,8 @@ l1baah:
 	ld (ix + ENEMY_FRAME_IDX),a		;1bb9	dd 77 06
 	ld a,(hl)			;1bbc
 	inc hl			;1bbd	23
-	ld (ix + FRAME_COUNTER_IDX),a		;1bbe	dd 77 07
-	call SET_MR_REACTION_FROM_HL		;1bc1	cd a5 1c 	. . . 
+	ld (ix + ENEMY_FRAME_COUNTER_IDX),a		;1bbe	dd 77 07 level 1
+	call SET_MR_REACTION_FROM_HL		    ;1bc1	cd a5 1c
 l1bc4h:
 	ld e,(ix + 14)		;1bc4	dd 5e 0e 	. ^ . 
 	ld d,(ix + 15)		;1bc7	dd 56 0f 	. V . 
@@ -4803,9 +4804,9 @@ sub_1befh:
 l1bf2h:
 	call sub_1c7ah		;1bf2	cd 7a 1c 	. z . 
 l1bf5h:
-	dec (ix + 7)		;1bf5	dd 35 07 	. 5 . 
+	dec (ix + ENEMY_FRAME_COUNTER_IDX)		;1bf5	dd 35 07 ; level 1
 	jr nz,l1c08h		;1bf8	20 0e 	  . 
-	ld (ix + FRAME_COUNTER_IDX),7	;1bfa	dd 36 07 07
+	ld (ix + ENEMY_FRAME_COUNTER_IDX), 7	;1bfa	dd 36 07 07
 	dec (ix + ENEMY_FRAME_IDX)	;1bfe	dd 35 06
 	jp p,l1c08h		                ;1c01	f2 08 1c
 	ld (ix + ENEMY_FRAME_IDX), 3	;1c04	dd 36 06 03
@@ -5266,14 +5267,14 @@ l1f50h:
 	call l1be2h		;1f59	cd e2 1b 	. . . 
 	call sub_20e3h		;1f5c	cd e3 20 	. .   
 	jp c,l2036h		;1f5f	da 36 20 	. 6   
-	dec (ix + 7)		;1f62	dd 35 07 	. 5 . 
+	dec (ix + ENEMY_FRAME_COUNTER_IDX)		;1f62	dd 35 07 level 1
 	ret nz			;1f65	c0 	. 
 	dec (ix + 14)		;1f66	dd 35 0e 	. 5 . 
 	jp m,l2085h		;1f69	fa 85 20 	. .   
 	jr z,l1fc2h		;1f6c	28 54 	( T 
-	inc (ix + ENEMY_FRAME_IDX)		;1f6e	dd 34 06
-	ld (ix + FRAME_COUNTER_IDX), 5	;1f71	dd 36 07 05
-	ld a,(ENEMY_ATTACK_STEP)		;1f75	3a e6 e2
+	inc (ix + ENEMY_FRAME_IDX)		        ;1f6e	dd 34 06
+	ld (ix + ENEMY_FRAME_COUNTER_IDX), 5	;1f71	dd 36 07 05
+	ld a,(ENEMY_ATTACK_STEP)		        ;1f75	3a e6 e2
 	cp 002h		;1f78	fe 02 	. . 
 	ret nz			;1f7a	c0 	. 
 	call sub_1dd4h		;1f7b	cd d4 1d 	. . . 
@@ -5313,8 +5314,8 @@ l1fb3h:
 l1fc2h:
 	dec (ix + 11)		;1fc2	dd 35 0b 	. 5 . 
 	jr nz,l1fd2h		;1fc5	20 0b 	  . 
-	inc (ix + ENEMY_FRAME_IDX)	;1fc7	dd 34 06
-	ld (ix + FRAME_COUNTER_IDX),5	;1fca	dd 36 07 05
+	inc (ix + ENEMY_FRAME_IDX)	            ;1fc7	dd 34 06
+	ld (ix + ENEMY_FRAME_COUNTER_IDX) ,5	;1fca	dd 36 07 05 level 1
 	ret			;1fce	c9 	. 
 l1fcfh:
 	call sub_2ce8h		;1fcf	cd e8 2c 	. . , 
@@ -5350,10 +5351,12 @@ l1ff9h:
 l200dh:
 	ld (ix + 1),002h		;200d	dd 36 01 02 	. 6 . . 
 l2011h:
-	call l1be2h		;2011	cd e2 1b 	. . . 
-	dec (ix + 7)		;2014	dd 35 07 	. 5 . 
-	jp z,l1fcfh		;2017	ca cf 1f 	. . . 
-	ret			;201a	c9 	. 
+	call l1be2h		                    ;2011	cd e2 1b
+	dec (ix + ENEMY_FRAME_COUNTER_IDX)	;2014	dd 35 07
+	jp z,l1fcfh		                    ;2017	ca cf 1f
+	ret			                        ;201a	c9
+
+    ; Question: unused code here?
 	ld de,(0e104h)		;201b	ed 5b 04 e1 	. [ . . 
 	ld l,(ix + 2)		;201f	dd 6e 02 	. n . 
 	ld h,(ix + 3)		;2022	dd 66 03 	. f . 
@@ -5402,11 +5405,11 @@ l2080h:
 	ld (ix + ENEMY_STATE_IDX), 0 ;2080	dd 36 01 00
 	ret			;2084	c9 	. 
 l2085h:
-	ld (ix + CURRENT_FRAME_IDX), 0	;2085	dd 36 06 00
-	ld (ix + FRAME_COUNTER_IDX), 7	;2089	dd 36 07 07
-	ld (ix + ENEMY_STATE_IDX), 5    ;208d	dd 36 01 05
-	ld (ix + 8),025h		;2091	dd 36 08 25 	. 6 . % 
-	ret			;2095	c9 	. 
+	ld (ix + CURRENT_FRAME_IDX), 0	        ;2085	dd 36 06 00
+	ld (ix + ENEMY_FRAME_COUNTER_IDX), 7	;2089	dd 36 07 07 level 1
+	ld (ix + ENEMY_STATE_IDX), 5            ;208d	dd 36 01 05
+	ld (ix + 8), 37 		                ;2091	dd 36 08 25
+	ret			                            ;2095	c9
 l2096h:
 	call sub_2cb9h		;2096	cd b9 2c 	. . , 
 	call sub_2c78h		;2099	cd 78 2c 	. x , 
@@ -5530,14 +5533,14 @@ l215dh:
 	call l1be2h		;2167	cd e2 1b 	. . . 
 	call sub_224bh		;216a	cd 4b 22 	. K " 
 	jp c,l220ah		;216d	da 0a 22 	. . " 
-	dec (ix + FRAME_COUNTER_IDX)		;2170	dd 35 07
+	dec (ix + ENEMY_FRAME_COUNTER_IDX)		;2170	dd 35 07 level 3
 	ret nz			;2173	c0 	. 
 	dec (ix + 14)		;2174	dd 35 0e 	. 5 . 
 	jr z,l21d4h		;2177	28 5b 	( [ 
-	inc (ix + ENEMY_FRAME_IDX)		;2179	dd 34 06
-	ld (ix + FRAME_COUNTER_IDX), 11		;217c	dd 36 07 0b
-	ld a,(ENEMY_ATTACK_STEP)		;2180	3a e6 e2 	: . . 
-	cp 002h		;2183	fe 02 	. . 
+	inc (ix + ENEMY_FRAME_IDX)		        ;2179	dd 34 06
+	ld (ix + ENEMY_FRAME_COUNTER_IDX), 11	;217c	dd 36 07 0b level 3
+	ld a,(ENEMY_ATTACK_STEP)		        ;2180	3a e6 e2
+	cp 2		                            ;2183	fe 02
 	ret nz			;2185	c0 	. 
 	call sub_1dd4h		;2186	cd d4 1d 	. . . 
 	ld hl,(ENEMY_POS)		;2189	2a da e2 	* . . 
@@ -5595,23 +5598,23 @@ l21ech:
 	ld (ix + 14),003h		;21fb	dd 36 0e 03 	. 6 . . 
 	ret			;21ff	c9 	. 
 l2200h:
-	call l1be2h		;2200	cd e2 1b 	. . . 
-	dec (ix + 7)		;2203	dd 35 07 	. 5 . 
-	jp z,l1f50h		;2206	ca 50 1f 	. P . 
-	ret			;2209	c9 	. 
+	call l1be2h		                        ;2200	cd e2 1b
+	dec (ix + ENEMY_FRAME_COUNTER_IDX)		;2203	dd 35 07 level 3
+	jp z,l1f50h		                        ;2206	ca 50 1f
+	ret			                            ;2209	c9
 l220ah:
-	ld (ix + ENEMY_FRAME_IDX), 0		;220a	dd 36 06 00
-	ld (ix + 7),00bh		;220e	dd 36 07 0b 	. 6 . . 
-	ld (ix + ENEMY_STATE_IDX), 2    ;2212	dd 36 01 02
-	ret			;2216	c9 	. 
+	ld (ix + ENEMY_FRAME_IDX), 0		    ;220a	dd 36 06 00
+	ld (ix + ENEMY_FRAME_COUNTER_IDX), 11	;220e	dd 36 07 0b level 3
+	ld (ix + ENEMY_STATE_IDX), 2            ;2212	dd 36 01 02
+	ret			                            ;2216	c9
 l2217h:
 	call sub_2d13h		;2217	cd 13 2d 	. . - 
 	call sub_224bh		;221a	cd 4b 22 	. K " 
 	jp l206dh		;221d	c3 6d 20 	. m   
 l2220h:
-	ld (ix + ENEMY_FRAME_IDX), 0	;2220	dd 36 06 00
-	ld (ix + FRAME_COUNTER_IDX), 7	;2224	dd 36 07 07
-	ld (ix + ENEMY_STATE_IDX), 5	;2228	dd 36 01 05
+	ld (ix + ENEMY_FRAME_IDX), 0	        ;2220	dd 36 06 00
+	ld (ix + ENEMY_FRAME_COUNTER_IDX), 7	;2224	dd 36 07 07 level 3
+	ld (ix + ENEMY_STATE_IDX), 5	        ;2228	dd 36 01 05
 	ld a,(0e013h)		;222c	3a 13 e0 	: . . 
 	ld hl,0e1a0h		;222f	21 a0 e1 	! . . 
 	call sub_1214h		;2232	cd 14 12 	. . . 
@@ -5695,13 +5698,13 @@ l22d2h:
 	call l1be2h		;22d2	cd e2 1b 	. . . 
 	call sub_24b0h		;22d5	cd b0 24 	. . $ 
 	jp c,l2448h		;22d8	da 48 24 	. H $ 
-	dec (ix + 7)		;22db	dd 35 07 	. 5 . 
+	dec (ix + ENEMY_FRAME_COUNTER_IDX)		;22db	dd 35 07 level 2
 	ret nz			;22de	c0 	. 
 	dec (ix + 14)		;22df	dd 35 0e 	. 5 . 
 	jr z,l2344h		;22e2	28 60 	( ` 
 	jp m,l23b4h		;22e4	fa b4 23 	. . # 
 	inc (ix + ENEMY_FRAME_IDX)		;22e7	dd 34 06
-	ld (ix + FRAME_COUNTER_IDX), 11		;22ea	dd 36 07 0b
+	ld (ix + ENEMY_FRAME_COUNTER_IDX), 11		;22ea	dd 36 07 0b level 2
 	ld iy,TBL_E2FB		;22ee	fd 21 fb e2 	. ! . . 
 	bit 4,(iy+000h)		;22f2	fd cb 00 66 	. . . f 
 	jr z,l22fch		;22f6	28 04 	( . 
@@ -5738,7 +5741,7 @@ l2309h:
 	ret			;2343	c9 	. 
 l2344h:
 	inc (ix + 14)		;2344	dd 34 0e 	. 4 . 
-	inc (ix + 7)		;2347	dd 34 07 	. 4 . 
+	inc (ix + ENEMY_FRAME_COUNTER_IDX)		;2347	dd 34 07 level 2
 	ld iy,TBL_E2FB		;234a	fd 21 fb e2 	. ! . . 
 	bit 4,(iy+000h)		;234e	fd cb 00 66 	. . . f 
 	jr z,l2368h		;2352	28 14 	( . 
@@ -5825,16 +5828,16 @@ l23edh:
 	ld b,00bh		;23f7	06 0b 	. . 
 l23f9h:
 	ld (ix + ENEMY_FRAME_IDX),b		;23f9	dd 70 06
-	ld (ix + FRAME_COUNTER_IDX), 11	;23fc	dd 36 07 0b
+	ld (ix + ENEMY_FRAME_COUNTER_IDX), 11	;23fc	dd 36 07 0b level 2
 	ld (ix + 14), 2		            ;2400	dd 36 0e 02
 	ret			;2404	c9 	. 
 l2405h:
 	ld (ix + 1), 2          		;2405	dd 36 01 02
 l2409h:
 	call l1be2h		;2409	cd e2 1b 	. . . 
-	dec (ix + 7)		;240c	dd 35 07 	. 5 . 
+	dec (ix + ENEMY_FRAME_COUNTER_IDX)		;240c	dd 35 07 level 2
 	ret nz			;240f	c0 	. 
-	inc (ix + 7)		;2410	dd 34 07 	. 4 . 
+	inc (ix + ENEMY_FRAME_COUNTER_IDX)		;2410	dd 34 07
 	ld a,(0e30bh)		;2413	3a 0b e3 	: . . 
 	and 010h		;2416	e6 10 	. . 
 	jr nz,l2427h		;2418	20 0d 	  . 
@@ -5864,7 +5867,7 @@ l2448h:
 	call sub_2d19h		;2453	cd 19 2d 	. . - 
 	jr c,l246fh		;2456	38 17 	8 . 
 	ld (ix + 12),b		;2458	dd 70 0c 	. p . 
-	ld (ix + FRAME_COUNTER_IDX),006h	;245b	dd 36 07 06
+	ld (ix + ENEMY_FRAME_COUNTER_IDX), 6	;245b	dd 36 07 06 level 2
 	ld a,(ix-002h)		;245f	dd 7e fe 	. ~ . 
 	ld (ix-002h),01ch		;2462	dd 36 fe 1c 	. 6 . . 
 	and a			;2466	a7 	. 
@@ -5989,7 +5992,7 @@ sub_250fh:
 	ld a,(ix + 14)		;2549	dd 7e 0e 	. ~ . 
 	and a			;254c	a7 	. 
 	call m,sub_25afh		;254d	fc af 25 	. . % 
-	dec (ix + FRAME_COUNTER_IDX)		;2550	dd 35 07
+	dec (ix + ENEMY_FRAME_COUNTER_IDX)		;2550	dd 35 07 level 4
 	ret nz			;2553	c0 	. 
 	and a			;2554	a7 	. 
 	jr z,l256ch		;2555	28 15 	( . 
@@ -5998,7 +6001,7 @@ sub_250fh:
 	ld (ix + ENEMY_FRAME_IDX),a		    ;255d	dd 77 06
 	call sub_34ddh		;2560	cd dd 34 	. . 4 
 l2563h:
-	ld (ix + FRAME_COUNTER_IDX), 11	;2563	dd 36 07 0b
+	ld (ix + ENEMY_FRAME_COUNTER_IDX), 11	;2563	dd 36 07 0b level 4
 	ld (ix + 14),000h		;2567	dd 36 0e 00 	. 6 . . 
 	ret			;256b	c9 	. 
 l256ch:
@@ -6011,7 +6014,7 @@ l2575h:
 	ld a,(0e011h)		;257c	3a 11 e0 	: . . 
 	ld hl,0e1a5h		;257f	21 a5 e1 	! . . 
 	call sub_1214h		;2582	cd 14 12 	. . . 
-	ld (ix + FRAME_COUNTER_IDX),a		;2585	dd 77 07
+	ld (ix + ENEMY_FRAME_COUNTER_IDX),a		;2585	dd 77 07 level 4
 	ret			;2588	c9 	. 
 l2589h:
 	call sub_2ce8h		;2589	cd e8 2c 	. . , 
@@ -6030,21 +6033,22 @@ l2592h:
 	jr c,l25a3h		;25a0	38 01 	8 . 
 	inc b			;25a2	04 	. 
 l25a3h:
-	ld (ix + 14),b		;25a3	dd 70 0e 	. p . 
-	ld (ix + ENEMY_FRAME_IDX), 4	;25a6	dd 36 06 04
-	ld (ix + FRAME_COUNTER_IDX), 11	;25aa	dd 36 07 0b
-	ret			;25ae	c9 	. 
+	ld (ix + 14),b		                    ;25a3	dd 70 0e
+	ld (ix + ENEMY_FRAME_IDX), 4	        ;25a6	dd 36 06 04
+	ld (ix + ENEMY_FRAME_COUNTER_IDX), 11	;25aa	dd 36 07 0b level 4
+	ret			                            ;25ae	c9
+
 sub_25afh:
 	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;25af	2a 0c e8 	* . . 
 	ld de,0f380h		;25b2	11 80 f3 	. . . 
 	add hl,de			;25b5	19 	. 
 	ret nc			;25b6	d0 	. 
 	pop af			;25b7	f1 	. 
-	ld (ix + ENEMY_FRAME_IDX), 0		;25b8	dd 36 06 00
-	ld (ix + 7), 7		                ;25bc	dd 36 07 07
+	ld (ix + ENEMY_FRAME_IDX), 0		    ;25b8	dd 36 06 00
+	ld (ix + ENEMY_FRAME_COUNTER_IDX), 7    ;25bc	dd 36 07 07 level 4
 	jp l2080h		;25c0	c3 80 20 	. .   
 	call l1be2h		;25c3	cd e2 1b 	. . . 
-	dec (ix + 7)		;25c6	dd 35 07 	. 5 . 
+	dec (ix + ENEMY_FRAME_COUNTER_IDX)		;25c6	dd 35 07 level 4
 	ret nz			;25c9	c0 	. 
 	ld a,(0e2d7h)		;25ca	3a d7 e2 	: . . 
 	and a			;25cd	a7 	. 
@@ -6108,7 +6112,7 @@ l264bh:
 	ld hl,l28d6h		;2658	21 d6 28 	! . ( 
 	jr c,l266eh		;265b	38 11 	8 . 
 	ld a,(hl)			;265d	7e 	~ 
-	ld (ix + FRAME_COUNTER_IDX),a		;265e	dd 77 07
+	ld (ix + ENEMY_FRAME_COUNTER_IDX),a		;265e	dd 77 07 level 4
 	ld (ix + ENEMY_STATE_IDX), 2    ;2661	dd 36 01 02
 	ld hl,0e2d6h		;2665	21 d6 e2 	! . . 
 	ld a,(hl)			;2668	7e 	~ 
@@ -6131,7 +6135,7 @@ l266eh:
 	cp 19		    ;268a	fe 13
 	jr c,l26ceh		;268c	38 40
 	jr nz,l26edh	;268e	20 5d 	  ] 
-	ld (ix + FRAME_COUNTER_IDX), 28		;2690	dd 36 07 1c
+	ld (ix + ENEMY_FRAME_COUNTER_IDX), 28		;2690	dd 36 07 1c
 	ld a, 38		;2694	3e 26
 	jr l26d2h		;2696	18 3a 	. : 
 l2698h:
@@ -6161,7 +6165,7 @@ l26d2h:
 	ld (ix + ENEMY_FRAME_IDX),a		;26d2	dd 77 06
 	ret			;26d5	c9 	. 
 	call l1be2h		;26d6	cd e2 1b 	. . . 
-	dec (ix + FRAME_COUNTER_IDX)		;26d9	dd 35 07
+	dec (ix + ENEMY_FRAME_COUNTER_IDX)		;26d9	dd 35 07 level 4
 	ret nz			;26dc	c0 	. 
 	ld a,(ix + ENEMY_FRAME_IDX)		;26dd	dd 7e 06
 	inc a			;26e0	3c 	< 
@@ -6203,12 +6207,12 @@ l270eh:
 	ld de,0a100h		;2731	11 00 a1 	. . . 
 	jp l2071h		;2734	c3 71 20 	. q   
 l2737h:
-	dec (ix + 7)		;2737	dd 35 07 	. 5 . 
+	dec (ix + ENEMY_FRAME_COUNTER_IDX)		;2737	dd 35 07 level 4
 	jr nz,l2752h		;273a	20 16 	  . 
-	inc (ix + 7)		;273c	dd 34 07 	. 4 . 
+	inc (ix + ENEMY_FRAME_COUNTER_IDX)		;273c	dd 34 07
 	call sub_2887h		;273f	cd 87 28 	. . ( 
 	jr nz,l27b0h		;2742	20 6c 	  l 
-	ld (ix + 7),007h		;2744	dd 36 07 07 	. 6 . . 
+	ld (ix + ENEMY_FRAME_COUNTER_IDX), 7	;2744	dd 36 07 07 level 4
 	dec (ix + ENEMY_FRAME_IDX)		;2748	dd 35 06
 	jp p,l2752h		;274b	f2 52 27 	. R ' 
 	ld (ix + ENEMY_FRAME_IDX), 3	;274e	dd 36 06 03
@@ -6238,7 +6242,7 @@ l277bh:
 	call l1be2h		;2784	cd e2 1b 	. . . 
 	call sub_2887h		;2787	cd 87 28 	. . ( 
 	jr z,l27a3h		;278a	28 17 	( . 
-	dec (ix + FRAME_COUNTER_IDX)	;278c	dd 35 07
+	dec (ix + ENEMY_FRAME_COUNTER_IDX)	;278c	dd 35 07 level 4
 	ret nz			;278f	c0 	. 
 	ld a,(ix + 14)		;2790	dd 7e 0e 	. ~ . 
 	and a			;2793	a7 	. 
@@ -6249,7 +6253,7 @@ l277bh:
 	jp l2563h		;27a0	c3 63 25 	. c % 
 l27a3h:
 	ld (ix + ENEMY_FRAME_IDX), 0	;27a3	dd 36 06 00
-	ld (ix + FRAME_COUNTER_IDX), 2	;27a7	dd 36 07 02
+	ld (ix + ENEMY_FRAME_COUNTER_IDX), 2	;27a7	dd 36 07 02 level 4
 	ld (ix + ENEMY_STATE_IDX),  11	;27ab	dd 36 01 0b
 	ret			;27af	c9 	. 
 l27b0h:
@@ -6309,9 +6313,10 @@ l2800h:
 	ret			;283c	c9 	. 
 l283dh:
     ; Weird negative addressing here
+    ; Question: WHY???
 	ld (ix-00ah), 0		;283d	dd 36 f6 00 This seems to be ENEMY_FRAME_IDX
-	ld (ix-009h), 2		;2841	dd 36 f7 02 	. 6 . . 
-	ld (ix-00fh), 0		;2845	dd 36 f1 00 It seems to be ENEMY_STATE
+	ld (ix-009h), 2		;2841	dd 36 f7 02 This seems to be ENEMY_FRAME_COUNTER_IDX
+	ld (ix-00fh), 0		;2845	dd 36 f1 00 Thiis seems to be ENEMY_STATE
 	ld hl,0e700h		;2849	21 00 e7 	! . . 
 	res 0,(hl)		;284c	cb 86 	. . 
 	ret			;284e	c9 	. 
@@ -6413,7 +6418,7 @@ l28dch:
 	jr nc,l292fh		;2903	30 2a 	0 * 
 	jr l2923h		;2905	18 1c 	. . 
 l2907h:
-	ld (ix + 7),007h		;2907	dd 36 07 07 	. 6 . . 
+	ld (ix + ENEMY_FRAME_COUNTER_IDX), 7	;2907	dd 36 07 07
 	ld (ix + 1),000h		;290b	dd 36 01 00 	. 6 . . 
 	ld (ix + 6),000h		;290f	dd 36 06 00 	. 6 . . 
 	ret			;2913	c9 	. 
@@ -6431,15 +6436,15 @@ l2923h:
 	jp c,l1f50h		;292a	da 50 1f 	. P . 
 	jr l2965h		;292d	18 36 	. 6 
 l292fh:
-	ld (ix + FRAME_COUNTER_IDX), 9		;292f	dd 36 07 09
-	ld (ix + ENEMY_FRAME_IDX), 4		;2933	dd 36 06 04
+	ld (ix + ENEMY_FRAME_COUNTER_IDX), 9 ;292f	dd 36 07 09 level 5
+	ld (ix + ENEMY_FRAME_IDX), 4		 ;2933	dd 36 06 04
 l2937h:
 	ld (ix + ENEMY_STATE_IDX), 6	;2937	dd 36 01 06
 	ret			;293b	c9 	. 
 sub_293ch:
-	dec (ix + FRAME_COUNTER_IDX)		;293c	dd 35 07
+	dec (ix + ENEMY_FRAME_COUNTER_IDX)		;293c	dd 35 07 level 5
 	jr nz,l2952h		;293f	20 11 	  . 
-	ld (ix + FRAME_COUNTER_IDX), 9		;2941	dd 36 07 09
+	ld (ix + ENEMY_FRAME_COUNTER_IDX), 9	;2941	dd 36 07 09 level 5
 	ld a,(ix + ENEMY_FRAME_IDX)		;2945	dd 7e 06
 	inc a		;2948	3c
 	cp 5		;2949	fe 05
@@ -6474,14 +6479,14 @@ l2977h:
 	add hl,de			;2981	19 	. 
 	jr nc,l29a0h		;2982	30 1c 	0 . 
 	ld a,(0e1aah)		;2984	3a aa e1 	: . . 
-	ld (ix + FRAME_COUNTER_IDX),a	;2987	dd 77 07
+	ld (ix + ENEMY_FRAME_COUNTER_IDX),a	;2987	dd 77 07 level 5
 	ld (ix + ENEMY_STATE_IDX), 7    ;298a	dd 36 01 07
 	ret			;298e	c9 	. 
 	ld de,(0e1abh)		;298f	ed 5b ab e1 	. [ . . 
 	call sub_1c70h		;2993	cd 70 1c 	. p . 
 	call l1be2h		;2996	cd e2 1b 	. . . 
 	call sub_2ba0h		;2999	cd a0 2b 	. . + 
-	dec (ix + FRAME_COUNTER_IDX)		;299c	dd 35 07
+	dec (ix + ENEMY_FRAME_COUNTER_IDX)		;299c	dd 35 07 level 5
 	ret nz			;299f	c0
 l29a0h:
 	call sub_2ce8h		;29a0	cd e8 2c 	. . , 
@@ -6502,12 +6507,12 @@ l29a3h:
 	ld b,010h		;29be	06 10 	. . 
 l29c0h:
 	ld (ix + ENEMY_FRAME_IDX),b		;29c0	dd 70 06
-	ld (ix + FRAME_COUNTER_IDX),5		;29c3	dd 36 07 05
+	ld (ix + ENEMY_FRAME_COUNTER_IDX),5		;29c3	dd 36 07 05 level 5
 	ld (ix + 14),005h		;29c7	dd 36 0e 05 	. 6 . . 
 	ret			;29cb	c9 	. 
 	call l1be2h		;29cc	cd e2 1b 	. . . 
 	call sub_2ba0h		;29cf	cd a0 2b 	. . + 
-	dec (ix + 7)		;29d2	dd 35 07 	. 5 . 
+	dec (ix + ENEMY_FRAME_COUNTER_IDX)		;29d2	dd 35 07 level 5
 	ret nz			;29d5	c0 	. 
 	dec (ix + 14)		;29d6	dd 35 0e 	. 5 . 
 	jr z,l2a3dh		;29d9	28 62 	( b 
@@ -6563,7 +6568,7 @@ l2a2ch:
 	ld hl,l2a87h		;2a34	21 87 2a 	! . * 
 	add hl,de			;2a37	19 	. 
 	ld a,(hl)			;2a38	7e 	~ 
-	ld (ix + 7),a		;2a39	dd 77 07 	. w . 
+	ld (ix + ENEMY_FRAME_COUNTER_IDX),a		;2a39	dd 77 07 level 5
 	ret			;2a3c	c9 	. 
 l2a3dh:
 	dec (ix + 11)		;2a3d	dd 35 0b 	. 5 . 
@@ -6571,8 +6576,8 @@ l2a3dh:
 	ld a,(0e012h)		;2a42	3a 12 e0 	: . . 
 	ld hl,0e1a5h		;2a45	21 a5 e1 	! . . 
 	call sub_1214h		;2a48	cd 14 12 	. . . 
-	ld (ix + 7),a		;2a4b	dd 77 07 	. w . 
-	ret			;2a4e	c9 	. 
+	ld (ix + ENEMY_FRAME_COUNTER_IDX),a		;2a4b	dd 77 07 level 5
+	ret			        ;2a4e	c9 	. 
 l2a4fh:
 	ld hl,05000h		;2a4f	21 00 50 	! . P 
 	ld (0e2dch),hl		;2a52	22 dc e2 	" . . 
@@ -6586,7 +6591,7 @@ l2a55h:
 	jr c,l2ad9h		;2a66	38 71 	8 q 
 	ld (ix + ENEMY_STATE_IDX),8 	;2a68	dd 36 01 08
 	ld a,(0e1aah)		;2a6c	3a aa e1 	: . . 
-	ld (ix + 7),a		;2a6f	dd 77 07 	. w . 
+	ld (ix + ENEMY_FRAME_COUNTER_IDX),a		;2a6f	dd 77 07 level 5
 	ret			;2a72	c9 	. 
 l2a73h:
 	jr nz,l2a76h		;2a73	20 01 	  . 
@@ -6636,20 +6641,20 @@ l2ac5h:
 	call sub_1c7ah		;2acc	cd 7a 1c 	. z . 
 	call sub_2ab6h		;2acf	cd b6 2a 	. . * 
 	call sub_2ba0h		;2ad2	cd a0 2b 	. . + 
-	dec (ix + 7)		;2ad5	dd 35 07 	. 5 . 
+	dec (ix + ENEMY_FRAME_COUNTER_IDX)		;2ad5	dd 35 07 level 5
 	ret nz			;2ad8	c0 	. 
 l2ad9h:
 	ld a,(0e012h)		;2ad9	3a 12 e0 	: . . 
 	ld hl,0e1a0h		;2adc	21 a0 e1 	! . . 
 	call sub_1214h		;2adf	cd 14 12 	. . . 
 	ld (ix + 8),a		;2ae2	dd 77 08 	. w . 
-	ld (ix + 7),009h		;2ae5	dd 36 07 09 	. 6 . . 
+	ld (ix + ENEMY_FRAME_COUNTER_IDX), 9	;2ae5	dd 36 07 09 level 5
 l2ae9h:
 	ld (ix + ENEMY_STATE_IDX), 5    ;2ae9	dd 36 01 05
 	ret			;2aed	c9 	. 
     ; Question: unused code here?
 	call l1be2h		;2aee	cd e2 1b 	. . . 
-	dec (ix + FRAME_COUNTER_IDX)		;2af1	dd 35 07
+	dec (ix + ENEMY_FRAME_COUNTER_IDX)		;2af1	dd 35 07 level 5
 	jp z,l2a4fh		;2af4	ca 4f 2a 	. O * 
 	ret			;2af7	c9 	. 
 
@@ -6682,7 +6687,7 @@ l2b10h:
 	ret			;2b27	c9 	. 
 l2b28h:
 	call l1be2h		;2b28	cd e2 1b 	. . . 
-	dec (ix + 7)		;2b2b	dd 35 07 	. 5 . 
+	dec (ix + ENEMY_FRAME_COUNTER_IDX)		;2b2b	dd 35 07 level 5
 	jp z,l2a55h		;2b2e	ca 55 2a 	. U * 
 	ret			;2b31	c9 	. 
 	call l1be2h		;2b32	cd e2 1b 	. . . 
@@ -6699,7 +6704,7 @@ l2b28h:
 	call l2c95h		;2b4b	cd 95 2c 	. . , 
 l2b4eh:
 	ld hl,(MR_REACTION_L)		;2b4e	2a e4 e2 	* . . 
-	dec (ix + 7)		;2b51	dd 35 07 	. 5 . 
+	dec (ix + ENEMY_FRAME_COUNTER_IDX)		;2b51	dd 35 07 level 5
 	jr nz,l2b6ah		;2b54	20 14 	  . 
 	inc hl			;2b56	23 	# 
 	inc hl			;2b57	23 	# 
@@ -6709,7 +6714,7 @@ l2b4eh:
 	ld (ix + ENEMY_FRAME_IDX),a	;2b5e	dd 77 06
 	inc hl			                ;2b61	23
 	ld a,(hl)			            ;2b62	7e
-	ld (ix + FRAME_COUNTER_IDX),a	;2b63	dd 77 07
+	ld (ix + ENEMY_FRAME_COUNTER_IDX),a	;2b63	dd 77 07
 	inc hl			;2b66	23 	# 
 	ld (MR_REACTION_L),hl		;2b67	22 e4 e2 	" . . 
 l2b6ah:
@@ -6794,7 +6799,7 @@ l2bddh:
 	cp 002h		;2bdf	fe 02 	. . 
 	jr z,l2c1bh		;2be1	28 38 	( 8 
 	jr c,l2c17h		;2be3	38 32 	8 2 
-	ld (ix + FRAME_COUNTER_IDX), 5	 ;2be5	dd 36 07 05
+	ld (ix + ENEMY_FRAME_COUNTER_IDX), 5	 ;2be5	dd 36 07 05 level 5
 	ld (ix + ENEMY_STATE_IDX), 10    ;2be9	dd 36 01 0a
 	ld (ix + ENEMY_FRAME_IDX), 23    ;2bed	dd 36 06 17
 	ld a,(DRAGONS_LEVEL)		;2bf1	3a 80 e0 	: . . 
@@ -6825,7 +6830,7 @@ l2c1bh:
 l2c1dh:
 	ld (ix + ENEMY_FRAME_IDX),a	;2c1d	dd 77 06
 	ld (ix + ENEMY_STATE_IDX), 9	;2c20	dd 36 01 09
-	ld (ix + FRAME_COUNTER_IDX), 11	;2c24	dd 36 07 0b
+	ld (ix + ENEMY_FRAME_COUNTER_IDX), 11	;2c24	dd 36 07 0b
 	ld a,091h		;2c28	3e 91 	> . 
 	call sub_0dfeh		;2c2a	cd fe 0d 	. . . 
 l2c2dh:
