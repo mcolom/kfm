@@ -1460,7 +1460,6 @@ l07e6h:
 	ld a,(hl)			;07f9	7e 	~ 
 	ld (0e1c1h),a		;07fa	32 c1 e1 	2 . . 
 	ld hl,l0c08h		;07fd	21 08 0c 	! . . 
-l0800h:
 	add hl,bc			;0800	09 	. 
 	ld a,(hl)			;0801	7e 	~ 
 	ld (0e199h),a		;0802	32 99 e1 	2 . . 
@@ -3235,12 +3234,15 @@ l114eh:
 	ld d,(hl)			;1150	56 	V 
 	jr l1133h		;1151	18 e0 	. . 
 	ld d,001h		;1153	16 01 	. . 
-	jr l1159h		;1155	18 02 	. . 
+	jr l1159h		;1155	18 02 	Question: is this code compiled or assembly? This jump to the middle of
+    ;                               another routine is a clear sign it's human assembly code.
+
+
 sub_1157h:
 	ld d,0dbh		;1157	16 db 	. . 
 l1159h:
 	ld e,020h		;1159	1e 20 	.   
-	ld bc,l0800h		;115b	01 00 08 	. . . 
+	ld bc,0x800		;115b	01 00 08 	. . . 
 	ld hl,M62_TILERAM		;115e	21 00 d0 	! . . 
 	ld iy,0d800h		;1161	fd 21 00 d8 	. ! . . 
 l1165h:
@@ -3253,6 +3255,7 @@ l1165h:
 	or c			;116e	b1 	. 
 	jr nz,l1165h		;116f	20 f4 	  . 
 	ret			;1171	c9 	. 
+
 sub_1172h:
 	xor a			;1172	af 	. 
 	add hl,hl			;1173	29 	) 
@@ -8581,7 +8584,7 @@ l390fh:
 	ld de,l0029h		;390f	11 29 00 	. ) . 
 	sbc hl,de		;3912	ed 52 	. R 
 	ex de,hl			;3914	eb 	. 
-	ld hl,l0800h		;3915	21 00 08 	! . . 
+	ld hl,0x800		;3915	21 00 08 	! . . 
 	sbc hl,de		;3918	ed 52 	. R 
 	jr c,l3921h		;391a	38 05 	8 . 
 	call sub_3d0eh		;391c	cd 0e 3d 	. . = 
