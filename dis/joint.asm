@@ -238,7 +238,8 @@ ENEMY_ATTACK_STEP: EQU TBL_ENEMIES + ENEMY_ATTACK_STEP_IDX ; Enemy attack step
 ; 1: boomerang goes up, returns down
 ; 2: boomerang goes down, returns down
 ; 3: boomerang goes down, returns up
-ENEMY_BOOMERANG_TYPE: EQU TBL_ENEMIES + 15
+ENEMY_BOOMERANG_TYPE_IDX: EQU 15
+ENEMY_BOOMERANG_TYPE: EQU TBL_ENEMIES + ENEMY_BOOMERANG_TYPE_IDX
 
 MAGICIAN_REPLICA_STATE: EQU TBL_ENEMIES + 18
 ; *******************************************************************
@@ -4773,7 +4774,7 @@ l1b96h:
 	call SET_ENEMY_REACTION_FROM_HL		    ;1b9f	cd a5 1c
 	xor a			;1ba2	af 	. 
 	ld (ix + ENEMY_ATTACK_STEP_IDX),a		;1ba3	dd 77 0e level 1
-	ld (ix + 15),a		;1ba6	dd 77 0f 	. w . 
+	ld (ix + ENEMY_BOOMERANG_TYPE_IDX),a	;1ba6	dd 77 0f level 1
 	ret			;1ba9	c9 	. 
 l1baah:
 	dec (ix + ENEMY_FRAME_COUNTER_IDX)	;1baa	dd 35 07 level 1
@@ -4790,11 +4791,11 @@ l1baah:
 	call SET_ENEMY_REACTION_FROM_HL		    ;1bc1	cd a5 1c
 l1bc4h:
 	ld e,(ix + ENEMY_ATTACK_STEP_IDX)		;1bc4	dd 5e 0e level 1
-	ld d,(ix + 15)		;1bc7	dd 56 0f 	. V . 
+	ld d,(ix + ENEMY_BOOMERANG_TYPE_IDX)	;1bc7	dd 56 0f level 1
 	ld hl,0016h		;1bca	21 16 00 	! . . 
 	add hl,de			;1bcd	19 	. 
 	ld (ix + ENEMY_ATTACK_STEP_IDX),l		;1bce	dd 75 0e level 1
-	ld (ix + 15),h		;1bd1	dd 74 0f 	. t . 
+	ld (ix + ENEMY_BOOMERANG_TYPE_IDX),h	;1bd1	dd 74 0f level 1
 	call GET_ENEMY_FALLING_HEIGHT_IN_HL		;1bd4	cd 9e 1c 	. . . 
 	sbc hl,de		;1bd7	ed 52 	. R 
 	call SET_ENEMY_FALLING_HEIGHT_FROM_HL		;1bd9	cd 97 1c 	. . . 
@@ -5828,7 +5829,7 @@ l23d3h:
 	jr c,l23edh		;23ea	38 01 	8 . 
 	inc b			;23ec	04 	. 
 l23edh:
-	ld (ix + 15),b		;23ed	dd 70 0f 	. p . 
+	ld (ix + ENEMY_BOOMERANG_TYPE_IDX),b	;23ed	dd 70 0f level 2
 	ld a,b			;23f0	78 	x 
 	ld b,009h		;23f1	06 09 	. . 
 	cp 002h		;23f3	fe 02 	. . 
