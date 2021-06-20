@@ -241,15 +241,22 @@ ENEMY_ATTACK_STEP: EQU TBL_ENEMIES + ENEMY_ATTACK_STEP_IDX ; Enemy attack step
 ENEMY_BOOMERANG_TYPE_IDX: EQU 15
 ENEMY_BOOMERANG_TYPE: EQU TBL_ENEMIES + ENEMY_BOOMERANG_TYPE_IDX
 
+; Set to 0x50 when the magician's replica appears, and 0 otherwise.
+MAGICIAN_REPLICA_APPEARED_IDX: EQU 16
+
+
 MAGICIAN_REPLICA_STATE: EQU TBL_ENEMIES + 18
+
 ; *******************************************************************
 
 
+; The code uses with address as a base to index IDX 0 (the same as MAGICIAN_REPLICA_APPEARED_IDX with TBL_ENEMIES)
+MAGICIAN_REPLICA_APPEARED_ADDR_IDX: EQU 0
+MAGICIAN_REPLICA_APPEARED_ADDR: EQU 0xE2E8 + MAGICIAN_REPLICA_APPEARED_ADDR_IDX
 
 
+; *******************************************************************
 
-; Another table of variables
-VARS_TABLE2: EQU 0xE2E8
 
 
 
@@ -4603,7 +4610,7 @@ l1a7eh:
 	xor 040h		;1a7e	ee 40 	. @ 
 l1a80h:
 	and 0c0h		;1a80	e6 c0 	. . 
-	bit 4,(ix + ENEMY_LOOKAT_IDX)	;1a82	dd cb 00 66
+	bit 4,(ix + MAGICIAN_REPLICA_APPEARED_ADDR_IDX)	;1a82	dd cb 00 66
 	ret z			;1a86	c8 	. 
 	ex de,hl			;1a87	eb 	. 
 	call GET_ENEMY_FALLING_HEIGHT_IN_HL		;1a88	cd 9e 1c
@@ -5354,7 +5361,7 @@ l1ff9h:
 	pop hl			;2001	e1 	. 
 	ld hl,TBL_ENEMIES		;2002	21 d8 e2 	! . . 
 	res 4,(hl)		;2005	cb a6 	. . 
-	ld hl,VARS_TABLE2		;2007	21 e8 e2 	! . . 
+	ld hl,MAGICIAN_REPLICA_APPEARED_ADDR		;2007	21 e8 e2 	! . . 
 	res 4,(hl)		;200a	cb a6 	. . 
 	ret			;200c	c9 	. 
 l200dh:
@@ -5438,7 +5445,7 @@ l20adh:
 	ld hl,(ME_INITIAL_FALL_SPEED_COPY)	;20b5	2a 0c e8
 	add hl,de			                ;20b8	19
 	ld hl,0e701h		                ;20b9	21 01 e7
-	bit 6,(ix + ENEMY_LOOKAT_IDX)		;20bc	dd cb 00 76
+	bit 6,(ix + MAGICIAN_REPLICA_APPEARED_ADDR_IDX)		;20bc	dd cb 00 76
 	jr z,l20cch		;20c0	28 0a 	( . 
 	jr c,l20c8h		;20c2	38 04 	8 . 
 	set 4,(hl)		;20c4	cb e6 	. . 
@@ -5458,7 +5465,7 @@ l20d7h:
 l20d9h:
 	pop hl			;20d9	e1 	. 
 	call sub_2d01h		;20da	cd 01 2d 	. . - 
-	ld a,(ix + ENEMY_LOOKAT_IDX)	;20dd	dd 7e 00
+	ld a,(ix + MAGICIAN_REPLICA_APPEARED_ADDR_IDX)	;20dd	dd 7e 00
 	jp l1a7eh		;20e0	c3 7e 1a 	. ~ . 
 sub_20e3h:
 	call sub_2109h		;20e3	cd 09 21 	. . ! 
@@ -5971,8 +5978,8 @@ l24fbh:
 	dec (hl)			;2502	35 	5 
 l2503h:
 	call sub_250fh		;2503	cd 0f 25 	. . % 
-	ld ix,VARS_TABLE2		;2506	dd 21 e8 e2 	. ! . . 
-	bit 4,(ix + 0)		;250a	dd cb 00 66 	. . . f 
+	ld ix,MAGICIAN_REPLICA_APPEARED_ADDR		    ;2506	dd 21 e8 e2
+	bit 4,(ix + MAGICIAN_REPLICA_APPEARED_ADDR_IDX)	;250a	dd cb 00 66
 	ret z			;250e	c8 	. 
 sub_250fh:
 	ld hl,024d2h		;250f	21 d2 24 	! . $ 
@@ -5982,7 +5989,7 @@ sub_250fh:
 	ld de,0f800h		;251b	11 00 f8 	. . . 
 	add hl,de			;251e	19 	. 
 	jp nc,l2589h		;251f	d2 89 25 	. . % 
-	bit 6,(ix + 0)		;2522	dd cb 00 76 	. . . v 
+	bit 6,(ix + MAGICIAN_REPLICA_APPEARED_ADDR_IDX)		;2522	dd cb 00 76
 	ret nz			;2526	c0 	. 
 	ld de,05f00h		;2527	11 00 5f 	. . _ 
 	ld l,(ix + ENEMY_POS_L_IDX)		;252a	dd 6e 02
@@ -6153,8 +6160,8 @@ l2698h:
 	ld l,(ix + ENEMY_POS_L_IDX)		;269d	dd 6e 02
 	ld h,(ix + ENEMY_POS_H_IDX)		;26a0	dd 66 03
 	ld (0e31dh),hl		;26a3	22 1d e3 	" . . 
-	ld a,(ix + 0)		;26a6	dd 7e 00 	. ~ . 
-	and 050h		;26a9	e6 50 	. P 
+	ld a,(ix + ENEMY_LOOKAT_IDX)	;26a6	dd 7e 00
+	and 0x50		;26a9	e6 50 	. P 
 	ld (TBL_E31B),a		;26ab	32 1b e3 	2 . . 
 	ld hl,06500h		;26ae	21 00 65 	! . e 
 	ld (0e31fh),hl		;26b1	22 1f e3 	" . . 
@@ -6188,7 +6195,7 @@ l26edh:
 	ld l,(ix + ENEMY_POS_L_IDX)		;26f0	dd 6e 02
 	ld h,(ix + ENEMY_POS_H_IDX)		;26f3	dd 66 03
 	ld de,l0280h		;26f6	11 80 02 	. . . 
-	bit 6,(ix + 0)		;26f9	dd cb 00 76 	. . . v 
+	bit 6,(ix + ENEMY_LOOKAT_IDX)		;26f9	dd cb 00 76 	. . . v 
 	jr nz,l270ch		;26fd	20 0d 	  . 
 	add hl,de			;26ff	19 	. 
 	ex de,hl			;2700	eb 	. 
@@ -6211,7 +6218,7 @@ l270eh:
 	jp c,l264bh		;2721	da 4b 26 	. K & 
 	call sub_2cd4h		;2724	cd d4 2c 	. . , 
 	jp z,l2080h		;2727	ca 80 20 	. .   
-	bit 6,(ix + 0)		;272a	dd cb 00 76 	. . . v 
+	bit 6,(ix + MAGICIAN_REPLICA_APPEARED_ADDR_IDX)		;272a	dd cb 00 76 	. . . v 
 	jp z,l2488h		;272e	ca 88 24 	. . $ 
 	ld de,0a100h		;2731	11 00 a1 	. . . 
 	jp l2071h		;2734	c3 71 20 	. q   
@@ -6231,7 +6238,7 @@ l2752h:
 	ld d,(ix + ENEMY_REACTION_IDX + 1)	;2758	dd 56 0d
 	sbc hl,de		;275b	ed 52 	. R 
 	ex de,hl			;275d	eb 	. 
-	bit 6,(ix + 0)		;275e	dd cb 00 76 	. . . v 
+	bit 6,(ix + MAGICIAN_REPLICA_APPEARED_ADDR_IDX)		;275e	dd cb 00 76 	. . . v 
 	jr nz,l2771h		;2762	20 0d 	  . 
 	ld hl,(0e106h)		;2764	2a 06 e1 	* . . 
 	sbc hl,de		;2767	ed 52 	. R 
@@ -6279,14 +6286,14 @@ l27b0h:
 	ret nz			;27cd	c0 	. 
 	ld hl,l018bh		;27ce	21 8b 01 	! . . 
 	ld (0e2f8h),hl		;27d1	22 f8 e2 	" . . 
-	ld (ix + 0),000h		;27d4	dd 36 00 00 	. 6 . . 
+	ld (ix + MAGICIAN_REPLICA_APPEARED_ADDR_IDX), 0	;27d4	dd 36 00 00
 	ld hl,0e701h		;27d8	21 01 e7 	! . . 
 	res 4,(hl)		;27db	cb a6 	. . 
 	jr l283dh		;27dd	18 5e 	. ^ 
 l27dfh:
 	ld hl,0e700h		;27df	21 00 e7 	! . . 
 	set 0,(hl)		;27e2	cb c6 	. . 
-	ld a,(VARS_TABLE2)		;27e4	3a e8 e2 	: . . 
+	ld a,(MAGICIAN_REPLICA_APPEARED_ADDR)		;27e4	3a e8 e2 	: . . 
 	and 010h		;27e7	e6 10 	. . 
 	jr z,l284fh		;27e9	28 64 	( d 
 	push ix		;27eb	dd e5 	. . 
@@ -6342,7 +6349,7 @@ l285ch:
 	ld (MAGICIAN_REPLICA_STATE),hl		;2865	22 ea e2 	" . . 
 	ld hl,05000h		;2868	21 00 50 	! . P 
 	ld (0e2ech),hl		;286b	22 ec e2 	" . . 
-	ld (ix+010h),050h		;286e	dd 36 10 50 	. 6 . P 
+	ld (ix + MAGICIAN_REPLICA_APPEARED_IDX), 0x50	;286e	dd 36 10 Replica appears
 	ld (ix+017h),008h		;2872	dd 36 17 08 	. 6 . . 
 	ld (ix+016h),01eh		;2876	dd 36 16 1e 	. 6 . . 
 	ld (ix+011h),009h		;287a	dd 36 11 09 	. 6 . . 
@@ -6365,7 +6372,7 @@ l2893h:
 	ld hl,0e197h		;289a	21 97 e1 	! . . 
 	ld de,0e198h		;289d	11 98 e1 	. . . 
 	jr nc,l28aah		;28a0	30 08 	0 . 
-	ld a,(VARS_TABLE2)		;28a2	3a e8 e2 	: . . 
+	ld a,(MAGICIAN_REPLICA_APPEARED_ADDR)		;28a2	3a e8 e2 	: . . 
 	and 010h		;28a5	e6 10 	. . 
 	jr nz,l28aah		;28a7	20 01 	  . 
 	ex de,hl			;28a9	eb 	. 
@@ -8027,7 +8034,7 @@ sub_34ddh:
 	ld l,(ix + ENEMY_POS_L_IDX)		;34e0	dd 6e 02
 	ld h,(ix + ENEMY_POS_H_IDX)		;34e3	dd 66 03
 	ld de,00200h		;34e6	11 00 02 	. . . 
-	ld a,(ix + 0)		;34e9	dd 7e 00 	. ~ . 
+	ld a,(ix + MAGICIAN_REPLICA_APPEARED_ADDR_IDX)		;34e9	dd 7e 00
 	and 040h		;34ec	e6 40 	. @ 
 	jr z,l34f3h		;34ee	28 03 	( . 
 	add hl,de			;34f0	19 	. 
