@@ -214,7 +214,9 @@ ENEMY_MOVE_COUNTER: EQU TBL_ENEMIES + ENEMY_MOVE_COUNTER_IDX ; 8: enemy moving c
 ; IDX 9 is not used, but in 0x1E54 ENEMY_MOVE_COUNTER is used as a 16-bit word (it seems useless, however)
 ; The programmer probably designed this as a 16-bit word and then realized that a byte was enough.
 
-ENEMY_ENERGY: EQU TBL_ENEMIES + 10 ; Enemy's energy
+ENEMY_ENERGY_IDX: EQU 10
+ENEMY_ENERGY: EQU TBL_ENEMIES + ENEMY_ENERGY_IDX ; Enemy's energy
+
 ENEMY_STEADY_COUNTER: EQU TBL_ENEMIES + 11 ; This controls the time left the energy is standing without moving.
 ;
 ; This mainly controls how Mr. X reacts to attacks
@@ -1411,8 +1413,8 @@ sub_074dh:
 	ld (0e347h),a		;078e	32 47 e3 	2 G . 
 l0791h:
 	ld ix,TBL_ENEMIES		;0791	dd 21 d8 e2 	. ! . . 
-	ld (ix + 10),03fh		;0795	dd 36 0a 3f TBL_ENEMIES + 0xa = 0xE2E2 = ENEMY_ENERGY
-	ld (ix + 7),007h		;0799	dd 36 07 07 	. 6 . . 
+	ld (ix + ENEMY_ENERGY_IDX), 63	;0795	dd 36 0a 3f
+	ld (ix + ENEMY_FRAME_COUNTER_IDX), 7	;0799	dd 36 07 07
 	ld hl,05000h		;079d	21 00 50 	! . P 
 	ld (0e2dch),hl		;07a0	22 dc e2 	" . . 
 	ld a,(DRAGONS_LEVEL)		;07a3	3a 80 e0 	: . . 
@@ -5139,7 +5141,7 @@ l1e5fh:
 	jr nz,l1e79h		;1e72	20 05 	  . 
 
     ; Increment enemy's energy
-	inc (ix + 10)		;1e74	dd 34 0a TBL_ENEMIES + 0xa = 0xE2E2 = ENEMY_ENERGY
+	inc (ix + ENEMY_ENERGY_IDX)		;1e74	dd 34 0a
 l1e77h:
 	ld (hl),070h		;1e77	36 70 	6 p 
 l1e79h:
