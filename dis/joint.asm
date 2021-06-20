@@ -211,8 +211,8 @@ ENEMY_FRAME_COUNTER: EQU TBL_ENEMIES + ENEMY_FRAME_COUNTER_IDX ; Ticks the enemy
 ; Surprisingly only for levels 1, 2, and 5
 ENEMY_MOVE_COUNTER_IDX: EQU 8
 ENEMY_MOVE_COUNTER: EQU TBL_ENEMIES + ENEMY_MOVE_COUNTER_IDX ; 8: enemy moving counter (forward and backwards)
-
-; (IDX 9 unused)
+; IDX 9 is not used, but in 0x1E54 ENEMY_MOVE_COUNTER is used as a 16-bit word (it seems useless, however)
+; The programmer probably designed this as a 16-bit word and then realized that a byte was enough.
 
 ENEMY_ENERGY: EQU TBL_ENEMIES + 10 ; Enemy's energy
 ENEMY_STEADY_COUNTER: EQU TBL_ENEMIES + 11 ; This controls the time left the energy is standing without moving.
