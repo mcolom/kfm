@@ -127,6 +127,8 @@ TBL_WIDTH_21: EQU 0xE577
 ; *******************************************************************
 TBL_MAGICAL_ELEMENTS: EQU 0xE382
 
+MAGICAL_ELEMENT_LOOKAT_IDX: EQU 0 ; E382
+
 ; This counter controls how many ticks the falling magical element will
 ; stay in that state
 MAGICAL_ELEMENT_STATE_IDX: EQU 1 ; E383
@@ -7434,7 +7436,7 @@ sub_2fc7h:
 	ld b, 16		;2fd0	06 10
 l2fd2h:
 	push bc			;2fd2	c5 	. 
-	ld c,(ix + 0)	;2fd3	dd 4e 00   Reads 0x50
+	ld c,(ix + MAGICAL_ELEMENT_LOOKAT_IDX)	;2fd3	dd 4e 00
 l2fd6h:
 	bit 4,c		    ;2fd6	cb 61
 	call nz,sub_2fe4h	;2fd8	c4 e4 2f No carry ==> Jump!
@@ -7506,11 +7508,11 @@ l3049h:
 	ld l,(ix + MAGICAL_ELEMENT_HOR_OFFSET_L_IDX)		;3052	dd 6e 0e
 	ld h,(ix + MAGICAL_ELEMENT_HOR_OFFSET_H_IDX)		;3055	dd 66 0f
 	ld de,l0020h		;3058	11 20 00 	.   . 
-	bit 2,(ix + 0)		;305b	dd cb 00 56 	. . . V 
+	bit 2,(ix + MAGICAL_ELEMENT_LOOKAT_IDX)		;305b	dd cb 00 56
 	jr z,l306eh		;305f	28 0d 	( . 
 	sbc hl,de		;3061	ed 52 	. R 
 	jr nc,l307bh		;3063	30 16 	0 . 
-	res 2,(ix + 0)		;3065	dd cb 00 96 	. . . . 
+	res 2,(ix + MAGICAL_ELEMENT_LOOKAT_IDX)		;3065	dd cb 00 96
 	ld hl,0		;3069	21 00 00 	! . . 
 	jr l307bh		;306c	18 0d 	. . 
 l306eh:
@@ -7520,23 +7522,23 @@ l306eh:
 	add hl,de			;3073	19 	. 
 	pop hl			;3074	e1 	. 
 	jr nc,l307bh		;3075	30 04 	0 . 
-	set 2,(ix + 0)		;3077	dd cb 00 d6 	. . . . 
+	set 2,(ix + MAGICAL_ELEMENT_LOOKAT_IDX)		;3077	dd cb 00 d6
 l307bh:
 	ld (ix + MAGICAL_ELEMENT_HOR_OFFSET_L_IDX),l		;307b	dd 75 0e
-	ld (ix + MAGICAL_ELEMENT_HOR_OFFSET_H_IDX),h		;307e	dd 74 0f 	. t . 
+	ld (ix + MAGICAL_ELEMENT_HOR_OFFSET_H_IDX),h		;307e	dd 74 0f
 	ld e,(ix + MAGICAL_ELEMENT_FALL_ACCELERATION_L_IDX)	;3081	dd 5e 0a
 	ld d,(ix + MAGICAL_ELEMENT_FALL_ACCELERATION_H_IDX)	;3084	dd 56 0b
 	add hl,de			;3087	19 	. 
 	ld (ix + MAGICAL_ELEMENT_DISTANCE_L_IDX),l		;3088	dd 75 02
 	ld (ix + MAGICAL_ELEMENT_DISTANCE_H_IDX),h		;308b	dd 74 03
 	ld l,(ix+MAGICAL_ELEMENT_HEIGHT_OFFSET_L_IDX)	;308e	dd 6e 10
-	ld h,(ix+MAGICAL_ELEMENT_HEIGHT_OFFSET_H_IDX)		;3091	dd 66 11 	. f . 
+	ld h,(ix+MAGICAL_ELEMENT_HEIGHT_OFFSET_H_IDX)	;3091	dd 66 11
 	ld de,00049h		;3094	11 49 00 	. I . 
-	bit 0,(ix + 0)		;3097	dd cb 00 46 	. . . F 
+	bit 0,(ix + MAGICAL_ELEMENT_LOOKAT_IDX)		;3097	dd cb 00 46
 	jr z,l30aah		;309b	28 0d 	( . 
 	sbc hl,de		;309d	ed 52 	. R 
 	jr nc,l30b7h		;309f	30 16 	0 . 
-	res 0,(ix + 0)		;30a1	dd cb 00 86 	. . . . 
+	res 0,(ix + MAGICAL_ELEMENT_LOOKAT_IDX)		;30a1	dd cb 00 86
 	ld hl,0		;30a5	21 00 00 	! . . 
 	jr l30b7h		;30a8	18 0d 	. . 
 l30aah:
@@ -7546,7 +7548,7 @@ l30aah:
 	add hl,de			;30af	19 	. 
 	pop hl			;30b0	e1 	. 
 	jr nc,l30b7h		;30b1	30 04 	0 . 
-	set 0,(ix + 0)		;30b3	dd cb 00 c6 	. . . . 
+	set 0,(ix + MAGICAL_ELEMENT_LOOKAT_IDX)		;30b3	dd cb 00 c6
 l30b7h:
 	ld (ix+MAGICAL_ELEMENT_HEIGHT_OFFSET_L_IDX),l		;30b7	dd 75 10
 	ld (ix+MAGICAL_ELEMENT_HEIGHT_OFFSET_H_IDX),h		;30ba	dd 74 11
@@ -7683,9 +7685,9 @@ l31c0h:
 	inc (ix + MAGICAL_ELEMENT_STATE_IDX)		;31ff	dd 34 01
 	ld a,(0e80bh)		;3202	3a 0b e8 	: . . 
 	bit 7,a		;3205	cb 7f 	.  
-	set 6,(ix + 0)		;3207	dd cb 00 f6 	. . . . 
+	set 6,(ix + MAGICAL_ELEMENT_LOOKAT_IDX)		;3207	dd cb 00 f6
 	jr nz,l3220h		;320b	20 13 	  . 
-	res 6,(ix + 0)		;320d	dd cb 00 b6 	. . . . 
+	res 6,(ix + MAGICAL_ELEMENT_LOOKAT_IDX)		;320d	dd cb 00 b6
 	jr l3220h		;3211	18 0d 	. . 
 l3213h:
 	ld a,086h		;3213	3e 86 	> . 
@@ -7875,9 +7877,9 @@ sub_3353h:
 l33b3h:
 	ld a,(0e80bh)		;33b3	3a 0b e8 	: . . 
 	bit 7,a		;33b6	cb 7f 	.  
-	set 6,(ix + 0)		;33b8	dd cb 00 f6 	. . . . 
+	set 6,(ix + MAGICAL_ELEMENT_LOOKAT_IDX)		;33b8	dd cb 00 f6
 	ret z			;33bc	c8 	. 
-	res 6,(ix + 0)		;33bd	dd cb 00 b6 	. . . . 
+	res 6,(ix + MAGICAL_ELEMENT_LOOKAT_IDX)		;33bd	dd cb 00 b6
 	ret			;33c1	c9 	. 
 l33c2h:
 	ld (ix + MAGICAL_ELEMENT_STATE_IDX), ME_STATE_POT_TOUCHES_FLOOR ;33c2	dd 36 01 03
@@ -7916,7 +7918,7 @@ l33ffh:
 	ld a,094h		;3410	3e 94 	> . 
 	call sub_0dfeh		;3412	cd fe 0d 	. . . 
 	call sub_36cah		;3415	cd ca 36 	. . 6 
-	set 5,(ix + 0)		;3418	dd cb 00 ee 	. . . . 
+	set 5,(ix + MAGICAL_ELEMENT_LOOKAT_IDX)		;3418	dd cb 00 ee
 l341ch:
 	dec (ix + FRAME_COUNTER_IDX)	;341c	dd 35 07
 	ret nz			;341f	c0 	. 
@@ -8197,7 +8199,7 @@ l363dh:
 	ld b,010h		;364e	06 10 	. . 
 l3650h:
 	add ix,de		;3650	dd 19 	. . 
-	bit 4,(ix + 0)		;3652	dd cb 00 66 	. . . f 
+	bit 4,(ix + MAGICAL_ELEMENT_LOOKAT_IDX)		;3652	dd cb 00 66
 	jr z,l366ch		;3656	28 14 	( . 
 	ld a,(ix + MAGICAL_ELEMENT_STATE_IDX)		;3658	dd 7e 01
 	cp ME_STATE_POT_TOUCHES_FLOOR		;365b	fe 03
@@ -8224,12 +8226,12 @@ l366ch:
 	ld bc, 19   		;3682	01 13 00 	. . . 
 l3685h:
 	add ix,bc		;3685	dd 09 	. . 
-	bit 4,(ix + 0)		;3687	dd cb 00 66 	. . . f 
+	bit 4,(ix + MAGICAL_ELEMENT_LOOKAT_IDX)		;3687	dd cb 00 66
 	jr nz,l3685h		;368b	20 f8 	  . 
 	ld a,r		;368d	ed 5f 	. _ 
 	and 040h		;368f	e6 40 	. @ 
 	or 010h		;3691	f6 10 	. . 
-	ld (ix + 0),a		;3693	dd 77 00 	. w . 
+	ld (ix + MAGICAL_ELEMENT_LOOKAT_IDX),a		;3693	dd 77 00
 	ld (ix + MAGICAL_ELEMENT_STATE_IDX),e		;3696	dd 73 01
 	ld (ix + CURRENT_FRAME_IDX),e	;3699	dd 73 06
 	ld (ix + 18),d		;369c	dd 72 12 	. r . 
@@ -8288,7 +8290,7 @@ l3711h:
 	pop af			;3711	f1 	. 
 	ret			;3712	c9 	. 
 l3713h:
-	ld (ix + 0),000h		;3713	dd 36 00 00 	. 6 . . 
+	ld (ix + MAGICAL_ELEMENT_LOOKAT_IDX), 0		;3713	dd 36 00 00
 	ld hl,NUM_MAGICAL_ELEMENTS		;3717	21 81 e3 	! . . 
 	dec (hl)			;371a	35 	5 
 	pop af			;371b	f1 	. 
