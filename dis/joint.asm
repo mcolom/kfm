@@ -226,7 +226,9 @@ ENEMY_STEADY_COUNTER: EQU TBL_ENEMIES + ENEMY_STEADY_COUNTER_IDX ; This controls
 ;
 ; For the stick guy: 27: punch, kick
 
-MR_REACTION_L: EQU TBL_ENEMIES + 12
+ENEMY_REACTION_IDX: EQU 12
+ENEMY_REACTION: EQU TBL_ENEMIES + ENEMY_REACTION_IDX
+; IDX 13 is used in the code, but actually it seems it's just a byte
 
 
 ENEMY_ATTACK_STEP: EQU TBL_ENEMIES + 14 ; Enemy attack step
@@ -4135,9 +4137,9 @@ l170bh:
 	pop af			;171d	f1 	. 
 	jr z,l173dh		;171e	28 1d 	( . 
 	ld de,0ffd6h		;1720	11 d6 ff 	. . . 
-	call GET_MR_REACTION_IN_HL		;1723	cd ac 1c 	. . . 
+	call GET_ENEMY_REACTION_IN_HL		;1723	cd ac 1c 	. . . 
 	add hl,de			;1726	19 	. 
-	call SET_MR_REACTION_FROM_HL		;1727	cd a5 1c 	. . . 
+	call SET_ENEMY_REACTION_FROM_HL		;1727	cd a5 1c 	. . . 
 	ex de,hl			;172a	eb 	. 
 	call GET_ENEMY_FALLING_HEIGHT_IN_HL		;172b	cd 9e 1c 	. . . 
 	add hl,de			;172e	19 	. 
@@ -4204,12 +4206,12 @@ l1796h:
 	call sub_2ee2h		;17a1	cd e2 2e 	. . . 
 	ld a,007h		;17a4	3e 07 	> . 
 	push af			;17a6	f5 	. 
-	call GET_MR_REACTION_IN_HL		;17a7	cd ac 1c 	. . . 
+	call GET_ENEMY_REACTION_IN_HL		;17a7	cd ac 1c 	. . . 
 	ex de,hl			;17aa	eb 	. 
 	ld hl,0		;17ab	21 00 00 	! . . 
 	sbc hl,de		;17ae	ed 52 	. R 
-	call SET_MR_REACTION_FROM_HL		;17b0	cd a5 1c 	. . . 
-	set 1,(ix + 11)		;17b3	dd cb 0b ce 	. . . . 
+	call SET_ENEMY_REACTION_FROM_HL		    ;17b0	cd a5 1c
+	set 1,(ix + ENEMY_STEADY_COUNTER_IDX)	;17b3	dd cb 0b ce
 	pop af			;17b7	f1 	. 
 	jr l1768h		;17b8	18 ae 	. . 
 l17bah:
@@ -4237,7 +4239,7 @@ l17d7h:
 l17e5h:
 	ld (ix + 1),00ah		;17e5	dd 36 01 0a 	. 6 . . 
 	ld hl,003a0h		;17e9	21 a0 03 	! . . 
-	call SET_MR_REACTION_FROM_HL		;17ec	cd a5 1c 	. . . 
+	call SET_ENEMY_REACTION_FROM_HL		;17ec	cd a5 1c 	. . . 
 	ld hl,00028h		;17ef	21 28 00 	! ( . 
 	ld (ix + 14),l		;17f2	dd 75 0e 	. u . 
 	ld (ix + 15),h		;17f5	dd 74 0f 	. t . 
@@ -4768,7 +4770,7 @@ l1b96h:
 	ld a,(hl)			;1b9a	7e 	~ 
 	inc hl			;1b9b	23 	# 
 	ld (ix + ENEMY_FRAME_COUNTER_IDX),a		;1b9c	dd 77 07 level 1
-	call SET_MR_REACTION_FROM_HL		    ;1b9f	cd a5 1c
+	call SET_ENEMY_REACTION_FROM_HL		    ;1b9f	cd a5 1c
 	xor a			;1ba2	af 	. 
 	ld (ix + 14),a		;1ba3	dd 77 0e 	. w . 
 	ld (ix + 15),a		;1ba6	dd 77 0f 	. w . 
@@ -4776,7 +4778,7 @@ l1b96h:
 l1baah:
 	dec (ix + ENEMY_FRAME_COUNTER_IDX)	;1baa	dd 35 07 level 1
 	jp nz,l1bc4h		                ;1bad	c2 c4 1b
-	call GET_MR_REACTION_IN_HL		    ;1bb0	cd ac 1c
+	call GET_ENEMY_REACTION_IN_HL		    ;1bb0	cd ac 1c
 	ld a,(hl)			;1bb3	7e 	~ 
 	and a			;1bb4	a7 	. 
 	jp m,sub_1b7ah		;1bb5	fa 7a 1b 	. z . 
@@ -4785,7 +4787,7 @@ l1baah:
 	ld a,(hl)			;1bbc
 	inc hl			;1bbd	23
 	ld (ix + ENEMY_FRAME_COUNTER_IDX),a		;1bbe	dd 77 07 level 1
-	call SET_MR_REACTION_FROM_HL		    ;1bc1	cd a5 1c
+	call SET_ENEMY_REACTION_FROM_HL		    ;1bc1	cd a5 1c
 l1bc4h:
 	ld e,(ix + 14)		;1bc4	dd 5e 0e 	. ^ . 
 	ld d,(ix + 15)		;1bc7	dd 56 0f 	. V . 
@@ -4918,15 +4920,14 @@ GET_ENEMY_FALLING_HEIGHT_IN_HL:
 	ld h,(ix + ENEMY_FALLING_HEIGHT_H_IDX)		;1ca1	dd 66 05
 	ret			;1ca4	c9 	. 
 
-SET_MR_REACTION_FROM_HL:
-	ld (ix + 12),l		;1ca5	dd 75 0c 	. u . 
-	ld (ix + 13),h		;1ca8	dd 74 0d 	. t . 
+SET_ENEMY_REACTION_FROM_HL:
+	ld (ix + ENEMY_REACTION_IDX),l		;1ca5	dd 75 0c
+	ld (ix + ENEMY_REACTION_IDX + 1),h	;1ca8	dd 74 0d
 	ret			;1cab	c9 	. 
 
-GET_MR_REACTION_IN_HL:
-    ; ToDo This must be when the confetti ball is bouncing
-	ld l,(ix + 12)		;1cac	dd 6e 0c
-	ld h,(ix + 13)		;1caf	dd 66 0d
+GET_ENEMY_REACTION_IN_HL:
+	ld l,(ix + ENEMY_REACTION_IDX)		;1cac	dd 6e 0c
+	ld h,(ix + ENEMY_REACTION_IDX + 1)	;1caf	dd 66 0d
 	ret			;1cb2	c9 	. 
 
 sub_1cb3h:
@@ -5854,7 +5855,7 @@ l2409h:
 	bit 0,(ix-001h)		;2421	dd cb ff 46 	. . . F 
 	jr nz,l23d3h		;2425	20 ac 	  . 
 l2427h:
-	ld a,(MR_REACTION_L)		;2427	3a e4 e2 	: . . 
+	ld a,(ENEMY_REACTION)		;2427	3a e4 e2 	: . . 
 	ld (ENEMY_FRAME),a		;242a	32 de e2 	2 . . 
 	ld (ix + 1),004h		;242d	dd 36 01 04 	. 6 . . 
 	ret			;2431	c9 	. 
@@ -5873,7 +5874,7 @@ l2448h:
 	ld hl,l2d6dh		;2450	21 6d 2d 	! m - 
 	call sub_2d19h		;2453	cd 19 2d 	. . - 
 	jr c,l246fh		;2456	38 17 	8 . 
-	ld (ix + 12),b		;2458	dd 70 0c 	. p . 
+	ld (ix + ENEMY_REACTION_IDX),b		    ;2458	dd 70 0c
 	ld (ix + ENEMY_FRAME_COUNTER_IDX), 6	;245b	dd 36 07 06 level 2
 	ld a,(ix-002h)		;245f	dd 7e fe 	. ~ . 
 	ld (ix-002h),01ch		;2462	dd 36 fe 1c 	. 6 . . 
@@ -6225,8 +6226,8 @@ l2737h:
 	ld (ix + ENEMY_FRAME_IDX), 3	;274e	dd 36 06 03
 l2752h:
 	ld hl,(0e712h)		;2752	2a 12 e7 	* . . 
-	ld e,(ix + 12)		;2755	dd 5e 0c 	. ^ . 
-	ld d,(ix + 13)		;2758	dd 56 0d 	. V . 
+	ld e,(ix + ENEMY_REACTION_IDX)		;2755	dd 5e 0c
+	ld d,(ix + ENEMY_REACTION_IDX + 1)	;2758	dd 56 0d
 	sbc hl,de		;275b	ed 52 	. R 
 	ex de,hl			;275d	eb 	. 
 	bit 6,(ix + 0)		;275e	dd cb 00 76 	. . . v 
@@ -6316,7 +6317,7 @@ l2800h:
 	ld hl,0		;2830	21 00 00 	! . . 
 	ld de,(0e2f4h)		;2833	ed 5b f4 e2 	. [ . . 
 	sbc hl,de		;2837	ed 52 	. R 
-	ld (MR_REACTION_L),hl		;2839	22 e4 e2 	" . . 
+	ld (ENEMY_REACTION),hl		;2839	22 e4 e2 	" . . 
 	ret			;283c	c9 	. 
 l283dh:
     ; Weird negative addressing here
@@ -6710,7 +6711,7 @@ l2b28h:
 	ld de,0016h+2		;2b48	11 18 00 	. . . 
 	call l2c95h		;2b4b	cd 95 2c 	. . , 
 l2b4eh:
-	ld hl,(MR_REACTION_L)		;2b4e	2a e4 e2 	* . . 
+	ld hl,(ENEMY_REACTION)		;2b4e	2a e4 e2 	* . . 
 	dec (ix + ENEMY_FRAME_COUNTER_IDX)		;2b51	dd 35 07 level 5
 	jr nz,l2b6ah		;2b54	20 14 	  . 
 	inc hl			;2b56	23 	# 
@@ -6723,7 +6724,7 @@ l2b4eh:
 	ld a,(hl)			            ;2b62	7e
 	ld (ix + ENEMY_FRAME_COUNTER_IDX),a	;2b63	dd 77 07
 	inc hl			;2b66	23 	# 
-	ld (MR_REACTION_L),hl		;2b67	22 e4 e2 	" . . 
+	ld (ENEMY_REACTION),hl		;2b67	22 e4 e2 	" . . 
 l2b6ah:
 	ld a,(hl)			;2b6a	7e 	~ 
 	add a,(ix + 4)		;2b6b	dd 86 04 	. . . 
@@ -6827,7 +6828,7 @@ l2bddh:
 	ld (0e2d7h),a		;2c0d	32 d7 e2 	2 . . 
 	ld (0e2d6h),a		;2c10	32 d6 e2 	2 . . 
 l2c13h:
-	ld (MR_REACTION_L),hl		;2c13	22 e4 e2 	" . . 
+	ld (ENEMY_REACTION),hl		;2c13	22 e4 e2 	" . . 
 	ret			;2c16	c9 	. 
 l2c17h:
 	ld a,015h		;2c17	3e 15 	> . 
