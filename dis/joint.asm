@@ -217,7 +217,8 @@ ENEMY_MOVE_COUNTER: EQU TBL_ENEMIES + ENEMY_MOVE_COUNTER_IDX ; 8: enemy moving c
 ENEMY_ENERGY_IDX: EQU 10
 ENEMY_ENERGY: EQU TBL_ENEMIES + ENEMY_ENERGY_IDX ; Enemy's energy
 
-ENEMY_STEADY_COUNTER: EQU TBL_ENEMIES + 11 ; This controls the time left the energy is standing without moving.
+ENEMY_STEADY_COUNTER_IDX: EQU 11
+ENEMY_STEADY_COUNTER: EQU TBL_ENEMIES + ENEMY_STEADY_COUNTER_IDX ; This controls the time left the enemy is standing without moving.
 ;
 ; This mainly controls how Mr. X reacts to attacks
 ; 7A: low kick, that he avoids by jumping
@@ -5318,7 +5319,7 @@ l1fb3h:
 	ld de,l0110h		;1fbc	11 10 01 	. . . 
 	jp l2c95h		;1fbf	c3 95 2c 	. . , 
 l1fc2h:
-	dec (ix + 11)		;1fc2	dd 35 0b 	. 5 . 
+	dec (ix + ENEMY_STEADY_COUNTER_IDX)		;1fc2	dd 35 0b level 1
 	jr nz,l1fd2h		;1fc5	20 0b 	  . 
 	inc (ix + ENEMY_FRAME_IDX)	            ;1fc7	dd 34 06
 	ld (ix + ENEMY_FRAME_COUNTER_IDX) ,5	;1fca	dd 36 07 05 level 1
@@ -5583,7 +5584,7 @@ l21ceh:
 	ld de,0016h+2		;21ce	11 18 00 	. . . 
 	jp l2c95h		;21d1	c3 95 2c 	. . , 
 l21d4h:
-	dec (ix + 11)		;21d4	dd 35 0b 	. 5 . 
+	dec (ix + ENEMY_STEADY_COUNTER_IDX)		;21d4	dd 35 0b level 3
 	jr nz,l21dfh		;21d7	20 06 	  . 
 	jp l2220h		;21d9	c3 20 22 	.   " 
 l21dch:
@@ -5799,7 +5800,7 @@ l23b4h:
 	ld de,0f500h		;23b7	11 00 f5 	. . . 
 	add hl,de			;23ba	19 	. 
 	jp c,l22bah		;23bb	da ba 22 	. . " 
-	dec (ix + 11)		;23be	dd 35 0b 	. 5 . 
+	dec (ix + ENEMY_STEADY_COUNTER_IDX)		;23be	dd 35 0b level 2
 	jr nz,l23cch		;23c1	20 09 	  . 
 	jp l2220h		;23c3	c3 20 22 	.   " 
 l23c6h:
@@ -6011,7 +6012,7 @@ l2563h:
 	ld (ix + 14),000h		;2567	dd 36 0e 00 	. 6 . . 
 	ret			;256b	c9 	. 
 l256ch:
-	dec (ix + 11)		;256c	dd 35 0b 	. 5 . 
+	dec (ix + ENEMY_STEADY_COUNTER_IDX)		;256c	dd 35 0b level 4
 	jp z,l2220h		;256f	ca 20 22 	.   " 
 	call sub_25afh		;2572	cd af 25 	. . % 
 l2575h:
@@ -6577,11 +6578,11 @@ l2a2ch:
 	ld (ix + ENEMY_FRAME_COUNTER_IDX),a		;2a39	dd 77 07 level 5
 	ret			;2a3c	c9 	. 
 l2a3dh:
-	dec (ix + 11)		;2a3d	dd 35 0b 	. 5 . 
-	jr z,l2a55h		;2a40	28 13 	( . 
-	ld a,(0e012h)		;2a42	3a 12 e0 	: . . 
-	ld hl,0e1a5h		;2a45	21 a5 e1 	! . . 
-	call sub_1214h		;2a48	cd 14 12 	. . . 
+	dec (ix + ENEMY_STEADY_COUNTER_IDX)		;2a3d	dd 35 0b level 5
+	jr z,l2a55h		;2a40	28 13
+	ld a,(0e012h)		;2a42	3a 12 e0
+	ld hl,0e1a5h		;2a45	21 a5 e1
+	call sub_1214h		;2a48	cd 14 12
 	ld (ix + ENEMY_FRAME_COUNTER_IDX),a		;2a4b	dd 77 07 level 5
 	ret			        ;2a4e	c9 	. 
 l2a4fh:
@@ -6976,8 +6977,8 @@ sub_2ce8h:
 	jr c,l2cf9h		;2cf6	38 01 	8 . 
 	inc b			;2cf8	04 	. 
 l2cf9h:
-	ld (ix + 11),b		;2cf9	dd 70 0b 	. p . 
-	ld (ix + ENEMY_STATE_IDX), 4	;2cfc	dd 36 01 04
+	ld (ix + ENEMY_STEADY_COUNTER_IDX),b	;2cf9	dd 70 0b level 1
+	ld (ix + ENEMY_STATE_IDX), 4	        ;2cfc	dd 36 01 04
 	ret			;2d00	c9 	. 
 sub_2d01h:
 	push hl			;2d01	e5 	. 
