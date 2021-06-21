@@ -4604,6 +4604,7 @@ l1a7eh:
 	xor 040h		;1a7e	ee 40 	. @ 
 l1a80h:
 	and 0c0h		;1a80	e6 c0 	. . 
+    ; Bit 4: enemy is alive
 	bit 4,(ix + ENEMY_LOOKAT_IDX)	;1a82	dd cb 00 66
 	ret z			;1a86	c8 	. 
 	ex de,hl			;1a87	eb 	. 
@@ -5353,7 +5354,7 @@ l1ff9h:
 	bit 4,(ix + 0)	;1ffc	dd cb 00 66
 	ret nz			;2000	c0
 	pop hl			;2001	e1
-    ; Resets bit 4 of magician and...
+    ; Resets bit 4 (enemy is alive) of magician and...
 	ld hl,TBL_ENEMIES		;2002	21 d8 e2
 	res 4,(hl)		        ;2005	cb a6
     ; ...its replica.
@@ -5431,7 +5432,8 @@ l209fh:
 sub_20a2h:
 	ld a,(0e701h)		;20a2	3a 01 e7 	: . . 
 	and 003h		;20a5	e6 03 	. . 
-	jr nz,l20adh		;20a7	20 04 	  . 
+	jr nz,l20adh		;20a7	20 04
+    ; Reset bit 5 (enemy is being attacked)
 	res 5,(ix + ENEMY_LOOKAT_IDX)	;20a9	dd cb 00 ae
 l20adh:
 	push hl			;20ad	e5 	. 
@@ -5441,6 +5443,7 @@ l20adh:
 	ld hl,(ME_INITIAL_FALL_SPEED_COPY)	;20b5	2a 0c e8
 	add hl,de			                ;20b8	19
 	ld hl,0e701h		                ;20b9	21 01 e7
+    ; Bit 6: looking direction (0: left, 1: right)
 	bit 6,(ix + ENEMY_LOOKAT_IDX)		;20bc	dd cb 00 76
 	jr z,l20cch		;20c0	28 0a 	( . 
 	jr c,l20c8h		;20c2	38 04 	8 . 
@@ -5480,13 +5483,18 @@ l20fdh:
 	ld hl,l211ch		;20fd	21 1c 21 	! . ! 
 l2100h:
 	call CHECK_VAL_HL_PLUS_B_0XFF		;2100	cd 18 1b
-	ret nc			                    ;2103	d0 	. 
+	ret nc			                    ;2103	d0
+    ; Bit 5: enemy is being attacked
 	set 5,(ix + ENEMY_LOOKAT_IDX)		;2104	dd cb 00 ee
 	ret			                        ;2108	c9
 sub_2109h:
 	ld a,(ix + ENEMY_LOOKAT_IDX)		;2109	dd 7e 00
-	and 020h		;210c	e6 20 	.   
-	ret nz			;210e	c0 	. 
+    ;        7654 3219 
+    ; 0x20 = 0010 0000
+    ; Bit 5: set when eneny is being attacked
+	and 020h		;210c	e6 20
+	ret nz			;210e	c0 Return, enemy under attack
+    ; Enemy not under attack
 	jp sub_1ae7h		;210f	c3 e7 1a 	. . . 
 l2112h:
 	inc b			;2112	04 	. 
@@ -5975,8 +5983,9 @@ l24fbh:
 l2503h:
 	call sub_250fh		;2503	cd 0f 25 	. . % 
 	ld ix,TBL_REPLICA		    ;2506	dd 21 e8 e2
+    ; Bit 4: enemy is alive
 	bit 4,(ix + ENEMY_LOOKAT_IDX)	;250a	dd cb 00 66
-	ret z			;250e	c8 	. 
+	ret z			;250e	c8 Return if enemy is dead
 sub_250fh:
 	ld hl,024d2h		;250f	21 d2 24 	! . $ 
 	call l1f23h		;2512	cd 23 1f 	. # . 
@@ -5984,9 +5993,10 @@ sub_250fh:
 	call sub_2d0dh		;2518	cd 0d 2d 	. . - 
 	ld de,0f800h		;251b	11 00 f8 	. . . 
 	add hl,de			;251e	19 	. 
-	jp nc,l2589h		;251f	d2 89 25 	. . % 
+	jp nc,l2589h		;251f	d2 89 25
+    ; Bit 6: looking direction
 	bit 6,(ix + ENEMY_LOOKAT_IDX)		;2522	dd cb 00 76
-	ret nz			;2526	c0 	. 
+	ret nz			;2526	c0 Return if looking right
 	ld de,05f00h		;2527	11 00 5f 	. . _ 
 	ld l,(ix + ENEMY_POS_L_IDX)		;252a	dd 6e 02
 	ld h,(ix + ENEMY_POS_H_IDX)		;252d	dd 66 03
@@ -6157,7 +6167,11 @@ l2698h:
 	ld h,(ix + ENEMY_POS_H_IDX)		;26a0	dd 66 03
 	ld (0e31dh),hl		;26a3	22 1d e3 	" . . 
 	ld a,(ix + ENEMY_LOOKAT_IDX)	;26a6	dd 7e 00
-	and 0x50		;26a9	e6 50 	. P 
+    ;        7654 3210
+    ; 0x50 = 0101 0000
+    ; Look right, not being attacked, enemy is alive
+    ; This seems an initializacion for the enemy.
+	and 0x50		;26a9	e6 50
 	ld (TBL_E31B),a		;26ab	32 1b e3 	2 . . 
 	ld hl,06500h		;26ae	21 00 65 	! . e 
 	ld (0e31fh),hl		;26b1	22 1f e3 	" . . 
@@ -6191,8 +6205,10 @@ l26edh:
 	ld l,(ix + ENEMY_POS_L_IDX)		;26f0	dd 6e 02
 	ld h,(ix + ENEMY_POS_H_IDX)		;26f3	dd 66 03
 	ld de,l0280h		;26f6	11 80 02 	. . . 
-	bit 6,(ix + ENEMY_LOOKAT_IDX)		;26f9	dd cb 00 76 	. . . v 
-	jr nz,l270ch		;26fd	20 0d 	  . 
+    ; Bit 6: looking direction
+	bit 6,(ix + ENEMY_LOOKAT_IDX)		;26f9	dd cb 00 76
+	jr nz,l270ch		;26fd	20 0d
+    ; Do this is looking left
 	add hl,de			;26ff	19 	. 
 	ex de,hl			;2700	eb 	. 
 	ld hl,(0e106h)		;2701	2a 06 e1 	* . . 
@@ -6202,7 +6218,8 @@ l26edh:
 	ex de,hl			;2709	eb 	. 
 	jr l270eh		;270a	18 02 	. . 
 l270ch:
-	sbc hl,de		;270c	ed 52 	. R 
+    ; Do this if looking right
+	sbc hl,de		;270c	ed 52
 l270eh:
 	ld (ix + ENEMY_POS_L_IDX),l		;270e	dd 75 02
 	ld (ix + ENEMY_POS_H_IDX),h		;2711	dd 74 03
@@ -6213,11 +6230,13 @@ l270eh:
 	call sub_28bah		;271e	cd ba 28 	. . ( 
 	jp c,l264bh		;2721	da 4b 26 	. K & 
 	call sub_2cd4h		;2724	cd d4 2c 	. . , 
-	jp z,l2080h		;2727	ca 80 20 	. .   
+	jp z,l2080h		;2727	ca 80 20
+    ; Bit 6: looking direction
 	bit 6,(ix + ENEMY_LOOKAT_IDX)		;272a	dd cb 00 76 	. . . v 
 	jp z,l2488h		;272e	ca 88 24 	. . $ 
 	ld de,0a100h		;2731	11 00 a1 	. . . 
-	jp l2071h		;2734	c3 71 20 	. q   
+	jp l2071h		;2734	c3 71 20
+
 l2737h:
 	dec (ix + ENEMY_FRAME_COUNTER_IDX)		;2737	dd 35 07 level 4
 	jr nz,l2752h		;273a	20 16 	  . 
@@ -6233,7 +6252,8 @@ l2752h:
 	ld e,(ix + ENEMY_REACTION_IDX)		;2755	dd 5e 0c
 	ld d,(ix + ENEMY_REACTION_IDX + 1)	;2758	dd 56 0d
 	sbc hl,de		;275b	ed 52 	. R 
-	ex de,hl			;275d	eb 	. 
+	ex de,hl			;275d	eb
+    ; Bit 6: looking direction
 	bit 6,(ix + ENEMY_LOOKAT_IDX)		;275e	dd cb 00 76 	. . . v 
 	jr nz,l2771h		;2762	20 0d 	  . 
 	ld hl,(0e106h)		;2764	2a 06 e1 	* . . 
@@ -6281,17 +6301,19 @@ l27b0h:
 	cp 022h		;27cb	fe 22 	. " 
 	ret nz			;27cd	c0 	. 
 	ld hl,l018bh		;27ce	21 8b 01 	! . . 
-	ld (0e2f8h),hl		;27d1	22 f8 e2 	" . . 
+	ld (0e2f8h),hl		;27d1	22 f8 e2
+    ; Set enemy is dead
 	ld (ix + ENEMY_LOOKAT_IDX), 0	;27d4	dd 36 00 00
-	ld hl,0e701h		;27d8	21 01 e7 	! . . 
+	ld hl,0e701h		;27d8	21 01 e7
 	res 4,(hl)		;27db	cb a6 	. . 
 	jr l283dh		;27dd	18 5e 	. ^ 
 l27dfh:
 	ld hl,0e700h		;27df	21 00 e7 	! . . 
 	set 0,(hl)		;27e2	cb c6 	. . 
 	ld a,(TBL_REPLICA + ENEMY_LOOKAT_IDX)		;27e4	3a e8 e2 	: . . 
+    ; Check bit 4: enemy is alive
 	and 010h		;27e7	e6 10 	. . 
-	jr z,l284fh		;27e9	28 64 	( d 
+	jr z,l284fh		;27e9	28 64 Get out if enemy is dead
 	push ix		;27eb	dd e5 	. . 
 	ld ix,TBL_ENEMIES		;27ed	dd 21 d8 e2 	. ! . . 
 	call sub_287eh		;27f1	cd 7e 28 	. ~ ( 
@@ -6353,6 +6375,7 @@ l285ch:
 	ld (TBL_REPLICA + ENEMY_POS_L_IDX),hl		;2865	22 ea e2
 	ld hl,05000h		;2868	21 00 50
 	ld (0e2ech),hl		;286b	22 ec e2
+    ; 0x50 = enemy looks right and he's alive
 	ld (ix + ENEMY_LOOKAT_IDX  + 16), 0x50	;286e	dd 36 10 Replica appears
 	ld (ix + FRAME_COUNTER_IDX + 16), 8		;2872	dd 36 17 08 	. 6 . . 
 	ld (ix + CURRENT_FRAME_IDX + 16), 30	;2876	dd 36 16 1e 	. 6 . . 
@@ -6375,8 +6398,9 @@ l2893h:
 	add hl,de			;2899	19 	. 
 	ld hl,0e197h		;289a	21 97 e1 	! . . 
 	ld de,0e198h		;289d	11 98 e1 	. . . 
-	jr nc,l28aah		;28a0	30 08 	0 . 
+	jr nc,l28aah		;28a0	30 08
 	ld a,(TBL_REPLICA + ENEMY_LOOKAT_IDX)	;28a2	3a e8 e2
+    ; Check bit 4: enemy is alive
 	and 010h		;28a5	e6 10 	. . 
 	jr nz,l28aah		;28a7	20 01 	  . 
 	ex de,hl			;28a9	eb 	. 
@@ -7468,8 +7492,9 @@ l2fd2h:
 	push bc			;2fd2	c5 	. 
 	ld c,(ix + MAGICAL_ELEMENT_LOOKAT_IDX)	;2fd3	dd 4e 00
 l2fd6h:
+    ; Bit 4: enemy is alive
 	bit 4,c		    ;2fd6	cb 61
-	call nz,sub_2fe4h	;2fd8	c4 e4 2f No carry ==> Jump!
+	call nz,sub_2fe4h	;2fd8	c4 e4 2f Call if alive
 	pop bc			;2fdb	c1 	. 
 	ld de, 19		;2fdc	11 13 00 	. . . 
 	add ix,de		;2fdf	dd 19 	. . 
@@ -8039,6 +8064,7 @@ sub_34ddh:
 	ld h,(ix + ENEMY_POS_H_IDX)		;34e3	dd 66 03
 	ld de,00200h		;34e6	11 00 02 	. . . 
 	ld a,(ix + ENEMY_LOOKAT_IDX)		;34e9	dd 7e 00
+    ; Check bit 6: looking direction
 	and 040h		;34ec	e6 40 	. @ 
 	jr z,l34f3h		;34ee	28 03 	( . 
 	add hl,de			;34f0	19 	. 
@@ -8228,7 +8254,8 @@ l363dh:
 	ld de, 19		;364b	11 13 00 	. . . 
 	ld b,010h		;364e	06 10 	. . 
 l3650h:
-	add ix,de		;3650	dd 19 	. . 
+	add ix,de		;3650	dd 19
+    ; Bit 4: enemy is alive
 	bit 4,(ix + MAGICAL_ELEMENT_LOOKAT_IDX)		;3652	dd cb 00 66
 	jr z,l366ch		;3656	28 14 	( . 
 	ld a,(ix + MAGICAL_ELEMENT_STATE_IDX)		;3658	dd 7e 01
@@ -8255,7 +8282,8 @@ l366ch:
 	ld ix,TABLE_WIDTH_19		;367e	dd 21 6f e3 	. ! o . 
 	ld bc, 19   		;3682	01 13 00 	. . . 
 l3685h:
-	add ix,bc		;3685	dd 09 	. . 
+	add ix,bc		;3685	dd 09
+    ; Bit 4: enemy is alive
 	bit 4,(ix + MAGICAL_ELEMENT_LOOKAT_IDX)		;3687	dd cb 00 66
 	jr nz,l3685h		;368b	20 f8 	  . 
 	ld a,r		;368d	ed 5f 	. _ 
