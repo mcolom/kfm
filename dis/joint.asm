@@ -184,13 +184,11 @@ BOUNCING_BALL_EXPLODE_TIMEOUT_INIT: EQU 0xE371
 TBL_ENEMIES: EQU 0xE2D8
 
 ; Enemy's look at
-; 0x0: enemy not visible yet
-; 0x52, 0x56: look right
-; 0x12: look left
-; 0x2, 0x46: no enemy (defeated)
-; Actually it's bitwise
+; Bit 6: looking (and moving!) direction. 0 = look left and 1 = look right
+; Bit 5: set to 1 when the enemy is attacked
+; Bit 4: enemy is alive
+; The other bits seem to be unused
 ENEMY_LOOKAT_IDX: EQU 0
-
 
 ENEMY_STATE_IDX: EQU 1
 ENEMY_STATE: EQU TBL_ENEMIES + ENEMY_STATE_IDX ; Enemy's state
@@ -241,19 +239,15 @@ ENEMY_ATTACK_STEP: EQU TBL_ENEMIES + ENEMY_ATTACK_STEP_IDX ; Enemy attack step
 ENEMY_BOOMERANG_TYPE_IDX: EQU 15
 ENEMY_BOOMERANG_TYPE: EQU TBL_ENEMIES + ENEMY_BOOMERANG_TYPE_IDX
 
-; Set to 0x50 when the magician's replica appears, and 0 otherwise.
-MAGICIAN_REPLICA_APPEARED_IDX: EQU 16
-
-
-MAGICIAN_REPLICA_STATE: EQU TBL_ENEMIES + 18
 
 ; *******************************************************************
 
+; In the 4th floor, the magician can make a replica of himself appear.
+; The code addresses the variables of the replica in two different ways:
+;   - With the same indices, but with base address TBL_ENEMIES + 16 = 0xE2E8 or
+;   - with the same base address, but adding 16 to the index.
 
-; The code uses with address as a base to index IDX 0 (the same as MAGICIAN_REPLICA_APPEARED_IDX with TBL_ENEMIES)
-MAGICIAN_REPLICA_APPEARED_ADDR_IDX: EQU 0
-MAGICIAN_REPLICA_APPEARED_ADDR: EQU 0xE2E8 + MAGICIAN_REPLICA_APPEARED_ADDR_IDX
-
+TBL_REPLICA: EQU TBL_ENEMIES + 16 ; 0xE2E8
 
 ; *******************************************************************
 
@@ -4610,7 +4604,7 @@ l1a7eh:
 	xor 040h		;1a7e	ee 40 	. @ 
 l1a80h:
 	and 0c0h		;1a80	e6 c0 	. . 
-	bit 4,(ix + MAGICIAN_REPLICA_APPEARED_ADDR_IDX)	;1a82	dd cb 00 66
+	bit 4,(ix + ENEMY_LOOKAT_IDX)	;1a82	dd cb 00 66
 	ret z			;1a86	c8 	. 
 	ex de,hl			;1a87	eb 	. 
 	call GET_ENEMY_FALLING_HEIGHT_IN_HL		;1a88	cd 9e 1c
@@ -4821,7 +4815,7 @@ sub_1befh:
 l1bf2h:
 	call sub_1c7ah		;1bf2	cd 7a 1c 	. z . 
 l1bf5h:
-	dec (ix + ENEMY_FRAME_COUNTER_IDX)		;1bf5	dd 35 07 ; level 1
+	dec (ix + ENEMY_FRAME_COUNTER_IDX)		;1bf5	dd 35 07 ; level 1.
 	jr nz,l1c08h		;1bf8	20 0e 	  . 
 	ld (ix + ENEMY_FRAME_COUNTER_IDX), 7	;1bfa	dd 36 07 07
 	dec (ix + ENEMY_FRAME_IDX)	;1bfe	dd 35 06
@@ -4905,18 +4899,18 @@ l1c81h:
 SET_ENEMY_POS_FROM_HL:
 	ld (ix + ENEMY_POS_L_IDX),l		;1c83	dd 75 02
 	ld (ix + ENEMY_POS_H_IDX),h		;1c86	dd 74 03
-	ret			;1c89	c9
+	ret			                    ;1c89	c9
 
 GET_ENEMY_POS_IN_HL:
 	ld l,(ix + ENEMY_POS_L_IDX)		;1c8a	dd 6e 02
 	ld h,(ix + ENEMY_POS_H_IDX)     ;1c8d	dd 66 03
-	ret			;1c90	c9
+	ret			                    ;1c90	c9
 
 GET_ENEMY_POS_IN_DE:
-	ex de,hl			;1c91	eb 	. 
-	call GET_ENEMY_POS_IN_HL		;1c92	cd 8a 1c 	. . . 
-	ex de,hl			;1c95	eb 	. 
-	ret			;1c96	c9 	. 
+	ex de,hl			            ;1c91	eb 	. 
+	call GET_ENEMY_POS_IN_HL		;1c92	cd 8a 1c
+	ex de,hl			            ;1c95	eb
+	ret			                    ;1c96	c9
 
 SET_ENEMY_FALLING_HEIGHT_FROM_HL:
 	ld (ix + ENEMY_FALLING_HEIGHT_L_IDX),l		;1c97	dd 75 04
@@ -5355,13 +5349,15 @@ l1fe5h:
 	ld (ENEMY_FRAME_COUNTER),a		;1ff5	32 df e2 	2 . . 
 	ret			;1ff8	c9 	. 
 l1ff9h:
-	call l1baah		;1ff9	cd aa 1b 	. . . 
-	bit 4,(ix + 0)		;1ffc	dd cb 00 66 	. . . f 
-	ret nz			;2000	c0 	. 
-	pop hl			;2001	e1 	. 
-	ld hl,TBL_ENEMIES		;2002	21 d8 e2 	! . . 
-	res 4,(hl)		;2005	cb a6 	. . 
-	ld hl,MAGICIAN_REPLICA_APPEARED_ADDR		;2007	21 e8 e2 	! . . 
+	call l1baah		;1ff9	cd aa 1b
+	bit 4,(ix + 0)	;1ffc	dd cb 00 66
+	ret nz			;2000	c0
+	pop hl			;2001	e1
+    ; Resets bit 4 of magician and...
+	ld hl,TBL_ENEMIES		;2002	21 d8 e2
+	res 4,(hl)		        ;2005	cb a6
+    ; ...its replica.
+	ld hl,TBL_REPLICA + ENEMY_LOOKAT_IDX    ;2007	21 e8 e2
 	res 4,(hl)		;200a	cb a6 	. . 
 	ret			;200c	c9 	. 
 l200dh:
@@ -5440,12 +5436,12 @@ sub_20a2h:
 l20adh:
 	push hl			;20ad	e5 	. 
 	ld a,(ix + ENEMY_STATE_IDX)		;20ae	dd 7e 01
-	cp 001h		;20b1	fe 01 	. . 
+	cp 1		                    ;20b1	fe 01
 	jr z,l20d2h		;20b3	28 1d 	( . 
 	ld hl,(ME_INITIAL_FALL_SPEED_COPY)	;20b5	2a 0c e8
 	add hl,de			                ;20b8	19
 	ld hl,0e701h		                ;20b9	21 01 e7
-	bit 6,(ix + MAGICIAN_REPLICA_APPEARED_ADDR_IDX)		;20bc	dd cb 00 76
+	bit 6,(ix + ENEMY_LOOKAT_IDX)		;20bc	dd cb 00 76
 	jr z,l20cch		;20c0	28 0a 	( . 
 	jr c,l20c8h		;20c2	38 04 	8 . 
 	set 4,(hl)		;20c4	cb e6 	. . 
@@ -5465,7 +5461,7 @@ l20d7h:
 l20d9h:
 	pop hl			;20d9	e1 	. 
 	call sub_2d01h		;20da	cd 01 2d 	. . - 
-	ld a,(ix + MAGICIAN_REPLICA_APPEARED_ADDR_IDX)	;20dd	dd 7e 00
+	ld a,(ix + ENEMY_LOOKAT_IDX)	;20dd	dd 7e 00
 	jp l1a7eh		;20e0	c3 7e 1a 	. ~ . 
 sub_20e3h:
 	call sub_2109h		;20e3	cd 09 21 	. . ! 
@@ -5978,8 +5974,8 @@ l24fbh:
 	dec (hl)			;2502	35 	5 
 l2503h:
 	call sub_250fh		;2503	cd 0f 25 	. . % 
-	ld ix,MAGICIAN_REPLICA_APPEARED_ADDR		    ;2506	dd 21 e8 e2
-	bit 4,(ix + MAGICIAN_REPLICA_APPEARED_ADDR_IDX)	;250a	dd cb 00 66
+	ld ix,TBL_REPLICA		    ;2506	dd 21 e8 e2
+	bit 4,(ix + ENEMY_LOOKAT_IDX)	;250a	dd cb 00 66
 	ret z			;250e	c8 	. 
 sub_250fh:
 	ld hl,024d2h		;250f	21 d2 24 	! . $ 
@@ -5989,7 +5985,7 @@ sub_250fh:
 	ld de,0f800h		;251b	11 00 f8 	. . . 
 	add hl,de			;251e	19 	. 
 	jp nc,l2589h		;251f	d2 89 25 	. . % 
-	bit 6,(ix + MAGICIAN_REPLICA_APPEARED_ADDR_IDX)		;2522	dd cb 00 76
+	bit 6,(ix + ENEMY_LOOKAT_IDX)		;2522	dd cb 00 76
 	ret nz			;2526	c0 	. 
 	ld de,05f00h		;2527	11 00 5f 	. . _ 
 	ld l,(ix + ENEMY_POS_L_IDX)		;252a	dd 6e 02
@@ -6218,7 +6214,7 @@ l270eh:
 	jp c,l264bh		;2721	da 4b 26 	. K & 
 	call sub_2cd4h		;2724	cd d4 2c 	. . , 
 	jp z,l2080h		;2727	ca 80 20 	. .   
-	bit 6,(ix + MAGICIAN_REPLICA_APPEARED_ADDR_IDX)		;272a	dd cb 00 76 	. . . v 
+	bit 6,(ix + ENEMY_LOOKAT_IDX)		;272a	dd cb 00 76 	. . . v 
 	jp z,l2488h		;272e	ca 88 24 	. . $ 
 	ld de,0a100h		;2731	11 00 a1 	. . . 
 	jp l2071h		;2734	c3 71 20 	. q   
@@ -6238,7 +6234,7 @@ l2752h:
 	ld d,(ix + ENEMY_REACTION_IDX + 1)	;2758	dd 56 0d
 	sbc hl,de		;275b	ed 52 	. R 
 	ex de,hl			;275d	eb 	. 
-	bit 6,(ix + MAGICIAN_REPLICA_APPEARED_ADDR_IDX)		;275e	dd cb 00 76 	. . . v 
+	bit 6,(ix + ENEMY_LOOKAT_IDX)		;275e	dd cb 00 76 	. . . v 
 	jr nz,l2771h		;2762	20 0d 	  . 
 	ld hl,(0e106h)		;2764	2a 06 e1 	* . . 
 	sbc hl,de		;2767	ed 52 	. R 
@@ -6286,32 +6282,32 @@ l27b0h:
 	ret nz			;27cd	c0 	. 
 	ld hl,l018bh		;27ce	21 8b 01 	! . . 
 	ld (0e2f8h),hl		;27d1	22 f8 e2 	" . . 
-	ld (ix + MAGICIAN_REPLICA_APPEARED_ADDR_IDX), 0	;27d4	dd 36 00 00
+	ld (ix + ENEMY_LOOKAT_IDX), 0	;27d4	dd 36 00 00
 	ld hl,0e701h		;27d8	21 01 e7 	! . . 
 	res 4,(hl)		;27db	cb a6 	. . 
 	jr l283dh		;27dd	18 5e 	. ^ 
 l27dfh:
 	ld hl,0e700h		;27df	21 00 e7 	! . . 
 	set 0,(hl)		;27e2	cb c6 	. . 
-	ld a,(MAGICIAN_REPLICA_APPEARED_ADDR)		;27e4	3a e8 e2 	: . . 
+	ld a,(TBL_REPLICA + ENEMY_LOOKAT_IDX)		;27e4	3a e8 e2 	: . . 
 	and 010h		;27e7	e6 10 	. . 
 	jr z,l284fh		;27e9	28 64 	( d 
 	push ix		;27eb	dd e5 	. . 
 	ld ix,TBL_ENEMIES		;27ed	dd 21 d8 e2 	. ! . . 
 	call sub_287eh		;27f1	cd 7e 28 	. ~ ( 
-	ld (ix+017h),008h		;27f4	dd 36 17 08 	. 6 . . 
-	ld (ix+016h),01ah		;27f8	dd 36 16 1a 	. 6 . . 
-	ld (ix+011h),00ah		;27fc	dd 36 11 0a 	. 6 . . 
+	ld (ix + FRAME_COUNTER_IDX + 16), 8	            ;27f4	dd 36 17 08
+	ld (ix + CURRENT_FRAME_IDX + 16), 26	        ;27f8	dd 36 16 1a
+	ld (ix + ENEMY_STATE_IDX + 16), 10    ;27fc	dd 36 11 0a
 l2800h:
 	pop ix		;2800	dd e1 	. . 
 	ret			;2802	c9 	. 
 	call l1be2h		;2803	cd e2 1b 	. . . 
-	dec (ix + 7)		;2806	dd 35 07 	. 5 . 
-	ret nz			;2809	c0 	. 
-	ld (ix + 7),008h		;280a	dd 36 07 08 	. 6 . . 
-	inc (ix + 6)		;280e	dd 34 06 	. 4 . 
-	ld a,(ix + 6)		;2811	dd 7e 06 	. ~ . 
-	cp 026h		;2814	fe 26 	. & 
+	dec (ix + ENEMY_FRAME_COUNTER_IDX)		;2806	dd 35 07
+	ret nz			                            ;2809	c0
+	ld (ix + ENEMY_FRAME_COUNTER_IDX), 8		;280a	dd 36 07 08
+	inc (ix + ENEMY_FRAME_IDX)		    ;280e	dd 34 06
+	ld a,(ix + ENEMY_FRAME_IDX)		    ;2811	dd 7e 06
+	cp 38		                                ;2814	fe 26
 	ret nz			;2816	c0 	. 
 	ld hl,l011ah		;2817	21 1a 01 	! . . 
 	ld (0e2f8h),hl		;281a	22 f8 e2 	" . . 
@@ -6320,19 +6316,23 @@ l2800h:
 	ld a,r		;2823	ed 5f 	. _ 
 	and 001h		;2825	e6 01 	. . 
 	ret z			;2827	c8 	. 
-	ld (ix-00fh),00bh		;2828	dd 36 f1 0b
-	ld (ix + ENEMY_STATE_IDX), 0	;282c	dd 36 01 00
+	ld (ix + ENEMY_STATE_IDX - 16), 11		;2828	dd 36 f1 0b Magician and...
+	ld (ix + ENEMY_STATE_IDX), 0	;282c	dd 36 01 00 Replica!
 	ld hl,0		;2830	21 00 00 	! . . 
 	ld de,(0e2f4h)		;2833	ed 5b f4 e2 	. [ . . 
 	sbc hl,de		;2837	ed 52 	. R 
 	ld (ENEMY_REACTION),hl		;2839	22 e4 e2 	" . . 
 	ret			;283c	c9 	. 
 l283dh:
-    ; Weird negative addressing here
-    ; Question: WHY???
-	ld (ix-00ah), 0		;283d	dd 36 f6 00 This seems to be ENEMY_FRAME_IDX
-	ld (ix-009h), 2		;2841	dd 36 f7 02 This seems to be ENEMY_FRAME_COUNTER_IDX
-	ld (ix-00fh), 0		;2845	dd 36 f1 00 Thiis seems to be ENEMY_STATE
+    ; Weird negative addressing here.
+    ; It sets the base address to TBL_REPLICA and uses negative indices to
+    ; access TBL_ENEMIES.
+    ;
+    ; Probably because IX is addressing the replica and it wants to
+    ; access the true magician.
+	ld (ix + ENEMY_FRAME_IDX - 16), 0		    ;283d	dd 36 f6 00
+	ld (ix + ENEMY_FRAME_COUNTER_IDX - 16), 2	;2841	dd 36 f7 02
+	ld (ix + ENEMY_STATE_IDX - 16), 0		    ;2845	dd 36 f1 00
 	ld hl,0e700h		;2849	21 00 e7 	! . . 
 	res 0,(hl)		;284c	cb 86 	. . 
 	ret			;284e	c9 	. 
@@ -6343,16 +6343,20 @@ l284fh:
 	jr c,l285ch		;2857	38 03 	8 . 
 	ld de,l02a0h		;2859	11 a0 02 	. . . 
 l285ch:
-	ld hl,(0e712h)		;285c	2a 12 e7 	* . . 
-	ld (0e2f4h),de		;285f	ed 53 f4 e2 	. S . . 
-	sbc hl,de		;2863	ed 52 	. R 
-	ld (MAGICIAN_REPLICA_STATE),hl		;2865	22 ea e2 	" . . 
-	ld hl,05000h		;2868	21 00 50 	! . P 
-	ld (0e2ech),hl		;286b	22 ec e2 	" . . 
-	ld (ix + MAGICIAN_REPLICA_APPEARED_IDX), 0x50	;286e	dd 36 10 Replica appears
-	ld (ix+017h),008h		;2872	dd 36 17 08 	. 6 . . 
-	ld (ix+016h),01eh		;2876	dd 36 16 1e 	. 6 . . 
-	ld (ix+011h),009h		;287a	dd 36 11 09 	. 6 . . 
+	ld hl,(0e712h)		;285c	2a 12 e7
+	ld (0e2f4h),de		;285f	ed 53 f4 e2
+	sbc hl,de		    ;2863	ed 52
+    ; It arrives here only when the replica appears
+    
+    ; The programmer preferred to index ENEMY_POS_L_IDX this way instead of
+    ; ld (ix + ENEMY_POS_L_IDX  + 16).
+	ld (TBL_REPLICA + ENEMY_POS_L_IDX),hl		;2865	22 ea e2
+	ld hl,05000h		;2868	21 00 50
+	ld (0e2ech),hl		;286b	22 ec e2
+	ld (ix + ENEMY_LOOKAT_IDX  + 16), 0x50	;286e	dd 36 10 Replica appears
+	ld (ix + FRAME_COUNTER_IDX + 16), 8		;2872	dd 36 17 08 	. 6 . . 
+	ld (ix + CURRENT_FRAME_IDX + 16), 30	;2876	dd 36 16 1e 	. 6 . . 
+	ld (ix + ENEMY_STATE_IDX + 16), 9		;287a	dd 36 11 09 	. 6 . .
 sub_287eh:
 	ld (ix + ENEMY_STATE_IDX), 8	;287e	dd 36 01 08
 	ld (ix + ENEMY_FRAME_IDX), 26	;2882	dd 36 06 1a
@@ -6372,7 +6376,7 @@ l2893h:
 	ld hl,0e197h		;289a	21 97 e1 	! . . 
 	ld de,0e198h		;289d	11 98 e1 	. . . 
 	jr nc,l28aah		;28a0	30 08 	0 . 
-	ld a,(MAGICIAN_REPLICA_APPEARED_ADDR)		;28a2	3a e8 e2 	: . . 
+	ld a,(TBL_REPLICA + ENEMY_LOOKAT_IDX)	;28a2	3a e8 e2
 	and 010h		;28a5	e6 10 	. . 
 	jr nz,l28aah		;28a7	20 01 	  . 
 	ex de,hl			;28a9	eb 	. 
@@ -8034,7 +8038,7 @@ sub_34ddh:
 	ld l,(ix + ENEMY_POS_L_IDX)		;34e0	dd 6e 02
 	ld h,(ix + ENEMY_POS_H_IDX)		;34e3	dd 66 03
 	ld de,00200h		;34e6	11 00 02 	. . . 
-	ld a,(ix + MAGICIAN_REPLICA_APPEARED_ADDR_IDX)		;34e9	dd 7e 00
+	ld a,(ix + ENEMY_LOOKAT_IDX)		;34e9	dd 7e 00
 	and 040h		;34ec	e6 40 	. @ 
 	jr z,l34f3h		;34ee	28 03 	( . 
 	add hl,de			;34f0	19 	. 
