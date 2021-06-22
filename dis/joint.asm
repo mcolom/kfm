@@ -97,7 +97,10 @@ STEP_COUNTER: EQU 0xE883
 NUM_GRIPPING: EQU 0xE71A
 ACTIVE_GRIPPERS: EQU 0xE71B
 
-TBL_E262: EQU 0xE262
+
+TBL_E10A: EQU 0xE10A
+
+TBL_GUYS: EQU 0xE262
 TBL_E282: EQU 0xE282
 TBL_E2A2: EQU 0xE2A2
 TBL_E2B2: EQU 0xE2B2
@@ -107,6 +110,8 @@ TBL_E292: EQU 0xE292
 TBL_E272: EQU 0xE272
 
 TBL_E2C2: EQU 0xE2C2
+
+
 
 	;ld ix,
 
@@ -517,7 +522,6 @@ l00e0h:
 	and 038h		        ;00fa	e6 38 Get dragons
 	cp 020h		            ;00fc	fe 20 More than 3 dragons?
 	jr c,l0102h		        ;00fe	38 02
-l0100h:
     ; Yes, more than 3 dragons. Thus, set 3 dragons
 	ld a,018h		        ;0100	3e 18
 
@@ -1485,7 +1489,7 @@ l07e6h:
 	inc hl			;0815	23 	# 
 	ld d,(hl)			;0816	56 	V 
 	add iy,de		;0817	fd 19 	. . 
-	ld ix,0e10ah		;0819	dd 21 0a e1 	. ! . . 
+	ld ix,TBL_E10A		;0819	dd 21 0a e1 	. ! . . 
 	ld de,l0c1ch		;081d	11 1c 0c 	. . . 
 	ld b,023h		;0820	06 23 	. # 
 l0822h:
@@ -3431,7 +3435,7 @@ l126eh:
 	nop			;1280	00 	. 
 	nop			;1281	00 	. 
 	nop			;1282	00 	. 
-	ld bc,l0100h+1		;1283	01 01 01 	. . . 
+	ld bc,0x0101		;1283	01 01 01 	. . . 
 	dec b			;1286	05 	. 
 	dec b			;1287	05 	. 
 	nop			;1288	00 	. 
@@ -3495,7 +3499,7 @@ sub_12cbh:
 	ld c,(hl)			;12d3	4e 	N 
 	ld b,000h		;12d4	06 00 	. . 
 	ex de,hl			;12d6	eb 	. 
-	ld hl,0e10ah		;12d7	21 0a e1 	! . . 
+	ld hl,TBL_E10A		;12d7	21 0a e1 	! . . 
 	add hl,bc			;12da	09 	. 
 	add hl,bc			;12db	09 	. 
 	res 7,(hl)		;12dc	cb be 	. . 
@@ -3511,7 +3515,7 @@ l12efh:
 	nop			;12ef	00 	. 
 	nop			;12f0	00 	. 
 	nop			;12f1	00 	. 
-	ld bc,l0100h+1		;12f2	01 01 01 	. . . 
+	ld bc,0x0101		;12f2	01 01 01 	. . . 
 	ld (bc),a			;12f5	02 	. 
 	ld (bc),a			;12f6	02 	. 
 	ld (bc),a			;12f7	02 	. 
@@ -3552,7 +3556,7 @@ l1309h:
 	add a,e			;1328	83 	. 
 	add a,c			;1329	81 	. 
 	ld c,a			;132a	4f 	O 
-	ld ix,0e10ah		;132b	dd 21 0a e1 	. ! . . 
+	ld ix,TBL_E10A		;132b	dd 21 0a e1 	. ! . . 
 	add ix,bc		;132f	dd 09 	. . 
 	add ix,bc		;1331	dd 09 	. . 
 	bit 7,(ix + 0)		;1333	dd cb 00 7e 	. . . ~ 
@@ -3903,10 +3907,10 @@ sub_153dh:
 	jr nz,l1547h		;1542	20 03 	  . 
 	ld (0e2d2h),a		;1544	32 d2 e2 	2 . . 
 l1547h:
-	ld hl,l0100h+1		;1547	21 01 01 	! . . 
+	ld hl,0x0101		;1547	21 01 01 	! . . 
 	ld (ACTIVE_GRIPPERS),hl		;154a	22 1b e7 	" . . 
 	ld (0e71dh),hl		;154d	22 1d e7 	" . . 
-	ld ix,TBL_E262		;1550	dd 21 62 e2 	. ! b . 
+	ld ix,TBL_GUYS		;1550	dd 21 62 e2 	. ! b . 
 	ld b,005h		;1554	06 05 	. . 
 l1556h:
 	push bc			;1556	c5 	. 
@@ -5193,7 +5197,7 @@ l1eb5h:
 	ret c			;1ec4	d8 	. 
 	ret z			;1ec5	c8 	. 
 	ld b,005h		;1ec6	06 05 	. . 
-	ld ix,TBL_E262		;1ec8	dd 21 62 e2 	. ! b . 
+	ld ix,TBL_GUYS		;1ec8	dd 21 62 e2 	. ! b . 
 l1ecch:
 	bit 0,(ix + 0)		;1ecc	dd cb 00 46 	. . . F 
 	jr nz,l1f03h		;1ed0	20 31 	  1 
@@ -7586,8 +7590,8 @@ l307bh:
 	add hl,de			;3087	19 	. 
 	ld (ix + MAGICAL_ELEMENT_DISTANCE_L_IDX),l		;3088	dd 75 02
 	ld (ix + MAGICAL_ELEMENT_DISTANCE_H_IDX),h		;308b	dd 74 03
-	ld l,(ix+MAGICAL_ELEMENT_HEIGHT_OFFSET_L_IDX)	;308e	dd 6e 10
-	ld h,(ix+MAGICAL_ELEMENT_HEIGHT_OFFSET_H_IDX)	;3091	dd 66 11
+	ld l,(ix + MAGICAL_ELEMENT_HEIGHT_OFFSET_L_IDX)	;308e	dd 6e 10
+	ld h,(ix + MAGICAL_ELEMENT_HEIGHT_OFFSET_H_IDX)	;3091	dd 66 11
 	ld de,00049h		;3094	11 49 00 	. I . 
 	bit 0,(ix + MAGICAL_ELEMENT_LOOKAT_IDX)		;3097	dd cb 00 46
 	jr z,l30aah		;309b	28 0d 	( . 
@@ -7605,8 +7609,8 @@ l30aah:
 	jr nc,l30b7h		;30b1	30 04 	0 . 
 	set 0,(ix + MAGICAL_ELEMENT_LOOKAT_IDX)		;30b3	dd cb 00 c6
 l30b7h:
-	ld (ix+MAGICAL_ELEMENT_HEIGHT_OFFSET_L_IDX),l		;30b7	dd 75 10
-	ld (ix+MAGICAL_ELEMENT_HEIGHT_OFFSET_H_IDX),h		;30ba	dd 74 11
+	ld (ix + MAGICAL_ELEMENT_HEIGHT_OFFSET_L_IDX),l		;30b7	dd 75 10
+	ld (ix + MAGICAL_ELEMENT_HEIGHT_OFFSET_H_IDX),h		;30ba	dd 74 11
 	ld e,(ix + MAGICAL_ELEMENT_FALL_SPEED_L_IDX)		;30bd	dd 5e 0c
 	ld d,(ix + MAGICAL_ELEMENT_FALL_SPEED_H_IDX)		;30c0	dd 56 0d
 	add hl,de			;30c3	19 	. 
@@ -7625,14 +7629,14 @@ l30cdh:
 	ld (ix + MAGICAL_ELEMENT_FALL_ACCELERATION_H_IDX),h		;30e5	dd 74 0b
 	ld (ix + MAGICAL_ELEMENT_HOR_OFFSET_L_IDX),e		;30e8	dd 73 0e
 	ld (ix + MAGICAL_ELEMENT_HOR_OFFSET_H_IDX),d		;30eb	dd 72 0f
-	ld de,l0100h		;30ee	11 00 01
+	ld de,0x0100		;30ee	11 00 01
 	ld l,(ix + MAGICAL_ELEMENT_HEIGHT_L_IDX)		;30f1	dd 6e 04
 	ld h,(ix + MAGICAL_ELEMENT_HEIGHT_H_IDX)		;30f4	dd 66 05
 	sbc hl,de		;30f7	ed 52 	. R 
 	ld (ix + MAGICAL_ELEMENT_FALL_SPEED_L_IDX),l		;30f9	dd 75 0c
 	ld (ix + MAGICAL_ELEMENT_FALL_SPEED_H_IDX),h		;30fc	dd 74 0d
-	ld (ix+MAGICAL_ELEMENT_HEIGHT_OFFSET_L_IDX),e		;30ff	dd 73 10
-	ld (ix+MAGICAL_ELEMENT_HEIGHT_OFFSET_H_IDX),d		;3102	dd 72 11
+	ld (ix + MAGICAL_ELEMENT_HEIGHT_OFFSET_L_IDX),e		;30ff	dd 73 10
+	ld (ix + MAGICAL_ELEMENT_HEIGHT_OFFSET_H_IDX),d		;3102	dd 72 11
 	ret			;3105	c9 	. 
 l3106h:
 	call sub_333ah		;3106	cd 3a 33 	. : 3 
@@ -8135,8 +8139,8 @@ l356bh:
 	and 001h		;3575	e6 01 	. . 
 	jp z,l3713h		;3577	ca 13 37 	. . 7 
 	ld a,040h		;357a	3e 40 	> @ 
-	xor (ix + 0)		;357c	dd ae 00 	. . . 
-	ld (ix + 0),a		;357f	dd 77 00 	. w . 
+	xor (ix + MAGICAL_ELEMENT_LOOKAT_IDX)		;357c	dd ae 00 	. . . 
+	ld (ix + MAGICAL_ELEMENT_LOOKAT_IDX),a		;357f	dd 77 00 	. w . 
 	ld (ix + MAGICAL_ELEMENT_STATE_IDX),010h		;3582	dd 36 01 10 	. 6 . . 
 	ld (ix + CURRENT_FRAME_IDX),01dh		;3586	dd 36 06 1d 	. 6 . . 
 	ld (ix + FRAME_COUNTER_IDX), 11 ;358a	dd 36 07 0b
@@ -9296,14 +9300,14 @@ l3e18h:
 l3e1fh:
 	ld (bc),a			;3e1f	02 	. 
 	nop			;3e20	00 	. 
-	ld bc,l0100h		;3e21	01 00 01 	. . . 
+	ld bc,0x0100		;3e21	01 00 01 	. . . 
 	ld (bc),a			;3e24	02 	. 
 	nop			;3e25	00 	. 
 	nop			;3e26	00 	. 
 	nop			;3e27	00 	. 
 	nop			;3e28	00 	. 
 	ld (bc),a			;3e29	02 	. 
-	ld bc,l0100h		;3e2a	01 00 01 	. . . 
+	ld bc,0x0100		;3e2a	01 00 01 	. . . 
 	nop			;3e2d	00 	. 
 	ld (bc),a			;3e2e	02 	. 
 	ld (bc),a			;3e2f	02 	. 
@@ -9575,11 +9579,11 @@ l40adh:
 	jr nc,l40ceh
 	add hl,de	
 	ld (0e900h),hl
-	ld hl,l0100h
+	ld hl,0x0100
 	jr l40d6h
 l40ceh:
 	ld (0e900h),de
-	ld de,l0100h
+	ld de,0x0100
 	add hl,de	
 l40d6h:
 	ld (0e715h),hl
@@ -10397,7 +10401,7 @@ l46a0h:
 	dec (hl)	
 	jr z,l46eeh
 	ld hl,(0e712h)
-	ld de,l0100h
+	ld de,0x0100
 	ld a,(0e101h)
 	and a	
 	jr z,l46c9h
@@ -10467,7 +10471,7 @@ l4723h:
 l4737h:
 	sub 00ch
 	jr c,l4749h
-	ld de,l0100h
+	ld de,0x0100
 	sbc hl,de
 	ret c	
 	ld de,0600h
@@ -10486,7 +10490,7 @@ l4749h:
 	and a	
 	jr z,l4766h
 	sbc hl,de
-	ld de,l0100h
+	ld de,0x0100
 l4766h:
 	add hl,de	
 	ld (0e712h),hl
@@ -10658,27 +10662,31 @@ l487eh:
 	ld (SILVIA_LEFT_OR_RIGHT),a
 	ld a,005h
 	ld (0e347h),a
-	ld ix,TBL_E262
+	ld ix,TBL_GUYS
 	ld bc,0750h
 	ld hl,0f00h
 	ld b,007h
 l48d2h:
-	ld (ix + 4),000h
-	ld (ix + 5),05ch
-	ld (ix + 7),007h
-	ld (ix + 14),038h
-	ld (ix + 15),b
-	ld (ix + 0),c
-	ld (ix + 2),l
-	ld (ix + 3),h
+    ; IX = TBL_GUYS
+	ld (ix + ENEMY_FALLING_HEIGHT_L_IDX), 0
+	ld (ix + ENEMY_FALLING_HEIGHT_H_IDX), 92 ; Distance from top of the enemy
+
+	ld (ix + ENEMY_FRAME_COUNTER_IDX), 7
+	ld (ix + ENEMY_ATTACK_STEP_IDX), 038h
+	ld (ix + ENEMY_BOOMERANG_TYPE_IDX),b
+	ld (ix + ENEMY_LOOKAT_IDX),c
+
+	ld (ix + ENEMY_POS_L_IDX),l
+	ld (ix + ENEMY_POS_H_IDX),h
+
 	ld a,b	
 	cp 007h
 	jr z,l48fbh
 	cp 004h
 	jr c,l48fbh
-	ld (ix + 6),00ah
+	ld (ix + ENEMY_FRAME_IDX), 10
 l48fbh:
-	cp 005h
+	cp 5
 	jr nc,l4904h
 l48ffh:
 	ld hl,03100h
@@ -11314,7 +11322,7 @@ l4da6h:
 	call sub_4821h
 l4da9h:
 	ld a,(0e020h)
-	ld ix,TBL_E262
+	ld ix,TBL_GUYS
 	ld c,(ix + 0)
 	ld hl,04dc2h
 	call l1f26h
@@ -11523,7 +11531,7 @@ l4f01h:
 	ld (bc),a	
 	inc b	
 	djnz $+18
-	ld hl,l0100h
+	ld hl,0x0100
 l4f20h:
 	dec bc	
 	inc b	
