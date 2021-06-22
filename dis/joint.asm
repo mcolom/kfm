@@ -76,6 +76,9 @@ HSCROLL_HIGH_W: EQU HSCROLL_LOW_W + 1
 M62_SPRITERAM: EQU 0xC000
 M62_TILERAM: EQU 0xD000
 
+EXT_RANDOM: EQU 0xE010
+EXT_TICKS: EQU 0xE020
+
 
 
 
@@ -113,7 +116,6 @@ TBL_E2C2: EQU 0xE2C2
 
 
 
-	;ld ix,
 
 ; Seem related to the moths at 4th floor
 TBL_E520: EQU 0xE520
@@ -375,16 +377,18 @@ l0023h:
 	ld hl,l05cch		;0023	21 cc 05 	! . . 
 	ld de,0ea06h		;0026	11 06 ea 	. . . 
 l0029h:
-	ld bc,l0078h		;0029	01 78 00 	. x . 
+	ld bc,0x78		;0029	01 78 00 	. x . 
 	ldir		;002c	ed b0 	. . 
 	defb 02ah, 03fh, 006h
 	ld a,l			;0031	7d 	} 
 	ld l,h			;0032	6c 	l 
 	ld h,a			;0033	67 	g 
-	jr l0082h		;0034	18 4c 	. L 
+	jr 0x82		;0034	18 4c 	. L 
 l0036h:
 	rst 0			;0036	c7 	. 
 	rst 0			;0037	c7 	. 
+
+    ; Z80 periodic interrupt handler
 	ex af,af'			;0038	08 	. 
 l0039h:
 	exx			;0039	d9 	. 
@@ -393,74 +397,32 @@ l0039h:
 l0040h:
 	ld bc,l00c0h		;0040	01 c0 00 	. . . 
 	ldir		;0043	ed b0 	. . 
-	ld a,(HSCROLL_LOW_W)		;0045	3a 02 e9 	: . . 
-	ld (M62_HSCROLL_LOW_W),a		;0048	32 00 a0 	2 . . 
-	ld a,(HSCROLL_HIGH_W)		;004b	3a 03 e9 	: . . 
-	ld (M62_HSCROLL_HIGH_W),a		;004e	32 00 b0 	2 . . 
-	push iy		;0051	fd e5 	. . 
-	push ix		;0053	dd e5 	. . 
-l0055h:
-	jp l008dh		;0055	c3 8d 00 	. . . 
-	rst 0			;0058	c7 	. 
-	rst 0			;0059	c7 	. 
-l005ah:
-	rst 0			;005a	c7 	. 
-l005bh:
-	rst 0			;005b	c7 	. 
-	rst 0			;005c	c7 	. 
-	rst 0			;005d	c7 	. 
-	rst 0			;005e	c7 	. 
-	rst 0			;005f	c7 	. 
-l0060h:
-	rst 0			;0060	c7 	. 
-	rst 0			;0061	c7 	. 
-	rst 0			;0062	c7 	. 
-	rst 0			;0063	c7 	. 
-	rst 0			;0064	c7 	. 
-	rst 0			;0065	c7 	. 
-	retn		;0066	ed 45 	. E 
-	ld h,e			;0068	63 	c 
-	xor l			;0069	ad 	. 
-	sbc a,h			;006a	9c 	. 
-	ld d,d			;006b	52 	R 
-	ld (hl),d			;006c	72 	r 
-	rst 8			;006d	cf 	. 
-l006eh:
-	add a,a			;006e	87 	. 
-	ld b,c			;006f	41 	A 
-	ld d,h			;0070	54 	T 
-	scf			;0071	37 	7 
-l0072h:
-	and a			;0072	a7 	. 
-	ld b,e			;0073	43 	C 
-	sub c			;0074	91 	. 
-	ld d,c			;0075	51 	Q 
-	and a			;0076	a7 	. 
-	ld b,e			;0077	43 	C 
-l0078h:
-	sub c			;0078	91 	. 
-	ld d,c			;0079	51 	Q 
-	sbc a,a			;007a	9f 	. 
-	cp b			;007b	b8 	. 
-	push hl			;007c	e5 	. 
-l007dh:
-	sub 085h		;007d	d6 85 	. . 
-	ld d,(hl)			;007f	56 	V 
-l0080h:
-	dec (hl)			;0080	35 	5 
-	inc hl			;0081	23 	# 
-l0082h:
-	ld (0e980h),hl		;0082	22 80 e9 	" . . 
-	ld hl,0e917h		;0085	21 17 e9 	! . . 
-	inc (hl)			;0088	34 	4 
-	ei			;0089	fb 	. 
-	jp 0487eh		;008a	c3 7e 48 	. ~ H 
+    
+    ; Read progra's scroll position, and update M62's config to actually do it
+	ld a,(HSCROLL_LOW_W)		;0045	3a 02 e9
+	ld (M62_HSCROLL_LOW_W),a	;0048	32 00 a0
+	ld a,(HSCROLL_HIGH_W)		;004b	3a 03 e9
+	ld (M62_HSCROLL_HIGH_W),a	;004e	32 00 b0
+	push iy		                ;0051	fd e5
+	push ix		                ;0053	dd e5
+	jp l008dh		;0055	c3 8d 00
+    
+    ; Probaby unused
+    ; Question: just a placeholder to add more code?
+    defb 0xc7, 0xc7, 0xc7, 0xc7, 0xc7, 0xc7, 0xc7, 0xc7
+    defb 0xc7, 0xc7, 0xc7, 0xc7, 0xc7, 0xc7
+    defb 0xed, 0x45, 0x63, 0xad, 0x9c, 0x52, 0x72, 0xcf
+	defb 0x87, 0x41, 0x54, 0x37, 0xa7, 0x43, 0x91, 0x51
+    defb 0xa7, 0x43, 0x91, 0x51, 0x9f, 0xb8, 0xe5, 0xd6
+    defb 0x85, 0x56, 0x35, 0x23, 0x22, 0x80, 0xe9, 0x21
+	defb 0x17, 0xe9, 0x34, 0xfb, 0xc3, 0x7e, 0x48
+
 l008dh:
 	ld a,(GAME_STATE)		;008d	3a 00 e0 	: . . 
 	and a			;0090	a7 	. 
 	jp m,l01f8h		;0091	fa f8 01 	. . . 
 	InDSW2		;0094	db 04 	. . 
-	bit 4,a		;0096	cb 67 	. g 
+	bit 4,a		;0096	cb 67 Check bit 4 of DSW2: slow motion trick
 	jr nz,l00b7h		;0098	20 1d 	  . 
 	ld hl,0e005h		;009a	21 05 e0 	! . . 
 	bit 7,(hl)		;009d	cb 7e 	. ~ 
@@ -477,14 +439,14 @@ l00b0h:
 	jp nz,l01f0h		;00b2	c2 f0 01 	. . . 
 	res 0,(hl)		;00b5	cb 86 	. . 
 l00b7h:
-	InDSW2		;00b7	db 04 	. . 
-	bit 3,a		;00b9	cb 5f 	. _ 
+	InDSW2		;00b7	db 04
+	bit 3,a		;00b9	cb 5f Check bit 3 of DSW2: coin mode 2
 	jr nz,l00cdh		;00bb	20 10 	  . 
 	ld hl,0e904h		;00bd	21 04 e9 	! . . 
 l00c0h:
 	bit 1,(hl)		;00c0	cb 4e 	. N 
 	jr z,l00cdh		;00c2	28 09 	( . 
-	ld hl,0e80eh		;00c4	21 0e e8 	! . . 
+	ld hl,0e80eh		;00c4	21 0e e8 Number of credits coin 2?
 	dec (hl)			;00c7	35 	5 
 	jp p,l01f0h		;00c8	f2 f0 01 	. . . 
 	ld (hl),008h		;00cb	36 08 	6 . 
@@ -492,16 +454,18 @@ l00cdh:
 	ld a,(GAME_STATE)		;00cd	3a 00 e0
 	cp GAME_STATE_DEMO		;00d0	fe 06
 l00d2h:
-	ld a,047h		;00d2	3e 47 	> G 
-	jr z,l00d8h		;00d4	28 02 	( . 
-	ld a,r		;00d6	ed 5f 	. _ 
+	ld a,047h		;00d2	3e 47
+	jr z,l00d8h		;00d4	28 02
+    ; If NOT in demo, set A to a "random" number. Set A=0x47 in demo mode
+	ld a,r		    ;00d6	ed 5f
 l00d8h:
-	ld hl,0e010h		;00d8	21 10 e0 	! . . 
-	add a,(hl)			;00db	86 	. 
-l00dch:
+    ; Store two random bytes
+	ld hl,EXT_RANDOM		;00d8	21 10 e0
+	add a,(hl)			;00db	86
+
 	ld (hl),a			;00dc	77 	w 
 	inc hl			;00dd	23 	# 
-l00deh:
+
 	add a,(hl)			;00de	86 	. 
 	ld (hl),a			;00df	77 	w 
 l00e0h:
@@ -512,10 +476,10 @@ l00e0h:
 	ld d,000h		;00e7	16 00 	. . 
 	ld e,a			;00e9	5f 	_ 
 	ld a,(GAME_STATE)		;00ea	3a 00 e0 	: . . 
-	ld hl,l007dh+1		;00ed	21 7e 00 	! ~ . 
+	ld hl,0x7E		;00ed	21 7e 00 	! ~ . 
 	cp GAME_STATE_DEMO	;00f0	fe 06
 	jr z,l0107h		;00f2	28 13 	( . 
-	ld hl,l006eh		;00f4	21 6e 00
+	ld hl,0x6E		;00f4	21 6e 00
 
     ; Set 3 dragons if more than 3.
 	ld a,(DRAGONS_LEVEL)	;00f7	3a 80 e0
@@ -628,7 +592,7 @@ l019fh:
 	call 02d72h		;01ac	cd 72 2d 	. r - 
 	call sub_2f06h		;01af	cd 06 2f 	. . / 
 	jr l01c4h		;01b2	18 10 	. . 
-	call 04d24h		;01b4	cd 24 4d 	. $ M 
+	call sub_4d24h		;01b4	cd 24 4d 	. $ M 
 	jr l01c4h		;01b7	18 0b 	. . 
 	call 05436h		;01b9	cd 36 54 	. 6 T 
 	jr l01c4h		;01bc	18 06 	. . 
@@ -1270,7 +1234,7 @@ l05cch:
 	defb "N.A"
 
 sub_0644h:
-	ld hl,l0080h		;0644	21 80 00 	! . . 
+	ld hl,0x80		;0644	21 80 00 	! . . 
 	ld (HSCROLL_LOW_W),hl		;0647	22 02 e9 	" . . 
 	ld hl,0eb25h		;064a	21 25 eb 	! % . 
 	ld de,0eb26h		;064d	11 26 eb 	. & . 
@@ -4394,7 +4358,7 @@ l18d6h:
 	add hl,de			;18dc	19 	. 
 	jr c,l18eah		;18dd	38 0b 	8 . 
 	ld a,005h		;18df	3e 05 	> . 
-	ld hl,l005ah		;18e1	21 5a 00 	! Z . 
+	ld hl,0x5a		;18e1	21 5a 00 	! Z . 
 	ld (ix + 6),002h		;18e4	dd 36 06 02 	. 6 . . 
 	jr l194fh		;18e8	18 65 	. e 
 l18eah:
@@ -4466,7 +4430,7 @@ l195dh:
 	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;195d	2a 0c e8 	* . . 
 	ld de,0f5a0h		;1960	11 a0 f5 	. . . 
 	add hl,de			;1963	19 	. 
-	ld hl,l005ah		;1964	21 5a 00 	! Z . 
+	ld hl,0x5a		;1964	21 5a 00 	! Z . 
 	ld a,000h		;1967	3e 00 	> . 
 	jr c,l194fh		;1969	38 e4 	8 . 
 	ret			;196b	c9 	. 
@@ -4539,7 +4503,7 @@ l19f3h:
 	ld (ix + 11),a		;19fa	dd 77 0b 	. w . 
 l19fdh:
 	ld hl,0e1f1h		;19fd	21 f1 e1 	! . . 
-	ld a,(0e010h)		;1a00	3a 10 e0 	: . . 
+	ld a,(EXT_RANDOM)		;1a00	3a 10 e0 	: . . 
 	cp (hl)			;1a03	be 	. 
 	ld a,009h		;1a04	3e 09 	> . 
 	jr c,l1a0ah		;1a06	38 02 	8 . 
@@ -4547,7 +4511,7 @@ l19fdh:
 l1a0ah:
 	ld (ix + 6),a		;1a0a	dd 77 06 	. w . 
 	inc hl			;1a0d	23 	# 
-	ld a,(0e011h)		;1a0e	3a 11 e0 	: . . 
+	ld a,(EXT_RANDOM + 1)		;1a0e	3a 11 e0 	: . . 
 	cp 055h		;1a11	fe 55 	. U 
 	jr c,l1a1bh		;1a13	38 06 	8 . 
 	inc hl			;1a15	23 	# 
@@ -4747,7 +4711,7 @@ l1b5fh:
 	ld de,0ff80h		;1b63	11 80 ff 	. . . 
 	jr nz,l1b6ch		;1b66	20 04 	  . 
 	inc hl			;1b68	23 	# 
-	ld de,l0080h		;1b69	11 80 00 	. . . 
+	ld de,0x80		;1b69	11 80 00 	. . . 
 l1b6ch:
 	inc (hl)			;1b6c	34 	4 
 	ld b,(hl)			;1b6d	46 	F 
@@ -5109,7 +5073,7 @@ sub_1dfdh:
 	jr nz,l1e45h		;1e1a	20 29 	  ) 
 	set 7,(ix + 0)		;1e1c	dd cb 00 fe 	. . . . 
 l1e20h:
-	ld de,l0072h		;1e20	11 72 00 	. r . 
+	ld de,0x72		;1e20	11 72 00 	. r . 
 	call sub_1c7ah		;1e23	cd 7a 1c 	. z . 
 	call l1be2h		;1e26	cd e2 1b 	. . . 
 	ld hl,(0e327h)		;1e29	2a 27 e3 	* ' . 
@@ -5335,7 +5299,7 @@ l1fc2h:
 l1fcfh:
 	call sub_2ce8h		;1fcf	cd e8 2c 	. . , 
 l1fd2h:
-	ld a,(0e011h)		;1fd2	3a 11 e0 	: . . 
+	ld a,(EXT_RANDOM + 1)		;1fd2	3a 11 e0 	: . . 
 	ld hl,0e19eh		;1fd5	21 9e e1 	! . . 
 	ld b,004h		;1fd8	06 04 	. . 
 	cp (hl)			;1fda	be 	. 
@@ -5379,7 +5343,7 @@ l2011h:
 	ld h,(ix + 3)		;2022	dd 66 03 	. f . 
 	sbc hl,de		;2025	ed 52 	. R 
 	jr c,l200dh		;2027	38 e4 	8 . 
-	ld de,l0055h		;2029	11 55 00 	. U . 
+	ld de,0x55		;2029	11 55 00 	. U . 
 	call sub_1c7ah		;202c	cd 7a 1c 	. z . 
 	jr l2011h		;202f	18 e0 	. . 
 l2031h:
@@ -5607,7 +5571,7 @@ l21d4h:
 l21dch:
 	call sub_2ce8h		;21dc	cd e8 2c 	. . , 
 l21dfh:
-	ld a,(0e011h)		;21df	3a 11 e0 	: . . 
+	ld a,(EXT_RANDOM + 1)		;21df	3a 11 e0 	: . . 
 	ld hl,0e19eh		;21e2	21 9e e1 	! . . 
 	ld b,004h		;21e5	06 04 	. . 
 	cp (hl)			;21e7	be 	. 
@@ -5806,7 +5770,7 @@ l2381h:
 	ld a,00bh		;23a0	3e 0b 	> . 
 	jr nz,l23b0h		;23a2	20 0c 	  . 
 	dec (ix + ENEMY_ATTACK_STEP_IDX)		;23a4	dd 35 0e level 2
-	ld a,(0e011h)		;23a7	3a 11 e0 	: . . 
+	ld a,(EXT_RANDOM + 1)		;23a7	3a 11 e0 	: . . 
 	ld hl,0e1a5h		;23aa	21 a5 e1 	! . . 
 	call sub_1214h		;23ad	cd 14 12 	. . . 
 l23b0h:
@@ -5829,7 +5793,7 @@ l23cch:
 	ld (ix-001h),a		;23d0	dd 77 ff 	. w . 
 l23d3h:
 	ld (ix + ENEMY_STATE_IDX), 4 ;23d3	dd 36 01 04
-	ld a,(0e010h)		;23d7	3a 10 e0 	: . . 
+	ld a,(EXT_RANDOM)		;23d7	3a 10 e0 	: . . 
 	ld hl,0e19ch		;23da	21 9c e1 	! . . 
 	ld b,000h		;23dd	06 00 	. . 
 	cp (hl)			;23df	be 	. 
@@ -5880,7 +5844,7 @@ l2427h:
 	ld h,(ix + 3)		;2439	dd 66 03 	. f . 
 	sbc hl,de		;243c	ed 52 	. R 
 	jr nc,l2405h		;243e	30 c5 	0 . 
-	ld de,l0055h		;2440	11 55 00 	. U . 
+	ld de,0x55		;2440	11 55 00 	. U . 
 	call sub_1c7ah		;2443	cd 7a 1c 	. z . 
 	jr l2409h		;2446	18 c1 	. . 
 l2448h:
@@ -5901,7 +5865,7 @@ l2448h:
 l246fh:
 	ld hl,l24cch		;246f	21 cc 24 	! . $ 
 	call l1b96h		;2472	cd 96 1b 	. . . 
-	ld de,l00dch		;2475	11 dc 00 	. . . 
+	ld de,0xdc		;2475	11 dc 00 	. . . 
 	ld a,009h		;2478	3e 09 	> . 
 l247ah:
 	ld hl,(ENEMY_POS)		;247a	2a da e2 	* . . 
@@ -6037,7 +6001,7 @@ l256ch:
 l2575h:
 	ld (ix + ENEMY_FRAME_IDX),0	;2575	dd 36 06 00
 	dec (ix + ENEMY_ATTACK_STEP_IDX)		;2579	dd 35 0e
-	ld a,(0e011h)		;257c	3a 11 e0 	: . . 
+	ld a,(EXT_RANDOM + 1)		;257c	3a 11 e0 	: . . 
 	ld hl,0e1a5h		;257f	21 a5 e1 	! . . 
 	call sub_1214h		;2582	cd 14 12 	. . . 
 	ld (ix + ENEMY_FRAME_COUNTER_IDX),a		;2585	dd 77 07 level 4
@@ -6179,7 +6143,7 @@ l2698h:
 	ld (TBL_E31B),a		;26ab	32 1b e3 	2 . . 
 	ld hl,06500h		;26ae	21 00 65 	! . e 
 	ld (0e31fh),hl		;26b1	22 1f e3 	" . . 
-	ld hl,l005bh		;26b4	21 5b 00 	! [ . 
+	ld hl,0x5b		    ;26b4	21 5b 00 	! [ . 
 	ld (0e327h),hl		;26b7	22 27 e3 	" ' . 
 	ld a,005h		;26ba	3e 05 	> . 
 	ld (0e322h),a		;26bc	32 22 e3 	2 " . 
@@ -6543,7 +6507,7 @@ l29a3h:
 	ld de,0fc80h		;29a6	11 80 fc 	. . . 
 	add hl,de			;29a9	19 	. 
 	jp c,l2a55h		;29aa	da 55 2a 	. U * 
-	ld a,(0e011h)		;29ad	3a 11 e0 	: . . 
+	ld a,(EXT_RANDOM + 1)		;29ad	3a 11 e0 	: . . 
 	ld hl,0e19eh		;29b0	21 9e e1 	! . . 
 	ld b,006h		;29b3	06 06 	. . 
 	cp (hl)			;29b5	be 	. 
@@ -6727,7 +6691,7 @@ l2b10h:
 	ld hl,l2c69h		;2b10	21 69 2c 	! i , 
 	call l1b96h		;2b13	cd 96 1b 	. . . 
 	ld hl,l2d67h		;2b16	21 67 2d 	! g - 
-	ld de,l00deh		;2b19	11 de 00 	. . . 
+	ld de,0xde		;2b19	11 de 00 	. . . 
 	call sub_2d19h		;2b1c	cd 19 2d 	. . - 
 	ld a,00bh		;2b1f	3e 0b 	> . 
 	jp c,l247ah		;2b21	da 7a 24 	. z $ 
@@ -7007,7 +6971,7 @@ l2ce6h:
 	and a			;2ce6	a7 	. 
 	ret			;2ce7	c9 	. 
 sub_2ce8h:
-	ld a,(0e010h)		;2ce8	3a 10 e0 	: . . 
+	ld a,(EXT_RANDOM)		;2ce8	3a 10 e0 	: . . 
 	ld hl,0e19ch		;2ceb	21 9c e1 	! . . 
 	ld b,001h		;2cee	06 01 	. . 
 	cp (hl)			;2cf0	be 	. 
@@ -7174,7 +7138,7 @@ l2ddch:
 	jr nz,l2df0h		;2dde	20 10 	  . 
 	bit 4,c		;2de0	cb 61 	. a 
 	jr nz,l2df0h		;2de2	20 0c 	  . 
-	ld de,l0060h		;2de4	11 60 00 	. ` . 
+	ld de,0x60		;2de4	11 60 00 	. ` . 
 	add hl,de			;2de7	19 	. 
 	ld de,l00c0h		;2de8	11 c0 00 	. . . 
 	sbc hl,de		;2deb	ed 52 	. R 
@@ -7821,7 +7785,7 @@ l32a8h:
 	call sub_0dfeh		;32aa	cd fe 0d 	. . . 
 	ld l,(ix + MAGICAL_ELEMENT_DISTANCE_L_IDX)	;32ad	dd 6e 02
 	ld h,(ix + MAGICAL_ELEMENT_DISTANCE_H_IDX)	;32b0	dd 66 03
-	ld de,l00dch		;32b3	11 dc 00 	. . . 
+	ld de,0xdc		;32b3	11 dc 00 	. . . 
 	ld a,088h		;32b6	3e 88 	> . 
 	call ADD_POINTS		;32b8	cd 60 2f 	. ` / 
 	ld (ix + CURRENT_FRAME_IDX), 22	;32bb	dd 36 06 16
@@ -8393,13 +8357,13 @@ sub_3746h:
 	ld hl,0ff80h		;3755	21 80 ff 	! . . 
 	add hl,de			;3758	19 	. 
 	ld (0e80fh),hl		;3759	22 0f e8 	" . . 
-	ld hl,l0080h		;375c	21 80 00 	! . . 
+	ld hl,0x80		;375c	21 80 00 	! . . 
 	add hl,de			;375f	19 	. 
 	ld (0e811h),hl		;3760	22 11 e8 	" . . 
 l3763h:
 	ld l,(ix + 4)		;3763	dd 6e 04 	. n . 
 	ld h,(ix + 5)		;3766	dd 66 05 	. f . 
-	ld de,l0080h		;3769	11 80 00 	. . . 
+	ld de,0x80		;3769	11 80 00 	. . . 
 	add hl,de			;376c	19 	. 
 	ld de,0006h+2		;376d	11 08 00 	. . . 
 	jp sub_1172h		;3770	c3 72 11 	. r . 
@@ -8434,7 +8398,7 @@ sub_3792h:
 	ld (0e811h),hl		;37ac	22 11 e8 	" . . 
 	ld l,(ix + MAGICAL_ELEMENT_HEIGHT_L_IDX)	;37af	dd 6e 04
 	ld h,(ix + MAGICAL_ELEMENT_HEIGHT_H_IDX)	;37b2	dd 66 05
-	ld de,l0080h		;37b5	11 80 00 	. . . 
+	ld de,0x80		;37b5	11 80 00 	. . . 
 	add hl,de			;37b8	19 	. 
 	ld de,4				;37b9	11 04 00 	. . . 
 	jp sub_1172h		;37bc	c3 72 11 	. r . 
@@ -9085,7 +9049,7 @@ l3c7ah:
 	ld hl,0ffc0h		;3c86	21 c0 ff 	! . . 
 	add hl,de			;3c89	19 	. 
 	ld (0e80fh),hl		;3c8a	22 0f e8 	" . . 
-	ld hl,l0080h		;3c8d	21 80 00 	! . . 
+	ld hl,0x80		;3c8d	21 80 00 	! . . 
 	add hl,de			;3c90	19 	. 
 	ld (0e811h),hl		;3c91	22 11 e8 	" . . 
 	ld l,(ix + 4)		;3c94	dd 6e 04 	. n . 
@@ -9238,7 +9202,7 @@ l3d93h:
 	jr z,l3db2h		;3dad	28 03 	( . 
 	ld hl,03e6fh		;3daf	21 6f 3e 	! o > 
 l3db2h:
-	ld a,(0e010h)		;3db2	3a 10 e0 	: . . 
+	ld a,(EXT_RANDOM)		;3db2	3a 10 e0 	: . . 
 	and 00eh		;3db5	e6 0e 	. . 
 	ld d,000h		;3db7	16 00 	. . 
 	ld e,a			;3db9	5f 	_ 
@@ -9287,7 +9251,7 @@ l3df4h:
 	ld (iy+008h),e		;3dff	fd 73 08 	. s . 
 	ld (iy+009h),d		;3e02	fd 72 09 	. r . 
 	ld (iy+00bh),002h		;3e05	fd 36 0b 02 	. 6 . . 
-	ld a,(0e011h)		;3e09	3a 11 e0 	: . . 
+	ld a,(EXT_RANDOM + 1)		;3e09	3a 11 e0 	: . . 
 	ld hl,0e50ch		;3e0c	21 0c e5 	! . . 
 	cp (hl)			;3e0f	be 	. 
 	ld hl,(0e500h)		;3e10	2a 00 e5 	* . . 
@@ -9570,7 +9534,7 @@ l40adh:
 	rla	
 	ld l,h	
 	ld h,a	
-	ld de,l0080h
+	ld de,0x80
 	sbc hl,de
 	jr c,l40ceh
 	add hl,de	
@@ -10352,7 +10316,7 @@ l4658h:
 	ld (THOMAS_FRAME),a
 	ld a,00dh
 	ld (0e702h),a
-	ld hl,l0080h
+	ld hl,0x80
 	ld (0e70eh),hl
 	ld hl,(0e712h)
 	ld (0e707h),hl
@@ -10639,8 +10603,8 @@ l487eh:
 	ld sp,0f000h
 	xor a	
 	ld (0e001h),a
-	ld (0e020h),a
-	ld (0e021h),a
+	ld (EXT_TICKS),a
+	ld (EXT_TICKS + 1),a
 	ld (DRAGONS_LEVEL),a
 	ei	
 	call sub_5700h
@@ -10662,53 +10626,69 @@ l487eh:
 	ld (SILVIA_LEFT_OR_RIGHT),a
 	ld a,005h
 	ld (0e347h),a
+
 	ld ix,TBL_GUYS
 	ld bc,0750h
-	ld hl,0f00h
-	ld b,007h
-l48d2h:
+	ld hl, 3840 ; Position of guy
+	ld b, 7 ; 7 guys in the intro. However, the programmer already set B with ld bc,0750h. Question: debug?
+iterate_guys_intro:
     ; IX = TBL_GUYS
 	ld (ix + ENEMY_FALLING_HEIGHT_L_IDX), 0
-	ld (ix + ENEMY_FALLING_HEIGHT_H_IDX), 92 ; Distance from top of the enemy
+	ld (ix + ENEMY_FALLING_HEIGHT_H_IDX), 92 ; Distance (from top) of the enemy
 
 	ld (ix + ENEMY_FRAME_COUNTER_IDX), 7
 	ld (ix + ENEMY_ATTACK_STEP_IDX), 038h
 	ld (ix + ENEMY_BOOMERANG_TYPE_IDX),b
-	ld (ix + ENEMY_LOOKAT_IDX),c
 
+    ; 0x50: look right, not being attacked, enemy is alive
+	ld (ix + ENEMY_LOOKAT_IDX),c ; Set to 0x50 or 0x10
+
+    ; Set position to HL = 3840
 	ld (ix + ENEMY_POS_L_IDX),l
 	ld (ix + ENEMY_POS_H_IDX),h
 
 	ld a,b	
-	cp 007h
+	cp 7
 	jr z,l48fbh
-	cp 004h
+	cp 4
 	jr c,l48fbh
 	ld (ix + ENEMY_FRAME_IDX), 10
 l48fbh:
 	cp 5
-	jr nc,l4904h
+	jr nc,next_guy_intro
 l48ffh:
-	ld hl,03100h
-	ld c,010h
-l4904h:
-	ld de,0010h
+    ; Change position for guys coming from the right
+	ld hl, 12544
+    ; Set looking direction.
+    ; 0x10: look left, not being attacked, enemy is alive
+	ld c, 0x10
+next_guy_intro:
+    ; Next guy in TBL_GUYS
+	ld de, 16
 	add ix,de
-	djnz l48d2h
+	djnz iterate_guys_intro
+
+;490B
+    ; Set game state to INTRO
 	ld a, GAME_STATE_INTRO
 	ld (GAME_STATE),a
+    
+    ; The text "A KUNG-FU MASTER, ... UNKNOWN GUYS" appears
+    ; Thomas and Silvia walk in
 	ld de,0d152h
 	ld c,00bh
 	ld hl,INTRO_STR
 	call l1134h
+
 l491bh:
-	ld a,(0e020h)
-	cp 008h
+	ld a,(EXT_TICKS)
+	cp 8
 l4920h:
 	jr nz,l491bh
+
 	call WRITE_TEXT
 l4925h:
-	ld a,(0e020h)
+	ld a,(EXT_TICKS)
 	cp 00bh
 	jr nz,l4925h
 	call sub_49aeh
@@ -10751,7 +10731,7 @@ l496fh:
 	ld hl,0
 	ld (POINTS),hl
 	ld (POINTS + 1),hl
-	ld (0e010h),hl
+	ld (EXT_RANDOM),hl
 	ld (0e012h),hl
 	ei	
 l4994h:
@@ -10772,7 +10752,7 @@ l49b3h:
 	push de	
 	call sub_572ah
 	pop hl	
-	ld de,l0080h
+	ld de,0x80
 	add hl,de	
 	ex de,hl	
 	djnz l49b3h
@@ -11249,6 +11229,7 @@ l4d1dh:
 	ld a, GAME_STATE_LIFE_LOST
 	ld (GAME_STATE),a
 	jr l4d54h
+
 sub_4d24h:
 	ld hl,0e703h
 	ld a,(hl)	
@@ -11265,7 +11246,9 @@ l4d2ch:
 	jp m,l4d1dh
 	bit 6,a
 	jr z,l4d43h
-	ld hl,0e020h
+    
+    ; Increment external ticks
+	ld hl,EXT_TICKS
 	inc (hl)	
 l4d43h:
 	bit 5,a
@@ -11292,7 +11275,7 @@ l4d5eh:
 l4d6ah:
 	ld a,l	
 	and 003h
-	ld (0e021h),a
+	ld (EXT_TICKS + 1),a
 	inc de	
 	ld a,(de)	
 	ld (0e705h),a
@@ -11302,10 +11285,10 @@ l4d6ah:
 	inc de	
 	ld (0e70eh),de
 l4d7fh:
-	ld a,(0e021h)
+	ld a,(EXT_TICKS + 1)
 	ld hl,l4dbch
 	call l1f26h
-	ld a,(0e020h)
+	ld a,(EXT_TICKS)
 	ld ix,SILVIA_LEFT_OR_RIGHT
 	ld c,(ix + 0)
 	cp 00ah
@@ -11321,7 +11304,7 @@ l4da0h:
 l4da6h:
 	call sub_4821h
 l4da9h:
-	ld a,(0e020h)
+	ld a,(EXT_TICKS)
 	ld ix,TBL_GUYS
 	ld c,(ix + 0)
 	ld hl,04dc2h
@@ -11401,7 +11384,8 @@ l4e12h:
 	ld de,0e700h
 	add hl,de	
 	jr nc,l4e6bh
-	ld hl,0e020h
+    ; Increment external ticks
+	ld hl,EXT_TICKS
 	inc (hl)	
 	ld hl,l4ee5h
 	jr l4e43h
@@ -11443,7 +11427,8 @@ l4e6bh:
 	call sub_4edfh
 	jr l4e6bh
 l4e76h:
-	ld hl,0e020h
+    ; Increment external ticks
+	ld hl,EXT_TICKS
 	inc (hl)	
 	call 17dfh
 	jr l4e68h
@@ -11646,7 +11631,7 @@ l4febh:
 	call sub_0dfeh
 	xor a	
 	ld (0e702h),a
-	ld (0e020h),a
+	ld (EXT_TICKS),a
 	ld (STEP_COUNTER),a
 	ld a, GAME_STATE_GAME_ENDS
 	ld (GAME_STATE),a
@@ -11684,7 +11669,7 @@ l5040h:
 	and a	
 	jr nz,l5061h
 	ld (hl),00bh
-	ld hl,0e020h
+	ld hl,EXT_TICKS
 	dec (hl)	
 	dec (hl)	
 	jp p,l5053h
@@ -15743,7 +15728,7 @@ l684ah:
 	ret nz	
 	rst 38h	
 	rrca	
-	ld hl,(l0080h)
+	ld hl,(0x80)
 	nop	
 	rst 38h	
 	ld (0a040h),a
@@ -15896,7 +15881,7 @@ l690bh:
 	nop	
 	ld c,0ffh
 	rrca	
-	ld a,(l0060h)
+	ld a,(0x60)
 	ret po	
 	rst 38h	
 	rrca	
@@ -15920,7 +15905,7 @@ l6930h:
 	ld (de),a	
 	rst 38h	
 	rrca	
-	ld a,(l0060h)
+	ld a,(0x60)
 	ret po	
 	rst 38h	
 	rrca	
@@ -18811,7 +18796,7 @@ l77bdh:
 	ld hl,0d155h
 	ld bc,l0020h
 	ldir
-	ld de,0e020h
+	ld de,EXT_TICKS
 	ld hl,0d955h
 	ld bc,l0020h
 	ldir
@@ -18823,7 +18808,7 @@ l77dbh:
 	ld de,0d155h
 	ld bc,l0020h
 	ldir
-	ld hl,0e020h
+	ld hl,EXT_TICKS
 	ld de,0d955h
 	ld bc,l0020h
 	ldir
