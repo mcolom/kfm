@@ -84,6 +84,9 @@ M62_SPRITERAM: EQU 0xC000
 M62_TILERAM: EQU 0xD000
 M62_TILERAM_COLORS: EQU M62_TILERAM + 32*2*32
 
+; A counter which is updated by the Z80's periodic interrupt
+INT_COUNTER: EQU 0xE880
+
 EXT_RANDOM: EQU 0xE010
 EXT_TICKS: EQU 0xE020
 
@@ -537,7 +540,7 @@ l0120h:
 	jp nz,l0217h	;012a	c2 17 02 Jump if coins inserted
 
 l012dh:
-	call sub_03f8h		;012d	cd f8 03 	. . . 
+	call UPDATE_INTERNAL_COUNTER		;012d	cd f8 03 	. . . 
 	ld a,(GAME_STATE)		;0130	3a 00 e0 	: . . 
 	cp GAME_STATE_LIFE_LOST		;0133	fe 0b
 	jp nc,l01ddh		;0135	d2 dd 01 	. . . 
@@ -659,7 +662,7 @@ l01f8h:
 	pop af			;0207	f1 	. 
 	inc a			;0208	3c 	< 
 	call nz,07aaeh		;0209	c4 ae 7a 	. . z 
-	call sub_03f8h		;020c	cd f8 03 	. . . 
+	call UPDATE_INTERNAL_COUNTER		;020c	cd f8 03 	. . . 
 	call sub_0d05h		;020f	cd 05 0d 	. . . 
 	call sub_0de5h		;0212	cd e5 0d 	. . . 
 	jr l01c4h		;0215	18 ad 	. . 
@@ -930,8 +933,11 @@ l03eeh:
 l03f3h:
 	call sub_0432h		;03f3	cd 32 04 	. 2 . 
 	jr l03bch		;03f6	18 c4 	. . 
-sub_03f8h:
-	ld hl,0e880h		;03f8	21 80 e8 	! . . 
+
+; Updates the internal counter (6 bytes long! from 0xE880 to 0xE885) with the
+; Z80 periodic interrupt
+UPDATE_INTERNAL_COUNTER:
+	ld hl,INT_COUNTER		;03f8	21 80 e8 	! . . 
 	dec (hl)			;03fb	35 	5 
 	inc hl			;03fc	23 	# 
 	ld a,(hl)			;03fd	7e 	~ 
@@ -2824,7 +2830,7 @@ sub_0e9bh:
 	and a			;0eb3	a7 	. 
 	call z,sub_0f1ah		;0eb4	cc 1a 0f 	. . . 
 	ld a,003h		;0eb7	3e 03 	> . 
-	ld (0e881h),a		;0eb9	32 81 e8 	2 . . 
+	ld (INT_COUNTER + 1),a		;0eb9	32 81 e8 	2 . . 
 	ld a,(ENERGY)		;0ebc	3a 09 e7 	: . . 
 	ld (ENERGY_DISP),a		;0ebf	32 1a e8 	2 . . 
 	ld a,(ENEMY_ENERGY)		;0ec2	3a e2 e2 	: . . 
@@ -3004,7 +3010,7 @@ l0fd5h:
 	call sub_0dfeh		;0fe0	cd fe 0d 	. . . 
 sub_0fe3h:
 	ld hl,0e81bh		;0fe3	21 1b e8 	! . . 
-	ld a,(0e880h)		;0fe6	3a 80 e8 	: . . 
+	ld a,(INT_COUNTER)		;0fe6	3a 80 e8 	: . . 
 	cp (hl)			;0fe9	be 	. 
 	jr z,l103ah		;0fea	28 4e 	( N 
 	ld (hl),a			;0fec	77 	w 
@@ -3018,9 +3024,9 @@ sub_0fe3h:
 	ld d,000h		;0ffd	16 00 	. . 
 	add hl,de			;0fff	19 	. 
 l1000h:
-	ld a,(0e880h)		;1000	3a 80 e8 	: . . 
+	ld a,(INT_COUNTER)		;1000	3a 80 e8 	: . . 
 	set 3,h		;1003	cb dc 	. . 
-	ld a,(0e880h)		;1005	3a 80 e8 	: . . 
+	ld a,(INT_COUNTER)		;1005	3a 80 e8 	: . . 
 	and 018h		;1008	e6 18 	. . 
 	ld a,095h		;100a	3e 95 	> . 
 	jr z,l100fh		;100c	28 01 	( . 
@@ -3042,7 +3048,7 @@ l100fh:
 l1027h:
 	cp 020h		;1027	fe 20 	.   
 	jr c,l103ah		;1029	38 0f 	8 . 
-	ld a,(0e880h)		;102b	3a 80 e8 	: . . 
+	ld a,(INT_COUNTER)		;102b	3a 80 e8 	: . . 
 	and 018h		;102e	e6 18 	. . 
 	jr z,l1037h		;1030	28 05 	( . 
 	call sub_0f1ah		;1032	cd 1a 0f 	. . . 
@@ -3070,7 +3076,7 @@ l105ah:
 	jr z,l1080h		;105f	28 1f 	( . 
 	cp 00ch		;1061	fe 0c 	. . 
 	jr z,l1080h		;1063	28 1b 	( . 
-	ld hl,0e881h		;1065	21 81 e8 	! . . 
+	ld hl,INT_COUNTER + 1		;1065	21 81 e8 	! . . 
 	ld a,(hl)			;1068	7e 	~ 
 	and a			;1069	a7 	. 
 	jr nz,l1080h		;106a	20 14 	  . 
@@ -10782,7 +10788,7 @@ l49b3h:
 sub_49c0h:
 	ld de,0d316h
 	ld bc,0190bh
-	ld a,(0e880h)
+	ld a,(INT_COUNTER)
 	and 030h
 	jp z,l571fh
 	ld hl,(0e90ah)
@@ -11837,7 +11843,7 @@ sub_5178h:
 l5183h:
 	ld de,0d25ah
 	ld c,014h
-	ld a,(0e880h)
+	ld a,(INT_COUNTER)
 	and 018h
 	jr z,l5197h
 	ld hl,PUSH_BUTTON_STR
@@ -12092,7 +12098,7 @@ l53f7h:
 sub_5416h:
 	ld (0e882h),a
 l5419h:
-	ld a,(0e880h)
+	ld a,(INT_COUNTER)
 	ld de,0d295h
 	ld c,0d9h
 	ld hl,5485h
@@ -12276,7 +12282,7 @@ l5596h:
 	call 10ffh
 	pop de	
 	ld a,038h
-	ld (0e881h),a
+	ld (INT_COUNTER + 1),a
 l55a8h:
 	call WAIT_1
 	ld a,(0e904h)
@@ -12324,7 +12330,7 @@ l55f5h:
 	ld (hl),a	
 	ld (de),a	
 l55f7h:
-	ld a,(0e881h)
+	ld a,(INT_COUNTER + 1)
 	and a	
 	jr nz,l55a8h
 	ld a,(0e026h)
@@ -12461,19 +12467,20 @@ sub_56f7h:
 	jp sub_1108h
 sub_5700h:
 	call 1153h
+
 sub_5703h:
 	xor a	
 	ld (GAME_STATE),a
 	ld hl,0
 	ld (HSCROLL_LOW_W),hl
 
-; Write 1 to (0e882h) and wait until (0e882h) is 0
+; Write A=1 to INT_COUNTER+2 and wait until it's 0
 WAIT_1:
 	ld a,001h
-; Write a to (0e882h) and wait until (0e882h) is 0
+; Write A to INT_COUNTER+2 and wait until it's 0
 WAIT_A:
 	push hl	
-	ld hl,0e882h
+	ld hl, INT_COUNTER + 2
 	ld (hl),a	
 l5714h:
 	ld a,(hl)	
