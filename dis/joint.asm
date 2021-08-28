@@ -3163,6 +3163,7 @@ l10f7h:
 sub_10fdh:
 	ld a,(hl)			;10fd	7e 	~ 
 	dec hl			;10fe	2b 	+ 
+
 	push af			;10ff	f5 	. 
 l1100h:
 	rrca			;1100	0f 	. 
@@ -10778,7 +10779,7 @@ sub_49aeh:
 	ld b,004h
 l49b3h:
 	push de	
-	call sub_572ah
+	call CLEAR_32_CHARS
 	pop hl	
 	ld de,0x80
 	add hl,de	
@@ -11760,7 +11761,7 @@ l5097h:
 	ld c,00bh
 	ld de,0d19fh
 l509ch:
-	call sub_571ah
+	call CLEAR_33_CHARS
 	ld hl,001dh+2
 	add hl,de	
 	ex de,hl	
@@ -11839,18 +11840,19 @@ sub_5178h:
 	ld hl,0e005h
 	set 7,(hl)
 	call CLEAR_TILEMAP
-	call sub_5703h
+	call CONFIG_GAME_STOP
 l5183h:
-	ld de,0d25ah
-	ld c,014h
+	ld de,0d25ah ; Position of the text
+	ld c,014h ; Color
 	ld a,(INT_COUNTER)
 	and 018h
 	jr z,l5197h
+    ; Write the "PUSH  BUTTON" message
 	ld hl,PUSH_BUTTON_STR
 	call WRITE_TEXT
 	jr l519ah
 l5197h:
-	call sub_5725h
+	call CLEAR_26_CHARS
 l519ah:
 	ld de,0d319h
 	ld a,(COINS)
@@ -11860,12 +11862,18 @@ l519ah:
 	jr z,l51abh
 	ld hl, ONE_OR_TWO_PLAYERS_STR
 l51abh:
+    ; Write number of players and the number of credits
 	call WRITE_TEXT
 	ld hl, CREDIT_STR
 	call WRITE_TEXT
-	pop af	
-	call 10ffh
-	ld a,(0e904h)
+	pop af
+    
+    ; Write number of credits
+    ; I really love the optimization he does, jumping in the middle of a
+    ; routine and calling it twice the way it does :)
+	call 10ffh 
+	
+    ld a,(0e904h)
 	and 003h
 	jr z,l5183h
 	and 002h
@@ -11882,7 +11890,7 @@ l51c9h:
 	ld (hl),a	
 	ld hl,0e005h
 	res 7,(hl)
-	ret	
+	ret	; 51d7
 
 PUSH_BUTTON_STR: ; 51d8
 	defb "PUSH  BUTTON", 0ffh
@@ -11898,14 +11906,14 @@ CREDIT_STR:
 	defb "CREDIT ", 0ffh
 
 	call 01157h		;520d	cd 57 11 	. W . 
-	call sub_5703h		;5210	cd 03 57 	. . W 
+	call CONFIG_GAME_STOP		;5210	cd 03 57 	. . W 
 	ld a,020h		;5213	3e 20 	>   
 	call 00dfeh		;5215	cd fe 0d 	. . . 
 	ld c,01bh		;5218	0e 1b 	. . 
 	ld de,0d153h		;521a	11 53 d1 	. S . 
 	ld b,017h		;521d	06 17 	. . 
 l521fh:
-	call sub_5725h		;521f	cd 25 57 	. % W 
+	call CLEAR_26_CHARS		;521f	cd 25 57 	. % W 
 	ld hl,00026h		;5222	21 26 00 	! & . 
 	add hl,de			;5225	19 	. 
 	ex de,hl			;5226	eb 	. 
@@ -12354,7 +12362,7 @@ l561bh:
 	jr l560dh
 sub_5620h:
 	call CLEAR_TILEMAP
-	call sub_5703h
+	call CONFIG_GAME_STOP
 	ld hl,l5675h
 	call WRITE_TEXT
 sub_562ch:
@@ -12468,7 +12476,9 @@ sub_56f7h:
 sub_5700h:
 	call 1153h
 
-sub_5703h:
+; Set the GAME_STATE to stop and reset the horizontal scroll, thus
+; preparing to start the game. It does also a very short pause.
+CONFIG_GAME_STOP:
 	xor a	
 	ld (GAME_STATE),a
 	ld hl,0
@@ -12489,21 +12499,22 @@ l5714h:
 	pop hl	
 	ret
 
-
-sub_571ah:
+; Clear a line of 26, 32 or 33 chars.
+CLEAR_33_CHARS:
 	push bc	
-	ld b,021h
+	ld b, 33
 	jr l572dh
 l571fh:
-	call sub_5725h
+	call CLEAR_26_CHARS
 	ld de,0d396h
-sub_5725h:
+
+CLEAR_26_CHARS:
 	push bc	
-	ld b,01ah
+	ld b, 26
 	jr l572dh
-sub_572ah:
+CLEAR_32_CHARS:
 	push bc	
-	ld b,020h
+	ld b, 32
 l572dh:
 	xor a	
 l572eh:
@@ -12511,6 +12522,7 @@ l572eh:
 	djnz l572eh
 	pop bc	
 	ret	
+
 l5735h:
 	ld e,(hl)	
 	inc hl	
@@ -19015,7 +19027,7 @@ l792ah:
 	call WRITE_TEXT
 	ld de,0d2d0h
 l7933h:
-	call sub_571ah
+	call CLEAR_33_CHARS
 l7936h:
 	InIremAudio
 	bit 1,a
