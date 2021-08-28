@@ -329,6 +329,11 @@ THOMAS_HEIGHT_COUNTER: EQU 0xE704
 ; Bit 7 active: shows characters: Thomas, knife-thrower, giant, Mr. X
 GAME_STATE: EQU 0xE000
 
+; This controls if the user is playing (1) or not yet (0).
+; When a coin is inserted and the user is not playing, it'll jump to the 1/2 player selection screen.
+; However, it won't jump to that screen when playing, of course.
+IN_PLAY: EQU 0xE001
+
 GAME_STATE_STOP: EQU 0
 GAME_STATE_CLEAR: EQU 1
 GAME_STATE_WALK_LEVEL_STARTS: EQU 2
@@ -357,7 +362,7 @@ GAME_STATE_SERVICE_MODE: EQU 0xFF
 
     ; Clear 4096 bytes from 0xe000
 	ld hl,GAME_STATE
-	ld de,0e001h
+	ld de,IN_PLAY
 	ld bc,00fffh
 	ld (hl),000h
 	ldir
@@ -514,12 +519,15 @@ l011ah:
 	call 0482fh		;011a	cd 2f 48 	. / H 
 	call sub_0de5h		;011d	cd e5 0d 	. . . 
 l0120h:
-	ld a,(0e001h)		;0120	3a 01 e0 	: . . 
-	and a			;0123	a7 	. 
-	jr nz,l012dh		;0124	20 07 	  . 
-	ld a,(COINS)		;0126	3a 13 e9 	: . . 
-	and a			;0129	a7 	. 
-	jp nz,l0217h		;012a	c2 17 02 	. . . 
+	ld a,(IN_PLAY)	;0120	3a 01 e0
+	and a			;0123	a7
+	jr nz,l012dh	;0124	20 07 Jump if we're already playing (say, 1 or 2 players button pressed)
+    
+    ; We're not playing yet. Check inserted coins
+	ld a,(COINS)	;0126	3a 13 e9
+	and a			;0129	a7
+	jp nz,l0217h	;012a	c2 17 02 Jump if coins inserted
+
 l012dh:
 	call sub_03f8h		;012d	cd f8 03 	. . . 
 	ld a,(GAME_STATE)		;0130	3a 00 e0 	: . . 
@@ -648,9 +656,12 @@ l01f8h:
 	call sub_0de5h		;0212	cd e5 0d 	. . . 
 	jr l01c4h		;0215	18 ad 	. . 
 l0217h:
-	ld sp,0f000h		;0217	31 00 f0 	1 . . 
-	ld a,001h		;021a	3e 01 	> . 
-	ld (0e001h),a		;021c	32 01 e0 	2 . . 
+	ld sp,0f000h	;0217	31 00 f0
+    
+    ; Set we're actually playing now
+	ld a,001h		;021a	3e 01
+	ld (IN_PLAY),a	;021c	32 01 e0
+
 	xor a			;021f	af 	. 
 l0220h:
 	ld (GAME_STATE),a		;0220	32 00 e0 	2 . . 
@@ -10602,7 +10613,7 @@ l487eh:
 	di	
 	ld sp,0f000h
 	xor a	
-	ld (0e001h),a
+	ld (IN_PLAY),a
 	ld (EXT_TICKS),a
 	ld (EXT_TICKS + 1),a
 	ld (DRAGONS_LEVEL),a
@@ -18681,7 +18692,7 @@ l76dch:
 l76e7h:
 	call sub_1157h
 	ld hl,GAME_STATE
-	ld de,0e001h
+	ld de,GAME_STATE+1
 	ld bc,0fffh
 	ld (hl), GAME_STATE_STOP
 	ldir
