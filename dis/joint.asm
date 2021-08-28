@@ -5,6 +5,12 @@
 ; $ z80asm dis/joint.asm && shasum a.bin
 ; d1d0db9da8c251c482821ce6fd4f4824e0b72d55  a.bin
 
+; The resolution if 32x32 tiles, each one of 8x8 pixels.
+; The 6 first rows are not affected by the scroll settings
+; Actually M62 stores 32 rows and 64 columns of which 32 are
+; visible according to the vertical scroll setting.
+
+
 ; BUG
 ; Conditions:
 ; - 4th floor
@@ -74,7 +80,9 @@ HSCROLL_LOW_W: EQU 0xE902
 HSCROLL_HIGH_W: EQU HSCROLL_LOW_W + 1
 
 M62_SPRITERAM: EQU 0xC000
+
 M62_TILERAM: EQU 0xD000
+M62_TILERAM_COLORS: EQU M62_TILERAM + 32*2*32
 
 EXT_RANDOM: EQU 0xE010
 EXT_TICKS: EQU 0xE020
@@ -718,7 +726,7 @@ l0280h:
 	ld a,070h		;0280	3e 70 	> p 
 	call WAIT_A		;0282	cd 0f 57 	. . W 
 l0285h:
-	call sub_1157h		;0285	cd 57 11 	. W . 
+	call CLEAR_TILEMAP		;0285	cd 57 11 	. W . 
 	xor a			;0288	af 	. 
 	ld (0e007h),a		;0289	32 07 e0 	2 . . 
 	ld (0e008h),a		;028c	32 08 e0 	2 . . 
@@ -882,7 +890,7 @@ l039ch:
 	call sub_0dfeh		;03a3	cd fe 0d 	. . . 
 	xor a			;03a6	af 	. 
 	ld (GAME_STATE),a		;03a7	32 00 e0 	2 . . 
-	call sub_1157h		;03aa	cd 57 11 	. W . 
+	call CLEAR_TILEMAP		;03aa	cd 57 11 	. W . 
 	ld hl,0				;03ad	21 00 00 	! . . 
 	ld (HSCROLL_LOW_W),hl		;03b0	22 02 e9 	" . . 
 	call 0570dh		;03b3	cd 0d 57 	. . W 
@@ -3171,7 +3179,8 @@ sub_1108h:
 WRITE_CHAR_AT_SCREEN_DE:
 	ex de,hl			;1110	eb 	. 
 	ld (hl),a			;1111	77 A: character
-	set 3,h		;1112	cb dc 	. . 
+	set 3,h		        ;1112	cb dc Activating bit 3 in H is actually adding 0x800 to HL and
+                        ;             thus pointing to the color part of the M62 tileram.
 	ld (hl),c			;1114	71 C: color
 	res 3,h		;1115	cb 9c 	. . 
 	inc hl			;1117	23 	# 
@@ -3229,16 +3238,18 @@ l114eh:
     ;                               another routine is a clear sign it's human assembly code.
 
 
-sub_1157h:
-	ld d,0dbh		;1157	16 db 	. . 
+; Clears the tilemap visibles on the screen.
+; It sets tile 0x20 (blank space) and color 0xDB.
+CLEAR_TILEMAP:
+	ld d,0dbh		;1157	16 db
 l1159h:
-	ld e,020h		;1159	1e 20 	.   
-	ld bc,0x800		;115b	01 00 08 	. . . 
-	ld hl,M62_TILERAM		;115e	21 00 d0 	! . . 
-	ld iy,0d800h		;1161	fd 21 00 d8 	. ! . . 
+	ld e,020h		;1159	1e 20
+	ld bc,32*2*32	;115b	01 00 08
+	ld hl,M62_TILERAM		;115e	21 00 d0
+	ld iy,M62_TILERAM_COLORS ;1161	fd 21 00 d8
 l1165h:
-	ld (hl),e			;1165	73 	s 
-	ld (iy+000h),d		;1166	fd 72 00 	. r . 
+	ld (hl),e			;1165	73 Set tile to blank (0x20)
+	ld (iy+000h),d		;1166	fd 72 00 Set color
 	inc hl			;1169	23 	# 
 	inc iy		;116a	fd 23 	. # 
 	dec bc			;116c	0b 	. 
@@ -10733,7 +10744,7 @@ l4943h:
 l496fh:
 	ld (DRAGONS_LEVEL),a
 	ld (0e023h),de
-	call sub_1157h
+	call CLEAR_TILEMAP
 	ld a,001h
 	call sub_0449h
 	di	
@@ -11816,11 +11827,12 @@ l516dh:
 	defb 0fdh,0f0h,0d4h	;illegal sequence
 	ld l,h	
 	ld l,l	
-	rst 38h	
+	rst 38h
+
 sub_5178h:
 	ld hl,0e005h
 	set 7,(hl)
-	call sub_1157h
+	call CLEAR_TILEMAP
 	call sub_5703h
 l5183h:
 	ld de,0d25ah
@@ -12335,7 +12347,7 @@ l561bh:
 	ld (de),a	
 	jr l560dh
 sub_5620h:
-	call sub_1157h
+	call CLEAR_TILEMAP
 	call sub_5703h
 	ld hl,l5675h
 	call WRITE_TEXT
@@ -18604,7 +18616,7 @@ SERVICE_MODE:
 	ld (GAME_STATE),a
 	ei	
 	call WAIT_1
-	call sub_1157h
+	call CLEAR_TILEMAP
 	di	
 l7673h:
 	ld ix,0
@@ -18690,7 +18702,7 @@ l76dch:
 	cp 014h
 	jr nz,l76b2h
 l76e7h:
-	call sub_1157h
+	call CLEAR_TILEMAP
 	ld hl,GAME_STATE
 	ld de,GAME_STATE+1
 	ld bc,0fffh
@@ -18740,7 +18752,7 @@ l7743h:
 	and a	
 	call nz,sub_7be8h
 l7751h:
-	call sub_1157h
+	call CLEAR_TILEMAP
 	ld hl,l7cf7h
 	call WRITE_TEXT
 	xor a	
@@ -18783,7 +18795,7 @@ l779ah:
 	ld a,(0e904h)
 	bit 0,a
 	jr z,l7769h
-	call sub_1157h
+	call CLEAR_TILEMAP
 	ld hl,l7751h
 	push hl	
 	ld a,(0e81dh)
