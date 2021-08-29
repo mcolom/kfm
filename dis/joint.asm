@@ -99,10 +99,7 @@ DRAGONS_LEVEL: EQU 0xE080 ; 00 DDD LLL, where D is the number of dragons, and L 
 ENERGY: EQU 0xE709
 ENERGY_DISP: EQU 0xE81A ; Displayed energy. Use to animate the bar when energy changes
 
-
 ENEMY_ENERGY_DISP: EQU 0xE819 ; Displayed enemy's energy. Use to animate the bar when energy changes
-
-TIME: EQU 0xE003 ; Time, encoded in BCD in 0xE003 and 0xE004
 
 POINTS: EQU 0xE081 ; Points, E081... E083
 
@@ -358,6 +355,9 @@ GAME_STATE_LIFE_LOST: EQU 0xB
 GAME_STATE_LEVEL_ENDS: EQU 0xC
 GAME_STATE_SERVICE_MODE: EQU 0xFF
 
+TIME: EQU 0xE003 ; Time, encoded in BCD in 0xE003 and 0xE004
+IN_FREEZE_CHEAT: EQU 0xE005
+
 
 
 ; ************************ ROM start ************************
@@ -438,9 +438,9 @@ l008dh:
 	and a			;0090	a7 	. 
 	jp m,l01f8h		;0091	fa f8 01 	. . . 
 	InDSW2		;0094	db 04 	. . 
-	bit 4,a		;0096	cb 67 Check bit 4 of DSW2: slow motion trick
+	bit 4,a		;0096	cb 67 Check bit 4 of DSW2: freeze trick
 	jr nz,l00b7h		;0098	20 1d 	  . 
-	ld hl,0e005h		;009a	21 05 e0 	! . . 
+	ld hl,IN_FREEZE_CHEAT		;009a	21 05 e0 	! . . 
 	bit 7,(hl)		;009d	cb 7e 	. ~ 
 	jr nz,l00b7h		;009f	20 16 	  . 
 	bit 0,(hl)		;00a1	cb 46 	. F 
@@ -702,7 +702,7 @@ l0247h:
 	ld (LIVES),a		;024a	32 84 e0 	2 . . 
 	ld (0e094h),a		;024d	32 94 e0 	2 . . 
 sub_0250h:
-	ld hl,0e005h		;0250	21 05 e0 	! . . 
+	ld hl,IN_FREEZE_CHEAT		;0250	21 05 e0 	! . . 
 	res 7,(hl)		;0253	cb be 	. . 
 	xor a			;0255	af 	. 
 	ld (GAME_STATE),a		;0256	32 00 e0 	2 . . 
@@ -887,7 +887,7 @@ l0382h:
 	jp nz,l0217h		;0396	c2 17 02 	. . . 
 	jp 0487eh		;0399	c3 7e 48 	. ~ H 
 l039ch:
-	ld hl,0e005h		;039c	21 05 e0 	! . . 
+	ld hl,IN_FREEZE_CHEAT		;039c	21 05 e0 	! . . 
 	set 7,(hl)		;039f	cb fe 	. . 
 	ld a,000h		;03a1	3e 00 	> . 
 	call sub_0dfeh		;03a3	cd fe 0d 	. . . 
@@ -11837,7 +11837,7 @@ l516dh:
 	rst 38h
 
 sub_5178h:
-	ld hl,0e005h
+	ld hl,IN_FREEZE_CHEAT
 	set 7,(hl)
 	call CLEAR_TILEMAP
 	call CONFIG_GAME_STOP
@@ -11888,7 +11888,7 @@ l51c9h:
 	jr c,l5183h
 	daa	
 	ld (hl),a	
-	ld hl,0e005h
+	ld hl,IN_FREEZE_CHEAT
 	res 7,(hl)
 	ret	; 51d7
 
