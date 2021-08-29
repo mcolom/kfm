@@ -1137,10 +1137,10 @@ l0574h:
 	ld a,002h		;057f	3e 02 	> . 
 	ret			;0581	c9 	. 
 sub_0582h:
-	ld (0e882h),a		;0582	32 82 e8 	2 . . 
+	ld (INT_COUNTER + 2),a		;0582	32 82 e8 	2 . . 
 l0585h:
 	call sub_0fe3h		;0585	cd e3 0f 	. . . 
-	ld a,(0e882h)		;0588	3a 82 e8 	: . . 
+	ld a,(INT_COUNTER + 2)		;0588	3a 82 e8 	: . . 
 	and a			;058b	a7 	. 
 	jr nz,l0585h		;058c	20 f7 	  . 
 	ret			;058e	c9 	. 
@@ -3001,7 +3001,7 @@ sub_0fb8h:
 	call sub_0dfeh		;0fd1	cd fe 0d 	. . . 
 	inc (hl)			;0fd4	34 	4 
 l0fd5h:
-	ld hl,0e885h		;0fd5	21 85 e8 	! . . 
+	ld hl,INT_COUNTER + 5		;0fd5	21 85 e8 	! . . 
 	ld a,(hl)			;0fd8	7e 	~ 
 	and a			;0fd9	a7 	. 
 	jr nz,sub_0fe3h		;0fda	20 07 	  . 
@@ -9817,11 +9817,11 @@ l4275h:
 	ld (THOMAS_FRAME),a
 	inc (hl)	
 sub_4279h:
-	ld a,(0e884h)
+	ld a,(INT_COUNTER + 4)
 	and a	
 	ret nz	
 	ld a,00bh
-	ld (0e884h),a
+	ld (INT_COUNTER + 4),a
 	ld a,082h
 	call sub_0dfeh
 	ret	
@@ -11690,7 +11690,7 @@ sub_5038h:
 	push hl	
 	push bc	
 	push de	
-	ld (0e882h),a
+	ld (INT_COUNTER + 2),a
 	ld c,0d9h
 l5040h:
 	ld hl,STEP_COUNTER
@@ -11714,7 +11714,7 @@ l5053h:
 	ld l,a	
 	call WRITE_TEXT
 l5061h:
-	ld a,(0e882h)
+	ld a,(INT_COUNTER + 2)
 	and a	
 	jr nz,l5040h
 	pop de	
@@ -12104,7 +12104,7 @@ l53f7h:
 	call sub_0dfeh
 	ld a,0c0h
 sub_5416h:
-	ld (0e882h),a
+	ld (INT_COUNTER + 2),a
 l5419h:
 	ld a,(INT_COUNTER)
 	ld de,0d295h
@@ -12115,7 +12115,7 @@ l5419h:
 	ld hl,05498h
 l542bh:
 	call WRITE_TEXT
-	ld hl,0e882h
+	ld hl,INT_COUNTER + 2
 	ld a,(hl)	
 	and a	
 	jr nz,l5419h
@@ -18775,7 +18775,7 @@ l7751h:
 	ld hl,l7cf7h
 	call WRITE_TEXT
 	xor a	
-	ld (0e882h),a
+	ld (INT_COUNTER + 2),a
 	ld a,(0e81dh)
 l7761h:
 	ld (0e81dh),a
@@ -18784,7 +18784,7 @@ l7761h:
 l7769h:
 	ld a,(PLAYER_STATE)
 	and 003h
-	ld hl,0e882h
+	ld hl,INT_COUNTER + 2
 	jr z,l7798h
 	ld b,a	
 	ld a,(hl)	
@@ -19060,7 +19060,7 @@ l7944h:
 	ld (TIME),hl
 l7971h:
 	ld a,038h
-	ld (0e882h),a
+	ld (INT_COUNTER + 2),a
 	ld hl,TIME
 	ld a,(hl)	
 	add a,001h
@@ -19084,7 +19084,7 @@ l798dh:
 	InP2Button
 	ld de,0d4a2h
 	call sub_7bb2h
-	ld a,(0e882h)
+	ld a,(INT_COUNTER + 2)
 	and a	
 	jr z,l7971h
 	ld a,(0e904h)
@@ -19095,7 +19095,7 @@ l798dh:
 	jr z,l798dh
 	ret	
 	xor a	
-	ld (0e882h),a
+	ld (INT_COUNTER + 2),a
 l79beh:
 	push af	
 	ld hl,l7a61h
@@ -19125,7 +19125,7 @@ l79e6h:
 l79eeh:
 	ld a,(PLAYER_STATE)
 	and 003h
-	ld hl,0e882h
+	ld hl,INT_COUNTER + 2
 	jr z,l7a26h
 	ld b,a	
 	ld a,(hl)	
