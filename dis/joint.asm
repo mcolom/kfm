@@ -301,7 +301,7 @@ COINS: EQU 0xE913
 
 ; Tip: in the intro screen, set 0xE000 (GAME_STATE) to 2, and
 ; change THOMAS_FRAME to see the sprite parts.
-; Interesting: 11, 20, 21, 24, 25, 27, 2F, 47, 4E, 54 (old man??), 59
+; Interesting: 11, 20, 21, 24, 25, 27, 2F, 47, 4E, 54, 59
 THOMAS_FRAME: EQU 0xE706
 ;
 THOMAS_FRAME_NORMAL: EQU 0
