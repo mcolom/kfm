@@ -106,12 +106,15 @@ POINTS: EQU 0xE081 ; Points, E081... E083
 STEP_COUNTER: EQU 0xE883
 
 NUM_GRIPPING: EQU 0xE71A
-ACTIVE_GRIPPERS: EQU 0xE71B
+ACTIVE_GRIPPERS_LEFT: EQU 0xE71B
+ACTIVE_GRIPPERS_RIGHT: EQU 0xE71D
 
 
 TBL_E10A: EQU 0xE10A
 
+; TBL_GUYS: each entry is 16 bytes
 TBL_GUYS: EQU 0xE262
+
 TBL_E282: EQU 0xE282
 TBL_E2A2: EQU 0xE2A2
 TBL_E2B2: EQU 0xE2B2
@@ -3901,8 +3904,8 @@ sub_153dh:
 	ld (0e2d2h),a		;1544	32 d2 e2 	2 . . 
 l1547h:
 	ld hl,0x0101		;1547	21 01 01 	! . . 
-	ld (ACTIVE_GRIPPERS),hl		;154a	22 1b e7 	" . . 
-	ld (0e71dh),hl		;154d	22 1d e7 	" . . 
+	ld (ACTIVE_GRIPPERS_LEFT),hl		;154a	22 1b e7 	" . . 
+	ld (ACTIVE_GRIPPERS_RIGHT),hl		;154d	22 1d e7 	" . . 
 	ld ix,TBL_GUYS		;1550	dd 21 62 e2 	. ! b . 
 	ld b,005h		;1554	06 05 	. . 
 l1556h:
@@ -4731,7 +4734,7 @@ l1b37h:
 	ld (ix + 14),005h		;1b50	dd 36 0e 05 	. 6 . . 
 sub_1b54h:
 	bit 2,(ix + 0)		;1b54	dd cb 00 56 	. . . V 
-	ld hl,ACTIVE_GRIPPERS		;1b58	21 1b e7 	! . . 
+	ld hl,ACTIVE_GRIPPERS_LEFT		;1b58	21 1b e7 	! . . 
 	jr z,l1b5fh		;1b5b	28 02 	( . 
 	inc hl			;1b5d	23 	# 
 	inc hl			;1b5e	23 	# 
