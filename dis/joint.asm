@@ -113,6 +113,7 @@ ACTIVE_GRIPPERS_RIGHT: EQU 0xE71D
 TBL_E10A: EQU 0xE10A
 
 ; TBL_GUYS: each entry is 16 bytes
+TBL_GUYS_LEN: EQU 0xE261
 TBL_GUYS: EQU 0xE262
 
 TBL_GUYS_ENTRY_2: EQU TBL_GUYS + 2*16
@@ -3746,7 +3747,7 @@ l1453h:
 	and a			;1453	a7 	. 
 	jr z,l145ch		;1454	28 06 	( . 
 	ld c,a			;1456	4f 	O 
-	ld a,(0e261h)		;1457	3a 61 e2 	: a . 
+	ld a,(TBL_GUYS_LEN)		;1457	3a 61 e2 	: a . 
 	cp c			;145a	b9 	. 
 	ret nc			;145b	d0 	. 
 l145ch:
@@ -3843,10 +3844,13 @@ l14f1h:
 	ld hl,0e260h		;14f1	21 60 e2 	! ` . 
 	set 5,(hl)		;14f4	cb ee 	. . 
 l14f6h:
-	ld hl,0e261h		;14f6	21 61 e2 	! a . 
+	ld hl,TBL_GUYS_LEN		;14f6	21 61 e2 	! a . 
 	inc (hl)			;14f9	34 	4 
 	inc hl			;14fa	23 	# 
-	ld bc,000fh+1		;14fb	01 10 00 	. . . 
+	ld bc, 16		;14fb	16=number of entries in TBL_GUYS
+
+; ToDo: here it seems it's looking for an active enemy and
+; configuring it
 l14feh:
 	ld a,(hl)			;14fe	7e 	~ 
 	and a			;14ff	a7 	. 
@@ -4760,7 +4764,7 @@ sub_1b7ah:
 	bit 1,(ix + 0)		;1b7a	dd cb 00 4e 	. . . N 
 	jr nz,l1b89h		;1b7e	20 09 	  . 
 	ld (ix + 0),000h		;1b80	dd 36 00 00 	. 6 . . 
-	ld hl,0e261h		;1b84	21 61 e2 	! a . 
+	ld hl,TBL_GUYS_LEN		;1b84	21 61 e2 	! a . 
 	dec (hl)			;1b87	35 	5 
 	ret			;1b88	c9 	. 
 l1b89h:
@@ -5190,7 +5194,7 @@ l1eb5h:
 	ld (TBL_ENEMIES),a		;1eb5	32 d8 e2 	2 . . 
 	ld a,070h		;1eb8	3e 70 	> p 
 	ld (0e2fah),a		;1eba	32 fa e2 	2 . . 
-	ld a,(0e261h)		;1ebd	3a 61 e2 	: a . 
+	ld a,(TBL_GUYS_LEN)		;1ebd	3a 61 e2 	: a . 
 	ld hl,0e197h		;1ec0	21 97 e1 	! . . 
 	sub (hl)			;1ec3	96 	. 
 	ret c			;1ec4	d8 	. 
@@ -6986,7 +6990,7 @@ sub_2cb9h:
 	ld a,(ix + ENEMY_STATE_IDX)		;2cc6	dd 7e 01
 	cp 001h		;2cc9	fe 01 	. . 
 	ret z			;2ccb	c8 	. 
-	ld a,(0e261h)		;2ccc	3a 61 e2 	: a . 
+	ld a,(TBL_GUYS_LEN)		;2ccc	3a 61 e2 	: a . 
 	and a			;2ccf	a7 	. 
 	ret nz			;2cd0	c0 	. 
 	set 4,(hl)		;2cd1	cb e6 	. . 
