@@ -115,7 +115,7 @@ TBL_E10A: EQU 0xE10A
 ; TBL_GUYS: each entry is 16 bytes
 TBL_GUYS: EQU 0xE262
 
-TBL_E282: EQU 0xE282
+TBL_GUYS_ENTRY_2: EQU TBL_GUYS + 2*16
 
 ; These are used in the intro only
 TBL_GUYS_ENTRY_4: EQU TBL_GUYS + 4*16
@@ -11480,7 +11480,7 @@ l4e87h:
 	call sub_4ed7h
 	ld ix,TBL_GUYS_ENTRY_4
 	call sub_4ed7h
-	ld ix,TBL_E282
+	ld ix,TBL_GUYS_ENTRY_2
 	call sub_4eb3h
 	ld ix,TBL_E292
 	call sub_4eb3h
