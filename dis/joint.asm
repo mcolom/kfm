@@ -116,8 +116,11 @@ TBL_E10A: EQU 0xE10A
 TBL_GUYS: EQU 0xE262
 
 TBL_E282: EQU 0xE282
-TBL_E2A2: EQU 0xE2A2
-TBL_E2B2: EQU 0xE2B2
+
+; These are used in the intro only
+TBL_GUYS_ENTRY_4: EQU TBL_GUYS + 4*16
+TBL_GUYS_ENTRY_5: EQU TBL_GUYS + 5*16
+
 TBL_E2FB: EQU 0xE2FB
 TBL_E31B: EQU 0xE31B
 TBL_E292: EQU 0xE292
@@ -10673,7 +10676,7 @@ iterate_guys_intro:
 	ld (ix + ENEMY_BOOMERANG_TYPE_IDX),b
 
     ; 0x50: look right, not being attacked, enemy is alive
-	ld (ix + ENEMY_LOOKAT_IDX),c ; Set to 0x50 or 0x10
+	ld (ix + ENEMY_LOOKAT_IDX),c ; Set to 0x50 or 0x10 ; 48e5
 
     ; Set position to HL = 3840
 	ld (ix + ENEMY_POS_L_IDX),l
@@ -11464,7 +11467,7 @@ l4e76h:
 	inc (hl)	
 	call 17dfh
 	jr l4e68h
-	ld hl,TBL_E2A2
+	ld hl,TBL_GUYS_ENTRY_4 ;4e7f
 	ld de,0010h
 	ld b,003h
 l4e87h:
@@ -11473,9 +11476,9 @@ l4e87h:
 	djnz l4e87h
 	ld ix,0e2c2h
 	call sub_4ed7h
-	ld ix,TBL_E2B2
+	ld ix,TBL_GUYS_ENTRY_5
 	call sub_4ed7h
-	ld ix,TBL_E2A2
+	ld ix,TBL_GUYS_ENTRY_4
 	call sub_4ed7h
 	ld ix,TBL_E282
 	call sub_4eb3h
