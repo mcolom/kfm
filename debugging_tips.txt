@@ -1,0 +1,107 @@
+Some tips to debug the program with MAME
+==================================================================
+
+**** Complete doc of the MAME's Debugger:
+https://docs.mamedev.org/debugger/
+
+**** Running at full speed:
+Press F10.
+
+**** Modifying ROM locations
+
+Copying from https://6502disassembly.com/mame-dbg.html:
+
+"When disassembling code it's sometimes useful to modify the code to
+see what effect it has. For example, if a chunk of code is doing
+something with a sound effect but you're not sure what, you can tweak or
+disable it and then observe the change.
+
+If you try to do this from the memory window you'll find that it doesn't work.
+The trick is to change the "Region" pop-up in the Memory View window from
+the default to "Region ':maincpu'".
+
+Once you've done this, you can edit ROM values directly."
+
+**** You can specify conditions in the breakpoints.
+For example:
+wpset 0,65535,rw,ix==e395
+
+
+The lives (+1) are stored at 0xE084.
+Let's look look between 0 and 65535, read-write with a condition:
+wpset 0,65535,rw,ix==e395
+
+**** The cheatinit command is useful to find variables.
+
+cheatinit [<sign><width><swap>,[<address>,<length>[,<cpu>]]]
+cheatinit ub, 0, 0xffff
+
+cheatnext equal
+cheatnext increase
+cheatnext decrease
+
+**** Clearing breakpoints and watchpoints
+
+bpclear
+wpclear
+
+**** You can add conditions and execute code in the breakpoints and watchpoints:
+
+From https://docs.mamedev.org/debugger/breakpoint.html:
+
+bp 23456,a0 == 0 && a1 == 0
+    Set a breakpoint for the visible CPU that will halt execution whenever the PC is equal to 23456 and the expression a0 == 0 && a1 == 0 is true.
+
+bp 3456:audiocpu,1,{ printf "A0=%08X\n",a0 ; g }
+    Set a breakpoint for the CPU with the absolute tag path :audiocpu that will halt execution whenever the PC is equal to 3456. When this happens, print A0=<a0val> to the debugger console and resume execution.
+
+bp 45678:2,a0==100,{ a0 = ff ; g }
+    Set a breakpoint on the third CPU in the system (zero-based index) that will halt execution whenever the PC is equal to 45678 and the expression a0 == 100 is true. When that happens, set a0 to ff and resume execution.
+
+temp0 = 0 ; bp 567890,++temp0 >= 10
+    Set a breakpoint for the visible CPU that will halt execution whenever the PC is equal to 567890 and the expression ++temp0 >= 10 is true. This effectively breaks only after the breakpoint has been hit sixteen times.
+
+****
+Use the bit(...) function to extract bits and use them in BP or WP conditions.
+This is particularly useful when the variable is a bitmask.
+
+From https://docs.mamedev.org/debugger/:
+    bit(<x>, <n>[, <w>])
+
+    Extracts and right-aligns a bit field <w> bits wide from <x> with least significant bit position position <n>, counting from the least significant bit. If <w> is omitted, a single bit is extracted.
+
+**** Modifying MAME to help debugging.
+
+Compile with
+$ make SUBTARGET=arcade -j8 && ./mamearcade -debug -rompath ~/juegos/mame kungfum
+
+The files of interest are those related to Z80:
+    src/devices/cpu/z80/z80.h
+    src/devices/cpu/z80/z80.cpp
+
+You can force a break from the C++ code with:
+    machine().debug_break();
+
+You can print from the OSD with:
+    osd_printf_warning("%04X, %04X\n", PC, IX);
+
+It's very useful to print messages when accesing tables of the
+form IX + off or IY + off. The effective addresses are computed with the
+eax() and eay() functions. We can modify them to add our debugging code:
+
+inline void z80_device::eax()
+{
+    uint8_t game_state = rm(0xE000);    
+
+    int8_t off = (int8_t)arg();
+	m_ea = (uint32_t)(uint16_t)(IX + off);
+    
+    if (game_state == 4 && IX == TBL) {
+        if (miguel_addresses.find(PC) == miguel_addresses.end()) {            
+                printf("Accessing IX + %d = %04X from PC=%04X\n", (int8_t)off, (uint32_t)m_ea, PC);
+
+        miguel_addresses.insert(PC);
+        }
+    }
+	WZ = m_ea;
+}
