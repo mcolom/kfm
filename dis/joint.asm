@@ -935,7 +935,7 @@ l03d9h:
 	jr nz,l03f3h		;03ea	20 07 	  . 
 	jr l03d9h		;03ec	18 eb 	. . 
 l03eeh:
-	call sub_041bh		;03ee	cd 1b 04 	. . . 
+	call DECREMENT_LEVEL		;03ee	cd 1b 04 	. . . 
 	jr l03bch		;03f1	18 c9 	. . 
 l03f3h:
 	call INCREMENT_LEVEL		;03f3	cd 32 04 	. 2 . 
@@ -978,28 +978,29 @@ l0414h:
 l041ah:
 	ret			;041a	c9 	. 
 
-sub_041bh:
+DECREMENT_LEVEL:
 	ld hl,DRAGONS_LEVEL	;041b	21 80 e0
-	dec (hl)			;041e	35
+	dec (hl)			;041e	35 Decrement current level
 	ld a,(hl)			;041f	7e
 	and 007h		    ;0420	e6 07 A = level
 	cp 007h		        ;0422	fe 07
-	ret nz			    ;0424	c0 Exit if we have 1 dragon, first level
+	ret nz			    ;0424	c0 Exit if we have not overflown with level-1 = 7
 
 	ld a,(hl)			;0425	7e
 	and 0f8h		    ;0426	e6 f8 A = dragons << 3
 	cp 0f8h		        ;0428	fe f8
 	jr nz,l042eh		;042a	20 02
-	ld a,028h		    ;042c	3e 28
+    ; Here we have dragons << 3 == 0xF8 = (11) 111 000, dragons overflow
+	ld a,028h		    ;042c	3e 28 Set A = (00) 101 000 = 5 dragons
 l042eh:
-	or 004h		        ;042e	f6 04
+	or 004h		        ;042e	f6 04 Set last level
 	ld (hl),a			;0430	77
 	ret			        ;0431	c9
 
 ; Increment current level, and dragons if less than 6.
 INCREMENT_LEVEL:
 	ld hl,DRAGONS_LEVEL	;0432	21 80 e0
-	inc (hl)			;0435	34 Increment number current level
+	inc (hl)			;0435	34 Increment current level
 	ld a,(hl)			;0436	7e
 	and 007h		    ;0437	e6 07 A = level
 	cp 005h		        ;0439	fe 05 Last level?
@@ -11608,7 +11609,7 @@ l4f43h:
 	ld b,c	
 	ex af,af'	
 	dec b	
-	ld bc,sub_041bh+1
+	ld bc,DECREMENT_LEVEL+1
 	add hl,bc	
 	djnz l4f70h
 l4f70h:
