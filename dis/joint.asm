@@ -837,7 +837,7 @@ time_decrement_done:
 	and 007h		        ;032d	e6 07 Get level
 	cp 004h		            ;032f	fe 04
 	call z,04fe9h		    ;0331	cc e9 4f Call only if in last level
-	call sub_0432h		;0334	cd 32 04 	. 2 . 
+	call INCREMENT_LEVEL		;0334	cd 32 04 	. 2 . 
 	call sub_0250h		;0337	cd 50 02 	. P . 
 l033ah:
 	ld a,02dh		;033a	3e 2d 	> - 
@@ -938,7 +938,7 @@ l03eeh:
 	call sub_041bh		;03ee	cd 1b 04 	. . . 
 	jr l03bch		;03f1	18 c9 	. . 
 l03f3h:
-	call sub_0432h		;03f3	cd 32 04 	. 2 . 
+	call INCREMENT_LEVEL		;03f3	cd 32 04 	. 2 . 
 	jr l03bch		;03f6	18 c4 	. . 
 
 ; Updates the internal counter (6 bytes long! from 0xE880 to 0xE885) with the
@@ -979,39 +979,41 @@ l041ah:
 	ret			;041a	c9 	. 
 
 sub_041bh:
-	ld hl,DRAGONS_LEVEL	;041b	21 80 e0 	! . . 
-	dec (hl)			;041e	35 	5 
-	ld a,(hl)			;041f	7e 	~ 
+	ld hl,DRAGONS_LEVEL	;041b	21 80 e0
+	dec (hl)			;041e	35
+	ld a,(hl)			;041f	7e
 	and 007h		    ;0420	e6 07 A = level
 	cp 007h		        ;0422	fe 07
-	ret nz			    ;0424	c0 Return if we have 1 dragon, level 0
+	ret nz			    ;0424	c0 Exit if we have 1 dragon, first level
 
-	ld a,(hl)			;0425	7e 	~ 
-	and 0f8h		;0426	e6 f8 	. . 
-	cp 0f8h		;0428	fe f8 	. . 
-	jr nz,l042eh		;042a	20 02 	  . 
-	ld a,028h		;042c	3e 28 	> ( 
+	ld a,(hl)			;0425	7e
+	and 0f8h		    ;0426	e6 f8 A = dragons << 3
+	cp 0f8h		        ;0428	fe f8
+	jr nz,l042eh		;042a	20 02
+	ld a,028h		    ;042c	3e 28
 l042eh:
-	or 004h		;042e	f6 04 	. . 
-	ld (hl),a			;0430	77 	w 
-	ret			;0431	c9 	. 
+	or 004h		        ;042e	f6 04
+	ld (hl),a			;0430	77
+	ret			        ;0431	c9
 
-sub_0432h:
-	ld hl,DRAGONS_LEVEL		;0432	21 80 e0 	! . . 
-	inc (hl)			;0435	34 	4 
-	ld a,(hl)			;0436	7e 	~ 
-	and 007h		;0437	e6 07 	. . 
-	cp 005h		;0439	fe 05 	. . 
-	ret nz			;043b	c0 	. 
-	ld a,(hl)			;043c	7e 	~ 
-	and 0f8h		;043d	e6 f8 	. . 
-	add a,008h		;043f	c6 08 	. . 
-	cp 030h		;0441	fe 30 	. 0 
-	jr nz,l0447h		;0443	20 02 	  . 
-	ld a,028h		;0445	3e 28 	> ( 
+; Increment current level, and dragons if less than 6.
+INCREMENT_LEVEL:
+	ld hl,DRAGONS_LEVEL	;0432	21 80 e0
+	inc (hl)			;0435	34 Increment number current level
+	ld a,(hl)			;0436	7e
+	and 007h		    ;0437	e6 07 A = level
+	cp 005h		        ;0439	fe 05 Last level?
+	ret nz			    ;043b	c0 Exit if not last level
+    ; We're in the last level
+	ld a,(hl)			;043c
+	and 0f8h		    ;043d	e6 f8 A = dragons << 3
+	add a, 8		    ;043f	c6 08 Increment dragons
+	cp 030h		        ;0441	fe 30 0x30 = (00)110 000 = 6 dragons, first level
+	jr nz,l0447h		;0443	20 02 Exit if not 6 dragons, level 0
+	ld a,028h		    ;0445	3e 28  A = 0x28 = (00)101 000 = 5 dragons, first level
 l0447h:
-	ld (hl),a			;0447	77 	w 
-	ret			;0448	c9 	. 
+	ld (hl),a			;0447	77
+	ret			        ;0448	c9
 
 sub_0449h:
 	ld (0e81ch),a		;0449	32 1c e8 	2 . . 
@@ -11542,7 +11544,7 @@ l4efdh:
 l4f01h:
 	ld b,c	
 	ld d,000h
-	ld bc,sub_0432h
+	ld bc,INCREMENT_LEVEL
 	ld bc,051ch
 	ld bc,0042dh
 	ld (01004h),hl
