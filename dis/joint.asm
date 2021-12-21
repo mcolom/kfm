@@ -308,10 +308,10 @@ PLAYER_CONTROLS: EQU 0xE907 ; It seems this contains everything in a single byte
 PLAYER_BUTTONS_AND_UP:  EQU 0xE908
 
 ; This is the effective movement.
-; The difference between PLAYER_JOYSTICK and PLAYER_INPUT is that
-; PLAYER_INPUT is very low-level and PLAYER_JOYSTICK is computed.
-; Thus, during the demo PLAYER_JOYSTICK will be written.
-PLAYER_JOYSTICK: EQU 0xE909
+; The difference between PLAYER_MOVE and PLAYER_INPUT is that
+; PLAYER_INPUT is very low-level and PLAYER_MOVE is computed.
+; Thus, during the demo PLAYER_MOVE will be written.
+PLAYER_MOVE: EQU 0xE909
 
 ; Player input (joystick, punch, and kick buttons bitmask.
 ; This variable is updated continuosly, even when not playing.
@@ -4021,7 +4021,7 @@ l15d2h:
 	ret			;15dc	c9 	. 
 l15ddh:
 	call sub_1b54h		;15dd	cd 54 1b 	. T . 
-	call sub_1c61h		;15e0	cd 61 1c 	. a . 
+	call GET_EFFECTIVE_PLAYER_MOVE		;15e0	cd 61 1c 	. a . 
 	cp (ix + 15)		;15e3	dd be 0f 	. . . 
 	jr z,l15f2h		;15e6	28 0a 	( . 
 	dec (ix + 11)		;15e8	dd 35 0b 	. 5 . 
@@ -4772,7 +4772,7 @@ l1b37h:
 	ld (ix + 1),009h		;1b3e	dd 36 01 09 	. 6 . . 
 	ld hl,NUM_GRIPPING		;1b42	21 1a e7 	! . . 
 	inc (hl)			;1b45	34 	4 
-	call sub_1c61h		;1b46	cd 61 1c 	. a . 
+	call GET_EFFECTIVE_PLAYER_MOVE		;1b46	cd 61 1c 	. a . 
 	ld (ix + 15),a		;1b49	dd 77 0f 	. w . 
 	ld (ix + 11),006h		;1b4c	dd 36 0b 06 	. 6 . . 
 	ld (ix + 14),005h		;1b50	dd 36 0e 05 	. 6 . . 
@@ -4918,14 +4918,16 @@ l1c55h:
 	rla			;1c5f	17 	. 
 	rst 38h			;1c60	ff
 
-sub_1c61h:
-	ld a,(GAME_STATE)		;1c61	3a 00 e0 	: . . 
+; Get the effective player move
+; If in demo, use PLAYER_MOVE, PLAYER_CONTROLS (direct input) otherwise
+GET_EFFECTIVE_PLAYER_MOVE:
+	ld a,(GAME_STATE)		;1c61	3a 00 e0
 	cp GAME_STATE_DEMO		;1c64	fe 06
-	ld a,(PLAYER_JOYSTICK)		;1c66	3a 09 e9 	: . . 
-	ret z			;1c69	c8 	. 
-	ld a,(PLAYER_CONTROLS)		;1c6a	3a 07 e9 	: . . 
-	and 00fh		;1c6d	e6 0f 	. . 
-	ret			;1c6f	c9 	. 
+	ld a,(PLAYER_MOVE)		;1c66	3a 09 e9
+	ret z			        ;1c69	c8
+	ld a,(PLAYER_CONTROLS)	;1c6a	3a 07 e9
+	and 00fh		        ;1c6d	e6 0f Consider only joystick directions, not buttons
+	ret			            ;1c6f	c9
 
 sub_1c70h:
 	call GET_ENEMY_POS_IN_HL		;1c70	cd 8a 1c 	. . . 
@@ -9759,7 +9761,7 @@ l419ah:
 	ld a,(0e71fh)
 	and 001h
 	jp nz,l4551h
-	ld a,(PLAYER_JOYSTICK)
+	ld a,(PLAYER_MOVE)
 	ld d,a	
 	ld a,(hl)	
 	cp 006h
@@ -9883,7 +9885,7 @@ l4289h:
 	jp m,l42a0h
 	ld (0e703h),a
 l42a0h:
-	ld a,(PLAYER_JOYSTICK)
+	ld a,(PLAYER_MOVE)
 	bit 5,a
 	jp nz,l4365h
 	bit 4,a
@@ -10170,7 +10172,7 @@ l44a0h:
 l44a7h:
 	bit 7,c
 	jr z,l44a0h
-	ld a,(PLAYER_JOYSTICK)
+	ld a,(PLAYER_MOVE)
 	and 030h
 	jr z,l44a0h
 	ld b,0f8h
@@ -10629,7 +10631,7 @@ sub_482fh:
 	ld a,(GAME_STATE)
 	cp GAME_STATE_DEMO
 	jr nz,l484dh
-    ; We're in demo mode, so we'll write values to PLAYER_JOYSTICK
+    ; We're in demo mode, so we'll write values to PLAYER_MOVE
     
     ; Control demo timing
 	ld hl,0e022h
@@ -10677,7 +10679,7 @@ l484dh:
 	ld b,a	
 	or c	
 l4874h:
-	ld (PLAYER_JOYSTICK),a
+	ld (PLAYER_MOVE),a
 	ret	
 l4878h:
 	ld a, GAME_STATE_LIFE_LOST
@@ -12382,7 +12384,7 @@ l55deh:
 	xor a	
 	ld (STEP_COUNTER),a
 l55e2h:
-	ld a,(PLAYER_JOYSTICK)
+	ld a,(PLAYER_MOVE)
 	and 030h
 	jr z,l55f7h
 	ld a,(hl)	
