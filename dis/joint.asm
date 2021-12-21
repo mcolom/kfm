@@ -90,7 +90,14 @@ INT_COUNTER: EQU 0xE880
 EXT_RANDOM: EQU 0xE010
 EXT_TICKS: EQU 0xE020
 
+; Pointer to the current position in the fake input table
+DEMO_FAKE_INPUT_ADDR: EQU 0xE023
 
+; The game cycles the demo level shown, between level 1 and 2.
+; 0: level 2 shown
+; 9: level 1 shown
+; This variable is used to set the value of DEMO_FAKE_INPUT_ADDR
+DEMO_LEVEL: EQU 0xE025
 
 
 LIVES: EQU 0xE084
@@ -296,6 +303,11 @@ THOMAS_POSITION: EQU 0xE713 ; Left end is 0
 
 PLAYER_CONTROLS: EQU 0xE907 ; It seems this contains everything in a single byte
 PLAYER_BUTTONS_AND_UP:  EQU 0xE908
+
+; This is the effective movement.
+; The difference between PLAYER_JOYSTICK and PLAYER_INPUT is that
+; PLAYER_INPUT is very low-level and PLAYER_JOYSTICK is computed.
+; Thus, during the demo PLAYER_JOYSTICK will be written.
 PLAYER_JOYSTICK: EQU 0xE909
 
 ; Player input (joystick, punch, and kick buttons bitmask.
@@ -10614,20 +10626,29 @@ sub_482fh:
 	ld a,(GAME_STATE)
 	cp GAME_STATE_DEMO
 	jr nz,l484dh
+    ; We're in demo mode, so we'll write values to PLAYER_JOYSTICK
+    
+    ; Control demo timing
 	ld hl,0e022h
 	dec (hl)	
-	ret nz	
+	ret nz ; Exit to prevent moving too fast
+    
 	ex de,hl	
-	ld hl,(0e023h)
+	ld hl,(DEMO_FAKE_INPUT_ADDR) ; HL: fake input table
+    
+    ; Read fake input
 	ld a,(hl)	
 	cp 0ffh
-	jr z,l4878h
+	jr z,l4878h ; Exit if finished
+    
 	inc hl	
-	ld (de),a	
+	ld (de),a ; Save fake input entry #1 in (DE)
+    
+    ; Read fake input entry #2
 	ld a,(hl)	
 	inc hl	
-	ld (0e023h),hl
-	jr l4874h
+	ld (DEMO_FAKE_INPUT_ADDR),hl ; Update current fake input table pointer
+	jr l4874h ; Set fake input in A
 l484dh:
 	ld a,(PLAYER_INPUT)
 	and 4 ; Bit 2: joystick pushing down
@@ -10658,7 +10679,8 @@ l4874h:
 l4878h:
 	ld a, GAME_STATE_LIFE_LOST
 	ld (GAME_STATE),a
-	ret	
+	ret
+
 l487eh:
 	di	
 	ld sp,0f000h
@@ -10772,17 +10794,19 @@ l4943h:
 	inc a	
 	ld (LIVES),a
 	ld (0e022h),a
-	ld hl,0e025h
+
+	ld hl,DEMO_LEVEL
 	ld a,(hl)	
-	ld (hl),009h
-	ld de,l4a55h
+	ld (hl), 9 ; Who knows why the programmer used 9 here. Why not :)
+	ld de,l4a55h ; Fake input for demo level #1
 	and a	
 	jr z,l496fh
-	ld de,l4b0ah
+	ld de,l4b0ah ; Fake input for demo level #2
+
 	ld (hl),000h
 l496fh:
 	ld (DRAGONS_LEVEL),a
-	ld (0e023h),de
+	ld (DEMO_FAKE_INPUT_ADDR),de
 	call CLEAR_TILEMAP
 	ld a,001h
 	call sub_0449h

@@ -28,7 +28,7 @@ wpset 0,65535,rw,ix==e395
 
 
 The lives (+1) are stored at 0xE084.
-Let's look look between 0 and 65535, read-write with a condition:
+Let's look between 0 and 65535, read-write with a condition:
 wpset 0,65535,rw,ix==e395
 
 **** The cheatinit command is useful to find variables.
