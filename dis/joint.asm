@@ -110,6 +110,9 @@ ENEMY_ENERGY_DISP: EQU 0xE819 ; Displayed enemy's energy. Use to animate the bar
 
 POINTS: EQU 0xE081 ; Points, E081... E083
 
+; The points are visible until this counter reaches zero
+POINTS_VISIBLE_COUNTER: EQU 0xE64C
+
 STEP_COUNTER: EQU 0xE883
 
 NUM_GRIPPING: EQU 0xE71A
@@ -7386,7 +7389,7 @@ l2f02h:
 	ld (ENERGY),a		;2f02	32 09 e7 	2 . . 
 	ret			;2f05	c9 	. 
 sub_2f06h:
-	ld hl,0e64ch		;2f06	21 4c e6 	! L . 
+	ld hl,POINTS_VISIBLE_COUNTER		;2f06	21 4c e6 	! L . 
 	ld b,004h		;2f09	06 04 	. . 
 l2f0bh:
 	ld a,(hl)			;2f0b	7e 	~ 
@@ -7478,7 +7481,7 @@ ADD_POINTS:
 	jr z,l2f85h		;2f81	28 02
 	ld a,00bh		;2f83	3e 0b 	> . 
 l2f85h:
-	ld (0e64ch),a		;2f85	32 4c e6 	2 L . 
+	ld (POINTS_VISIBLE_COUNTER),a		;2f85	32 4c e6 	2 L . 
 	ld d,000h		;2f88	16 00 	. . 
 	ld hl,POINTS_TABLE		;2f8a	21 ad 2f 	! . / 
 	add hl,de			;2f8d	19 	. 
