@@ -85,6 +85,8 @@ You can force a break from the C++ code with:
 You can print from the OSD with:
     osd_printf_warning("%04X, %04X\n", PC, IX);
 
+** Debugging table accesses:
+
 It's very useful to print messages when accesing tables of the
 form IX + off or IY + off. The effective addresses are computed with the
 eax() and eay() functions. We can modify them to add our debugging code:
@@ -104,4 +106,29 @@ inline void z80_device::eax()
         }
     }
 	WZ = m_ea;
+}
+
+** Debugging bit masks:
+
+I define a temp variable in the public part of "class z80_device : public cpu_device, public z80_daisy_chain_interface":
+    uint8_t miguel_tmp_byte = 0;
+
+And I use this code in z80.cpp to track individual bit changes:
+
+uint8_t z80_device::rm(uint16_t addr)
+{
+	uint8_t res = m_data.read_byte(addr);
+    
+    uint16_t addr_interest = 0xE906; // PLAYER_STATE
+    uint8_t bit_position = 0;
+    
+    if (addr == addr_interest) {
+        uint8_t mask = 1 << bit_position;
+        if ((res & mask) != (miguel_tmp_byte & mask)) {
+            printf("Bit #%d flipped (now %d), addr=%04X\n", bit_position, (res & mask) >> bit_position, addr);
+            miguel_tmp_byte = res;
+            //machine().debug_break();
+        }
+    }    
+	return res;
 }

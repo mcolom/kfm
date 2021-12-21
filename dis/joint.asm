@@ -298,7 +298,18 @@ PLAYER_CONTROLS: EQU 0xE907 ; It seems this contains everything in a single byte
 PLAYER_BUTTONS_AND_UP:  EQU 0xE908
 PLAYER_JOYSTICK: EQU 0xE909
 
-PLAYER_STATE: EQU 0xE906
+; Player input (joystick, punch, and kick buttons bitmask.
+; This variable is updated continuosly, even when not playing.
+;
+; Bit #0: joystick pushing right
+; Bit #1: joystick pushing left
+; Bit #2: joystick pushing down
+; Bit #3: joystick pushing up
+; Bit #4: unused
+; Bit #5: punch button pressed
+; Bit #6: unused
+; Bit #7: kick button pressed
+PLAYER_INPUT: EQU 0xE906
 
 KNIFE_STATUS: EQU 0xE807
 KNIFE_DIST: EQU 0xE32E
@@ -905,7 +916,8 @@ l039ch:
 	ld (HSCROLL_LOW_W),hl		;03b0	22 02 e9 	" . . 
 	call 0570dh		;03b3	cd 0d 57 	. . W 
 	ld hl, select_game_floor_str		;03b6	21 5b 59
-	call WRITE_TEXT		;03b9	cd 1c 11 	. . . 
+	call WRITE_TEXT		;03b9	cd 1c 11 	. . .
+
 l03bch:
 	ld c,014h		;03bc	0e 14 	. . 
 	ld de,0d3a7h		;03be	11 a7 d3 	. . . 
@@ -920,26 +932,33 @@ l03bch:
 	call sub_055bh		;03c9	cd 5b 05 	. [ . 
 	ld de,0d427h		;03cc	11 27 d4 	. ' . 
 	call sub_0556h		;03cf	cd 56 05 	. V . 
+
+; Level selection code
+
+; Wait until kick and punch buttons are released
 l03d2h:
-	ld a,(PLAYER_STATE)		;03d2	3a 06 e9 	: . . 
-	and 0a0h		;03d5	e6 a0 	. . 
-	jr nz,l03d2h		;03d7	20 f9 	  . 
+	ld a,(PLAYER_INPUT)		;03d2	3a 06 e9
+	and 0a0h		        ;03d5	e6 a0 Check bits 7 (kick) and 5 (punch)
+	jr nz,l03d2h		    ;03d7	20 f9 Wait until both buttons released
+
+; Wait until a button is pressed, to decrement or increment the level
 l03d9h:
-	ld hl,0e904h		;03d9	21 04 e9 	! . . 
-	bit 1,(hl)		;03dc	cb 4e 	. N 
-	jp nz,sub_0250h		;03de	c2 50 02 	. P . 
-	ld hl,PLAYER_STATE		;03e1	21 06 e9 	! . . 
-	bit 7,(hl)		;03e4	cb 7e 	. ~ 
-	jr nz,l03eeh		;03e6	20 06 	  . 
-	bit 5,(hl)		;03e8	cb 6e 	. n 
-	jr nz,l03f3h		;03ea	20 07 	  . 
-	jr l03d9h		;03ec	18 eb 	. . 
+	ld hl,0e904h		    ;03d9	21 04 e9
+	bit 1,(hl)		        ;03dc	cb 4e
+	jp nz,sub_0250h		    ;03de	c2 50 02
+	ld hl,PLAYER_INPUT		;03e1	21 06 e9
+	bit 7,(hl)		        ;03e4	cb 7e Check bit 7 (kick)
+	jr nz,l03eeh		    ;03e6	20 06 Jump to decrement level if pressed
+	bit 5,(hl)		        ;03e8	cb 6e Check bit 5 (punch)
+	jr nz,l03f3h		    ;03ea	20 07 Jump to increment level if pressed
+	jr l03d9h		        ;03ec	18 eb Repeat until a button is pressed
+
 l03eeh:
-	call DECREMENT_LEVEL		;03ee	cd 1b 04 	. . . 
-	jr l03bch		;03f1	18 c9 	. . 
+	call DECREMENT_LEVEL	;03ee	cd 1b 04
+	jr l03bch		        ;03f1	18 c9
 l03f3h:
-	call INCREMENT_LEVEL		;03f3	cd 32 04 	. 2 . 
-	jr l03bch		;03f6	18 c4 	. . 
+	call INCREMENT_LEVEL	;03f3	cd 32 04
+	jr l03bch		        ;03f6	18 c4
 
 ; Updates the internal counter (6 bytes long! from 0xE880 to 0xE885) with the
 ; Z80 periodic interrupt
@@ -2580,9 +2599,9 @@ sub_0d05h:
 	jr z,l0d10h		;0d0c	28 02 	( . 
 	InP2Button		;0d0e	db 02 	. . 
 l0d10h:
-	ld hl,(PLAYER_STATE)		;0d10	2a 06 e9 	* . . 
+	ld hl,(PLAYER_INPUT)		;0d10	2a 06 e9 	* . . 
 	call sub_0d3bh		;0d13	cd 3b 0d 	. ; . 
-	ld (PLAYER_STATE),hl		;0d16	22 06 e9 	" . . 
+	ld (PLAYER_INPUT),hl		;0d16	22 06 e9 	" . . 
 	ld hl,PLAYER_BUTTONS_AND_UP		;0d19	21 08 e9 	! . . 
 	rla			;0d1c	17 	. 
 	rl (hl)		;0d1d	cb 16 	. . 
@@ -10610,13 +10629,13 @@ sub_482fh:
 	ld (0e023h),hl
 	jr l4874h
 l484dh:
-	ld a,(PLAYER_STATE)
-	and 004h
+	ld a,(PLAYER_INPUT)
+	and 4 ; Bit 2: joystick pushing down
 	ld hl,0e700h
 	bit 0,(hl)
 	jr nz,l4874h
-	ld a,(PLAYER_STATE)
-	and 007h
+	ld a,(PLAYER_INPUT)
+	and 7 ; Bits 0, 1, 2: joystick right, left, or down
 	ld c,a	
 	ld a,(NUM_GRIPPING)
 	and a	
@@ -12309,16 +12328,16 @@ l55a8h:
 	ld a,(0e904h)
 	and 003h
 	jr nz,l561bh
-	ld a,(PLAYER_STATE)
-	and 003h
+	ld a,(PLAYER_INPUT)
+	and 3 ; Bits 0 and 1: joystick pushing right and left
 	jr z,l55deh
 	ld a,(STEP_COUNTER)
 	and a	
 	jr nz,l55e2h
 	ld a,00bh
 	ld (STEP_COUNTER),a
-	ld a,(PLAYER_STATE)
-	bit 0,a
+	ld a,(PLAYER_INPUT)
+	bit 0,a ; Bit 0: joystick pushing right
 	ld a,(hl)	
 	jr nz,l55d5h
 	dec a	
@@ -18795,8 +18814,8 @@ l7761h:
 	ld c,000h
 	call sub_7bd7h
 l7769h:
-	ld a,(PLAYER_STATE)
-	and 003h
+	ld a,(PLAYER_INPUT)
+	and 3 ; Bits 0 and 1: joystick pushing right and left
 	ld hl,INT_COUNTER + 2
 	jr z,l7798h
 	ld b,a	
@@ -19103,8 +19122,8 @@ l798dh:
 	ld a,(0e904h)
 	bit 1,a
 	jr z,l798dh
-	ld a,(PLAYER_STATE)
-	bit 1,a
+	ld a,(PLAYER_INPUT)
+	bit 1,a ; Bit 1: joystick pushing left
 	jr z,l798dh
 	ret	
 	xor a	
@@ -19136,8 +19155,8 @@ l79e6h:
 	ld c,000h
 	call sub_7bceh
 l79eeh:
-	ld a,(PLAYER_STATE)
-	and 003h
+	ld a,(PLAYER_INPUT)
+	and 3 ; Bits 0 and 1: joystick pushing right and left
 	ld hl,INT_COUNTER + 2
 	jr z,l7a26h
 	ld b,a	
@@ -19236,8 +19255,8 @@ l7a61h:
 	ret po	
 	ld (hl),0feh
 l7a93h:
-	ld a,(PLAYER_STATE)
-	and 003h
+	ld a,(PLAYER_INPUT)
+	and 3 ; Bits 0 and 1: joystick pushing right and left
 	jr z,l7aa4h
 	bit 1,a
 	jr z,l7aa2h
