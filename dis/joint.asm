@@ -736,9 +736,9 @@ l0220h:
 	ld (hl),000h		    ;0235	36 00
 	ldir		;0237	ed b0
 
-	InDSW1		;0239	db 03 	. . 
-	and 001h		;023b	e6 01 	. . 
-	jr nz,l0247h		;023d	20 08 	  . 
+	InDSW1		 ;0239	db 03
+	and 001h	 ;023b	e6 01 Check difficulty
+	jr nz,l0247h ;023d	20 08
 
     ; Set 1 dragon, level 1
 	ld a,008h		        ;023f	3e 08
@@ -754,8 +754,10 @@ sub_0250h:
 	res 7,(hl)		;0253	cb be 	. . 
 	xor a			;0255	af 	. 
 	ld (GAME_STATE),a		;0256	32 00 e0 	2 . . 
-	InDSW2		;0259	db 04 	. . 
-	and 002h		;025b	e6 02 	. . 
+
+	InDSW2		    ;0259	db 04
+	and 002h		;025b	e6 02 Check bit 1: energy loss speed
+
 	ld hl,0e910h		;025d	21 10 e9 	! . . 
 	jr z,l026dh		;0260	28 0b 	( . 
 	ld a,(0e002h)		;0262	3a 02 e0 	: . . 
@@ -787,11 +789,11 @@ l0285h:
 	ld a,024h		;0297	3e 24 	> $ 
 	call sub_0dfeh		;0299	cd fe 0d 	. . . 
 l029ch:
-	InDSW2		;029c	db 04 	. . 
-	bit 4,a		;029e	cb 67 	. g 
+	InDSW2		;029c	db 04
+	bit 4,a		;029e	cb 67 Check bit 4: freeze cheat
 l02a0h:
 	jr z,l02aeh		;02a0	28 0c 	( . 
-	bit 5,a		;02a2	cb 6f 	. o 
+	bit 5,a		;02a2	cb 6f Check bit 5: levels selection mode cheat
 	jr nz,l02aeh		;02a4	20 08 	  . 
 	ld hl,0e904h		;02a6	21 04 e9 	! . . 
 	bit 0,(hl)		;02a9	cb 46 	. F 
@@ -1213,8 +1215,10 @@ l0594h:
 	rra			;0595	1f 	. 
 	ld b,a			;0596	47 	G 
 	ld hl,0e90ah		;0597	21 0a e9 	! . . 
+
 	InDSW2		;059a	db 04 	. . 
-	bit 2,a		;059c	cb 57 	. W 
+	bit 2,a		;059c	cb 57  Check bit 2: coin mode
+
 	jr nz,l05b1h		;059e	20 11 	  . 
 	ld a,b			;05a0	78 	x 
 	inc a			;05a1	3c 	< 
@@ -2948,8 +2952,9 @@ sub_0f1ah:
 	rrca			;0f20	0f 	. 
 	rrca			;0f21	0f 	. 
 	ld b,a			;0f22	47 	G 
-	InDSW1		;0f23	db 03 	. . 
-	and 001h		;0f25	e6 01 	. . 
+
+	InDSW1		    ;0f23	db 03
+	and 001h		;0f25	e6 01  Check bit 0: difficulty
 	jr nz,l0f2ah		;0f27	20 01 	  . 
 	dec b			;0f29	05 	. 
 l0f2ah:
@@ -3099,8 +3104,10 @@ l100fh:
 	and a			;1018	a7 	. 
 	jr nz,l105ah		;1019	20 3f 	  ? 
 	ld b,a			;101b	47 	G 
-	InDSW1		;101c	db 03 	. . 
-	and 001h		;101e	e6 01 	. . 
+
+	InDSW1		    ;101c	db 03 	. . 
+	and 001h		;101e	e6 01 Check bit 0: difficulty
+
 	ld a,(DRAGONS_LEVEL)		;1020	3a 80 e0 	: . . 
 	jr nz,l1027h		;1023	20 02 	  . 
 	sub 008h		;1025	d6 08 	. . 
@@ -4056,8 +4063,10 @@ l15ffh:
 	and a			;1606	a7 	. 
 	ld a,002h		;1607	3e 02 	> . 
 	jr nz,l1615h		;1609	20 0a 	  . 
-	InDSW1		;160b	db 03 	. . 
-	and 002h		;160d	e6 02 	. . 
+
+	InDSW1		    ;160b	db 03
+	and 002h		;160d	e6 02 Bit 1: energy loss speed
+
 	ld a,004h		;160f	3e 04 	> . 
 	jr nz,l1615h		;1611	20 02 	  . 
 	ld a,003h		;1613	3e 03 	> . 
@@ -4776,8 +4785,10 @@ l1b20h:
 	and a			;1b28	a7 	. 
 	ld a,002h		;1b29	3e 02 	> . 
 	jr nz,l1b37h		;1b2b	20 0a 	  . 
-	InDSW1		;1b2d	db 03 	. . 
-	and 002h		;1b2f	e6 02 	. . 
+
+	InDSW1		    ;1b2d	db 03
+	and 002h		;1b2f	e6 02 Bit 1: energy loss speed
+    
 	ld a,004h		;1b31	3e 04 	> . 
 	jr nz,l1b37h		;1b33	20 02 	  . 
 	ld a,003h		;1b35	3e 03 	> . 
@@ -18770,7 +18781,7 @@ l78a5h:
 	InDSW2
 	call sub_7bb2h
 	InDSW2
-	bit 1,a
+	bit 1,a ; Check bit 1: cabinet setting (upright / cocktail)
 	ld hl,l7c96h
 	jr nz,l78c1h
 	ld hl,l7c9eh
@@ -18778,15 +18789,17 @@ l78c1h:
 	ld de,0d35dh
 	call WRITE_TEXT
 	InDSW1
-	and 001h
+	and 001h    ; Check bit 0: difficulty
 	ld hl,l7ca6h
 	jr nz,l78d3h
 	ld hl,l7cb0h
 l78d3h:
 	ld de,0d39eh
 	call WRITE_TEXT
+
 	InDSW1
-	and 002h
+	and 002h ; Check bit 1: energy loss speed
+
 	ld hl,l7cbah
 	jr nz,l78e5h
 	ld hl,l7cbfh
