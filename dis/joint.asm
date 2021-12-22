@@ -1403,8 +1403,8 @@ sub_06beh:
 	ld (0e101h),a		;06ed	32 01 e1 	2 . . 
 	jr z,l071dh		;06f0	28 2b 	( + 
 	ld hl,THOMAS_GLOBAL_STATE		;06f2	21 00 e7 	! . . 
-	ld (hl),020h		;06f5	36 20 	6   
-	inc hl			;06f7	23 	# 
+	ld (hl),020h		;06f5	36 20 Thomas looking to the right
+	inc hl			    ;06f7	23 	# 
 	ld (hl),040h		;06f8	36 40 	6 @ 
 	ld hl,0ce40h		;06fa	21 40 ce 	! @ . 
 	ld (0e102h),hl		;06fd	22 02 e1 	" . . 
@@ -5976,7 +5976,7 @@ l2488h:
 	ret			;249e	c9 	. 
 l249fh:
 	ld hl,THOMAS_GLOBAL_STATE		;249f	21 00 e7 	! . . 
-	set 6,(hl)		;24a2	cb f6 	. . 
+	set 6,(hl)		;24a2	cb f6 Knifer in level 2 will send his dagger to the right
 	call sub_2cb9h		;24a4	cd b9 2c 	. . , 
 	call sub_2c78h		;24a7	cd 78 2c 	. x , 
 	ld hl,06f4eh		;24aa	21 4e 6f 	! N o 
@@ -9569,11 +9569,11 @@ sub_402ch:
 	jr z,l40adh
 l4055h:
 	ld a,(THOMAS_GLOBAL_STATE)
-	bit 5,a
+	bit 5,a ; Check which side Thomas is looking at
 	ld a,(0e701h)
 	ld de,l0029h
 	jr z,l4089h
-	and 020h
+	and 020h ; Check which side Thomas is looking at
 	jr nz,l40adh
 	add hl,de	
 	ld de,0db00h
@@ -9720,9 +9720,9 @@ l4150h:
 	ld hl,THOMAS_GLOBAL_STATE
 	bit 4,(hl)
 	jr z,l4168h
-	bit 5,(hl)
+	bit 5,(hl) ; Check at which side Thomas is looking at
 	jr z,l4163h
-	bit 6,(hl)
+	bit 6,(hl) ; Check if the knifer at level 2 should throw his dagger to the right
 	jr nz,l4170h
 	ret	
 l4163h:
@@ -9793,11 +9793,11 @@ l41d6h:
 	ld hl,THOMAS_GLOBAL_STATE
 	bit 1,d 
 	jr z,l41e4h
-	res 5,(hl)
+	res 5,(hl) ; Check at which side Thomas is looking at
 l41e4h:
 	bit 0,d
 	jr z,l41eah
-	set 5,(hl)
+	set 5,(hl) ; Set Thomas looks to the right
 l41eah:
 	ld hl,0e703h
 	dec (hl)	
