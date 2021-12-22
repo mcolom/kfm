@@ -348,6 +348,20 @@ THOMAS_FRAME_START_JUMP: EQU 0x1F
 THOMAS_FRAME_JUMP_PAIN: EQU 0x20
 THOMAS_FRAME_WITH_SILVIA: EQU 0x26
 
+
+; This is a bitmask
+; Bit #0: Thomas is frozen. Used by the magician at level 4.
+; Bit #1: Thomas is not playing. For example: going upstairs or falling down dead
+; Bit #2: (unused)
+; Bit #3: (unused)
+; Bit #4: Related to the activity of the boss
+; Bit #5: 0=Thomas looking to the left. 1=Thomas looking to the right.
+; Bit #6: Make the knifer in presence of the boomerang boss send his dagger to the right.
+;         This is probably because the the boss configures sending boomerangs and daggers to the left, but
+;         for this particular knifer we need that he sends to the right instead. Tricky. It seems like a workaround.
+; Bit #7: (unused)
+THOMAS_GLOBAL_STATE: EQU 0xE700
+
 ; This is used to count the ticks Thomas is jumping or going upstairs
 THOMAS_HEIGHT_COUNTER: EQU 0xE704
 
@@ -364,7 +378,7 @@ THOMAS_HEIGHT_COUNTER: EQU 0xE704
 ; 7: screen with tied Silvia, "LET'S TRY NEXT FLOOR"
 ; 8: game ending, with hearts
 ; 9: reset
-; B: Thomas has lost one live
+; B: Thomas has lost one life
 ; C: level ending music sounds. Energy and time decrease to gain points.
 ; Bit 7 active: shows characters: Thomas, knife-thrower, giant, Mr. X
 GAME_STATE: EQU 0xE000
@@ -1364,7 +1378,7 @@ sub_06b2h:
 	ldir		;06bb	ed b0 	. . 
 	ret			;06bd	c9 	. 
 sub_06beh:
-	ld hl,0e700h		;06be	21 00 e7 	! . . 
+	ld hl,THOMAS_GLOBAL_STATE		;06be	21 00 e7 	! . . 
 	ld de,0e701h		;06c1	11 01 e7 	. . . 
 	ld bc,l0023h		;06c4	01 23 00 	. # . 
 	ld (hl),000h		;06c7	36 00 	6 . 
@@ -1388,7 +1402,7 @@ sub_06beh:
 	and 001h		;06eb	e6 01 	. . 
 	ld (0e101h),a		;06ed	32 01 e1 	2 . . 
 	jr z,l071dh		;06f0	28 2b 	( + 
-	ld hl,0e700h		;06f2	21 00 e7 	! . . 
+	ld hl,THOMAS_GLOBAL_STATE		;06f2	21 00 e7 	! . . 
 	ld (hl),020h		;06f5	36 20 	6   
 	inc hl			;06f7	23 	# 
 	ld (hl),040h		;06f8	36 40 	6 @ 
@@ -3509,9 +3523,9 @@ l1299h:
 	add a,b			;12aa	80 	. 
 	rrca			;12ab	0f 	. 
 sub_12ach:
-	ld hl,0e700h		;12ac	21 00 e7 	! . . 
-	bit 1,(hl)		;12af	cb 4e 	. N 
-	jr nz,l12c5h		;12b1	20 12 	  . 
+	ld hl,THOMAS_GLOBAL_STATE		;12ac	21 00 e7 	! . . 
+	bit 1,(hl)		    ;12af	cb 4e ; Check if Thomas is actually fighting
+	jr nz,l12c5h		;12b1	20 12 ; Skip all this if he's not fighting
 	ld hl,0e200h		;12b3	21 00 e2 	! . . 
 	call sub_12cbh		;12b6	cd cb 12 	. . . 
 	call sub_12feh		;12b9	cd fe 12 	. . . 
@@ -3969,9 +3983,9 @@ l1556h:
 	jp nz,l168ah		;1575	c2 8a 16 	. . . 
 	ld hl,l162fh		;1578	21 2f 16 	! / . 
 	push hl			;157b	e5 	. 
-	ld hl,0e700h		;157c	21 00 e7 	! . . 
-	bit 1,(hl)		;157f	cb 4e 	. N 
-	jp nz,l1be2h		;1581	c2 e2 1b 	. . . 
+	ld hl,THOMAS_GLOBAL_STATE	;157c	21 00 e7
+	bit 1,(hl)		;157f	cb 4e Check if Thomas is fighting
+	jp nz,l1be2h		;1581	c2 e2 1b Get out if he's not fighting
 	cp 001h		;1584	fe 01 	. . 
 	jp z,l1baah		;1586	ca aa 1b 	. . . 
 	jr c,l15d2h		;1589	38 47 	8 G 
@@ -4115,9 +4129,9 @@ l1680h:
 l168ah:
 	ld hl,l1822h		;168a	21 22 18 	! " . 
 	push hl			;168d	e5 	. 
-	ld hl,0e700h		;168e	21 00 e7 	! . . 
-	bit 1,(hl)		;1691	cb 4e 	. N 
-	jp nz,l1be2h		;1693	c2 e2 1b 	. . . 
+	ld hl,THOMAS_GLOBAL_STATE	;168e	21 00 e7
+	bit 1,(hl)		;1691	cb 4e Check if Thomas is fighting
+	jp nz,l1be2h	;1693	c2 e2 1b Skip if he's not fighting
 	cp 009h		;1696	fe 09 	. . 
 	jp z,l15ddh		;1698	ca dd 15 	. . . 
 	jp nc,l170bh		;169b	d2 0b 17 	. . . 
@@ -4369,9 +4383,9 @@ l1864h:
 l186eh:
 	ld hl,l1a72h		;186e	21 72 1a 	! r . 
 	push hl			;1871	e5 	. 
-	ld hl,0e700h		;1872	21 00 e7 	! . . 
-	bit 1,(hl)		;1875	cb 4e 	. N 
-	jr nz,l18a3h		;1877	20 2a 	  * 
+	ld hl,THOMAS_GLOBAL_STATE	;1872	21 00 e7 Check if Thomas is fighting
+	bit 1,(hl)		;1875	cb 4e
+	jr nz,l18a3h	;1877	20 2a Skip if he's not
 	ld l,(ix + 8)		;1879	dd 6e 08 	. n . 
 	ld h,(ix + 9)		;187c	dd 66 09 	. f . 
 	dec hl			;187f	2b 	+ 
@@ -4989,9 +5003,9 @@ sub_1cc4h:
 	ld c,a			;1cc7	4f 	O 
 	and 010h		;1cc8	e6 10 	. . 
 	ret z			;1cca	c8 	. 
-	ld a,(0e700h)		;1ccb	3a 00 e7 	: . . 
-	and 002h		;1cce	e6 02 	. . 
-	jp nz,l1da7h		;1cd0	c2 a7 1d 	. . . 
+	ld a,(THOMAS_GLOBAL_STATE)	;1ccb	3a 00 e7 	: . . 
+	and 002h		;1cce	e6 02 Check if Thomas is fighting
+	jp nz,l1da7h	;1cd0	c2 a7 1d Skip if he's not
 	ld a,(ix + 1)		;1cd3	dd 7e 01 	. ~ . 
 	cp 001h		;1cd6	fe 01 	. . 
 	jp c,l1d4bh		;1cd8	da 4b 1d 	. K . 
@@ -5961,7 +5975,7 @@ l2488h:
 	jp z,l2080h		;249b	ca 80 20 	. .   
 	ret			;249e	c9 	. 
 l249fh:
-	ld hl,0e700h		;249f	21 00 e7 	! . . 
+	ld hl,THOMAS_GLOBAL_STATE		;249f	21 00 e7 	! . . 
 	set 6,(hl)		;24a2	cb f6 	. . 
 	call sub_2cb9h		;24a4	cd b9 2c 	. . , 
 	call sub_2c78h		;24a7	cd 78 2c 	. x , 
@@ -6123,9 +6137,10 @@ sub_25afh:
 	ld (ix + 1),00dh		;25d1	dd 36 01 0d 	. 6 . . 
 	ld (ix + CURRENT_FRAME_IDX), 26	;25d5	dd 36 06 1a
 	ld (ix + FRAME_COUNTER_IDX), 8	;25d9	dd 36 07 08
-	ld hl,0e700h		;25dd	21 00 e7 	! . . 
-	set 0,(hl)		;25e0	cb c6 	. . 
-	ret			;25e2	c9 	. 
+    ; Set Thomas is frozen
+	ld hl,THOMAS_GLOBAL_STATE		            ;25dd	21 00 e7
+	set 0,(hl)		                ;25e0	cb c6
+	ret			                    ;25e2	c9
 	call l1be2h		;25e3	cd e2 1b 	. . . 
 	dec (ix + FRAME_COUNTER_IDX)		;25e6	dd 35 07
 	ret nz			                    ;25e9	c0
@@ -6167,9 +6182,10 @@ l2626h:
 	ld a,(ix + CURRENT_FRAME_IDX)		;263d	dd 7e 06
 	cp 38		    ;2640	fe 26
 	ret nz			;2642	c0
-	ld hl,0e700h		;2643	21 00 e7 	! . . 
-	res 0,(hl)		;2646	cb 86 	. . 
-	jp l1f50h		;2648	c3 50 1f 	. P . 
+    ; Set Thomas is not frozen
+	ld hl,THOMAS_GLOBAL_STATE	;2643	21 00 e7
+	res 0,(hl)		;2646	cb 86
+	jp l1f50h		;2648	c3 50
 l264bh:
 	and a			;264b	a7 	. 
 	jr z,l2698h		;264c	28 4a 	( J 
@@ -6225,9 +6241,10 @@ l2698h:
 	ld a,005h		;26ba	3e 05 	> . 
 	ld (0e322h),a		;26bc	32 22 e3 	2 " . 
 	xor a			;26bf	af 	. 
-	ld (0e321h),a		;26c0	32 21 e3 	2 ! . 
-	ld hl,0e700h		;26c3	21 00 e7 	! . . 
-	set 0,(hl)		;26c6	cb c6 	. . 
+	ld (0e321h),a		;26c0	32 21 e3
+    ; Set Thomas is frozen
+	ld hl,THOMAS_GLOBAL_STATE		;26c3	21 00 e7
+	set 0,(hl)		    ;26c6	cb c6
 	ld (ix + ENEMY_STATE_IDX), 6    ;26c8	dd 36 01 06
 	ld a, 11		;26cc	3e 0b
 l26ceh:
@@ -6242,9 +6259,10 @@ l26d2h:
 	inc a			;26e0	3c 	< 
 	cp 26   		;26e1	fe 1a
 	jr c,l26ceh		;26e3	38 e9 	8 . 
-	ld hl,0e700h		;26e5	21 00 e7 	! . . 
-	res 0,(hl)		;26e8	cb 86 	. . 
-	jp l2589h		;26ea	c3 89 25 	. . % 
+    ; Set Thomas is not frozen
+	ld hl,THOMAS_GLOBAL_STATE	;26e5	21 00 e7
+	res 0,(hl)		;26e8	cb 86
+	jp l2589h		;26ea	c3 89 25
 l26edh:
 	inc (ix + ENEMY_STATE_IDX)		;26ed	dd 34 01
 	ld l,(ix + ENEMY_POS_L_IDX)		;26f0	dd 6e 02
@@ -6353,8 +6371,9 @@ l27b0h:
 	res 4,(hl)		;27db	cb a6 	. . 
 	jr l283dh		;27dd	18 5e 	. ^ 
 l27dfh:
-	ld hl,0e700h		;27df	21 00 e7 	! . . 
-	set 0,(hl)		;27e2	cb c6 	. . 
+    ; Set Thomas is frozen
+	ld hl,THOMAS_GLOBAL_STATE	;27df	21 00 e7
+	set 0,(hl)		;27e2	cb c6
 	ld a,(TBL_REPLICA + ENEMY_LOOKAT_IDX)		;27e4	3a e8 e2 	: . . 
     ; Check bit 4: enemy is alive
 	and 010h		;27e7	e6 10 	. . 
@@ -6400,8 +6419,9 @@ l283dh:
 	ld (ix + ENEMY_FRAME_IDX - 16), 0		    ;283d	dd 36 f6 00
 	ld (ix + ENEMY_FRAME_COUNTER_IDX - 16), 2	;2841	dd 36 f7 02
 	ld (ix + ENEMY_STATE_IDX - 16), 0		    ;2845	dd 36 f1 00
-	ld hl,0e700h		;2849	21 00 e7 	! . . 
-	res 0,(hl)		;284c	cb 86 	. . 
+    ; Set Thomas is not frozen
+	ld hl,THOMAS_GLOBAL_STATE	;2849	21 00 e7
+	res 0,(hl)		;284c	cb 86
 	ret			;284e	c9 	. 
 l284fh:
 	ld de,(0e80ah)		;284f	ed 5b 0a e8 	. [ . . 
@@ -7022,7 +7042,7 @@ sub_2cb9h:
 	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;2cb9	2a 0c e8 	* . . 
 	ld de,0f760h		;2cbc	11 60 f7 	. ` . 
 	add hl,de			;2cbf	19 	. 
-	ld hl,0e700h		;2cc0	21 00 e7 	! . . 
+	ld hl,THOMAS_GLOBAL_STATE		;2cc0	21 00 e7 	! . . 
 	res 4,(hl)		;2cc3	cb a6 	. . 
 	ret c			;2cc5	d8 	. 
 	ld a,(ix + ENEMY_STATE_IDX)		;2cc6	dd 7e 01
@@ -7175,7 +7195,7 @@ l2d91h:
 	push hl			;2d97	e5 	. 
 	inc hl			;2d98	23 	# 
 	ld d,(hl)			;2d99	56 	V 
-	ld a,(0e700h)		;2d9a	3a 00 e7 	: . . 
+	ld a,(THOMAS_GLOBAL_STATE)		;2d9a	3a 00 e7 	: . . 
 	ld hl,(0e1f7h)		;2d9d	2a f7 e1 	* . . 
 	bit 6,c		;2da0	cb 71 	. q 
 	jr z,l2dbeh		;2da2	28 1a 	( . 
@@ -9548,7 +9568,7 @@ sub_402ch:
 	cp THOMAS_FRAME_READY
 	jr z,l40adh
 l4055h:
-	ld a,(0e700h)
+	ld a,(THOMAS_GLOBAL_STATE)
 	bit 5,a
 	ld a,(0e701h)
 	ld de,l0029h
@@ -9573,9 +9593,9 @@ l4070h:
 	add a,01fh
 	jr l40a6h
 l4080h:
-	ld a,(0e700h)
-	and 020h
-	jr nz,l4098h
+	ld a,(THOMAS_GLOBAL_STATE)
+	and 020h ; Check if Thomas is fighting
+	jr nz,l4098h ; Get out of the loop if he's not
 	jr l4070h
 l4089h:
 	and 010h
@@ -9697,7 +9717,7 @@ sub_413fh:
 	set 1,(hl)
 l4150h:
 	call sub_4174h
-	ld hl,0e700h
+	ld hl,THOMAS_GLOBAL_STATE
 	bit 4,(hl)
 	jr z,l4168h
 	bit 5,(hl)
@@ -9770,8 +9790,8 @@ l419ah:
 l41d6h:
 	bit 3,d
 	jp nz,l43b5h
-	ld hl,0e700h
-	bit 1,d
+	ld hl,THOMAS_GLOBAL_STATE
+	bit 1,d 
 	jr z,l41e4h
 	res 5,(hl)
 l41e4h:
@@ -10038,8 +10058,8 @@ l43b5h:
 l43bdh:
 	ld hl,(0e712h)
 	ld de,(0e707h)
-	ld a,(0e700h)
-	and 020h
+	ld a,(THOMAS_GLOBAL_STATE)
+	and 020h    ; Check if Thomas is fighting
 	jr nz,l43cch
 	ex de,hl	
 l43cch:
@@ -10232,7 +10252,8 @@ l4502h:
 	inc hl	
 	ld (0e703h),a
 	ld (0e70ah),hl
-	ld hl,0e700h
+    ; Set Thomas is not fighting
+	ld hl,THOMAS_GLOBAL_STATE
 	set 1,(hl)
 l4521h:
 	ld de,(0e70eh)
@@ -10244,8 +10265,8 @@ l4521h:
 	ld (0e710h),hl
 	ld hl,(0e712h)
 	ld de,(0e70ch)
-	ld a,(0e700h)
-	and 020h
+	ld a,(THOMAS_GLOBAL_STATE)
+	and 020h    ; Check if Thomas is fighting
 	jr z,l4546h
 	sbc hl,de
 	jr l4547h
@@ -10535,7 +10556,8 @@ l4749h:
 l4766h:
 	add hl,de	
 	ld (0e712h),hl
-	ld hl,0e700h
+    ; Set Thomas is not fighting
+	ld hl,THOMAS_GLOBAL_STATE
 	set 1,(hl)
 	ld a, THOMAS_FRAME_JUMP_KICK
 	ld (THOMAS_FRAME),a
@@ -10656,9 +10678,10 @@ sub_482fh:
 l484dh:
 	ld a,(PLAYER_INPUT)
 	and 4 ; Bit 2: joystick pushing down
-	ld hl,0e700h
+    ; Check if Thomas is frozen
+	ld hl,THOMAS_GLOBAL_STATE
 	bit 0,(hl)
-	jr nz,l4874h
+	jr nz,l4874h ; If he's frozen, don't read any input
 	ld a,(PLAYER_INPUT)
 	and 7 ; Bits 0, 1, 2: joystick right, left, or down
 	ld c,a	
@@ -11187,7 +11210,7 @@ l4e12h:
 	ret	
 	call sub_1be7h
 	ld hl,(0e264h)
-	ld de,0e700h
+	ld de,THOMAS_GLOBAL_STATE
 	add hl,de	
 	jr nc,l4e6bh
     ; Increment external ticks
@@ -11967,7 +11990,7 @@ l550ch:
 	call WAIT_A
 	xor a	
 l5510h:
-	ld (0e700h),a
+	ld (THOMAS_GLOBAL_STATE),a
 	ld (NUM_GRIPPING),a
 	ld de,POINTS + 2
 	ld hl,0ea00h
