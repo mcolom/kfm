@@ -55,6 +55,13 @@ InP2Button: macro
 	in a,(002h)
 endm
 
+; DIP switches.
+; For their meaning look in ./src/mame/drivers/m62.cpp, in
+; "static INPUT_PORTS_START( common )" and in
+; "static INPUT_PORTS_START( kungfum )".
+; In MAME's code the notation "SW2:i" the index i goes from 1 to 8, so
+; the actual bit is i-1 starting from zero.
+
 ; DSW1 on port 3
 InDSW1: macro
 	in a,(003h)
@@ -63,11 +70,6 @@ endm
 ; DSW2 on port 4
 InDSW2: macro
 	in a,(004h)
-endm
-
-; Service mode: bit 7 of DSW2. Active LOW.
-CHECKSERVICEMODE: macro
-	bit 7,a
 endm
 
 ; Screen is character-based and memory-mapped
@@ -430,7 +432,7 @@ IN_FREEZE_CHEAT: EQU 0xE005
 	
 	; Check DSW2 and jump to service mode if needed
 	InDSW2
-	CHECKSERVICEMODE
+	bit 7,a ; Service mode: bit 7 of DSW2. Active LOW.
 	jp z,SERVICE_MODE
 
 l0020h:
