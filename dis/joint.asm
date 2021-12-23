@@ -124,8 +124,21 @@ ACTIVE_GRIPPERS_RIGHT: EQU 0xE71D
 TBL_E10A: EQU 0xE10A
 
 ; TBL_GUYS: each entry is 16 bytes
+; Setting a large number in TBL_GUYS_LEN will prevent adding more guys
 TBL_GUYS_LEN: EQU 0xE261
 TBL_GUYS: EQU 0xE262
+
+; Entry 0
+; Bit 0: guy is a gripper (0) or a knifer (1)
+; Bit 1: (unused)
+; Bit 2: guy is a kid
+; Bit 3: 1=avoid adding guys behind this one
+; Bit 4: setting this to 0 makes the guy disappear
+; Bit 5: ???
+; Bit 6: moving direction of the guy (0 to the right, 1 to the left)
+
+
+
 
 TBL_GUYS_ENTRY_2: EQU TBL_GUYS + 2*16
 
@@ -3903,20 +3916,21 @@ l14f1h:
 	ld hl,0e260h		;14f1	21 60 e2 	! ` . 
 	set 5,(hl)		;14f4	cb ee 	. . 
 l14f6h:
-	ld hl,TBL_GUYS_LEN		;14f6	21 61 e2 	! a . 
-	inc (hl)			;14f9	34 	4 
-	inc hl			;14fa	23 	# 
-	ld bc, 16		;14fb	16=number of entries in TBL_GUYS
+	ld hl,TBL_GUYS_LEN	;14f6	21 61 e2
+	inc (hl)			;14f9	34 Add one more guy
+	inc hl			    ;14fa	23 Now HL points to TBL_GUYS
+	ld bc, 16		    ;14fb	16=number of entries in TBL_GUYS
 
-; ToDo: here it seems it's looking for an active enemy and
-; configuring it
+; Look for an empty guy entry. Is value at index 0 needs to be zero.
+; Keep looping until we find him.
 l14feh:
-	ld a,(hl)			;14fe	7e 	~ 
-	and a			;14ff	a7 	. 
+	ld a,(hl)		;14fe	7e
+	and a			;14ff	a7
 l1500h:
-	jr z,l1505h		;1500	28 03 	( . 
-	add hl,bc			;1502	09 	. 
-	jr l14feh		;1503	18 f9 	. . 
+	jr z,l1505h		;1500	28 03
+	add hl,bc		;1502	09
+	jr l14feh		;1503	18 f9 Keep searching if not found...
+; Guy empty entry found
 l1505h:
 	pop af			;1505	f1 	. 
 	ld (hl),a			;1506	77 	w 
@@ -3944,6 +3958,7 @@ l1505h:
 	inc hl			;1521	23 	# 
 	ld (hl),a			;1522	77 	w 
 	ret			;1523	c9 	. 
+
 sub_1524h:
 	ld a,(hl)			;1524	7e 	~ 
 	dec c			;1525	0d 	. 
@@ -4806,8 +4821,8 @@ sub_1b54h:
 	bit 2,(ix + 0)		;1b54	dd cb 00 56 	. . . V 
 	ld hl,ACTIVE_GRIPPERS_LEFT		;1b58	21 1b e7 	! . . 
 	jr z,l1b5fh		;1b5b	28 02 	( . 
-	inc hl			;1b5d	23 	# 
-	inc hl			;1b5e	23 	# 
+	inc hl			;1b5d	23
+	inc hl			;1b5e	23 Now HL = ACTIVE_GRIPPERS_RIGHT
 l1b5fh:
 	bit 6,(ix + 0)		;1b5f	dd cb 00 76 	. . . v 
 	ld de,0ff80h		;1b63	11 80 ff 	. . . 
@@ -4826,8 +4841,8 @@ l1b71h:
 sub_1b7ah:
 	bit 1,(ix + 0)		;1b7a	dd cb 00 4e 	. . . N 
 	jr nz,l1b89h		;1b7e	20 09 	  . 
-	ld (ix + 0),000h		;1b80	dd 36 00 00 	. 6 . . 
-	ld hl,TBL_GUYS_LEN		;1b84	21 61 e2 	! a . 
+	ld (ix + 0),000h	;1b80	dd 36 00 00 Guy is no longer active
+	ld hl,TBL_GUYS_LEN	;1b84	21 61 e2 Update table length
 	dec (hl)			;1b87	35 	5 
 	ret			;1b88	c9 	. 
 l1b89h:
