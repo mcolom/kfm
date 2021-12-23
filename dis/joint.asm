@@ -3425,14 +3425,22 @@ l1201h:
 	ld de,0006h		;1201	11 06 00 	. . . 
 	add iy,de		;1204	fd 19 	. . 
 	jr l1198h		;1206	18 90 	. . 
-sub_1208h:
+
+; Return Z if in demo or vulnerable (without vulnerability cheat)
+; Z = demo || vulnerable
+; This is used to avoid applying the invulnerability cheat in the demo.
+CHECK_DEMO_OR_VULNERABLE:
+    ; Return Z if in demo
 	ld a,(GAME_STATE)		;1208	3a 00 e0
 	cp GAME_STATE_DEMO		;120b	fe 06
-	ret z			;120d	c8 	. 
-	InDSW2		;120e	db 04 	. . 
-	cpl			;1210	2f 	/ 
-	bit 6,a		;1211	cb 77 	. w 
-	ret			;1213	c9 	. 
+	ret z			        ;120d	c8
+    ;
+	InDSW2		            ;120e	db 04
+	cpl			            ;1210	2f
+    ; Return NZ if invulnerability cheat = return Z if vulnerable
+	bit 6,a		            ;1211	cb 77
+	ret			            ;1213	c9
+
 sub_1214h:
 	cp (hl)			;1214	be 	. 
 	jr c,l121ch		;1215	38 05 	8 . 
@@ -4800,8 +4808,9 @@ CHECK_VAL_HL_PLUS_B_0XFF:
 	ret			;1b1f	c9
 
 l1b20h:
-	call sub_1208h		;1b20	cd 08 12 	. . . 
-	jr nz,REMOVE_ENEMY		;1b23	20 55 	  U 
+	call CHECK_DEMO_OR_VULNERABLE	;1b20	cd 08 12
+    ; If invulnerable, simply remove the enemy
+	jr nz,REMOVE_ENEMY		        ;1b23	20 55
 	ld a,(0e81ch)		;1b25	3a 1c e8 	: . . 
 	and a			;1b28	a7 	. 
 	ld a,002h		;1b29	3e 02 	> . 
@@ -7067,7 +7076,7 @@ sub_2c9ah:
 	ld a,(ENERGY)		;2c9a	3a 09 e7 	: . . 
 	sub e			;2c9d	93 	. 
 	jp p,l2cb6h		;2c9e	f2 b6 2c 	. . , 
-	call sub_1208h		;2ca1	cd 08 12 	. . . 
+	call CHECK_DEMO_OR_VULNERABLE		;2ca1	cd 08 12 	. . . 
 	jr nz,l2cb6h		;2ca4	20 10 	  . 
 	ld a,(DRAGONS_LEVEL)		;2ca6	3a 80 e0 	: . . 
 	and 007h		;2ca9	e6 07 	. . 
@@ -8423,7 +8432,7 @@ sub_36cah:
 	ld a,(ENERGY)		;36d3	3a 09 e7 	: . . 
 	sub e			;36d6	93 	. 
 	jp p,l36e4h		;36d7	f2 e4 36 	. . 6 
-	call sub_1208h		;36da	cd 08 12 	. . . 
+	call CHECK_DEMO_OR_VULNERABLE		;36da	cd 08 12 	. . . 
 	jr nz,l36e4h		;36dd	20 05 	  . 
 	ld a,005h		;36df	3e 05 	> . 
 	ld (0e007h),a		;36e1	32 07 e0 	2 . . 
@@ -9748,7 +9757,7 @@ l4134h:
 	call z,sub_2ec1h
 	ret	
 sub_413fh:
-	call sub_1208h
+	call CHECK_DEMO_OR_VULNERABLE
 	jr nz,l4150h
 	ld hl,(TIME)
 	ld a,h	
@@ -10356,7 +10365,7 @@ l4591h:
 	ld hl,0e702h
 	ld (hl),00bh
 	ret nc	
-	call sub_1208h
+	call CHECK_DEMO_OR_VULNERABLE
 	ret nz	
 	inc (hl)	
 	ld a,(0e720h)
@@ -10428,12 +10437,12 @@ l4610h:
 	ret	
 l4625h:
 	ld hl,l5000h
-	ld hl,0e71fh
+	ld hl,0e71fh ; Debug? It discards 0x5000 and loads a different value
 	bit 1,(hl)
 	jr z,l4643h
 	res 1,(hl)
-	call sub_1208h
-	jr nz,l4643h
+	call CHECK_DEMO_OR_VULNERABLE
+	jr nz,l4643h  ;4634  20 0D
 l4636h:
 	ld a,00ch
 	ld (0e702h),a
