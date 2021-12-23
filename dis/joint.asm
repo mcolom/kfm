@@ -130,11 +130,11 @@ TBL_GUYS: EQU 0xE262
 
 ; Entry 0
 ; Bit 0: guy is a gripper (0) or a knifer (1)
-; Bit 1: (unused)
+; Bit 1: unused for guys? It's 1 when it's a boss, but in TBL_ENEMIES
 ; Bit 2: guy is a kid
-; Bit 3: 1=avoid adding guys behind this one
-; Bit 4: setting this to 0 makes the guy disappear
-; Bit 5: ???
+; Bit 3: 1=avoid adding guys behind this one on the left
+; Bit 4: guy is alive (not falling). A falling guy will still use its place in TBL_GUYS
+; Bit 5: 1=avoid adding guys behind this one on the right
 ; Bit 6: moving direction of the guy (0 to the right, 1 to the left)
 
 
@@ -229,12 +229,12 @@ BOUNCING_BALL_EXPLODE_TIMEOUT_INIT: EQU 0xE371
 ; *******************************************************************
 TBL_ENEMIES: EQU 0xE2D8
 
-; Enemy's look at
+; Enemy's properties
 ; Bit 6: looking (and moving!) direction. 0 = look left and 1 = look right
 ; Bit 5: set to 1 when the enemy is attacked
 ; Bit 4: enemy is alive
-; The other bits seem to be unused
-ENEMY_LOOKAT_IDX: EQU 0
+; Bit 1: 1 if it's a boss
+ENEMY_PROPS_IDX: EQU 0
 
 ENEMY_STATE_IDX: EQU 1
 ENEMY_STATE: EQU TBL_ENEMIES + ENEMY_STATE_IDX ; Enemy's state
@@ -315,8 +315,9 @@ SILVIA_STATE: EQU 0xE34C
 ; Also at floor 4, with elements thrown by the magician
 NUM_MAGICAL_ELEMENTS: EQU 0xE381
 
-; This seems to be used to make appear the final enemy and the stairs
-THOMAS_POSITION: EQU 0xE713 ; Left end is 0
+; Absolute position of Thomas ìn the complete floor
+THOMAS_POSITION: EQU 0xE712 ; Left end is 0
+THOMAS_POSITION_H: EQU THOMAS_POSITION + 1
 
 PLAYER_CONTROLS: EQU 0xE907 ; It seems this contains everything in a single byte
 PLAYER_BUTTONS_AND_UP:  EQU 0xE908
@@ -1428,7 +1429,7 @@ sub_06beh:
 	ld hl,0ce40h		;06fa	21 40 ce 	! @ . 
 	ld (0e102h),hl		;06fd	22 02 e1 	" . . 
 	ld hl,00900h		;0700	21 00 09 	! . . 
-	ld (0e712h),hl		;0703	22 12 e7 	" . . 
+	ld (THOMAS_POSITION),hl		;0703	22 12 e7 	" . . 
 	ld hl,l1000h		;0706	21 00 10 	! . . 
 	ld (0e707h),hl		;0709	22 07 e7 	" . . 
 	ld hl,0cd00h		;070c	21 00 cd 	! . . 
@@ -1447,7 +1448,7 @@ l071dh:
 l072ch:
 	ld (0e102h),hl		;072c	22 02 e1 	" . . 
 	ld hl,0d560h		;072f	21 60 d5 	! ` . 
-	ld (0e712h),hl		;0732	22 12 e7 	" . . 
+	ld (THOMAS_POSITION),hl		;0732	22 12 e7 	" . . 
 	ld hl,M62_TILERAM		;0735	21 00 d0 	! . . 
 	ld (0e707h),hl		;0738	22 07 e7 	" . . 
 	ld hl,0dc40h		;073b	21 40 dc 	! @ . 
@@ -3386,7 +3387,7 @@ l1198h:
 	ld de,(0e815h)		;11b6	ed 5b 15 e8 	. [ . . 
 	sbc hl,de		;11ba	ed 52 	. R 
 	jr c,l1201h		;11bc	38 43 	8 C 
-	ld hl,(0e712h)		;11be	2a 12 e7 	* . . 
+	ld hl,(THOMAS_POSITION)		;11be	2a 12 e7 	* . . 
 	ld a,(0e701h)		;11c1	3a 01 e7 	: . . 
 	and 040h		;11c4	e6 40 	. @ 
 	jr z,l11d2h		;11c6	28 0a 	( . 
@@ -3403,7 +3404,7 @@ l11d9h:
 	ld de,(0e80fh)		;11da	ed 5b 0f e8 	. [ . . 
 	sbc hl,de		;11de	ed 52 	. R 
 	jr c,l1201h		;11e0	38 1f 	8 . 
-	ld hl,(0e712h)		;11e2	2a 12 e7 	* . . 
+	ld hl,(THOMAS_POSITION)		;11e2	2a 12 e7 	* . . 
 	and a			;11e5	a7 	. 
 	jr z,l11f2h		;11e6	28 0a 	( . 
 	ld e,(iy+002h)		;11e8	fd 5e 02 	. ^ . 
@@ -3466,7 +3467,7 @@ sub_1220h:
 	push hl			;1243	e5 	. 
 	ld e,(iy+000h)		;1244	fd 5e 00 	. ^ . 
 	ld d,(iy+001h)		;1247	fd 56 01 	. V . 
-	ld hl,(0e712h)		;124a	2a 12 e7 	* . . 
+	ld hl,(THOMAS_POSITION)		;124a	2a 12 e7 	* . . 
 	ld a,(0e701h)		;124d	3a 01 e7 	: . . 
 	and 040h		;1250	e6 40 	. @ 
 	jr z,l1257h		;1252	28 03 	( . 
@@ -3604,7 +3605,7 @@ sub_12feh:
 	jr z,l1309h		;1305	28 02 	( . 
 	ld c,01ch		;1307	0e 1c 	. . 
 l1309h:
-	ld a,(THOMAS_POSITION)		;1309	3a 13 e7 	: . . 
+	ld a,(THOMAS_POSITION_H)		;1309	3a 13 e7 	: . . 
 	add a,c			;130c	81 	. 
 	cp 0e0h		;130d	fe e0 	. . 
 	ret nc			;130f	d0 	. 
@@ -3716,7 +3717,7 @@ l13a4h:
 	jr nc,l13bch		;13af	30 0b 	0 . 
 	ld bc,l1200h		;13b1	01 00 12 	. . . 
 	add hl,bc			;13b4	09 	. 
-	ld bc,(0e712h)		;13b5	ed 4b 12 e7 	. K . . 
+	ld bc,(THOMAS_POSITION)		;13b5	ed 4b 12 e7 	. K . . 
 	sbc hl,bc		;13b9	ed 42 	. B 
 	ret c			;13bb	d8 	. 
 l13bch:
@@ -3782,7 +3783,7 @@ l1403h:
 	jr c,l141ch		;140e	38 0c 	8 . 
 	ld bc,l1200h		;1410	01 00 12 	. . . 
 	sbc hl,bc		;1413	ed 42 	. B 
-	ld bc,(0e712h)		;1415	ed 4b 12 e7 	. K . . 
+	ld bc,(THOMAS_POSITION)		;1415	ed 4b 12 e7 	. K . . 
 	sbc hl,bc		;1419	ed 42 	. B 
 	ret nc			;141b	d0 	. 
 l141ch:
@@ -3846,7 +3847,7 @@ l1475h:
 l1479h:
 	call sub_1524h		;1479	cd 24 15 	. $ . 
 	push af			;147c	f5 	. 
-	ld hl,(0e712h)		;147d	2a 12 e7 	* . . 
+	ld hl,(THOMAS_POSITION)		;147d	2a 12 e7 	* . . 
 	ld de,l1200h		;1480	11 00 12 	. . . 
 	sbc hl,de		;1483	ed 52 	. R 
 	ld de,0be00h		;1485	11 00 be 	. . . 
@@ -3888,7 +3889,7 @@ l14b8h:
 l14bfh:
 	call sub_1524h		;14bf	cd 24 15 	. $ . 
 	push af			;14c2	f5 	. 
-	ld hl,(0e712h)		;14c3	2a 12 e7 	* . . 
+	ld hl,(THOMAS_POSITION)		;14c3	2a 12 e7 	* . . 
 	ld de,l1200h		;14c6	11 00 12 	. . . 
 	add hl,de			;14c9	19 	. 
 	ld de,l2200h		;14ca	11 00 22 	. . " 
@@ -3933,30 +3934,30 @@ l1500h:
 ; Guy empty entry found
 l1505h:
 	pop af			;1505	f1 	. 
-	ld (hl),a			;1506	77 	w 
+	ld (hl),a		;1506	77 	    Field #0
 	xor a			;1507	af 	. 
-	inc hl			;1508	23 	# 
-	ld (hl),000h		;1509	36 00 	6 . 
-	inc hl			;150b	23 	# 
-	ld (hl),e			;150c	73 	s 
-	inc hl			;150d	23 	# 
-	ld (hl),d			;150e	72 	r 
-	inc hl			;150f	23 	# 
-	ld (hl),000h		;1510	36 00 	6 . 
-	inc hl			;1512	23 	# 
-	ld (hl),050h		;1513	36 50 	6 P 
-	inc hl			;1515	23 	# 
-	ld (hl),a			;1516	77 	w 
-	inc hl			;1517	23 	# 
-	ld (hl),007h		;1518	36 07 	6 . 
-	inc hl			;151a	23 	# 
-	ld (hl),a			;151b	77 	w 
-	inc hl			;151c	23 	# 
-	ld (hl),a			;151d	77 	w 
-	inc hl			;151e	23 	# 
-	ld (hl),002h		;151f	36 02 	6 . 
-	inc hl			;1521	23 	# 
-	ld (hl),a			;1522	77 	w 
+	inc hl			;1508	23 	
+	ld (hl),000h	;1509	36 00
+	inc hl			;150b	23
+	ld (hl),e		;150c
+	inc hl			;150d	23
+	ld (hl),d		;150e	72
+	inc hl			;150f	23
+	ld (hl),000h	;1510	36 00
+	inc hl			;1512	23
+	ld (hl),050h	;1513	36 50
+	inc hl			;1515	23
+	ld (hl),a		;1516	77
+	inc hl			;1517	23
+	ld (hl),007h	;1518	36 07
+	inc hl			;151a	23
+	ld (hl),a		;151b	77
+	inc hl			;151c	23
+	ld (hl),a		;151d	77
+	inc hl			;151e	23
+	ld (hl),002h	;151f	36 02
+	inc hl			;1521	23
+	ld (hl),a		;1522	77
 	ret			;1523	c9 	. 
 
 sub_1524h:
@@ -3991,26 +3992,31 @@ l1547h:
 	ld b,005h		;1554	06 05 	. . 
 l1556h:
 	push bc			;1556	c5 	. 
-	ld hl,l1534h		;1557	21 34 15 	! 4 . 
-	push hl			;155a	e5 	. 
-	ld c,(ix + 0)		;155b	dd 4e 00 	. N . 
-	bit 4,c		;155e	cb 61 	. a 
-	ret z			;1560	c8 	. 
-	bit 5,c		;1561	cb 69 	. i 
-	call nz,sub_1c26h		;1563	c4 26 1c 	. & . 
-	bit 3,c		;1566	cb 59 	. Y 
-	call nz,sub_1c3dh		;1568	c4 3d 1c 	. = . 
-	bit 0,c		;156b	cb 41 	. A 
-	ld a,(ix + 1)		;156d	dd 7e 01 	. ~ . 
-	jp nz,l186eh		;1570	c2 6e 18 	. n . 
-	bit 2,c		;1573	cb 51 	. Q 
-	jp nz,l168ah		;1575	c2 8a 16 	. . . 
-	ld hl,l162fh		;1578	21 2f 16 	! / . 
+	ld hl,l1534h	;1557	21 34 15 	! 4 . 
+	push hl			;155a	e5
+    ;
+	ld c,(ix + 0)	;155b	dd 4e 00 Guy is alive?
+	bit 4,c		    ;155e	cb 61
+	ret z			;1560	c8 Guy is falling, get out
+    ;
+	bit 5,c		        ;1561	cb 69 Can we add more guys behind, on the right?
+	call nz,sub_1c26h	;1563	c4 26 1c
+	bit 3,c		        ;1566	cb 59 Can we add more guys behind, on the left?
+	call nz,sub_1c3dh	;1568	c4 3d 1c 	. = . 
+	bit 0,c		        ;156b	cb 41 Is it a gripper (0) of a knifer (1)?
+	ld a,(ix + 1)		;156d	dd 7e 01
+	jp nz,l186eh		;1570	c2 6e 18 Jump if he's a knifer
+    ; He's a gripper or a kid
+	bit 2,c		        ;1573	Is he a kid?
+	jp nz,l168ah		;1575	Jump if he's a kind
+    ; He's a gripper
+	ld hl,l162fh		;1578	21 2f 16
 	push hl			;157b	e5 	. 
 	ld hl,THOMAS_GLOBAL_STATE	;157c	21 00 e7
-	bit 1,(hl)		;157f	cb 4e Check if Thomas is fighting
-	jp nz,l1be2h		;1581	c2 e2 1b Get out if he's not fighting
-	cp 001h		;1584	fe 01 	. . 
+	bit 1,(hl)		            ;157f	cb 4e Check if Thomas is fighting
+	jp nz,l1be2h		        ;1581	c2 e2 1b Get out if he's not fighting
+    ; Thomas is fighting
+	cp 001h		    ;1584	fe 01 Here A comes from ld a,(ix + 1) @ 156d
 	jp z,l1baah		;1586	ca aa 1b 	. . . 
 	jr c,l15d2h		;1589	38 47 	8 G 
 	cp 009h		;158b	fe 09 	. . 
@@ -4021,7 +4027,7 @@ l1592h:
 	ld de,0ef00h		;1595	11 00 ef 	. . . 
 	add hl,de			;1598	19 	. 
 	ret nc			;1599	d0 	. 
-	call sub_1b7ah		;159a	cd 7a 1b 	. z . 
+	call REMOVE_ENEMY		;159a	cd 7a 1b 	. z . 
 	ld a,c			;159d	79 	y 
 	and 028h		;159e	e6 28 	. ( 
 	cpl			;15a0	2f 	/ 
@@ -4170,7 +4176,7 @@ l168ah:
 	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;16ad	2a 0c e8 	* . . 
 	ld de,0e100h		;16b0	11 00 e1 	. . . 
 	add hl,de			;16b3	19 	. 
-	jp c,sub_1b7ah		;16b4	da 7a 1b 	. z . 
+	jp c,REMOVE_ENEMY		;16b4	da 7a 1b 	. z . 
 	bit 0,(ix + 11)		;16b7	dd cb 0b 46 	. . . F 
 	jr nz,l16e3h		;16bb	20 26 	  & 
 	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;16bd	2a 0c e8 	* . . 
@@ -4688,7 +4694,7 @@ l1a7eh:
 l1a80h:
 	and 0c0h		;1a80	e6 c0 	. . 
     ; Bit 4: enemy is alive
-	bit 4,(ix + ENEMY_LOOKAT_IDX)	;1a82	dd cb 00 66
+	bit 4,(ix + ENEMY_PROPS_IDX)	;1a82	dd cb 00 66
 	ret z			;1a86	c8 	. 
 	ex de,hl			;1a87	eb 	. 
 	call GET_ENEMY_FALLING_HEIGHT_IN_HL		;1a88	cd 9e 1c
@@ -4795,7 +4801,7 @@ CHECK_VAL_HL_PLUS_B_0XFF:
 
 l1b20h:
 	call sub_1208h		;1b20	cd 08 12 	. . . 
-	jr nz,sub_1b7ah		;1b23	20 55 	  U 
+	jr nz,REMOVE_ENEMY		;1b23	20 55 	  U 
 	ld a,(0e81ch)		;1b25	3a 1c e8 	: . . 
 	and a			;1b28	a7 	. 
 	ld a,002h		;1b29	3e 02 	> . 
@@ -4817,37 +4823,43 @@ l1b37h:
 	ld (ix + 15),a		;1b49	dd 77 0f 	. w . 
 	ld (ix + 11),006h		;1b4c	dd 36 0b 06 	. 6 . . 
 	ld (ix + 14),005h		;1b50	dd 36 0e 05 	. 6 . . 
+
 sub_1b54h:
-	bit 2,(ix + 0)		;1b54	dd cb 00 56 	. . . V 
-	ld hl,ACTIVE_GRIPPERS_LEFT		;1b58	21 1b e7 	! . . 
-	jr z,l1b5fh		;1b5b	28 02 	( . 
+	bit 2,(ix + 0)		            ;1b54	dd cb 00 56 Check if guy is a kid
+	ld hl,ACTIVE_GRIPPERS_LEFT		;1b58	21 1b e7
+	jr z,l1b5fh		                ;1b5b	28 02 Jump if he's not a kind
 	inc hl			;1b5d	23
 	inc hl			;1b5e	23 Now HL = ACTIVE_GRIPPERS_RIGHT
 l1b5fh:
-	bit 6,(ix + 0)		;1b5f	dd cb 00 76 	. . . v 
-	ld de,0ff80h		;1b63	11 80 ff 	. . . 
-	jr nz,l1b6ch		;1b66	20 04 	  . 
-	inc hl			;1b68	23 	# 
-	ld de,0x80		;1b69	11 80 00 	. . . 
+    ; HL = ACTIVE_GRIPPERS (left or right)
+	bit 6,(ix + 0)		;1b5f	dd cb 00 76 Check the moving direction
+	ld de, -128		    ;1b63	11 80 ff
+	jr nz,l1b6ch		;1b66	20 04 Jump if moving to the left
+	inc hl			    ;1b68	23
+	ld de, +128		    ;1b69	11 80 00
 l1b6ch:
-	inc (hl)			;1b6c	34 	4 
+	inc (hl)			;1b6c	34 	4
 	ld b,(hl)			;1b6d	46 	F 
-	ld hl,(0e712h)		;1b6e	2a 12 e7 	* . . 
+	ld hl,(THOMAS_POSITION)		;1b6e	2a 12 e7 	* . . 
 l1b71h:
 	add hl,de			;1b71	19 	. 
 	djnz l1b71h		;1b72	10 fd 	. . 
 	call SET_ENEMY_POS_FROM_HL		;1b74	cd 83 1c 	. . . 
 	jp l1be2h		;1b77	c3 e2 1b 	. . . 
-sub_1b7ah:
-	bit 1,(ix + 0)		;1b7a	dd cb 00 4e 	. . . N 
-	jr nz,l1b89h		;1b7e	20 09 	  . 
-	ld (ix + 0),000h	;1b80	dd 36 00 00 Guy is no longer active
-	ld hl,TBL_GUYS_LEN	;1b84	21 61 e2 Update table length
-	dec (hl)			;1b87	35 	5 
-	ret			;1b88	c9 	. 
+
+REMOVE_ENEMY:
+	bit 1,(ix + 0)		;1b7a	dd cb 00 4e Is enemy a boss?
+	jr nz,l1b89h		;1b7e	20 09 If so, mark it as inactive, but don't remove it from TBL_GUYS.
+	ld (ix + 0), 0  	;1b80	dd 36 00 00 Guy is no longer active
+	ld hl,TBL_GUYS_LEN	;1b84	21 61 e2 Decrease length of table
+	dec (hl)			;1b87	35
+	ret			        ;1b88	c9
 l1b89h:
-	res 4,(ix + 0)		;1b89	dd cb 00 a6 	. . . . 
-	ret			;1b8d	c9 	. 
+    ; Mark the guy as inactive, but don't remove from TBL_GUYS
+	res 4,(ix + 0)		;1b89	dd cb 00 a6
+	ret			        ;1b8d	c9
+
+
 sub_1b8eh:
 	add a,004h		;1b8e	c6 04 	. . 
 l1b90h:
@@ -4869,7 +4881,7 @@ l1baah:
 	call GET_ENEMY_REACTION_IN_HL		    ;1bb0	cd ac 1c
 	ld a,(hl)			;1bb3	7e 	~ 
 	and a			;1bb4	a7 	. 
-	jp m,sub_1b7ah		;1bb5	fa 7a 1b 	. z . 
+	jp m,REMOVE_ENEMY		;1bb5	fa 7a 1b 	. z . 
 	inc hl			;1bb8	23 	# 
 	ld (ix + ENEMY_FRAME_IDX),a		;1bb9	dd 77 06
 	ld a,(hl)			;1bbc
@@ -4908,7 +4920,7 @@ l1bf5h:
 	jp p,l1c08h		                ;1c01	f2 08 1c
 	ld (ix + ENEMY_FRAME_IDX), 3	;1c04	dd 36 06 03
 l1c08h:
-	ld de,(0e712h)		;1c08	ed 5b 12 e7 	. [ . . 
+	ld de,(THOMAS_POSITION)		;1c08	ed 5b 12 e7 	. [ . . 
 	ld a,e			;1c0c	7b 	{ 
 	and 0e0h		;1c0d	e6 e0 	. . 
 	ld e,a			;1c0f	5f 	_ 
@@ -4926,7 +4938,7 @@ l1c21h:
 	and a			;1c24	a7 	. 
 	ret			;1c25	c9 	. 
 sub_1c26h:
-	ld hl,(0e712h)		;1c26	2a 12 e7 	* . . 
+	ld hl,(THOMAS_POSITION)		;1c26	2a 12 e7 	* . . 
 	ld de,l1000h		;1c29	11 00 10 	. . . 
 	add hl,de			;1c2c	19 	. 
 	call GET_ENEMY_POS_IN_DE		;1c2d	cd 91 1c 	. . . 
@@ -4940,7 +4952,7 @@ sub_1c3dh:
 	call GET_ENEMY_POS_IN_HL		;1c3d	cd 8a 1c 	. . . 
 	ld de,l1000h		;1c40	11 00 10 	. . . 
 	add hl,de			;1c43	19 	. 
-	ld de,(0e712h)		;1c44	ed 5b 12 e7 	. [ . . 
+	ld de,(THOMAS_POSITION)		;1c44	ed 5b 12 e7 	. [ . . 
 	sbc hl,de		;1c48	ed 52 	. R 
 	ret c			;1c4a	d8 	. 
 	res 3,(ix + 0)		;1c4b	dd cb 00 9e 	. . . . 
@@ -4971,8 +4983,8 @@ GET_EFFECTIVE_PLAYER_MOVE:
 	ret			            ;1c6f	c9
 
 sub_1c70h:
-	call GET_ENEMY_POS_IN_HL		;1c70	cd 8a 1c 	. . . 
-	bit 6,c		;1c73	cb 71 	. q 
+	call GET_ENEMY_POS_IN_HL	;1c70	cd 8a 1c
+	bit 6,c		                ;1c73	cb 71 	. q 
 	jr z,l1c81h		;1c75	28 0a 	( . 
 l1c77h:
 	add hl,de			;1c77	19 	. 
@@ -5046,7 +5058,7 @@ sub_1cc4h:
 	and 010h		;1cea	e6 10 	. . 
 	jr nz,l1d5bh		;1cec	20 6d 	  m 
 l1ceeh:
-	ld de,(0e712h)		;1cee	ed 5b 12 e7 	. [ . . 
+	ld de,(THOMAS_POSITION)		;1cee	ed 5b 12 e7 	. [ . . 
 	sbc hl,de		;1cf2	ed 52 	. R 
 	jp c,l1d5bh		;1cf4	da 5b 1d 	. [ . 
 	ld de,0ec00h		;1cf7	11 00 ec 	. . . 
@@ -5253,7 +5265,7 @@ l1e84h:
 	ret po			;1e90	e0 	. 
 	and 007h		;1e91	e6 07 	. . 
 	ld hl,(0e2d3h)		;1e93	2a d3 e2 	* . . 
-	ld de,(0e712h)		;1e96	ed 5b 12 e7 	. [ . . 
+	ld de,(THOMAS_POSITION)		;1e96	ed 5b 12 e7 	. [ . . 
 	sbc hl,de		;1e9a	ed 52 	. R 
 	bit 0,a		;1e9c	cb 47 	. G 
 	jr z,l1ea1h		;1e9e	28 01 	( . 
@@ -5282,21 +5294,22 @@ l1eb5h:
 	ld b,005h		;1ec6	06 05 	. . 
 	ld ix,TBL_GUYS		;1ec8	dd 21 62 e2 	. ! b . 
 l1ecch:
-	bit 0,(ix + 0)		;1ecc	dd cb 00 46 	. . . F 
-	jr nz,l1f03h		;1ed0	20 31 	  1 
-	ld hl,(0e712h)		;1ed2	2a 12 e7 	* . . 
-	ld e,(ix + 2)		;1ed5	dd 5e 02 	. ^ . 
-	ld d,(ix + 3)		;1ed8	dd 56 03 	. V . 
-	bit 0,c		;1edb	cb 41 	. A 
-	jr z,l1eebh		;1edd	28 0c 	( . 
-	bit 6,(ix + 0)		;1edf	dd cb 00 76 	. . . v 
-	jr z,l1f03h		;1ee3	28 1e 	( . 
-	sbc hl,de		;1ee5	ed 52 	. R 
+	bit 0,(ix + 0)		;1ecc	dd cb 00 46 Check if it's a gripper (0) of a knifer (1)
+	jr nz,l1f03h		;1ed0	20 31 Jump if it's a knifer
+    ; It's a gripper
+	ld hl,(THOMAS_POSITION)		;1ed2	2a 12 e7
+	ld e,(ix + 2)		;1ed5	dd 5e 02
+	ld d,(ix + 3)		;1ed8	dd 56 03
+	bit 0,c		        ;1edb	cb 41
+	jr z,l1eebh		    ;1edd	28 0c
+	bit 6,(ix + 0)		;1edf	dd cb 00 76 Check moving direction (0: to the right, 1: to the left)
+	jr z,l1f03h		    ;1ee3	28 1e Jump if he moves to the right
+	sbc hl,de		    ;1ee5	ed 52
 l1ee7h:
-	jr c,l1f03h		;1ee7	38 1a 	8 . 
-	jr l1ef5h		;1ee9	18 0a 	. . 
+	jr c,l1f03h		    ;1ee7	38 1a
+	jr l1ef5h		    ;1ee9	18 0a
 l1eebh:
-	bit 6,(ix + 0)		;1eeb	dd cb 00 76 	. . . v 
+	bit 6,(ix + 0)		;1eeb	dd cb 00 76 Check moving direction (0: to the right, 1: to the left)
 	jr nz,l1f03h		;1eef	20 12 	  . 
 	sbc hl,de		;1ef1	ed 52 	. R 
 	jr nc,l1f03h		;1ef3	30 0e 	0 . 
@@ -5445,7 +5458,7 @@ l1ff9h:
 	ld hl,TBL_ENEMIES		;2002	21 d8 e2
 	res 4,(hl)		        ;2005	cb a6
     ; ...its replica.
-	ld hl,TBL_REPLICA + ENEMY_LOOKAT_IDX    ;2007	21 e8 e2
+	ld hl,TBL_REPLICA + ENEMY_PROPS_IDX    ;2007	21 e8 e2
 	res 4,(hl)		;200a	cb a6 	. . 
 	ret			;200c	c9 	. 
 l200dh:
@@ -5521,7 +5534,7 @@ sub_20a2h:
 	and 003h		;20a5	e6 03 	. . 
 	jr nz,l20adh		;20a7	20 04
     ; Reset bit 5 (enemy is being attacked)
-	res 5,(ix + ENEMY_LOOKAT_IDX)	;20a9	dd cb 00 ae
+	res 5,(ix + ENEMY_PROPS_IDX)	;20a9	dd cb 00 ae
 l20adh:
 	push hl			;20ad	e5 	. 
 	ld a,(ix + ENEMY_STATE_IDX)		;20ae	dd 7e 01
@@ -5531,7 +5544,7 @@ l20adh:
 	add hl,de			                ;20b8	19
 	ld hl,0e701h		                ;20b9	21 01 e7
     ; Bit 6: looking direction (0: left, 1: right)
-	bit 6,(ix + ENEMY_LOOKAT_IDX)		;20bc	dd cb 00 76
+	bit 6,(ix + ENEMY_PROPS_IDX)		;20bc	dd cb 00 76
 	jr z,l20cch		;20c0	28 0a 	( . 
 	jr c,l20c8h		;20c2	38 04 	8 . 
 	set 4,(hl)		;20c4	cb e6 	. . 
@@ -5551,7 +5564,7 @@ l20d7h:
 l20d9h:
 	pop hl			;20d9	e1 	. 
 	call sub_2d01h		;20da	cd 01 2d 	. . - 
-	ld a,(ix + ENEMY_LOOKAT_IDX)	;20dd	dd 7e 00
+	ld a,(ix + ENEMY_PROPS_IDX)	;20dd	dd 7e 00
 	jp l1a7eh		;20e0	c3 7e 1a 	. ~ . 
 sub_20e3h:
 	call sub_2109h		;20e3	cd 09 21 	. . ! 
@@ -5572,10 +5585,10 @@ l2100h:
 	call CHECK_VAL_HL_PLUS_B_0XFF		;2100	cd 18 1b
 	ret nc			                    ;2103	d0
     ; Bit 5: enemy is being attacked
-	set 5,(ix + ENEMY_LOOKAT_IDX)		;2104	dd cb 00 ee
+	set 5,(ix + ENEMY_PROPS_IDX)		;2104	dd cb 00 ee
 	ret			                        ;2108	c9
 sub_2109h:
-	ld a,(ix + ENEMY_LOOKAT_IDX)		;2109	dd 7e 00
+	ld a,(ix + ENEMY_PROPS_IDX)		;2109	dd 7e 00
     ;        7654 3219 
     ; 0x20 = 0010 0000
     ; Bit 5: set when eneny is being attacked
@@ -6071,7 +6084,7 @@ l2503h:
 	call sub_250fh		;2503	cd 0f 25 	. . % 
 	ld ix,TBL_REPLICA		    ;2506	dd 21 e8 e2
     ; Bit 4: enemy is alive
-	bit 4,(ix + ENEMY_LOOKAT_IDX)	;250a	dd cb 00 66
+	bit 4,(ix + ENEMY_PROPS_IDX)	;250a	dd cb 00 66
 	ret z			;250e	c8 Return if enemy is dead
 sub_250fh:
 	ld hl,024d2h		;250f	21 d2 24 	! . $ 
@@ -6082,7 +6095,7 @@ sub_250fh:
 	add hl,de			;251e	19 	. 
 	jp nc,l2589h		;251f	d2 89 25
     ; Bit 6: looking direction
-	bit 6,(ix + ENEMY_LOOKAT_IDX)		;2522	dd cb 00 76
+	bit 6,(ix + ENEMY_PROPS_IDX)		;2522	dd cb 00 76
 	ret nz			;2526	c0 Return if looking right
 	ld de,05f00h		;2527	11 00 5f 	. . _ 
 	ld l,(ix + ENEMY_POS_L_IDX)		;252a	dd 6e 02
@@ -6255,7 +6268,7 @@ l2698h:
 	ld l,(ix + ENEMY_POS_L_IDX)		;269d	dd 6e 02
 	ld h,(ix + ENEMY_POS_H_IDX)		;26a0	dd 66 03
 	ld (0e31dh),hl		;26a3	22 1d e3 	" . . 
-	ld a,(ix + ENEMY_LOOKAT_IDX)	;26a6	dd 7e 00
+	ld a,(ix + ENEMY_PROPS_IDX)	;26a6	dd 7e 00
     ;        7654 3210
     ; 0x50 = 0101 0000
     ; Look right, not being attacked, enemy is alive
@@ -6297,7 +6310,7 @@ l26edh:
 	ld h,(ix + ENEMY_POS_H_IDX)		;26f3	dd 66 03
 	ld de,l0280h		;26f6	11 80 02 	. . . 
     ; Bit 6: looking direction
-	bit 6,(ix + ENEMY_LOOKAT_IDX)		;26f9	dd cb 00 76
+	bit 6,(ix + ENEMY_PROPS_IDX)		;26f9	dd cb 00 76
 	jr nz,l270ch		;26fd	20 0d
     ; Do this is looking left
 	add hl,de			;26ff	19 	. 
@@ -6323,7 +6336,7 @@ l270eh:
 	call sub_2cd4h		;2724	cd d4 2c 	. . , 
 	jp z,l2080h		;2727	ca 80 20
     ; Bit 6: looking direction
-	bit 6,(ix + ENEMY_LOOKAT_IDX)		;272a	dd cb 00 76 	. . . v 
+	bit 6,(ix + ENEMY_PROPS_IDX)		;272a	dd cb 00 76 	. . . v 
 	jp z,l2488h		;272e	ca 88 24 	. . $ 
 	ld de,0a100h		;2731	11 00 a1 	. . . 
 	jp l2071h		;2734	c3 71 20
@@ -6339,13 +6352,13 @@ l2737h:
 	jp p,l2752h		;274b	f2 52 27 	. R ' 
 	ld (ix + ENEMY_FRAME_IDX), 3	;274e	dd 36 06 03
 l2752h:
-	ld hl,(0e712h)		;2752	2a 12 e7 	* . . 
+	ld hl,(THOMAS_POSITION)		;2752	2a 12 e7 	* . . 
 	ld e,(ix + ENEMY_REACTION_IDX)		;2755	dd 5e 0c
 	ld d,(ix + ENEMY_REACTION_IDX + 1)	;2758	dd 56 0d
 	sbc hl,de		;275b	ed 52 	. R 
 	ex de,hl			;275d	eb
     ; Bit 6: looking direction
-	bit 6,(ix + ENEMY_LOOKAT_IDX)		;275e	dd cb 00 76 	. . . v 
+	bit 6,(ix + ENEMY_PROPS_IDX)		;275e	dd cb 00 76 	. . . v 
 	jr nz,l2771h		;2762	20 0d 	  . 
 	ld hl,(0e106h)		;2764	2a 06 e1 	* . . 
 	sbc hl,de		;2767	ed 52 	. R 
@@ -6394,7 +6407,7 @@ l27b0h:
 	ld hl,l018bh		;27ce	21 8b 01 	! . . 
 	ld (0e2f8h),hl		;27d1	22 f8 e2
     ; Set enemy is dead
-	ld (ix + ENEMY_LOOKAT_IDX), 0	;27d4	dd 36 00 00
+	ld (ix + ENEMY_PROPS_IDX), 0	;27d4	dd 36 00 00
 	ld hl,0e701h		;27d8	21 01 e7
 	res 4,(hl)		;27db	cb a6 	. . 
 	jr l283dh		;27dd	18 5e 	. ^ 
@@ -6402,7 +6415,7 @@ l27dfh:
     ; Set Thomas is frozen
 	ld hl,THOMAS_GLOBAL_STATE	;27df	21 00 e7
 	set 0,(hl)		;27e2	cb c6
-	ld a,(TBL_REPLICA + ENEMY_LOOKAT_IDX)		;27e4	3a e8 e2 	: . . 
+	ld a,(TBL_REPLICA + ENEMY_PROPS_IDX)		;27e4	3a e8 e2 	: . . 
     ; Check bit 4: enemy is alive
 	and 010h		;27e7	e6 10 	. . 
 	jr z,l284fh		;27e9	28 64 Get out if enemy is dead
@@ -6458,7 +6471,7 @@ l284fh:
 	jr c,l285ch		;2857	38 03 	8 . 
 	ld de,l02a0h		;2859	11 a0 02 	. . . 
 l285ch:
-	ld hl,(0e712h)		;285c	2a 12 e7
+	ld hl,(THOMAS_POSITION)		;285c	2a 12 e7
 	ld (0e2f4h),de		;285f	ed 53 f4 e2
 	sbc hl,de		    ;2863	ed 52
     ; It arrives here only when the replica appears
@@ -6469,7 +6482,7 @@ l285ch:
 	ld hl,05000h		;2868	21 00 50
 	ld (0e2ech),hl		;286b	22 ec e2
     ; 0x50 = enemy looks right and he's alive
-	ld (ix + ENEMY_LOOKAT_IDX  + 16), 0x50	;286e	dd 36 10 Replica appears
+	ld (ix + ENEMY_PROPS_IDX  + 16), 0x50	;286e	dd 36 10 Replica appears
 	ld (ix + FRAME_COUNTER_IDX + 16), 8		;2872	dd 36 17 08 	. 6 . . 
 	ld (ix + CURRENT_FRAME_IDX + 16), 30	;2876	dd 36 16 1e 	. 6 . . 
 	ld (ix + ENEMY_STATE_IDX + 16), 9		;287a	dd 36 11 09 	. 6 . .
@@ -6492,7 +6505,7 @@ l2893h:
 	ld hl,0e197h		;289a	21 97 e1 	! . . 
 	ld de,0e198h		;289d	11 98 e1 	. . . 
 	jr nc,l28aah		;28a0	30 08
-	ld a,(TBL_REPLICA + ENEMY_LOOKAT_IDX)	;28a2	3a e8 e2
+	ld a,(TBL_REPLICA + ENEMY_PROPS_IDX)	;28a2	3a e8 e2
     ; Check bit 4: enemy is alive
 	and 010h		;28a5	e6 10 	. . 
 	jr nz,l28aah		;28a7	20 01 	  . 
@@ -7233,7 +7246,7 @@ l2d91h:
 	add hl,de			;2da9	19 	. 
 l2daah:
 	push hl			;2daa	e5 	. 
-	ld de,(0e712h)		;2dab	ed 5b 12 e7 	. [ . . 
+	ld de,(THOMAS_POSITION)		;2dab	ed 5b 12 e7 	. [ . . 
 	sbc hl,de		;2daf	ed 52 	. R 
 	ld (0e80ah),hl		;2db1	22 0a e8 	" . . 
 	jr c,l2ddch		;2db4	38 26 	8 & 
@@ -7249,7 +7262,7 @@ l2dbeh:
 l2dc5h:
 	push hl			;2dc5	e5 	. 
 	jr c,l2e1ah		;2dc6	38 52 	8 R 
-	ld de,(0e712h)		;2dc8	ed 5b 12 e7 	. [ . . 
+	ld de,(THOMAS_POSITION)		;2dc8	ed 5b 12 e7 	. [ . . 
 	sbc hl,de		;2dcc	ed 52 	. R 
 	ld (0e80ah),hl		;2dce	22 0a e8 	" . . 
 	jr nc,l2ddch		;2dd1	30 09 	0 . 
@@ -7460,7 +7473,7 @@ l2f0bh:
 	ld c,(hl)			;2f1f	4e 	N 
 	inc hl			;2f20	23 	# 
 	push hl			;2f21	e5 	. 
-	ld hl,(0e712h)		;2f22	2a 12 e7 	* . . 
+	ld hl,(THOMAS_POSITION)		;2f22	2a 12 e7 	* . . 
 	ld a,l			;2f25	7d 	} 
 	and 0e0h		;2f26	e6 e0 	. . 
 	ld l,a			;2f28	6f 	o 
@@ -7759,7 +7772,7 @@ l314ch:
 	ld de,0013h		;314c	11 13 00 	. . . 
 	add iy,de		;314f	fd 19 	. . 
 	djnz l311ch		;3151	10 c9 	. . 
-	ret			;3153	c9 	. 
+	ret			;3153	c9 	.  Why a RET here? Debug?
 	ld de,(0e376h)		;3154	ed 5b 76 e3 	. [ v . 
 	call sub_1c70h		;3158	cd 70 1c 	. p . 
 	jr l316dh		;315b	18 10 	. . 
@@ -8156,7 +8169,7 @@ sub_34ddh:
 	ld l,(ix + ENEMY_POS_L_IDX)		;34e0	dd 6e 02
 	ld h,(ix + ENEMY_POS_H_IDX)		;34e3	dd 66 03
 	ld de,00200h		;34e6	11 00 02 	. . . 
-	ld a,(ix + ENEMY_LOOKAT_IDX)		;34e9	dd 7e 00
+	ld a,(ix + ENEMY_PROPS_IDX)		;34e9	dd 7e 00
     ; Check bit 6: looking direction
 	and 040h		;34ec	e6 40 	. @ 
 	jr z,l34f3h		;34ee	28 03 	( . 
@@ -8238,7 +8251,7 @@ l356bh:
 	ret			;3594	c9 	. 
 sub_3595h:
 	ld a,(0e360h)		;3595	3a 60 e3 	: ` . 
-	ld de,(0e712h)		;3598	ed 5b 12 e7 	. [ . . 
+	ld de,(THOMAS_POSITION)		;3598	ed 5b 12 e7 	. [ . . 
 	ld hl,(0e361h)		;359c	2a 61 e3 	* a . 
 	sbc hl,de		;359f	ed 52 	. R 
 	jr c,l35aeh		;35a1	38 0b 	8 . 
@@ -8338,7 +8351,7 @@ l3637h:
 l363dh:
 	add a,d			;363d	82 	. 
 	ld d,a			;363e	57 	W 
-	ld a,(THOMAS_POSITION)		;363f	3a 13 e7 	: . . 
+	ld a,(THOMAS_POSITION_H)		;363f	3a 13 e7 	: . . 
 	add a,d			;3642	82 	. 
 	ld d,a			;3643	57 	W 
 	set 0,d		    ;3644	cb c2 	. . 
@@ -8544,7 +8557,7 @@ sub_37bfh:
 	sbc hl,de		;37db	ed 52 	. R 
 	ret			;37dd	c9 	. 
 sub_37deh:
-	ld hl,(0e712h)		;37de	2a 12 e7 	* . . 
+	ld hl,(THOMAS_POSITION)		;37de	2a 12 e7 	* . . 
 	ld de,08000h		;37e1	11 00 80 	. . . 
 	add hl,de			;37e4	19 	. 
 	jr c,l37f1h		;37e5	38 0a 	8 . 
@@ -8586,7 +8599,7 @@ l3813h:
 	inc hl			;381c	23 	# 
 	ld d,(hl)			;381d	56 	V 
 	push hl			;381e	e5 	. 
-	ld bc,(0e712h)		;381f	ed 4b 12 e7 	. K . . 
+	ld bc,(THOMAS_POSITION)		;381f	ed 4b 12 e7 	. K . . 
 	ld hl,sub_0f3fh+1		;3823	21 40 0f 	! @ . 
 	add hl,bc			;3826	09 	. 
 	sbc hl,de		;3827	ed 52 	. R 
@@ -8608,7 +8621,7 @@ l3847h:
 	jr nz,l3847h		;384d	20 f8 	  . 
 	ld (iy+002h),e		;384f	fd 73 02 	. s . 
 	ld (iy+003h),d		;3852	fd 72 03 	. r . 
-	ld hl,(0e712h)		;3855	2a 12 e7 	* . . 
+	ld hl,(THOMAS_POSITION)		;3855	2a 12 e7 	* . . 
 	ld a,010h		;3858	3e 10 	> . 
 	sbc hl,de		;385a	ed 52 	. R 
 	jr c,l3860h		;385c	38 02 	8 . 
@@ -8738,7 +8751,7 @@ l390fh:
 l3921h:
 	ld (ix + 0),e		;3921	dd 73 00 	. s . 
 	ld (ix + 1),d		;3924	dd 72 01 	. r . 
-	ld hl,(0e712h)		;3927	2a 12 e7 	* . . 
+	ld hl,(THOMAS_POSITION)		;3927	2a 12 e7 	* . . 
 	sbc hl,de		;392a	ed 52 	. R 
 	jr c,l3938h		;392c	38 0a 	8 . 
 	ld de,0f000h		;392e	11 00 f0 	. . . 
@@ -8798,7 +8811,7 @@ l3970h:
 l3981h:
 	ld (ix + 0),e		;3981	dd 73 00 	. s . 
 	ld (ix + 1),d		;3984	dd 72 01 	. r . 
-	ld hl,(0e712h)		;3987	2a 12 e7 	* . . 
+	ld hl,(THOMAS_POSITION)		;3987	2a 12 e7 	* . . 
 	sbc hl,de		;398a	ed 52 	. R 
 	jr c,l3998h		;398c	38 0a 	8 . 
 	ld de,0f000h		;398e	11 00 f0 	. . . 
@@ -8919,7 +8932,7 @@ l3a70h:
 	ld (ix + 2),e		;3a70	dd 73 02 	. s . 
 	ld (ix + 3),d		;3a73	dd 72 03 	. r . 
 	push de			;3a76	d5 	. 
-	ld hl,(0e712h)		;3a77	2a 12 e7 	* . . 
+	ld hl,(THOMAS_POSITION)		;3a77	2a 12 e7 	* . . 
 	sbc hl,de		;3a7a	ed 52 	. R 
 	ld de,l1100h		;3a7c	11 00 11 	. . . 
 	jr c,l3a89h		;3a7f	38 08 	8 . 
@@ -9301,7 +9314,7 @@ l3d6bh:
 	and 00ch		;3d75	e6 0c 	. . 
 	or b			;3d77	b0 	. 
 	ld (iy+000h),a		;3d78	fd 77 00 	. w . 
-	ld hl,(0e712h)		;3d7b	2a 12 e7 	* . . 
+	ld hl,(THOMAS_POSITION)		;3d7b	2a 12 e7 	* . . 
 	ld de,l1080h		;3d7e	11 80 10 	. . . 
 	bit 0,c		;3d81	cb 41 	. A 
 	jr z,l3d89h		;3d83	28 04 	( . 
@@ -9554,7 +9567,7 @@ l3eabh:
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 sub_4000h:
-	ld hl,(0e712h)
+	ld hl,(THOMAS_POSITION)
 	ld de,(0e707h)
 	ld a,(DRAGONS_LEVEL)
 	and 001h
@@ -9577,7 +9590,7 @@ l4017h:
 	ld a,090h
 	call sub_0dfeh
 sub_402ch:
-	ld hl,(0e712h)
+	ld hl,(THOMAS_POSITION)
 	ld a,(NUM_GRIPPING)
 	and a	
 	jp nz,l40adh
@@ -9648,7 +9661,7 @@ l40a6h:
 	call sub_5765h
 l40a9h:
 	pop hl	
-	ld (0e712h),hl
+	ld (THOMAS_POSITION),hl
 l40adh:
 	xor a	
 	add hl,hl	
@@ -9959,11 +9972,11 @@ l42d3h:
 	dec a	
 	ld (0e705h),a
 	ret nz	
-	ld hl,(0e712h)
+	ld hl,(THOMAS_POSITION)
 	ld (0e707h),hl
 	ret	
 l42dfh:
-	ld hl,(0e712h)
+	ld hl,(THOMAS_POSITION)
 	ld de,0db00h
 	sbc hl,de
 	jr z,l42bfh
@@ -9981,11 +9994,11 @@ l42f9h:
 l42fdh:
 	res 5,(hl)
 l42ffh:
-	ld hl,(0e712h)
+	ld hl,(THOMAS_POSITION)
 	ld (0e707h),hl
 	jr l42bfh
 l4307h:
-	ld hl,(0e712h)
+	ld hl,(THOMAS_POSITION)
 	ld de,00400h
 	sbc hl,de
 	jr z,l42bfh
@@ -10003,7 +10016,7 @@ l431fh:
 	ld a,005h
 	ld (0e703h),a
 l432bh:
-	ld hl,(0e712h)
+	ld hl,(THOMAS_POSITION)
 	ld (0e707h),hl
 l4331h:
 	ld hl,0e702h
@@ -10034,7 +10047,7 @@ l4352h:
 	ld a,007h
 l435bh:
 	ld (hl),a	
-	ld hl,(0e712h)
+	ld hl,(THOMAS_POSITION)
 	ld (0e707h),hl
 	jp l4240h
 l4365h:
@@ -10052,7 +10065,7 @@ l4377h:
 	ld (THOMAS_FRAME),a
 	ld a,0ffh
 	ld (THOMAS_HEIGHT_COUNTER),a
-	ld hl,(0e712h)
+	ld hl,(THOMAS_POSITION)
 	ld (0e707h),hl
 	ret	
 l4387h:
@@ -10062,7 +10075,7 @@ l4387h:
 	cp 003h
 	ret z	
 	ld (hl),002h
-	ld hl,(0e712h)
+	ld hl,(THOMAS_POSITION)
 	ld (0e707h),hl
 	ld a,002h
 	ld (0e703h),a
@@ -10084,7 +10097,7 @@ l43b5h:
 	and 0fch
 	ld (0e701h),a
 l43bdh:
-	ld hl,(0e712h)
+	ld hl,(THOMAS_POSITION)
 	ld de,(0e707h)
 	ld a,(THOMAS_GLOBAL_STATE)
 	and 020h    ; Check if Thomas is fighting
@@ -10192,7 +10205,7 @@ l446eh:
 	ld (THOMAS_FRAME),a
 	ld hl,l5000h
 	ld (0e710h),hl
-	ld hl,(0e712h)
+	ld hl,(THOMAS_POSITION)
 	ld (0e707h),hl
 	ret	
 l4486h:
@@ -10291,7 +10304,7 @@ l4521h:
 	ld hl,(0e710h)
 	sbc hl,de
 	ld (0e710h),hl
-	ld hl,(0e712h)
+	ld hl,(THOMAS_POSITION)
 	ld de,(0e70ch)
 	ld a,(THOMAS_GLOBAL_STATE)
 	and 020h    ; Check if Thomas is fighting
@@ -10301,7 +10314,7 @@ l4521h:
 l4546h:
 	add hl,de	
 l4547h:
-	ld (0e712h),hl
+	ld (THOMAS_POSITION),hl
 	ret	
 l454bh:
 	ld a, GAME_STATE_LIFE_LOST
@@ -10323,7 +10336,7 @@ l4564h:
 	ld (THOMAS_FRAME),a
 l4567h:
 	call 2e91h
-	ld hl,(0e712h)
+	ld hl,(THOMAS_POSITION)
 	ld (0e707h),hl
 	ld a,(0e701h)
 	and 0fch
@@ -10359,7 +10372,7 @@ l459fh:
 	ld de,000ch
 	ld bc,0012h
 	jr nz,l45dah
-	ld hl,(0e712h)
+	ld hl,(THOMAS_POSITION)
 	ld de,(ENEMY_POS)
 	sbc hl,de
 	ld hl,0e701h
@@ -10444,7 +10457,7 @@ l4658h:
 	ld (0e702h),a
 	ld hl,0x80
 	ld (0e70eh),hl
-	ld hl,(0e712h)
+	ld hl,(THOMAS_POSITION)
 	ld (0e707h),hl
 	ld a,(0e701h)
 	and 0fch
@@ -10490,7 +10503,7 @@ l46a0h:
 	dec hl	
 	dec (hl)	
 	jr z,l46eeh
-	ld hl,(0e712h)
+	ld hl,(THOMAS_POSITION)
 	ld de,0x0100
 	ld a,(0e101h)
 	and a	
@@ -10500,7 +10513,7 @@ l46a0h:
 l46c9h:
 	sbc hl,de
 l46cbh:
-	ld (0e712h),hl
+	ld (THOMAS_POSITION),hl
 	ld hl,(0e710h)
 	ld de,0600h
 	add hl,de	
@@ -10534,7 +10547,7 @@ l4700h:
 	ret	
 sub_4704h:
 	ld hl,(0e102h)
-	ld de,(0e712h)
+	ld de,(THOMAS_POSITION)
 	call sub_5903h
 	cp 004h
 	jr z,l4784h
@@ -10575,7 +10588,7 @@ l4749h:
 	ld a, GAME_STATE_GO_UPSTAIRS_OR_SILVIA_RESCUED
 	ld (GAME_STATE),a
 	ex de,hl	
-	ld hl,(0e712h)
+	ld hl,(THOMAS_POSITION)
 	ld a,(0e101h)
 	and a	
 	jr z,l4766h
@@ -10583,7 +10596,7 @@ l4749h:
 	ld de,0x0100
 l4766h:
 	add hl,de	
-	ld (0e712h),hl
+	ld (THOMAS_POSITION),hl
     ; Set Thomas is not fighting
 	ld hl,THOMAS_GLOBAL_STATE
 	set 1,(hl)
@@ -10754,7 +10767,7 @@ l487eh:
 	ld a,09ch
 	ld (0e705h),a
 	ld hl,030a0h
-	ld (0e712h),hl
+	ld (THOMAS_POSITION),hl
 	ld hl,l5c00h
 	ld (0e710h),hl
 	ld (0e344h),hl
@@ -10779,7 +10792,7 @@ iterate_guys_intro:
 	ld (ix + ENEMY_BOOMERANG_TYPE_IDX),b
 
     ; 0x50: look right, not being attacked, enemy is alive
-	ld (ix + ENEMY_LOOKAT_IDX),c ; Set to 0x50 or 0x10 ; 48e5
+	ld (ix + ENEMY_PROPS_IDX),c ; Set to 0x50 or 0x10 ; 48e5
 
     ; Set position to HL = 3840
 	ld (ix + ENEMY_POS_L_IDX),l
@@ -11211,7 +11224,7 @@ l4dbch:
 	ld (0e703h),a
 	jr l4e12h
 	call l431fh
-	ld hl,(0e712h)
+	ld hl,(THOMAS_POSITION)
 	ld de,0ffe5h
 	ld a,(0e701h)
 	and 040h
@@ -11221,9 +11234,9 @@ l4dbch:
 l4e0dh:
 	sbc hl,de
 l4e0fh:
-	ld (0e712h),hl
+	ld (THOMAS_POSITION),hl
 l4e12h:
-	ld hl,(0e712h)
+	ld hl,(THOMAS_POSITION)
 	xor a	
 	add hl,hl	
 	rla	
@@ -11290,12 +11303,13 @@ l4e76h:
 	call 17dfh
 	jr l4e68h
 	ld hl,TBL_GUYS_ENTRY_4 ;4e7f
-	ld de,0010h
+	ld de, 16 ; Length of each entry in TBL_GUYS
 	ld b,003h
 l4e87h:
-	set 6,(hl)
-	add hl,de	
+	set 6,(hl) ; Set moving direction 1 (left)
+	add hl,de ; Next entry
 	djnz l4e87h
+
 	ld ix,0e2c2h
 	call sub_4ed7h
 	ld ix,TBL_GUYS_ENTRY_5
@@ -11908,7 +11922,7 @@ l53d9h:
 	ld (0e710h),hl
 	ld (0e344h),hl
 	ld hl,2700h
-	ld (0e712h),hl
+	ld (THOMAS_POSITION),hl
 	ld hl,1a00h
 	ld (0e342h),hl
 l53ebh:
