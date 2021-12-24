@@ -5186,12 +5186,13 @@ l1dceh:
 	pop de			;1dd1	d1 	. 
 	pop hl			;1dd2	e1 	. 
 	ret			;1dd3	c9 	. 
+
 sub_1dd4h:
 	push hl			;1dd4	e5 	. 
 	push de			;1dd5	d5 	. 
 	ld hl,(TIME)		;1dd6	2a 03 e0 	* . . 
-	ld de,0fccdh		;1dd9	11 cd fc 	. . . 
-	add hl,de			;1ddc	19 	. 
+	ld de, -819		;1dd9	11 cd fc 	. . . 
+	add hl,de		;1ddc	19 	HL = TIME - -819
 	ld a,092h		;1ddd	3e 92 	> . 
 	jr c,l1de3h		;1ddf	38 02 	8 . 
 	ld a,09ah		;1de1	3e 9a 	> . 
@@ -5200,6 +5201,7 @@ l1de3h:
 	pop de			;1de6	d1 	. 
 	pop hl			;1de7	e1 	. 
 	ret			;1de8	c9 	. 
+
 sub_1de9h:
 	ld l,(ix + 12)		;1de9	dd 6e 0c 	. n . 
 	ld h,(ix + 13)		;1dec	dd 66 0d 	. f . 
