@@ -1193,7 +1193,7 @@ sub_04e5h:
 	ld a,(PLAYER_TURN)	;04eb	3a 02 e0
 	and 001h		    ;04ee	e6 01 Check number of players
 	inc a			    ;04f0	3c Increment so A = number of players
-	call sub_1108h		;04f1	cd 08 11
+	call PRINT_NUMBER		;04f1	cd 08 11
 	call WRITE_TEXT		;04f4	cd 1c 11
 	call sub_0556h		;04f7	cd 56 05
 	jp WRITE_TEXT		;04fa	c3 1c 11
@@ -1220,7 +1220,7 @@ l0559h:
 	and 007h		;0559	e6 07 	. . 
 sub_055bh:
 	inc a			;055b	3c 	< 
-	jp sub_1108h		;055c	c3 08 11 	. . . 
+	jp PRINT_NUMBER		;055c	c3 08 11 	. . . 
 
 sub_055fh:
 	ld a,(STEP_COUNTER)		;055f	3a 83 e8 	: . . 
@@ -3253,11 +3253,11 @@ l10bfh:
 l10c1h:
 	ld a,(hl)			;10c1	7e 	~ 
 	dec hl			;10c2	2b 	+ 
-	call sub_1108h		;10c3	cd 08 11 	. . . 
+	call PRINT_NUMBER		;10c3	cd 08 11 	. . . 
 	call sub_10fdh		;10c6	cd fd 10 	. . . 
 	call sub_10fdh		;10c9	cd fd 10 	. . . 
 	xor a			;10cc	af 	. 
-	jr sub_1108h		;10cd	18 39 	. 9 
+	jr PRINT_NUMBER		;10cd	18 39 	. 9 
 sub_10cfh:
 	ld hl,0e982h		;10cf	21 82 e9 	! . . 
 	ld de,0d01fh		;10d2	11 1f d0 	. . . 
@@ -3294,10 +3294,14 @@ l1100h:
 	rrca			;1101	0f 	. 
 	rrca			;1102	0f 	. 
 	rrca			;1103	0f 	. 
-	call sub_1108h		;1104	cd 08 11 	. . . 
+	call PRINT_NUMBER		;1104	cd 08 11 	. . . 
 	pop af			;1107	f1 	. 
 
-sub_1108h:
+; Write a number on the screen
+; A: number
+; C: color
+; DE: position in the screen
+PRINT_NUMBER:
 	and 00fh		;1108	e6 0f 	. . 
 	add a,090h		;110a	c6 90 	. . 
 	daa			;110c	27 	' 
@@ -3307,6 +3311,7 @@ sub_1108h:
 ; Write a character on the screen
 ; A: character
 ; C: color
+; DE: position in the screen
 WRITE_CHAR_AT_SCREEN_DE:
 	ex de,hl			;1110	eb 	. 
 	ld (hl),a			;1111	77 A: character
@@ -12324,7 +12329,7 @@ l5634h:
 	inc hl	
 	and a	
 	push de	
-	call nz,sub_1108h
+	call nz,PRINT_NUMBER
 	pop de	
 	inc de	
 	ld b,002h
@@ -12417,7 +12422,7 @@ sub_56f7h:
 	cp 010h
 	jp nc,10ffh
 	inc de	
-	jp sub_1108h
+	jp PRINT_NUMBER
 sub_5700h:
 	call 1153h
 
@@ -18943,7 +18948,7 @@ l78e5h:
 	call WRITE_TEXT
 	call sub_056fh
 	ld de,0d41fh
-	call sub_1108h
+	call PRINT_NUMBER
 	call sub_058fh
 	ld b,c	
 	ld de,0d29ah
@@ -18992,7 +18997,7 @@ l7944h:
 	push hl	
 	inc de	
 	ld a,b	
-	call sub_1108h
+	call PRINT_NUMBER
 	call sub_7bc1h
 	ld hl,002ch
 	add hl,de	
@@ -19316,7 +19321,7 @@ l7bb6h:
 	xor a	
 	rrc l
 	rl a
-	call sub_1108h
+	call PRINT_NUMBER
 	djnz l7bb6h
 	ret	
 sub_7bc1h:
