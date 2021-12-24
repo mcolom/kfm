@@ -794,16 +794,16 @@ l026fh:
 	set 1,(hl)		;0276	cb ce 	. . 
 	call 0520dh		;0278	cd 0d 52 	. . R 
 	ld a,0e1h		;027b	3e e1 	> . 
-	call WAIT_A		;027d	cd 0f 57 	. . W 
+	call DELAY_A		;027d	cd 0f 57 	. . W 
 l0280h:
 	ld a,070h		;0280	3e 70 	> p 
-	call WAIT_A		;0282	cd 0f 57 	. . W 
+	call DELAY_A		;0282	cd 0f 57 	. . W 
 l0285h:
 	call CLEAR_TILEMAP		;0285	cd 57 11 	. W . 
 	xor a			;0288	af 	. 
 	ld (0e007h),a		;0289	32 07 e0 	2 . . 
 	ld (0e008h),a		;028c	32 08 e0 	2 . . 
-	call sub_0449h		;028f	cd 49 04 	. I . 
+	call ANIMATION_THOMAS_STARTS_LEVEL		;028f	cd 49 04 	. I . 
 	ld a, GAME_STATE_PLAY		;0292	3e 04
 	ld (GAME_STATE),a		;0294	32 00 e0 	2 . . 
 	ld a,024h		;0297	3e 24 	> $ 
@@ -904,7 +904,7 @@ time_decrement_done:
 	call sub_0250h		;0337	cd 50 02 	. P . 
 l033ah:
 	ld a,02dh		;033a	3e 2d 	> - 
-	call WAIT_A		;033c	cd 0f 57 	. . W 
+	call DELAY_A		;033c	cd 0f 57 	. . W 
 	ld hl,(TIME)		;033f	2a 03 e0 	* . . 
 	ld a,l			;0342	7d 	} 
 	or h			;0343	b4 	. 
@@ -917,7 +917,7 @@ l033ah:
 	jr z,l0360h		;0351	28 0d 	( . 
 	call sub_0dfeh		;0353	cd fe 0d 	. . . 
 	ld a,0a9h		;0356	3e a9 	> . 
-	call WAIT_A		;0358	cd 0f 57 	. . W 
+	call DELAY_A		;0358	cd 0f 57 	. . W 
 	jr l0360h		;035b	18 03 	. . 
 l035dh:
 	call 054f4h		;035d	cd f4 54 	. . T 
@@ -1087,13 +1087,13 @@ l0447h:
 	ld (hl),a			;0447	77
 	ret			        ;0448	c9
 
-sub_0449h:
+ANIMATION_THOMAS_STARTS_LEVEL:
 	ld (0e81ch),a		;0449	32 1c e8 	2 . . 
 	ld a, GAME_STATE_CLEAR		;044c	3e 01
 	ld (GAME_STATE),a		;044e	32 00 e0 	2 . . 
-	call sub_0644h		;0451	cd 44 06 	. D . 
-	ld a,(DRAGONS_LEVEL)		;0454	3a 80 e0 	: . . 
-	and 001h		;0457	e6 01 	. . 
+	call sub_0644h		    ;0451	cd 44 06 	. D . 
+	ld a,(DRAGONS_LEVEL)	;0454	3a 80 e0 	: . . 
+	and 1		            ;0457	e6 01 Check if it's level 1
 	ld hl,l0020h+1		;0459	21 21 00 	! ! . 
 	jr nz,l0461h		;045c	20 03 	  . 
 	ld hl,0bfe0h		;045e	21 e0 bf 	! . . 
@@ -1110,26 +1110,26 @@ l0461h:
 	ld a, GAME_STATE_WALK_LEVEL_STARTS		;0476	3e 02
 	ld (GAME_STATE),a		;0478	32 00 e0 	2 . . 
 	ld a,027h		;047b	3e 27 	> ' 
-	call WAIT_A		;047d	cd 0f 57 	. . W 
+	call DELAY_A		;047d	cd 0f 57 	. . W 
 	ld hl,0006h+1		;0480	21 07 00 	! . . 
 	ld (0e817h),hl		;0483	22 17 e8 	" . . 
 	ld hl,0e915h		;0486	21 15 e9 	! . . 
 	inc (hl)			;0489	34 	4 
 	ld hl,05aa1h		;048a	21 a1 5a 	! . Z 
-	call sub_04bfh		;048d	cd bf 04 	. . . 
+	call DRAW_FLOOR_HATCH		;048d	cd bf 04 	. . . 
 	ld a,00bh		;0490	3e 0b 	> . 
-	call WAIT_A		;0492	cd 0f 57 	. . W 
+	call DELAY_A		;0492	cd 0f 57 	. . W 
 	ld hl,0e915h		;0495	21 15 e9 	! . . 
 	inc (hl)			;0498	34 	4 
 	ld hl,05af0h		;0499	21 f0 5a 	! . Z 
-	call sub_04bfh		;049c	cd bf 04 	. . . 
+	call DRAW_FLOOR_HATCH		;049c	cd bf 04 	. . . 
 	ld a,(0e81ch)		;049f	3a 1c e8 	: . . 
 	and a			;04a2	a7 	. 
-    ld hl, 0x053f; z80asm wrote this as defb 021h, 03fh, 005h (bug z80dasm?)
+    ld hl, 0x053f; z80dasm wrote this as defb 021h, 03fh, 005h (bug z80dasm?)
 	
 	call z,WRITE_TEXT		;04a6	cc 1c 11 	. . . 
 	ld a,054h		;04a9	3e 54 	> T 
-	call WAIT_A		;04ab	cd 0f 57 	. . W 
+	call DELAY_A		;04ab	cd 0f 57 	. . W 
 	pop hl			;04ae	e1 	. 
 	ld (0e817h),hl		;04af	22 17 e8 	" . . 
 	call 05756h		;04b2	cd 56 57 	. V W 
@@ -1137,11 +1137,13 @@ l0461h:
 	ld (0e014h),hl		;04b8	22 14 e0 	" . . 
 	ld (0e016h),hl		;04bb	22 16 e0 	" . . 
 	ret			;04be	c9 	. 
-sub_04bfh:
-	ld a,(DRAGONS_LEVEL)		;04bf	3a 80 e0 	: . . 
-	and 007h		;04c2	e6 07 	. . 
-	ret z			;04c4	c8 	. 
-	and 001h		;04c5	e6 01 	. . 
+
+; Draws one step of the floor hatch closing
+DRAW_FLOOR_HATCH:
+	ld a,(DRAGONS_LEVEL)	;04bf	3a 80 e0
+	and 007h		        ;04c2	e6 07 Get level
+	ret z			        ;04c4	c8 Exit if it's the first level
+	and 001h		        ;04c5	e6 01 Write text if it's 2, 4: levels 3, and 5.
 	jp z,WRITE_TEXT		;04c7	ca 1c 11 	. . . 
 	call 05756h		;04ca	cd 56 57 	. V W 
 	ld a,(0e915h)		;04cd	3a 15 e9 	: . . 
@@ -1149,6 +1151,7 @@ sub_04bfh:
 	ret nz			;04d2	c0 	. 
 	ld hl,l04d9h		;04d3	21 d9 04 	! . . 
 	jp WRITE_TEXT		;04d6	c3 1c 11 	. . . 
+
 l04d9h:
 	defb 0fdh,067h,0d6h	;illegal sequence		;04d9	fd 67 d6 	. g . 
 	cp 092h		;04dc	fe 92 	. . 
@@ -3319,7 +3322,7 @@ l1134h:
 	cp 020h		;1143	fe 20 	.   
 	jr nz,l1134h		;1145	20 ed 	  . 
 	ld a,00bh		;1147	3e 0b 	> . 
-	call WAIT_A		;1149	cd 0f 57 	. . W 
+	call DELAY_A		;1149	cd 0f 57 	. . W 
 	jr l1134h		;114c	18 e6 	. . 
 l114eh:
 	ld e,(hl)			;114e	5e 	^ 
@@ -10905,7 +10908,7 @@ l4925h:
 	ld hl,4c0eh
 	call l1134h
 	ld a,0e1h
-	call WAIT_A
+	call DELAY_A
 	call sub_49aeh
 	ld hl,LARGE_KUNG_FU_MASTER_LOGO
 	call WRITE_TEXT
@@ -10936,7 +10939,7 @@ l496fh:
 	ld (DEMO_FAKE_INPUT_ADDR),de
 	call CLEAR_TILEMAP
 	ld a,001h
-	call sub_0449h
+	call ANIMATION_THOMAS_STARTS_LEVEL
 	di	
 	ld a, GAME_STATE_DEMO
 	ld (GAME_STATE),a
@@ -10952,10 +10955,10 @@ l4994h:
 	cp GAME_STATE_LIFE_LOST
 	jr nz,l4994h
 	ld a,038h
-	call WAIT_A
+	call DELAY_A
 	call sub_5620h
 	ld a,0e1h
-	call WAIT_A
+	call DELAY_A
 	jp l487eh
 sub_49aeh:
 	ld de,0d150h
@@ -12084,11 +12087,11 @@ l54feh:
 	call sub_56c3h
 l5505h:
 	ld a,0e1h
-	call WAIT_A
+	call DELAY_A
 l550ah:
 	ld a,038h
 l550ch:
-	call WAIT_A
+	call DELAY_A
 	xor a	
 l5510h:
 	ld (THOMAS_GLOBAL_STATE),a
@@ -12193,7 +12196,7 @@ l5596h:
 	ld a,038h
 	ld (INT_COUNTER + 1),a
 l55a8h:
-	call WAIT_1
+	call DELAY_1
 	ld a,(0e904h)
 	and 003h
 	jr nz,l561bh
@@ -12253,7 +12256,7 @@ l5600h:
 l560dh:
 	call sub_562ch
 	ld a,01ch
-	call WAIT_A
+	call DELAY_A
 	ld a,000h
 	call sub_0dfeh
 	ret	
@@ -12328,7 +12331,7 @@ l5675h:
 l56beh:
 	ld a,070h		;56be	3e 70 	> p 
 l56c0h:
-	jp WAIT_A
+	jp DELAY_A
 sub_56c3h:
 	ld hl,(HSCROLL_LOW_W)
 	ld de,4
@@ -12386,10 +12389,10 @@ CONFIG_GAME_STOP:
 	ld (HSCROLL_LOW_W),hl
 
 ; Write A=1 to INT_COUNTER+2 and wait until it's 0
-WAIT_1:
+DELAY_1:
 	ld a,001h
 ; Write A to INT_COUNTER+2 and wait until it's 0
-WAIT_A:
+DELAY_A:
 	push hl	
 	ld hl, INT_COUNTER + 2
 	ld (hl),a	
@@ -18538,7 +18541,7 @@ SERVICE_MODE:
 	ld a, GAME_STATE_SERVICE_MODE
 	ld (GAME_STATE),a
 	ei	
-	call WAIT_1
+	call DELAY_1
 	call CLEAR_TILEMAP
 	di	
 l7673h:
@@ -18670,7 +18673,7 @@ l7743h:
 	call WRITE_TEXT
 	ei	
 	ld a,070h
-	call WAIT_A
+	call DELAY_A
 	ld a,b	
 	and a	
 	call nz,sub_7be8h
