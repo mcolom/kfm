@@ -4953,6 +4953,7 @@ l1c21h:
 	ld (ME_INITIAL_FALL_SPEED_COPY),hl		;1c21	22 0c e8 	" . . 
 	and a			;1c24	a7 	. 
 	ret			;1c25	c9 	. 
+
 sub_1c26h:
 	ld hl,(THOMAS_POSITION)		;1c26	2a 12 e7 	* . . 
 	ld de,l1000h		;1c29	11 00 10 	. . . 
@@ -4964,6 +4965,7 @@ sub_1c26h:
 	ld hl,0e260h		;1c37	21 60 e2 	! ` . 
 	res 5,(hl)		;1c3a	cb ae 	. . 
 	ret			;1c3c	c9 	. 
+
 sub_1c3dh:
 	call GET_ENEMY_POS_IN_HL		;1c3d	cd 8a 1c 	. . . 
 	ld de,l1000h		;1c40	11 00 10 	. . . 
@@ -10546,7 +10548,7 @@ sub_468eh:
 	inc a	
 	ret	
 l46a0h:
-	call sub_5903h
+	call GET_CURRENT_LEVEL
 	cp 004h
 	jr z,l46f4h
 	ld hl,0e703h
@@ -10605,7 +10607,7 @@ l4700h:
 sub_4704h:
 	ld hl,(0e102h)
 	ld de,(THOMAS_POSITION)
-	call sub_5903h
+	call GET_CURRENT_LEVEL
 	cp 004h
 	jr z,l4784h
 	ld a,(0e101h)
@@ -12478,7 +12480,7 @@ sub_5765h:
 l5786h:
 	call sub_5835h
 l5789h:
-	call sub_5903h
+	call GET_CURRENT_LEVEL
 	jr nz,l5793h
 	call sub_58d3h
 	jr l5796h
@@ -12486,7 +12488,7 @@ l5793h:
 	call sub_58f1h
 l5796h:
 	call sub_57d4h
-	call sub_5903h
+	call GET_CURRENT_LEVEL
 	cp 003h
 	ret nz	
 	ld a,(DISTANCE_TO_LEFT)
@@ -12629,7 +12631,7 @@ l586dh:
 l5886h:
 	ld b,a	
 	ld de,l61cbh
-	call sub_5903h
+	call GET_CURRENT_LEVEL
 	jr z,l589ch
 	ld a,(0e915h)
 	cp 001h
@@ -12641,14 +12643,14 @@ l589ch:
 	jr l58c5h
 l589fh:
 	ld e,a	
-	call sub_5903h
+	call GET_CURRENT_LEVEL
 	cp 004h
 	ld a,e	
 	ld de,l60b3h
 	jr z,l58c5h
 	ld de,l5ea9h
 	call l5918h
-	call sub_5903h
+	call GET_CURRENT_LEVEL
 	ld a,(DISTANCE_TO_LEFT)
 	jr nz,l58beh
 	cp 003h
@@ -12692,10 +12694,13 @@ sub_58f1h:
 	add a,024h
 	ld c,042h
 	jr sub_5909h
-sub_5903h:
+
+; Obtain the current level (starting at 0).
+GET_CURRENT_LEVEL:
 	ld a,(DRAGONS_LEVEL)
 	and 007h
 	ret	
+
 sub_5909h:
 	ld b,003h
 	ld de,0f840h
