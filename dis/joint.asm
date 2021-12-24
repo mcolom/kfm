@@ -107,6 +107,12 @@ DRAGONS_LEVEL: EQU 0xE080 ; 00 DDD LLL, where D is the number of dragons, and L 
 ENERGY: EQU 0xE709
 ENERGY_DISP: EQU 0xE81A ; Displayed energy. Use to animate the bar when energy changes
 
+ENERGY_TO_SUBTRACT: EQU 0xE721
+
+; Bit 0: receiving damage (it changes the displayed frame)
+; Bit 1: dying (all energy lost or time over)
+THOMAS_DAMAGE_STATUS: EQU 0xE71F
+
 ENEMY_ENERGY_DISP: EQU 0xE819 ; Displayed enemy's energy. Use to animate the bar when energy changes
 
 POINTS: EQU 0xE081 ; Points, E081... E083
@@ -4107,7 +4113,8 @@ l1615h:
 	ret m			;161d	f8 	. 
 	dec (hl)			;161e	35 	5 
 	ret p			;161f	f0 	. 
-	ld hl,0e71fh		;1620	21 1f e7 	! . . 
+    ; Set Thomas must die :-O
+	ld hl,THOMAS_DAMAGE_STATUS		;1620	21 1f e7
 	set 1,(hl)		;1623	cb ce 	. . 
 	ret			;1625	c9 	. 
 l1626h:
@@ -7437,28 +7444,36 @@ sub_2ec1h:
 	call l0e20h		;2edd	cd 20 0e 	.   . 
 	pop bc			;2ee0	c1 	. 
 	ret			;2ee1	c9 	. 
+
+; E = amount of energy to subtract
 sub_2ee2h:
-	ld a,(0e71fh)		;2ee2	3a 1f e7 	: . . 
-	and 001h		;2ee5	e6 01 	. . 
-	jr nz,l2efbh		;2ee7	20 12 	  . 
-	ld (0e722h),hl		;2ee9	22 22 e7 	" " . 
-	ld hl,0e71fh		;2eec	21 1f e7 	! . . 
-	set 0,(hl)		;2eef	cb c6 	. . 
+	ld a,(THOMAS_DAMAGE_STATUS)	;2ee2	3a 1f e7
+	and 1		                ;2ee5	e6 01 	. . 
+	jr nz,l2efbh		        ;2ee7	20 12 Jump if Thomas is not receiving damage
+    ; Thomas is receiving damage
+	ld (0e722h),hl		        ;2ee9	22 22 e7
+    ; Set Thomas is not receiving damage
+	ld hl,THOMAS_DAMAGE_STATUS	;2eec	21 1f e7
+	set 0,(hl)		            ;2eef	cb c6
+    ;
 	inc hl			;2ef1	23 	# 
 	ld (hl),d			;2ef2	72 	r 
 	inc hl			;2ef3	23 	# 
-	ld (hl),e			;2ef4	73 	s 
+	ld (hl),e		;2ef4	73 Write E = amount of energy to subtract. HL = ENERGY_TO_SUBTRACT.
 	ld a,083h		;2ef5	3e 83 	> . 
 	call sub_0dfeh		;2ef7	cd fe 0d 	. . . 
-	ret			;2efa	c9 	. 
+	ret			;2efa	c9
+
 l2efbh:
-	ld a,(ENERGY)		;2efb	3a 09 e7 	: . . 
-	sub e			;2efe	93 	. 
-	jr nc,l2f02h		;2eff	30 01 	0 . 
+    ; ENERGY = ENERGY - E
+	ld a,(ENERGY)	;2efb	3a 09 e7
+	sub e			;2efe	93
+	jr nc,l2f02h	;2eff	30 01 Set ENERGY = 0 if it becomes negative
 	xor a			;2f01	af 	. 
 l2f02h:
 	ld (ENERGY),a		;2f02	32 09 e7 	2 . . 
-	ret			;2f05	c9 	. 
+	ret			;2f05	c9
+
 sub_2f06h:
 	ld hl,POINTS_VISIBLE_COUNTER		;2f06	21 4c e6 	! L . 
 	ld b,004h		;2f09	06 04 	. . 
@@ -9755,15 +9770,18 @@ l4134h:
 	ld a,(0e33fh)
 	and a	
 	call z,sub_2ec1h
-	ret	
+	ret
+
 sub_413fh:
 	call CHECK_DEMO_OR_VULNERABLE
-	jr nz,l4150h
+	jr nz,l4150h ; Don't check the time if invulnerable
+    ; Check time
 	ld hl,(TIME)
 	ld a,h	
 	or l	
 	jr nz,l4150h
-	ld hl,0e71fh
+    ; Time over: set Thomas must die :-O
+	ld hl,THOMAS_DAMAGE_STATUS
 	set 1,(hl)
 l4150h:
 	call sub_4174h
@@ -9774,7 +9792,8 @@ l4150h:
 	jr z,l4163h
 	bit 6,(hl) ; Check if the knifer at level 2 should throw his dagger to the right
 	jr nz,l4170h
-	ret	
+	ret
+
 l4163h:
 	bit 6,(hl)
 	jr z,l416ch
@@ -9789,7 +9808,8 @@ l416ch:
 l4170h:
 	inc hl	
 	set 6,(hl)
-	ret	
+	ret
+
 sub_4174h:
 	ld hl,0e719h
 	dec (hl)	
@@ -9827,9 +9847,11 @@ l419ah:
 	jp nc,l4502h
 	cp 008h
 	jp nc,l4406h
-	ld a,(0e71fh)
-	and 001h
-	jp nz,l4551h
+    ; Check if Thomas is dying
+	ld a,(THOMAS_DAMAGE_STATUS)
+	and 1
+	jp nz,l4551h ; Jump if Thomas is dying
+    ; Thomas is not dying :)
 	ld a,(PLAYER_MOVE)
 	ld d,a	
 	ld a,(hl)	
@@ -9944,11 +9966,17 @@ sub_4279h:
 	call sub_0dfeh
 	ret	
 l4289h:
-	ld a,(0e71fh)
+    ; Check if Thomas is dying
+	ld a,(THOMAS_DAMAGE_STATUS)
 	bit 1,a
-	jp nz,l4636h
+	jp nz,l4636h ; Jump if he's dying
+
+    ; Thomas is not dying    
+    ; Check if Thomas is receiving damage
 	bit 0,a
-	jp nz,l455ah
+	jp nz,l455ah ; Jump if he's receiving damage
+
+    ; Thomas is not receiving damage
 	ld a,(0e703h)
 	dec a	
 	jp m,l42a0h
@@ -10149,9 +10177,12 @@ l43d8h:
 	ld (THOMAS_FRAME),a
 	ret	
 l4406h:
-	ld hl,0e71fh
+    ; Check if Thomas is receiving damage
+	ld hl,THOMAS_DAMAGE_STATUS
 	bit 0,(hl)
-	jp nz,l464bh
+	jp nz,l464bh ; Jump if Thomas is receiving damage
+
+    ; Thomas is not receiving damage
 	ld a,(NUM_GRIPPING)
 	and a	
 	jp nz,l4656h
@@ -10271,10 +10302,13 @@ l44c4h:
 	ld (0e70ah),hl
 	jr l4489h
 l44deh:
-	ld a,(0e71fh)
+    ; Check if Thomas is dying
+	ld a,(THOMAS_DAMAGE_STATUS)
 	and 001h
-	jr nz,l455ah
-	ld hl,0e703h
+	jr nz,l455ah ; Jump if Thomas is dying
+	
+    ; Thomas is not dying
+    ld hl,0e703h
 	dec (hl)	
 	ret nz	
 	ld hl,0e702h
@@ -10350,11 +10384,14 @@ l4567h:
 	ld a,(0e701h)
 	and 0fch
 	ld (0e701h),a
-	ld hl,0e71fh
+    
+    ; Set Thomas is not receiving damage 
+	ld hl,THOMAS_DAMAGE_STATUS
 	res 0,(hl)
+
 	ld a,008h
 	ld (0e703h),a
-	ld hl,0e721h
+	ld hl,ENERGY_TO_SUBTRACT
 	ld a,(ENERGY)
 	and a	
 	scf	
@@ -10414,11 +10451,14 @@ l45f1h:
 	dec h	
 	ld d,0ffh
 l45f6h:
-	ld hl,0e71fh
+    ; Check if Thomas is receiving damage
+	ld hl,THOMAS_DAMAGE_STATUS
 	bit 0,(hl)
-	jr z,l4609h
-	call 2e91h
-	call sub_4675h
+	jr z,l4609h ; Jump if Thomas is not receiving damage
+	
+    ; Thomas is receiving damage
+    call 2e91h
+	call LOSE_ENERGY_AND_UPDATE_DAMAGE_STATUS
 	call sub_468eh
 	ld (THOMAS_FRAME),a
 l4609h:
@@ -10436,11 +10476,14 @@ l4610h:
 	ld (0e710h),de
 	ret	
 l4625h:
+    ; Check if Thomas is dying
 	ld hl,l5000h
-	ld hl,0e71fh ; Debug? It discards 0x5000 and loads a different value
+	ld hl,THOMAS_DAMAGE_STATUS ; Debug? It discards 0x5000 and loads a different value
 	bit 1,(hl)
-	jr z,l4643h
-	res 1,(hl)
+	jr z,l4643h ; Jump if Thomas is not dying
+    ; Thomas is dying
+    ; Set Thomas is not dying
+	res 1,(hl) 
 	call CHECK_DEMO_OR_VULNERABLE
 	jr nz,l4643h  ;4634  20 0D
 l4636h:
@@ -10455,7 +10498,7 @@ l4643h:
 	jp l4347h
 l464bh:
 	call 2e91h
-	call sub_4675h
+	call LOSE_ENERGY_AND_UPDATE_DAMAGE_STATUS
 	call sub_468eh
 	jr l4658h
 l4656h:
@@ -10471,22 +10514,27 @@ l4658h:
 	ld a,(0e701h)
 	and 0fch
 	ld (0e701h),a
-	ret	
-sub_4675h:
-	ld hl,0e721h
+	ret
+
+; Perform energy loss and update Thomas' damage status    
+LOSE_ENERGY_AND_UPDATE_DAMAGE_STATUS:
+	ld hl,ENERGY_TO_SUBTRACT
 	ld a,(ENERGY)
 	and a	
 	jp m,l4684h
-	sub (hl)	
-	ld c,000h
+	sub (hl) ; A = ENERGY - [ENERGY_TO_SUBTRACT]
+	ld c, 0 ; Not receiving damage and not dying
 	jr nc,l4686h
 l4684h:
-	ld c,002h
+    ; Negative energy, set C = 2 (dying)
+	ld c, 2
 l4686h:
-	ld (ENERGY),a
-	ld hl,0e71fh
+	ld (ENERGY),a ; Update decreased energy
+    ; Update damage status
+	ld hl,THOMAS_DAMAGE_STATUS
 	ld (hl),c	
-	ret	
+	ret
+
 sub_468eh:
 	ld hl,(0e710h)
 	ld de,1800h
