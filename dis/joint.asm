@@ -351,7 +351,25 @@ KNIFE_STATUS: EQU 0xE807
 KNIFE_DIST: EQU 0xE32E
 NUM_KNIVES: EQU 0xE32B
 
+; Its value is related to the detection of the coin sensor
+COIN_SENSOR: EQU 0xE911
+
+; 0: it forces 2 coins
+; 1..7: number of coins needed add one credit
+; 8: no credits added regardless the number of introduced coins 
+; 9: one coin to add one credit
+; A: 1 coin gives 2 credits
+; B: 1 coin gives 3 credits
+; 0x11: 9 credits
+; 0x18: 10 credits
+; 0x20: 18 credits
+; 0x25: 23 credits
+; 0x13: 12 credits
+
+
 COINS: EQU 0xE913
+
+
 
 ; Tip: in the intro screen, set 0xE000 (GAME_STATE) to 2, and
 ; change THOMAS_FRAME to see the sprite parts.
@@ -422,6 +440,13 @@ GAME_STATE_GAME_ENDS: EQU 8
 GAME_STATE_LIFE_LOST: EQU 0xB
 GAME_STATE_LEVEL_ENDS: EQU 0xC
 GAME_STATE_SERVICE_MODE: EQU 0xFF
+
+; Controls how players will make turns in the game
+; Two bits:
+; 00: only one player
+; 10: it's player #1 turn
+; 11: it's player #2 turn
+PLAYER_TURN: EQU 0xE002
 
 TIME: EQU 0xE003 ; Time, encoded in BCD in 0xE003 and 0xE004
 IN_FREEZE_CHEAT: EQU 0xE005
@@ -780,9 +805,10 @@ sub_0250h:
 
 	ld hl,0e910h		;025d	21 10 e9 	! . . 
 	jr z,l026dh		;0260	28 0b 	( . 
-	ld a,(0e002h)		;0262	3a 02 e0 	: . . 
-	and 001h		;0265	e6 01 	. . 
-	jr z,l026dh		;0267	28 04 	( . 
+	ld a,(PLAYER_TURN)	;0262	3a 02 e0 	: . . 
+	and 001h		;0265	e6 01
+	jr z,l026dh		;0267	28 04 Jump if it's player #1
+    ; It's player #2
 	set 0,(hl)		;0269	cb c6 	. . 
 	jr l026fh		;026b	18 02 	. . 
 l026dh:
@@ -922,9 +948,10 @@ l033ah:
 l035dh:
 	call 054f4h		;035d	cd f4 54 	. . T 
 l0360h:
-	ld hl,0e002h		;0360	21 02 e0 	! . . 
-	bit 1,(hl)		;0363	cb 4e 	. N 
-	jr z,l0382h		;0365	28 1b 	( . 
+	ld hl,PLAYER_TURN	;0360	21 02 e0
+	bit 1,(hl)		    ;0363	cb 4e
+	jr z,l0382h		;0365	28 1b Jump if only one players
+    ; Two players
 	ld a,(0e094h)		;0367	3a 94 e0 	: . . 
 	and a			;036a	a7 	. 
 	jr z,l0382h		;036b	28 15 	( . 
@@ -1161,15 +1188,15 @@ l04d9h:
 	add a,e			;04e3	83 	. 
 	rst 38h			;04e4	ff 	. 
 sub_04e5h:
-	ld hl,l04fdh		;04e5	21 fd 04 	! . . 
-	call WRITE_TEXT		;04e8	cd 1c 11 	. . . 
-	ld a,(0e002h)		;04eb	3a 02 e0 	: . . 
-	and 001h		;04ee	e6 01 	. . 
-	inc a			;04f0	3c 	< 
-	call sub_1108h		;04f1	cd 08 11 	. . . 
-	call WRITE_TEXT		;04f4	cd 1c 11 	. . . 
-	call sub_0556h		;04f7	cd 56 05 	. V . 
-	jp WRITE_TEXT		;04fa	c3 1c 11 	. . . 
+	ld hl,l04fdh		;04e5	21 fd 04
+	call WRITE_TEXT		;04e8	cd 1c 11
+	ld a,(PLAYER_TURN)	;04eb	3a 02 e0
+	and 001h		    ;04ee	e6 01 Check number of players
+	inc a			    ;04f0	3c Increment so A = number of players
+	call sub_1108h		;04f1	cd 08 11
+	call WRITE_TEXT		;04f4	cd 1c 11
+	call sub_0556h		;04f7	cd 56 05
+	jp WRITE_TEXT		;04fa	c3 1c 11
 l04fdh:
 	defb 0fdh,067h,0d3h	;illegal sequence		;04fd	fd 67 d3 	. g . 
 	defb 0feh, 0dbh
@@ -2649,6 +2676,7 @@ l0cbfh:
 	ld d,013h		;0d01	16 13 	. . 
 	ld d,b			;0d03	50 	P 
 	nop			;0d04	00 	. 
+
 sub_0d05h:
 	ld a,(0e910h)		;0d05	3a 10 e9 	: . . 
 	and 001h		;0d08	e6 01 	. . 
@@ -2678,26 +2706,29 @@ l0d10h:
 	call sub_0d3bh		;0d34	cd 3b 0d 	. ; . 
 	ld (0e904h),hl		;0d37	22 04 e9 	" . . 
 	ret			;0d3a	c9 	. 
+
+; This transforms HL according to A, B, C
 sub_0d3bh:
-	cpl			;0d3b	2f 	/ 
-	ld b,a			;0d3c	47 	G 
-	xor h			;0d3d	ac 	. 
-	ld c,a			;0d3e	4f 	O 
-	and l			;0d3f	a5 	. 
-	ld l,a			;0d40	6f 	o 
-	ld a,c			;0d41	79 	y 
-	cpl			;0d42	2f 	/ 
-	and h			;0d43	a4 	. 
-	or l			;0d44	b5 	. 
-	ld l,a			;0d45	6f 	o 
-	ld h,b			;0d46	60 	` 
-	ret			;0d47	c9 	. 
+	cpl			    ;0d3b	2f 	A = ~I
+	ld b,a			;0d3c	47 	B = ~I
+	xor h			;0d3d	ac 	A = ~I xor H
+	ld c,a			;0d3e	4f 	C = ~I xor H
+	and l			;0d3f	a5 	A = ~I xor H and L
+	ld l,a			;0d40	6f 	L = ~I xor H and L
+	ld a,c			;0d41	79 	A = ~I xor H
+	cpl			    ;0d42	2f 	A = ~(~I xor H)
+	and h			;0d43	a4 	A = ~(~I xor H) & H
+	or l			;0d44	b5 	A =  ~(~I xor H) & H | L
+	ld l,a			;0d45	6f 	L = ~(~I xor H) & H | L
+	ld h,b			;0d46	60 	H = ~I
+	ret			    ;0d47	c9
+
 sub_0d48h:
 	rrca			;0d48	0f 	. 
 	rrca			;0d49	0f 	. 
 	rrca			;0d4a	0f 	. 
 	ld b,a			;0d4b	47 	G 
-	ld a,(0e911h)		;0d4c	3a 11 e9 	: . . 
+	ld a,(COIN_SENSOR)		;0d4c	3a 11 e9 	: . . 
 	rla			;0d4f	17 	. 
 	ld c,a			;0d50	4f 	O 
 	and 049h		;0d51	e6 49 	. I 
@@ -2715,7 +2746,7 @@ l0d61h:
 	ld hl,0e90eh		;0d6a	21 0e e9 	! . . 
 	inc de			;0d6d	13 	. 
 	call sub_0db1h		;0d6e	cd b1 0d 	. . . 
-	ld hl,0e911h		;0d71	21 11 e9 	! . . 
+	ld hl,COIN_SENSOR		;0d71	21 11 e9 	! . . 
 	ld (hl),c			;0d74	71 	q 
 	dec hl			;0d75	2b 	+ 
 	ld c,(hl)			;0d76	4e 	N 
@@ -2742,6 +2773,7 @@ l0d94h:
 	ld a,002h		;0d9c	3e 02 	> . 
 	ld (COINS),a		;0d9e	32 13 e9 	2 . . 
 	ret			;0da1	c9 	. 
+
 sub_0da2h:
 	dec (hl)			;0da2	35 	5 
 	ret p			;0da3	f0 	. 
@@ -2779,19 +2811,22 @@ sub_0db1h:
 	cp (hl)			;0dd2	be 	. 
 	ret nz			;0dd3	c0 	. 
 	ld (hl),000h		;0dd4	36 00 	6 . 
-sub_0dd6h:
-	ld a,009h		;0dd6	3e 09 	> . 
+
+sub_0dd6h: ; SEGUIR
+	ld a, 9		;0dd6	3e 09
 l0dd8h:
-	sub 008h		;0dd8	d6 08 	. . 
+	sub 8		;0dd8	d6 08
 l0ddah:
 	ld hl,COINS		;0dda	21 13 e9 	! . . 
 	add a,(hl)			;0ddd	86 	. 
-	daa			;0dde	27 	' 
-	jr nc,l0de3h		;0ddf	30 02 	0 . 
-	ld a,099h		;0de1	3e 99 	> . 
+	daa			;0dde	27
+    ; See here for a good description of DAA: https://ehaskins.com/2018-01-30%20Z80%20DAA/
+	jr nc,l0de3h	;0ddf	30 02 If we have more than 99 coins, limit to 99
+	ld a,099h		;0de1	3e 99
 l0de3h:
-	ld (hl),a			;0de3	77 	w 
-	ret			;0de4	c9 	. 
+	ld (hl),a		;0de3	77
+	ret			    ;0de4	c9
+
 sub_0de5h:
 	ld hl,0e917h		;0de5	21 17 e9 	! . . 
 	ld a,(hl)			;0de8	7e 	~ 
@@ -3206,7 +3241,7 @@ sub_10abh:
 	ld a,001h		;10ab	3e 01 	> . 
 	ld de,0e093h		;10ad	11 93 e0 	. . . 
 l10b0h:
-	ld hl,0e002h		;10b0	21 02 e0 	! . . 
+	ld hl,PLAYER_TURN		;10b0	21 02 e0 	! . . 
 	xor (hl)			;10b3	ae 	. 
 	ex de,hl			;10b4	eb 	. 
 	and 001h		;10b5	e6 01 	. . 
@@ -11784,18 +11819,20 @@ l51abh:
     ld a,(0e904h)
 	and 003h
 	jr z,l5183h
-	and 002h
-	ld (0e002h),a
-	ld b,001h
-	jr z,l51c9h
-	inc b	
+	and 2 ; Check number of players
+	ld (PLAYER_TURN),a
+	ld b, 1 ; Subtract one coin
+	jr z,l51c9h ; Z means only one player, so we won't increment B to require 2 coins
+	inc b ; Subtract one more coin, since it's two players
 l51c9h:
 	ld hl,COINS
 	ld a,(hl)	
-	sub b	
-	jr c,l5183h
+	sub b ; Subtract required number of coins
+	jr c,l5183h ; Ignore if there are not enough coins
 	daa	
-	ld (hl),a	
+	ld (hl),a ; Updated number of coins after subtracting
+
+    ; Reset IN_FREEZE_CHEAT
 	ld hl,IN_FREEZE_CHEAT
 	res 7,(hl)
 	ret	; 51d7
