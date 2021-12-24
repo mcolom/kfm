@@ -745,7 +745,7 @@ l0217h:
 l0220h:
 	ld (GAME_STATE),a		;0220	32 00 e0 	2 . . 
 	ei			;0223	fb 	. 
-	call 05178h		;0224	cd 78 51 	. x Q 
+	call CHOOSE_1_OR_2_PLAYERS		;0224	cd 78 51 	. x Q 
 	ld a,0ffh		;0227	3e ff 	> . 
 	ld (0e006h),a		;0229	32 06 e0 	2 . . 
 
@@ -11742,7 +11742,9 @@ l516dh:
 	ld l,l	
 	rst 38h
 
-sub_5178h:
+; Shows the text with "1 OR 2 PLAYERS" and "CREDIT XX" and
+; waits until the users chooses 1 or 2 players before starting the game.
+CHOOSE_1_OR_2_PLAYERS:
 	ld hl,IN_FREEZE_CHEAT
 	set 7,(hl)
 	call CLEAR_TILEMAP
