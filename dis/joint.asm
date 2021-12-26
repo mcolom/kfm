@@ -116,6 +116,8 @@ THOMAS_DAMAGE_STATUS: EQU 0xE71F
 ENEMY_ENERGY_DISP: EQU 0xE819 ; Displayed enemy's energy. Use to animate the bar when energy changes
 
 POINTS: EQU 0xE081 ; Points, E081... E083
+POINTS_P2: EQU 0xE091 ; Points, E091... E093
+POINTS_TOP: EQU 0xE980 ; Points, E080... E082
 
 ; The points are visible until this counter reaches zero
 POINTS_VISIBLE_COUNTER: EQU 0xE64C
@@ -761,7 +763,7 @@ l01f8h:
 	ld (0eb01h),hl		;0204	22 01 eb 	" . . 
 	pop af			;0207	f1 	. 
 	inc a			;0208	3c 	< 
-	call nz,07aaeh		;0209	c4 ae 7a 	. . z 
+	call nz, sub_7aaeh		;0209	c4 ae 7a 	. . z 
 	call UPDATE_INTERNAL_COUNTER		;020c	cd f8 03 	. . . 
 	call CHECK_FLIPSCREEN_AND_READ_PLAYER_CONTROLS		;020f	cd 05 0d 	. . . 
 	call sub_0de5h		;0212	cd e5 0d 	. . . 
@@ -2982,11 +2984,11 @@ l0e92h:
 sub_0e9bh:
 	ld hl,059a7h		;0e9b	21 a7 59 	! . Y 
 	call WRITE_TEXT		;0e9e	cd 1c 11 	. . . 
-	call sub_10a5h		;0ea1	cd a5 10 	. . . 
-	call sub_10abh		;0ea4	cd ab 10 	. . . 
-	call sub_10cfh		;0ea7	cd cf 10 	. . . 
-	call sub_10d9h		;0eaa	cd d9 10 	. . . 
-	call sub_10e6h		;0ead	cd e6 10 	. . . 
+	call PRINT_POINTS_P1		;0ea1	cd a5 10 	. . . 
+	call PRINT_POINTS_P2		;0ea4	cd ab 10 	. . . 
+	call PRINT_TOP_SCORE		;0ea7	cd cf 10 	. . . 
+	call PRINT_TIME		;0eaa	cd d9 10 	. . . 
+	call DRAW_LIVES		;0ead	cd e6 10 	. . . 
 	ld a,(0e81ch)		;0eb0	3a 1c e8 	: . . 
 	and a			;0eb3	a7 	. 
 	call z,sub_0f1ah		;0eb4	cc 1a 0f 	. . . 
@@ -3233,7 +3235,7 @@ l103ah:
 	inc (hl)			;1051	34 	4 
 	ld a,098h		;1052	3e 98 	> . 
 	call sub_0dfeh		;1054	cd fe 0d 	. . . 
-	call sub_10e6h		;1057	cd e6 10 	. . . 
+	call DRAW_LIVES		;1057	cd e6 10 	. . . 
 l105ah:
 	ld a,(GAME_STATE)		;105a	3a 00 e0 	: . . 
 	cp GAME_STATE_GO_UPSTAIRS_OR_SILVIA_RESCUED		;105d	fe 03
@@ -3257,29 +3259,32 @@ l105ah:
 	jr c,l1080h		;107b	38 03 	8 . 
 	ld (TIME),hl		;107d	22 03 e0 	" . . 
 l1080h:
-	call sub_10d9h		;1080	cd d9 10 	. . . 
+	call PRINT_TIME		;1080	cd d9 10 	. . . 
 	ld a,(POINTS + 2)		;1083	3a 83 e0 	: . . 
 	ld c,a			;1086	4f 	O 
 	ld de,(POINTS)		;1087	ed 5b 81 e0 	. [ . . 
-	ld a,(0e982h)		;108b	3a 82 e9 	: . . 
-	ld hl,(0e980h)		;108e	2a 80 e9 	* . . 
+	ld a,(POINTS_TOP + 2)		;108b	3a 82 e9 	: . . 
+	ld hl,(POINTS_TOP)		;108e	2a 80 e9 	* . . 
 	sub c			;1091	91 	. 
 	jr c,l109ah		;1092	38 06 	8 . 
-	jr nz,sub_10a5h		;1094	20 0f 	  . 
+	jr nz,PRINT_POINTS_P1		;1094	20 0f 	  . 
 	sbc hl,de		;1096	ed 52 	. R 
-	jr nc,sub_10a5h		;1098	30 0b 	0 . 
+	jr nc,PRINT_POINTS_P1		;1098	30 0b 	0 . 
 l109ah:
-	ld a,c			;109a	79 	y 
-	ld (0e982h),a		;109b	32 82 e9 	2 . . 
-	ld (0e980h),de		;109e	ed 53 80 e9 	. S . . 
-	call sub_10cfh		;10a2	cd cf 10 	. . . 
-sub_10a5h:
+    ; Update top score
+	ld a,c			        ;109a	79
+	ld (POINTS_TOP + 2),a	;109b	32 82 e9
+	ld (POINTS_TOP),de		;109e	ed 53 80 e9
+	call PRINT_TOP_SCORE	;10a2	cd cf 10
+
+PRINT_POINTS_P1:
 	xor a			;10a5	af 	. 
 	ld de,POINTS + 2		;10a6	11 83 e0 	. . . 
 	jr l10b0h		;10a9	18 05 	. . 
-sub_10abh:
+
+PRINT_POINTS_P2:
 	ld a,001h		;10ab	3e 01 	> . 
-	ld de,0e093h		;10ad	11 93 e0 	. . . 
+	ld de,POINTS_P2 + 2	;10ad	11 93 e0 	. . . 
 l10b0h:
 	ld hl,PLAYER_TURN		;10b0	21 02 e0 	! . . 
 	xor (hl)			;10b3	ae 	. 
@@ -3294,22 +3299,26 @@ l10c1h:
 	ld a,(hl)			;10c1	7e 	~ 
 	dec hl			;10c2	2b 	+ 
 	call PRINT_NUMBER		;10c3	cd 08 11 	. . . 
-	call sub_10fdh		;10c6	cd fd 10 	. . . 
-	call sub_10fdh		;10c9	cd fd 10 	. . . 
+	call PRINT_NUMBER_TWO_DIGITS_DEC_HL		;10c6	cd fd 10 	. . . 
+	call PRINT_NUMBER_TWO_DIGITS_DEC_HL		;10c9	cd fd 10 	. . . 
+    ; Print a zero
 	xor a			;10cc	af 	. 
 	jr PRINT_NUMBER		;10cd	18 39 	. 9 
-sub_10cfh:
+
+PRINT_TOP_SCORE:
 	ld hl,0e982h		;10cf	21 82 e9 	! . . 
 	ld de,0d01fh		;10d2	11 1f d0 	. . . 
 	ld c,000h		;10d5	0e 00 	. . 
 	jr l10c1h		;10d7	18 e8 	. . 
-sub_10d9h:
+
+PRINT_TIME:
 	ld c,014h		;10d9	0e 14
 	ld hl, TIME + 1	;10db	21 04 e0
 	ld de,0d0eah		;10de	11 ea d0 	. . . 
-	call sub_10fdh		;10e1	cd fd 10 	. . . 
-	jr sub_10fdh		;10e4	18 17 	. . 
-sub_10e6h:
+	call PRINT_NUMBER_TWO_DIGITS_DEC_HL		;10e1	cd fd 10 	. . . 
+	jr PRINT_NUMBER_TWO_DIGITS_DEC_HL		;10e4	18 17 	. . 
+
+DRAW_LIVES:
 	ld a,(LIVES)		;10e6	3a 84 e0 	: . . 
 	ld de,0d162h		;10e9	11 62 d1 	. b . 
 	ld l,a			;10ec	6f 	o 
@@ -3324,25 +3333,36 @@ l10f7h:
 	call WRITE_CHAR_AT_SCREEN_DE		;10f7	cd 10 11 	. . . 
 	djnz l10f3h		;10fa	10 f7 	. . 
 	ret			;10fc	c9 	. 
-sub_10fdh:
-	ld a,(hl)			;10fd	7e 	~ 
-	dec hl			;10fe	2b 	+ 
 
-	push af			;10ff	f5 	. 
-l1100h:
-	rrca			;1100	0f 	. 
-	rrca			;1101	0f 	. 
-	rrca			;1102	0f 	. 
-	rrca			;1103	0f 	. 
-	call PRINT_NUMBER		;1104	cd 08 11 	. . . 
-	pop af			;1107	f1 	. 
+; Prints two digits encoded in the 4 MSB and 4 LSB of A.
+; It moves the HL pointer one position back
+; A: the two numbers (NNNN.MMMM)
+; C: color
+; DE: position in the screen
+PRINT_NUMBER_TWO_DIGITS_DEC_HL:
+	ld a,(hl)		;10fd	Read number
+	dec hl			;10fe	Move pointer to the previous digit
+
+	push af			;10ff	f5
+    ; Rotate num 4 times to the right
+    ; This is to move the MSB to the LSB
+	rrca			;1100	0f
+	rrca			;1101	0f
+	rrca			;1102	0f
+	rrca			;1103	0f
+    ; Now it'll print the number which was at NNNNxxxx.
+	call PRINT_NUMBER	;1104	cd 08 11
+	pop af			    ;1107	f1
+    
+    ; With the POP it's recoved the original A, so now it'll print the
+    ; number at the LSB: xxxxMMMM.
 
 ; Write a number on the screen
-; A: number
+; A: number (the 4 LSB)
 ; C: color
 ; DE: position in the screen
 PRINT_NUMBER:
-	and 00fh		;1108	e6 0f 	. . 
+	and 00fh		;1108	e6 0f Consider only the 4 LSB
 	add a,090h		;110a	c6 90 	. . 
 	daa			;110c	27 	' 
 	adc a,040h		;110d	ce 40 	. @ 
@@ -9045,7 +9065,7 @@ l3a70h:
 	push de			;3a76	d5 	. 
 	ld hl,(THOMAS_POSITION)		;3a77	2a 12 e7 	* . . 
 	sbc hl,de		;3a7a	ed 52 	. R 
-	ld de,l1100h		;3a7c	11 00 11 	. . . 
+	ld de,0x1100		;3a7c	11 00 11 	. . . 
 	jr c,l3a89h		;3a7f	38 08 	8 . 
 	sbc hl,de		;3a81	ed 52 	. R 
 	pop de			;3a83	d1 	. 
@@ -19068,8 +19088,8 @@ l7971h:
 	daa	
 	ld (hl),a	
 	ld de,0d562h
-	call sub_10fdh
-	call sub_10fdh
+	call PRINT_NUMBER_TWO_DIGITS_DEC_HL
+	call PRINT_NUMBER_TWO_DIGITS_DEC_HL
 l798dh:
 	InSystem
 	ld de,0d2a2h
