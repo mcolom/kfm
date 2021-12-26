@@ -28,6 +28,7 @@ Once you've done this, you can edit ROM values directly."
 **** You can specify conditions in the breakpoints.
 For example:
 wpset 0,65535,rw,ix==e395
+bp d0c, A != 0xFF
 
 
 The lives (+1) are stored at 0xE084.

@@ -788,10 +788,10 @@ l0220h:
 
     ; Reset all game variables
 	ld hl,DRAGONS_LEVEL		;022c	21 80 e0
-	ld de,POINTS	;022f	11 81 e0
+	ld de,DRAGONS_LEVEL+1	;022f	11 81 e0
 	ld bc, 31		        ;0232	01 1f 00
-	ld (hl),000h		    ;0235	36 00
-	ldir		;0237	ed b0
+	ld (hl), 0  		    ;0235	36 00
+	ldir		            ;0237	ed b0
 
 	InDSW1		 ;0239	db 03
 	and 001h	 ;023b	e6 01 Check difficulty
@@ -835,14 +835,15 @@ l026dh:
     ; neither if it's cocktail and it's the turn of player 1.
 	res 0,(hl)		;026d	cb 86 Set bit #0 of FLIP_SCREEN to 0: don't flip the screen
 l026fh:
-	ld hl,0e085h		;026f	21 85 e0 	! . . 
+	ld hl,0e085h		;026f	21 85 e0 	! . .  SEGUIR
 	bit 1,(hl)		;0272	cb 4e 	. N 
-	jr nz,l0285h		;0274	20 0f 	  . 
+	jr nz,l0285h		;0274	20 0f Skip the letter scene
+    
+    ; Show the letter scene
 	set 1,(hl)		;0276	cb ce 	. . 
-	call 0520dh		;0278	cd 0d 52 	. . R 
+	call DRAW_LETTER_SCREEN		;0278	cd 0d 52 	. . R 
 	ld a,0e1h		;027b	3e e1 	> . 
 	call DELAY_A		;027d	cd 0f 57 	. . W 
-l0280h:
 	ld a,070h		;0280	3e 70 	> p 
 	call DELAY_A		;0282	cd 0f 57 	. . W 
 l0285h:
@@ -2728,34 +2729,50 @@ l0cbfh:
 CHECK_FLIPSCREEN_AND_READ_PLAYER_CONTROLS:
 	ld a,(FLIP_SCREEN)	;0d05	3a 10 e9
 	and 001h		    ;0d08	e6 01
-	InP1Controls	;0d0a	db 01
-    ; Here we have the input of player 1
+	InP1Controls	    ;0d0a	db 01
+    ; Here we have A = input of player 1
+    ; DEBUG, A = 0xFD
     
     ; If the screen is not flipped, it means always it's  player 1
-	jr z,l0d10h		    ;0d0c	28 02 It's player 1, all do
+	jr z,l0d10h		    ;0d0c	28 02 It's player 1, all done
     
     ; The screen is flipped, so it's player 2 for sure
     ; Read the input of player 2
 	InP2Controls		    ;0d0e	db 02
 l0d10h:
-	ld hl,(PLAYER_INPUT_1)    ;0d10	2a 06 e9
+    ; In A we have the read the player controls (P1 or P2)
+
+	ld hl,(PLAYER_INPUT_1)  ;0d10	2a 06 e9
+    ; DEBUG, HL = 0x0000
+    
 	call sub_0d3bh		    ;0d13	cd 3b 0d
 	ld (PLAYER_INPUT_1),hl	;0d16	22 06 e9
+
 	ld hl,PLAYER_BUTTONS_AND_UP		;0d19	21 08 e9
-	rla			;0d1c	17 	. 
-	rl (hl)		;0d1d	cb 16 	. . 
-	rla			;0d1f	17 	. 
-	rla			;0d20	17 	. 
-	rl (hl)		;0d21	cb 16 	. . 
-	rla			;0d23	17 	. 
-	rla			;0d24	17 	. 
-	rl (hl)		;0d25	cb 16 	. . 
-	InSystem		;0d27	db 00 	. . 
-	and 00fh		;0d29	e6 0f 	. . 
-	ld b,a			;0d2b	47 	G 
-	InP2Controls		;0d2c	db 02 	. . 
-	and 010h		;0d2e	e6 10 	. . 
-	or b			;0d30	b0 	. 
+    ; RL: 9-bit rotation to the left. the register's bits are shifted left.
+    ; The carry value is put into 0th bit of the register, and the leaving 7th bit is put into the carry.
+    ;
+    ;     7654.3210
+    ; A = hgfe.dcba
+    ; Extract bit #7
+	rla			;0d1c	17      A = gfed.cba?, C=h
+	rl (hl)		;0d1d	cb      (HL) = ????.???h
+    ; Extract bit #5
+	rla			;0d1f	17      A = fedc.ba??, C=g
+	rla			;0d20	17      A = edcb.a???, C=f
+	rl (hl)		;0d21	cb 16 	(HL) = ????.??hf
+    ; ; Extract bit #3
+	rla			;0d23	17      A = dcba.????, C=e
+	rla			;0d24	17      A = cba?.????, C=d
+	rl (hl)		;0d25	cb 16   (HL) = ????.?hfd
+
+	InSystem		;0d27	db 00
+	and 00fh		;0d29	e6 0f Read buttons (also service and coin sensor)
+	ld b,a			;0d2b	47 	B = buttons = 0CCCC
+    
+	InP2Controls		;0d2c	db 02
+	and 010h		    ;0d2e	e6 10 I don't get this. Why not and 0xF?
+	or b			    ;0d30	b0 A = ?0000 | controls = ?CCCC
 	ld hl,(PLAYER_INPUT_2)		;0d31	2a 04 e9 	* . . 
 	call sub_0d3bh		;0d34	cd 3b 0d 	. ; . 
 	ld (PLAYER_INPUT_2),hl		;0d37	22 04 e9 	" . . 
@@ -2774,18 +2791,46 @@ l0d10h:
 ;	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 )
 
 sub_0d3bh:
+    ; A: player controls
+    ; HL: (PLAYER_INPUT_x)
+    
+    ; DEBUG, A = 0xFD
+    
 	cpl			    ;0d3b	2f 	A = ~I
+    ; DEBUG, A = 0x02
+    
 	ld b,a			;0d3c	47 	B = ~I
-	xor h			;0d3d	ac 	A = ~I xor H
-	ld c,a			;0d3e	4f 	C = ~I xor H
-	and l			;0d3f	a5 	A = ~I xor H and L
-	ld l,a			;0d40	6f 	L = ~I xor H and L
-	ld a,c			;0d41	79 	A = ~I xor H
-	cpl			    ;0d42	2f 	A = ~(~I xor H)
-	and h			;0d43	a4 	A = ~(~I xor H) & H
-	or l			;0d44	b5 	A =  ~(~I xor H) & H | L
-	ld l,a			;0d45	6f 	L = ~(~I xor H) & H | L
+    ; DEBUG, B = 0x02
+    
+	xor h			;0d3d	ac 	A = ~I xor H0
+    ; DEBUG, A = 0x02
+        
+	ld c,a			;0d3e	4f 	C = ~I xor H0
+    ; DEBUG, C = 0x02
+    
+	and l			;0d3f	a5 	A = (~I xor H0) & L0
+    ; DEBUG, A = 0x00
+    
+	ld l,a			;0d40	6f 	L = (~I xor H0) & L0
+    ; DEBUG, L = 0x00
+    
+	ld a,c			;0d41	79 	A = ~I xor H0
+    ; DEBUG, A = 0x02
+    
+	cpl			    ;0d42	2f 	A = ~(~I xor H0)
+    ; DEBUG, A = 0xFD
+    
+	and h			;0d43	a4 	A = ~(~I xor H0) & H0
+    ; DEBUG, A = 0x00
+
+	or l			;0d44	b5 	A =  (~(~I xor H0) & H0) | L0
+    ; DEBUG, A = 0x00
+    
+	ld l,a			;0d45	6f 	L = (~(~I xor H0) & H0) | L0
+    ; DEBUG, L = 0x00
+    
 	ld h,b			;0d46	60 	H = ~I
+    ; DEBUG, H = 0x02    
 	ret			    ;0d47	c9
 
 sub_0d48h:
@@ -3255,7 +3300,8 @@ l1027h:
 l1037h:
 	call sub_0f58h		;1037	cd 58 0f 	. X . 
 l103ah:
-	ld a,(0e085h)		;103a	3a 85 e0 	: . . 
+    ; Probably this is a check to give extra lives
+	ld a,(0e085h)		;103a	3a 85 e0 SEGUIR
 	and 001h		;103d	e6 01 	. . 
 	jr nz,l105ah		;103f	20 19 	  . 
 	ld hl,(POINTS)		;1041	2a 81 e0 	* . . 
@@ -6361,7 +6407,7 @@ sub_25afh:
 	add hl,de			;2615	19 	. 
 	jr l2626h		;2616	18 0e 	. . 
 l2618h:
-	ld de,l0280h		;2618	11 80 02 	. . . 
+	ld de,0x0280		;2618	11 80 02 	. . . 
 	add hl,de			;261b	19 	. 
 	ld de,(0e106h)		;261c	ed 5b 06 e1 	. [ . . 
 	sbc hl,de		;2620	ed 52 	. R 
@@ -6465,7 +6511,7 @@ l26edh:
 	inc (ix + ENEMY_STATE_IDX)		;26ed	dd 34 01
 	ld l,(ix + ENEMY_POS_L_IDX)		;26f0	dd 6e 02
 	ld h,(ix + ENEMY_POS_H_IDX)		;26f3	dd 66 03
-	ld de,l0280h		;26f6	11 80 02 	. . . 
+	ld de,0x0280		;26f6	11 80 02 	. . . 
     ; Bit 6: looking direction
 	bit 6,(ix + ENEMY_PROPS_IDX)		;26f9	dd cb 00 76
 	jr nz,l270ch		;26fd	20 0d
@@ -8149,7 +8195,7 @@ l3327h:
 	call sub_0dfeh		;3327	cd fe 0d 	. . . 
 	ld l,(ix + 4)		;332a	dd 6e 04 	. n . 
 	ld h,(ix + 5)		;332d	dd 66 05 	. f . 
-	ld de,l0280h		;3330	11 80 02 	. . . 
+	ld de,0x0280		;3330	11 80 02 	. . . 
 	add hl,de			;3333	19 	. 
 	ld de,l0120h		;3334	11 20 01 	.   . 
 	call sub_36cah		;3337	cd ca 36 	. . 6 
@@ -10888,6 +10934,9 @@ sub_4821h:
 	ld hl,l73f0h
 	jp l1a7dh
 
+; Update the effective PLAYER_MOVE.
+; It takes into account if it's in player mode (fake input) or if
+; Thomas is being gripped.
 sub_482fh:
 	ld a,(GAME_STATE)
 	cp GAME_STATE_DEMO
@@ -10928,7 +10977,10 @@ l484dh:
 	ld a,(NUM_GRIPPING)
 	and a	
 	ld a,c	
-	jr nz,l4874h
+	jr nz,l4874h ; Thomas is being gripped, so he can't move: skip update
+    ; Skipping the update means he'll be able to kick (but it won't have any effect).
+    
+    ; Decode PLAYER_BUTTONS_AND_UP into PLAYER_MOVE
 	ld a,(PLAYER_BUTTONS_AND_UP)
 	cpl	
 	ld b,a	
@@ -11950,23 +12002,31 @@ CREDIT_STR:
 	defb 0fdh, 0e1h, 0d5h
 	defb "CREDIT ", 0ffh
 
-	call 01157h		;520d	cd 57 11 	. W . 
+DRAW_LETTER_SCREEN:
+	call CLEAR_TILEMAP		;520d	cd 57 11 	. W . 
 	call CONFIG_GAME_STOP		;5210	cd 03 57 	. . W 
 	ld a,020h		;5213	3e 20 	>   
-	call 00dfeh		;5215	cd fe 0d 	. . . 
-	ld c,01bh		;5218	0e 1b 	. . 
+	call sub_0dfeh		;5215	cd fe 0d 	. . . 
+    
+    ; This draws the yellow background of the letter
+	ld c,01bh		    ;5218	0e 1b 	. . 
 	ld de,0d153h		;521a	11 53 d1 	. S . 
-	ld b,017h		;521d	06 17 	. . 
+	ld b, 23    		;521d	06 17 	. . 
 l521fh:
 	call CLEAR_26_CHARS		;521f	cd 25 57 	. % W 
 	ld hl,00026h		;5222	21 26 00 	! & . 
 	add hl,de			;5225	19 	. 
 	ex de,hl			;5226	eb 	. 
 	djnz l521fh		;5227	10 f6 	. . 
-	ld hl,l5232h		;5229	21 32 52 	! 2 R 
-	call sub_5739h		;522c	cd 39 57 	. 9 W 
-	jp 0111ch		;522f	c3 1c 11 	. . . 
-l5232h:
+
+	ld hl,HAND_AND_PAPER_DRAWING		;5229	21 32 52 	! 2 R 
+	call DRAW_HANDS_AND_PAPER		;522c	cd 39 57 	. 9 W
+
+    ; Write the text of the letter
+	jp WRITE_TEXT		;522f	c3 1c 11 	. . . 
+
+
+HAND_AND_PAPER_DRAWING:
 	defb 0fdh,055h,0d1h	;illegal sequence		;5232	fd 55 d1 	. U . 
 	call z,sub_60fdh		;5235	cc fd 60 	. . ` 
 	pop de			;5238	d1 	. 
@@ -12573,7 +12633,7 @@ l5735h:
 	inc hl	
 	ld d,(hl)	
 	inc hl	
-sub_5739h:
+DRAW_HANDS_AND_PAPER:
 	ld a,(hl)	
 	inc hl	
 	inc a	
@@ -12581,7 +12641,7 @@ sub_5739h:
 	inc a	
 	jr nz,l5744h
 	set 5,c
-	jr sub_5739h
+	jr DRAW_HANDS_AND_PAPER
 l5744h:
 	inc a	
 	jr z,l5735h
@@ -12592,7 +12652,7 @@ l5744h:
 	set 7,c
 l5751h:
 	call WRITE_CHAR_AT_SCREEN_DE
-	jr sub_5739h
+	jr DRAW_HANDS_AND_PAPER
 
 DRAW_SCENARIO: ;  0x5756
 	ld hl,(0e817h)
