@@ -33,7 +33,7 @@ endm
 ; ************************ I/O ports ************************
 
 ; Irem audio on port 0
-InIremAudio: macro
+InSystem: macro
 	in a,(000h)
 endm
 ;
@@ -42,16 +42,16 @@ OutIremAudio: macro
 endm
 
 ; P1 joystick, flipscreen, and coin counters on port 1
-InP1FlipscreenCoins: macro
+InP1Controls: macro
 	in a,(001h)
 endm
 ;
-OutP1FlipscreenCoins: macro
+OutP1Flipscreen: macro
 	out (001h),a
 endm
 
 ; P2 joystick on port 2
-InP2Button: macro
+InP2Controls: macro
 	in a,(002h)
 endm
 
@@ -351,6 +351,12 @@ KNIFE_STATUS: EQU 0xE807
 KNIFE_DIST: EQU 0xE32E
 NUM_KNIVES: EQU 0xE32B
 
+
+; Bit #0 controls if the screen show be flipped.
+; The code checks this variable and performs the actual flip by
+; calling OutP1Flipscreen @ 0d89.
+FLIP_SCREEN: EQU 0xE910
+
 ; Its value is related to the detection of the coin sensor
 COIN_SENSOR: EQU 0xE911
 
@@ -504,7 +510,7 @@ l0039h:
 	ld hl,(0eb03h)		;003a	2a 03 eb 	* . . 
 	ld de,0c020h		;003d	11 20 c0 	.   . 
 l0040h:
-	ld bc,l00c0h		;0040	01 c0 00 	. . . 
+	ld bc,0x00c0		;0040	01 c0 00 	. . . 
 	ldir		;0043	ed b0 	. . 
     
     ; Read progra's scroll position, and update M62's config to actually do it
@@ -537,7 +543,7 @@ l008dh:
 	bit 7,(hl)		;009d	cb 7e 	. ~ 
 	jr nz,l00b7h		;009f	20 16 	  . 
 	bit 0,(hl)		;00a1	cb 46 	. F 
-	InIremAudio		;00a3	db 00 	. . 
+	InSystem		;00a3	db 00 	. . 
 	jr nz,l00b0h		;00a5	20 09 	  . 
 	and 002h		;00a7	e6 02 	. . 
 	jr nz,l00b7h		;00a9	20 0c 	  . 
@@ -549,11 +555,11 @@ l00b0h:
 	res 0,(hl)		;00b5	cb 86 	. . 
 l00b7h:
 	InDSW2		;00b7	db 04
-	bit 3,a		;00b9	cb 5f Check bit 3 of DSW2: coin mode 2
-	jr nz,l00cdh		;00bb	20 10 	  . 
-	ld hl,0e904h		;00bd	21 04 e9 	! . . 
-l00c0h:
-	bit 1,(hl)		;00c0	cb 4e 	. N 
+	bit 3,a		;00b9	cb 5f Check bit 3 of DSW2: slow motion mode cheat
+	jr nz,l00cdh		;00bb	20 10 Jump if slow motion OFF
+    ; slow motion ON
+	ld hl,0e904h	;00bd	21 04 e9
+	bit 1,(hl)		;00c0	cb 4e Bit #1 of 0e904h: slow motion ON
 	jr z,l00cdh		;00c2	28 09 	( . 
 	ld hl,0e80eh		;00c4	21 0e e8 Number of credits coin 2?
 	dec (hl)			;00c7	35 	5 
@@ -794,25 +800,34 @@ l0247h:
 	call sub_056fh		;0247	cd 6f 05 	. o . 
 	ld (LIVES),a		;024a	32 84 e0 	2 . . 
 	ld (0e094h),a		;024d	32 94 e0 	2 . . 
+
 sub_0250h:
-	ld hl,IN_FREEZE_CHEAT		;0250	21 05 e0 	! . . 
-	res 7,(hl)		;0253	cb be 	. . 
-	xor a			;0255	af 	. 
-	ld (GAME_STATE),a		;0256	32 00 e0 	2 . . 
+    ; Deactivate freeze cheat
+	ld hl,IN_FREEZE_CHEAT	;0250	21 05 e0
+	res 7,(hl)		        ;0253	cb be
+    
+    ; Set GAME_STATE to STOP (0)
+	xor a			    ;0255	af
+	ld (GAME_STATE),a	;0256	32 00 e0
 
 	InDSW2		    ;0259	db 04
-	and 002h		;025b	e6 02 Check bit 1: energy loss speed
+	and 002h		;025b	e6 02 Check bit 1: upright (0) / cocktail (1) config
 
-	ld hl,0e910h		;025d	21 10 e9 	! . . 
-	jr z,l026dh		;0260	28 0b 	( . 
-	ld a,(PLAYER_TURN)	;0262	3a 02 e0 	: . . 
-	and 001h		;0265	e6 01
-	jr z,l026dh		;0267	28 04 Jump if it's player #1
+	ld hl,FLIP_SCREEN	;025d	21 10 e9
+	jr z,l026dh		;0260	28 0b Jump if upright
+    ; cocktail
+
+	ld a,(PLAYER_TURN)	;0262	3a 02 e0
+	and 001h		    ;0265	e6 01
+	jr z,l026dh		    ;0267	28 04 Jump if it's player #1
     ; It's player #2
-	set 0,(hl)		;0269	cb c6 	. . 
-	jr l026fh		;026b	18 02 	. . 
+	set 0,(hl)		    ;0269	cb c6 Set bit #0 of FLIP_SCREEN to 1: flip the screen
+	jr l026fh		    ;026b	18 02
 l026dh:
-	res 0,(hl)		;026d	cb 86 	. . 
+    ; upright or player 1
+    ; We don't flip the screen if we're upright, but
+    ; neither if it's cocktail and it's the turn of player 1.
+	res 0,(hl)		;026d	cb 86 Set bit #0 of FLIP_SCREEN to 0: don't flip the screen
 l026fh:
 	ld hl,0e085h		;026f	21 85 e0 	! . . 
 	bit 1,(hl)		;0272	cb 4e 	. N 
@@ -839,7 +854,7 @@ l029ch:
 	bit 4,a		;029e	cb 67 Check bit 4: freeze cheat
 l02a0h:
 	jr z,l02aeh		;02a0	28 0c 	( . 
-	bit 5,a		;02a2	cb 6f Check bit 5: levels selection mode cheat
+	bit 5,a		;02a2	cb 6f Check bit 5: level selection mode cheat
 	jr nz,l02aeh		;02a4	20 08 	  . 
 	ld hl,0e904h		;02a6	21 04 e9 	! . . 
 	bit 0,(hl)		;02a9	cb 46 	. F 
@@ -975,8 +990,11 @@ l0382h:
 	ld a,(LIVES)		;0382	3a 84 e0 	: . . 
 	and a			;0385	a7 	. 
 	jp nz,sub_0250h		;0386	c2 50 02 	. P . 
-	ld hl,0e910h		;0389	21 10 e9 	! . . 
+    
+    ; Don't flip the screen
+	ld hl,FLIP_SCREEN		;0389	21 10 e9 	! . . 
 	res 0,(hl)		;038c	cb 86 	. . 
+
 	xor a			;038e	af 	. 
 	ld (0e006h),a		;038f	32 06 e0 	2 . . 
 	ld a,(COINS)		;0392	3a 13 e9 	: . . 
@@ -2677,17 +2695,27 @@ l0cbfh:
 	ld d,b			;0d03	50 	P 
 	nop			;0d04	00 	. 
 
+;SEGUIR
+; This routine seems to read the I/O ports of the player controls and
+; store the info in a proper (packet?) format in 0e904h.
+
 sub_0d05h:
-	ld a,(0e910h)		;0d05	3a 10 e9 	: . . 
-	and 001h		;0d08	e6 01 	. . 
-	InP1FlipscreenCoins		;0d0a	db 01 	. . 
-	jr z,l0d10h		;0d0c	28 02 	( . 
-	InP2Button		;0d0e	db 02 	. . 
+	ld a,(FLIP_SCREEN)	;0d05	3a 10 e9
+	and 001h		    ;0d08	e6 01
+	InP1Controls	;0d0a	db 01
+    ; Here we have the input of player 1
+    
+    ; If the screen is not flipped, it means always it's  player 1
+	jr z,l0d10h		    ;0d0c	28 02 It's player 1, all do
+    
+    ; The screen is flipped, so it's player 2 for sure
+    ; Read the input of player 2
+	InP2Controls		    ;0d0e	db 02
 l0d10h:
-	ld hl,(PLAYER_INPUT)		;0d10	2a 06 e9 	* . . 
-	call sub_0d3bh		;0d13	cd 3b 0d 	. ; . 
-	ld (PLAYER_INPUT),hl		;0d16	22 06 e9 	" . . 
-	ld hl,PLAYER_BUTTONS_AND_UP		;0d19	21 08 e9 	! . . 
+	ld hl,(PLAYER_INPUT)    ;0d10	2a 06 e9
+	call sub_0d3bh		    ;0d13	cd 3b 0d
+	ld (PLAYER_INPUT),hl	;0d16	22 06 e9
+	ld hl,PLAYER_BUTTONS_AND_UP		;0d19	21 08 e9
 	rla			;0d1c	17 	. 
 	rl (hl)		;0d1d	cb 16 	. . 
 	rla			;0d1f	17 	. 
@@ -2696,10 +2724,10 @@ l0d10h:
 	rla			;0d23	17 	. 
 	rla			;0d24	17 	. 
 	rl (hl)		;0d25	cb 16 	. . 
-	InIremAudio		;0d27	db 00 	. . 
+	InSystem		;0d27	db 00 	. . 
 	and 00fh		;0d29	e6 0f 	. . 
 	ld b,a			;0d2b	47 	G 
-	InP2Button		;0d2c	db 02 	. . 
+	InP2Controls		;0d2c	db 02 	. . 
 	and 010h		;0d2e	e6 10 	. . 
 	or b			;0d30	b0 	. 
 	ld hl,(0e904h)		;0d31	2a 04 e9 	* . . 
@@ -2708,6 +2736,17 @@ l0d10h:
 	ret			;0d3a	c9 	. 
 
 ; This transforms HL according to A, B, C
+; A: player input
+;	PORT_START("P1")
+;	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY
+;	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY
+;	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY
+;	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY
+;	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN ) /* probably unused */
+;	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 )
+;	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN ) /* probably unused */
+;	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 )
+
 sub_0d3bh:
 	cpl			    ;0d3b	2f 	A = ~I
 	ld b,a			;0d3c	47 	B = ~I
@@ -2757,8 +2796,8 @@ l0d61h:
 	ld b,002h		;0d80	06 02 	. . 
 	call sub_0da2h		;0d82	cd a2 0d 	. . . 
 	ld a,c			;0d85	79 	y 
-	ld (0e910h),a		;0d86	32 10 e9 	2 . . 
-	OutP1FlipscreenCoins		;0d89	d3 01 	. . 
+	ld (FLIP_SCREEN),a		;0d86	32 10 e9 	2 . . 
+	OutP1Flipscreen		;0d89	d3 01 	. . 
 	InDSW2		;0d8b	db 04 	. . 
 	cpl			;0d8d	2f 	/ 
 	xor c			;0d8e	a9 	. 
@@ -4260,7 +4299,7 @@ l16e3h:
 	add hl,de			;16e9	19 	. 
 	ret c			;16ea	d8 	. 
 	ld hl,(0e80ah)		;16eb	2a 0a e8 	* . . 
-	ld de,l00c0h		;16ee	11 c0 00 	. . . 
+	ld de,0x00c0		;16ee	11 c0 00 	. . . 
 	bit 6,c		;16f1	cb 71 	. q 
 	jr z,l16f8h		;16f3	28 03 	( . 
 	add hl,de			;16f5	19 	. 
@@ -4567,7 +4606,7 @@ l18ffh:
 	add hl,de			;1914	19 	. 
 	push hl			;1915	e5 	. 
 	call GET_ENEMY_POS_IN_HL		;1916	cd 8a 1c 	. . . 
-	ld de,l00c0h		;1919	11 c0 00 	. . . 
+	ld de,0x00c0		;1919	11 c0 00 	. . . 
 	ld a,c			;191c	79 	y 
 	and 040h		;191d	e6 40 	. @ 
 	jr z,l1924h		;191f	28 03 	( . 
@@ -7341,7 +7380,7 @@ l2ddch:
 	jr nz,l2df0h		;2de2	20 0c 	  . 
 	ld de,0x60		;2de4	11 60 00 	. ` . 
 	add hl,de			;2de7	19 	. 
-	ld de,l00c0h		;2de8	11 c0 00 	. . . 
+	ld de,0x00c0		;2de8	11 c0 00 	. . . 
 	sbc hl,de		;2deb	ed 52 	. R 
 	call c,sub_2e31h		;2ded	dc 31 2e 	. 1 . 
 l2df0h:
@@ -12933,7 +12972,7 @@ l5a31h:
 	out (07ch),a
 	ld a,(hl)	
 	inc bc	
-	OutP1FlipscreenCoins
+	OutP1Flipscreen
 l5a38h:
 	ld a,a	
 	inc e	
@@ -12955,7 +12994,7 @@ l5a51h:
 	out (07ch),a
 	ld a,(hl)	
 	inc bc	
-	OutP1FlipscreenCoins
+	OutP1Flipscreen
 	ld a,a	
 	inc e	
 	call nc,07e7ch
@@ -15880,7 +15919,7 @@ l690bh:
 	ret po	
 	rst 38h	
 	rrca	
-	ld sp,l00c0h
+	ld sp,0x00c0
 	nop	
 	nop	
 	rrca	
@@ -15904,7 +15943,7 @@ l6930h:
 	ret po	
 	rst 38h	
 	rrca	
-	ld (l00c0h),a
+	ld (0x00c0),a
 	jr nz,l6948h
 l6948h:
 	rrca	
@@ -16071,7 +16110,7 @@ l6a14h:
 	ret nz	
 	rst 38h	
 	rrca	
-	ld a,(l00c0h)
+	ld a,(0x00c0)
 	jr nz,l6a26h
 l6a26h:
 	rst 38h	
@@ -18858,7 +18897,7 @@ l783ah:
 	ld iy,l7844h
 	jr l7861h
 l7844h:
-	InIremAudio
+	InSystem
 	bit 0,a
 	jp z,l76e7h
 	bit 1,a
@@ -18870,7 +18909,7 @@ l7852h:
 	or b	
 	jr nz,l7852h
 l7857h:
-	InIremAudio
+	InSystem
 	bit 1,a
 	jr z,l7857h
 	exx	
@@ -18984,7 +19023,7 @@ l792ah:
 l7933h:
 	call CLEAR_33_CHARS
 l7936h:
-	InIremAudio
+	InSystem
 	bit 1,a
 	jp nz,l78a5h
 	ret	
@@ -19030,13 +19069,13 @@ l7971h:
 	call sub_10fdh
 	call sub_10fdh
 l798dh:
-	InIremAudio
+	InSystem
 	ld de,0d2a2h
 	call sub_7bb2h
-	InP1FlipscreenCoins
+	InP1Controls
 	ld de,0d3a2h
 	call sub_7bb2h
-	InP2Button
+	InP2Controls
 	ld de,0d4a2h
 	call sub_7bb2h
 	ld a,(INT_COUNTER + 2)
@@ -19217,7 +19256,7 @@ sub_7adch:
 	ld hl,l75deh
 	jp l0e20h
 l7ae5h:
-	ld hl,l00c0h
+	ld hl,0x00c0
 	ld (KNIFE_STATUS),hl
 	ld de,00d0h
 	ld hl,l669bh

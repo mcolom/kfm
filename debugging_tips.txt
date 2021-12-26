@@ -7,6 +7,9 @@ https://docs.mamedev.org/debugger/
 **** Running at full speed:
 Press F10.
 
+**** I/O ports
+See in z80.cpp, "static INPUT_PORTS_START( common )" for the bitmaks of the player P1 and P2 controls.
+
 **** Modifying ROM locations
 
 Copying from https://6502disassembly.com/mame-dbg.html:
