@@ -107,6 +107,11 @@ DEMO_LEVEL: EQU 0xE025
 LIVES: EQU 0xE084
 DRAGONS_LEVEL: EQU 0xE080 ; 00 DDD LLL, where D is the number of dragons, and L the level - 1.
 
+; This variable controls if it should avoid giving an extra life because
+; it was already given (bit #0) and to skip the letter scene (bit #1).
+SKIP_LETTER_SKIP_EXTRA_LIFE: EQU 0xE085
+
+
 ENERGY: EQU 0xE709
 ENERGY_DISP: EQU 0xE81A ; Displayed energy. Use to animate the bar when energy changes
 
@@ -835,9 +840,9 @@ l026dh:
     ; neither if it's cocktail and it's the turn of player 1.
 	res 0,(hl)		;026d	cb 86 Set bit #0 of FLIP_SCREEN to 0: don't flip the screen
 l026fh:
-	ld hl,0e085h		;026f	21 85 e0 	! . .  SEGUIR
-	bit 1,(hl)		;0272	cb 4e 	. N 
-	jr nz,l0285h		;0274	20 0f Skip the letter scene
+	ld hl,SKIP_LETTER_SKIP_EXTRA_LIFE	;026f	21 85 e0
+	bit 1,(hl)		;0272	cb 4e Bit #1 of SKIP_LETTER_SKIP_EXTRA_LIFE: skip letter scene
+	jr nz,l0285h	;0274	20 0f Skip
     
     ; Show the letter scene
 	set 1,(hl)		;0276	cb ce 	. . 
@@ -3301,17 +3306,28 @@ l1037h:
 	call sub_0f58h		;1037	cd 58 0f 	. X . 
 l103ah:
     ; Probably this is a check to give extra lives
-	ld a,(0e085h)		;103a	3a 85 e0 SEGUIR
-	and 001h		;103d	e6 01 	. . 
-	jr nz,l105ah		;103f	20 19 	  . 
-	ld hl,(POINTS)		;1041	2a 81 e0 	* . . 
-	ld de,05000h		;1044	11 00 50 	. . P 
-	sbc hl,de		;1047	ed 52 	. R 
-	jr c,l105ah		;1049	38 0f 	8 . 
-	ld hl,0e085h		;104b	21 85 e0 	! . . 
-	set 0,(hl)		;104e	cb c6 	. . 
-	dec hl			;1050	2b 	+ 
+    
+    ; Check if we've already given the extra life
+	ld a,(SKIP_LETTER_SKIP_EXTRA_LIFE)	;103a	3a 85 e0
+	and 001h		;103d	e6 01 Bit #0 of SKIP_LETTER_SKIP_EXTRA_LIFE: extra live already given
+	jr nz,l105ah	;103f	20 19 Yes, we've already given it, don't check any more
+    
+    ; We haven't given the extra life: check if the score is over 20480 points
+	ld hl,(POINTS)		;1041	2a 81 e0
+	ld de, 0x5000		;1044	11 00 50 50,000 points
+	sbc hl,de		    ;1047	ed 52
+	jr c,l105ah		    ;1049	38 0f POINTS < 50,000
+    ; POINTS >= 20480
+	
+    ; Set bit #0 of SKIP_LETTER_SKIP_EXTRA_LIFE: extra life has been already given
+    ld hl,SKIP_LETTER_SKIP_EXTRA_LIFE	;104b	21 85 e0
+	set 0,(hl)		;104e	cb c6
+    
+	dec hl			;1050	2b
+    ; Now HL = 0xE084 = @LIVES
+    ; Increment lives
 	inc (hl)			;1051	34 	4 
+    
 	ld a,098h		;1052	3e 98 	> . 
 	call sub_0dfeh		;1054	cd fe 0d 	. . . 
 	call DRAW_LIVES		;1057	cd e6 10 	. . . 
