@@ -624,10 +624,10 @@ l0110h:
 	inc hl			;0111	23 	# 
 	add a,(hl)			;0112	86 	. 
 	ld (hl),a			;0113	77 	w 
-	call sub_0d05h		;0114	cd 05 0d 	. . . 
+	call CHECK_FLIPSCREEN_AND_READ_PLAYER_CONTROLS		;0114	cd 05 0d 	. . . 
 	call sub_0d48h		;0117	cd 48 0d 	. H . 
 l011ah:
-	call 0482fh		;011a	cd 2f 48 	. / H 
+	call sub_482fh		;011a	cd 2f 48 	. / H 
 	call sub_0de5h		;011d	cd e5 0d 	. . . 
 l0120h:
 	ld a,(IN_PLAY)	;0120	3a 01 e0
@@ -763,7 +763,7 @@ l01f8h:
 	inc a			;0208	3c 	< 
 	call nz,07aaeh		;0209	c4 ae 7a 	. . z 
 	call UPDATE_INTERNAL_COUNTER		;020c	cd f8 03 	. . . 
-	call sub_0d05h		;020f	cd 05 0d 	. . . 
+	call CHECK_FLIPSCREEN_AND_READ_PLAYER_CONTROLS		;020f	cd 05 0d 	. . . 
 	call sub_0de5h		;0212	cd e5 0d 	. . . 
 	jr l01c4h		;0215	18 ad 	. . 
 l0217h:
@@ -2700,7 +2700,7 @@ l0cbfh:
 ; This routine seems to read the I/O ports of the player controls and
 ; store the info in a proper (packet?) format in PLAYER_INPUT_2.
 
-sub_0d05h:
+CHECK_FLIPSCREEN_AND_READ_PLAYER_CONTROLS:
 	ld a,(FLIP_SCREEN)	;0d05	3a 10 e9
 	and 001h		    ;0d08	e6 01
 	InP1Controls	;0d0a	db 01
@@ -10833,6 +10833,7 @@ sub_4821h:
 	ret c	
 	ld hl,l73f0h
 	jp l1a7dh
+
 sub_482fh:
 	ld a,(GAME_STATE)
 	cp GAME_STATE_DEMO
