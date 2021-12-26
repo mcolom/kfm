@@ -329,8 +329,8 @@ PLAYER_CONTROLS: EQU 0xE907 ; It seems this contains everything in a single byte
 PLAYER_BUTTONS_AND_UP:  EQU 0xE908
 
 ; This is the effective movement.
-; The difference between PLAYER_MOVE and PLAYER_INPUT is that
-; PLAYER_INPUT is very low-level and PLAYER_MOVE is computed.
+; The difference between PLAYER_MOVE and PLAYER_INPUT_1 is that
+; PLAYER_INPUT_1 is very low-level and PLAYER_MOVE is computed.
 ; Thus, during the demo PLAYER_MOVE will be written.
 PLAYER_MOVE: EQU 0xE909
 
@@ -345,7 +345,8 @@ PLAYER_MOVE: EQU 0xE909
 ; Bit #5: punch button pressed
 ; Bit #6: unused
 ; Bit #7: kick button pressed
-PLAYER_INPUT: EQU 0xE906
+PLAYER_INPUT_1: EQU 0xE906
+PLAYER_INPUT_2: EQU 0xE904
 
 KNIFE_STATUS: EQU 0xE807
 KNIFE_DIST: EQU 0xE32E
@@ -558,8 +559,8 @@ l00b7h:
 	bit 3,a		;00b9	cb 5f Check bit 3 of DSW2: slow motion mode cheat
 	jr nz,l00cdh		;00bb	20 10 Jump if slow motion OFF
     ; slow motion ON
-	ld hl,0e904h	;00bd	21 04 e9
-	bit 1,(hl)		;00c0	cb 4e Bit #1 of 0e904h: slow motion ON
+	ld hl,PLAYER_INPUT_2	;00bd	21 04 e9
+	bit 1,(hl)		;00c0	cb 4e Bit #1 of PLAYER_INPUT_2: slow motion ON
 	jr z,l00cdh		;00c2	28 09 	( . 
 	ld hl,0e80eh		;00c4	21 0e e8 Number of credits coin 2?
 	dec (hl)			;00c7	35 	5 
@@ -856,7 +857,7 @@ l02a0h:
 	jr z,l02aeh		;02a0	28 0c 	( . 
 	bit 5,a		;02a2	cb 6f Check bit 5: level selection mode cheat
 	jr nz,l02aeh		;02a4	20 08 	  . 
-	ld hl,0e904h		;02a6	21 04 e9 	! . . 
+	ld hl,PLAYER_INPUT_2		;02a6	21 04 e9 	! . . 
 	bit 0,(hl)		;02a9	cb 46 	. F 
 	jp nz,l039ch		;02ab	c2 9c 03 	. . . 
 l02aeh:
@@ -1034,16 +1035,16 @@ l03bch:
 
 ; Wait until kick and punch buttons are released
 l03d2h:
-	ld a,(PLAYER_INPUT)		;03d2	3a 06 e9
+	ld a,(PLAYER_INPUT_1)		;03d2	3a 06 e9
 	and 0a0h		        ;03d5	e6 a0 Check bits 7 (kick) and 5 (punch)
 	jr nz,l03d2h		    ;03d7	20 f9 Wait until both buttons released
 
 ; Wait until a button is pressed, to decrement or increment the level
 l03d9h:
-	ld hl,0e904h		    ;03d9	21 04 e9
+	ld hl,PLAYER_INPUT_2		    ;03d9	21 04 e9
 	bit 1,(hl)		        ;03dc	cb 4e
 	jp nz,sub_0250h		    ;03de	c2 50 02
-	ld hl,PLAYER_INPUT		;03e1	21 06 e9
+	ld hl,PLAYER_INPUT_1		;03e1	21 06 e9
 	bit 7,(hl)		        ;03e4	cb 7e Check bit 7 (kick)
 	jr nz,l03eeh		    ;03e6	20 06 Jump to decrement level if pressed
 	bit 5,(hl)		        ;03e8	cb 6e Check bit 5 (punch)
@@ -2697,7 +2698,7 @@ l0cbfh:
 
 ;SEGUIR
 ; This routine seems to read the I/O ports of the player controls and
-; store the info in a proper (packet?) format in 0e904h.
+; store the info in a proper (packet?) format in PLAYER_INPUT_2.
 
 sub_0d05h:
 	ld a,(FLIP_SCREEN)	;0d05	3a 10 e9
@@ -2712,9 +2713,9 @@ sub_0d05h:
     ; Read the input of player 2
 	InP2Controls		    ;0d0e	db 02
 l0d10h:
-	ld hl,(PLAYER_INPUT)    ;0d10	2a 06 e9
+	ld hl,(PLAYER_INPUT_1)    ;0d10	2a 06 e9
 	call sub_0d3bh		    ;0d13	cd 3b 0d
-	ld (PLAYER_INPUT),hl	;0d16	22 06 e9
+	ld (PLAYER_INPUT_1),hl	;0d16	22 06 e9
 	ld hl,PLAYER_BUTTONS_AND_UP		;0d19	21 08 e9
 	rla			;0d1c	17 	. 
 	rl (hl)		;0d1d	cb 16 	. . 
@@ -2730,9 +2731,9 @@ l0d10h:
 	InP2Controls		;0d2c	db 02 	. . 
 	and 010h		;0d2e	e6 10 	. . 
 	or b			;0d30	b0 	. 
-	ld hl,(0e904h)		;0d31	2a 04 e9 	* . . 
+	ld hl,(PLAYER_INPUT_2)		;0d31	2a 04 e9 	* . . 
 	call sub_0d3bh		;0d34	cd 3b 0d 	. ; . 
-	ld (0e904h),hl		;0d37	22 04 e9 	" . . 
+	ld (PLAYER_INPUT_2),hl		;0d37	22 04 e9 	" . . 
 	ret			;0d3a	c9 	. 
 
 ; This transforms HL according to A, B, C
@@ -10860,13 +10861,13 @@ sub_482fh:
 	ld (DEMO_FAKE_INPUT_ADDR),hl ; Update current fake input table pointer
 	jr l4874h ; Set fake input in A
 l484dh:
-	ld a,(PLAYER_INPUT)
+	ld a,(PLAYER_INPUT_1)
 	and 4 ; Bit 2: joystick pushing down
     ; Check if Thomas is frozen
 	ld hl,THOMAS_GLOBAL_STATE
 	bit 0,(hl)
 	jr nz,l4874h ; If he's frozen, don't read any input
-	ld a,(PLAYER_INPUT)
+	ld a,(PLAYER_INPUT_1)
 	and 7 ; Bits 0, 1, 2: joystick right, left, or down
 	ld c,a	
 	ld a,(NUM_GRIPPING)
@@ -11860,7 +11861,7 @@ l51abh:
     ; routine and calling it twice the way it does :)
 	call 10ffh 
 	
-    ld a,(0e904h)
+    ld a,(PLAYER_INPUT_2)
 	and 003h
 	jr z,l5183h
 	and 2 ; Check number of players
@@ -12282,10 +12283,10 @@ l5596h:
 	ld (INT_COUNTER + 1),a
 l55a8h:
 	call DELAY_1
-	ld a,(0e904h)
+	ld a,(PLAYER_INPUT_2)
 	and 003h
 	jr nz,l561bh
-	ld a,(PLAYER_INPUT)
+	ld a,(PLAYER_INPUT_1)
 	and 3 ; Bits 0 and 1: joystick pushing right and left
 	jr z,l55deh
 	ld a,(STEP_COUNTER)
@@ -12293,7 +12294,7 @@ l55a8h:
 	jr nz,l55e2h
 	ld a,00bh
 	ld (STEP_COUNTER),a
-	ld a,(PLAYER_INPUT)
+	ld a,(PLAYER_INPUT_1)
 	bit 0,a ; Bit 0: joystick pushing right
 	ld a,(hl)	
 	jr nz,l55d5h
@@ -18774,7 +18775,7 @@ l7761h:
 	ld c,000h
 	call sub_7bd7h
 l7769h:
-	ld a,(PLAYER_INPUT)
+	ld a,(PLAYER_INPUT_1)
 	and 3 ; Bits 0 and 1: joystick pushing right and left
 	ld hl,INT_COUNTER + 2
 	jr z,l7798h
@@ -18803,7 +18804,7 @@ l7790h:
 l7798h:
 	ld (hl),000h
 l779ah:
-	ld a,(0e904h)
+	ld a,(PLAYER_INPUT_2)
 	bit 0,a
 	jr z,l7769h
 	call CLEAR_TILEMAP
@@ -19081,10 +19082,10 @@ l798dh:
 	ld a,(INT_COUNTER + 2)
 	and a	
 	jr z,l7971h
-	ld a,(0e904h)
+	ld a,(PLAYER_INPUT_2)
 	bit 1,a
 	jr z,l798dh
-	ld a,(PLAYER_INPUT)
+	ld a,(PLAYER_INPUT_1)
 	bit 1,a ; Bit 1: joystick pushing left
 	jr z,l798dh
 	ret	
@@ -19098,7 +19099,7 @@ l79beh:
 	add hl,de	
 	add hl,de	
 l79c7h:
-	ld a,(0e904h)
+	ld a,(PLAYER_INPUT_2)
 	bit 0,a
 	jr nz,l79c7h
 	ld a,(hl)	
@@ -19117,7 +19118,7 @@ l79e6h:
 	ld c,000h
 	call sub_7bceh
 l79eeh:
-	ld a,(PLAYER_INPUT)
+	ld a,(PLAYER_INPUT_1)
 	and 3 ; Bits 0 and 1: joystick pushing right and left
 	ld hl,INT_COUNTER + 2
 	jr z,l7a26h
@@ -19156,7 +19157,7 @@ l7a26h:
 	ld a,(STEP_COUNTER)
 	and a	
 	jr z,l7a46h
-	ld a,(0e904h)
+	ld a,(PLAYER_INPUT_2)
 	and 003h
 	jr z,l79eeh
 	bit 1,a
@@ -19217,7 +19218,7 @@ l7a61h:
 	ret po	
 	ld (hl),0feh
 l7a93h:
-	ld a,(PLAYER_INPUT)
+	ld a,(PLAYER_INPUT_1)
 	and 3 ; Bits 0 and 1: joystick pushing right and left
 	jr z,l7aa4h
 	bit 1,a
@@ -19227,7 +19228,7 @@ l7a93h:
 l7aa2h:
 	ld (hl),0feh
 l7aa4h:
-	ld a,(0e904h)
+	ld a,(PLAYER_INPUT_2)
 	bit 1,a
 	jr z,l7a93h
 	ld (hl),0ffh
@@ -19397,11 +19398,11 @@ sub_7bd7h:
 	ld (hl),c	
 	ret	
 sub_7be8h:
-	ld a,(0e904h)
+	ld a,(PLAYER_INPUT_2)
 	bit 1,a
 	jr z,sub_7be8h
 l7befh:
-	ld a,(0e904h)
+	ld a,(PLAYER_INPUT_2)
 	bit 1,a
 	jr nz,l7befh
 	ret	
