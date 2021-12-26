@@ -1455,11 +1455,13 @@ sub_06b2h:
 	ldir		;06bb	ed b0 	. . 
 	ret			;06bd	c9 	. 
 sub_06beh:
-	ld hl,THOMAS_GLOBAL_STATE		;06be	21 00 e7 	! . . 
-	ld de,0e701h		;06c1	11 01 e7 	. . . 
-	ld bc,l0023h		;06c4	01 23 00 	. # . 
-	ld (hl),000h		;06c7	36 00 	6 . 
-	ldir		;06c9	ed b0 	. . 
+    ; Clear 35 bytes from THOMAS_GLOBAL_STATE
+	ld hl,THOMAS_GLOBAL_STATE		;06be	21 00 e7
+	ld de,THOMAS_GLOBAL_STATE + 1	;06c1	11 01 e7
+	ld bc, 35		                ;06c4	01 23 00
+	ld (hl), 0		                ;06c7	36 00
+	ldir		                    ;06c9	ed b0
+
 	ld a,(DRAGONS_LEVEL)		;06cb	3a 80 e0 	: . . 
 	and 007h		;06ce	e6 07 	. . 
 	add a,a			;06d0	87 	. 
@@ -1471,28 +1473,40 @@ sub_06beh:
 	ld h,(hl)			;06d8	66 	f 
 	ld l,a			;06d9	6f 	o 
 	ld (TIME),hl		;06da	22 03 e0 	" . . 
+
 	ld a,03fh		;06dd	3e 3f 	> ? 
 	ld (ENERGY),a		;06df	32 09 e7 	2 . . 
+
 	ld hl,05000h		;06e2	21 00 50 	! . P 
 	ld (0e710h),hl		;06e5	22 10 e7 	" . . 
+
 	ld a,(DRAGONS_LEVEL)		;06e8	3a 80 e0 	: . . 
 	and 001h		;06eb	e6 01 	. . 
 	ld (0e101h),a		;06ed	32 01 e1 	2 . . 
+
 	jr z,l071dh		;06f0	28 2b 	( + 
+
 	ld hl,THOMAS_GLOBAL_STATE		;06f2	21 00 e7 	! . . 
 	ld (hl),020h		;06f5	36 20 Thomas looking to the right
+
 	inc hl			    ;06f7	23 	# 
 	ld (hl),040h		;06f8	36 40 	6 @ 
+
 	ld hl,0ce40h		;06fa	21 40 ce 	! @ . 
 	ld (0e102h),hl		;06fd	22 02 e1 	" . . 
+
 	ld hl,00900h		;0700	21 00 09 	! . . 
 	ld (THOMAS_POSITION),hl		;0703	22 12 e7 	" . . 
+
 	ld hl,l1000h		;0706	21 00 10 	! . . 
 	ld (0e707h),hl		;0709	22 07 e7 	" . . 
+
 	ld hl,0cd00h		;070c	21 00 cd 	! . . 
 	ld (0e106h),hl		;070f	22 06 e1 	" . . 
+
 	ld hl,l02c0h		;0712	21 c0 02 	! . . 
 	ld (0e104h),hl		;0715	22 04 e1 	" . . 
+
 	ld a,001h		;0718	3e 01 	> . 
 	jp l0749h		;071a	c3 49 07 	. I . 
 l071dh:
@@ -3716,11 +3730,12 @@ l12efh:
 	inc b			;12fc	04 	. 
 	inc b			;12fd	04 	. 
 sub_12feh:
-	ld a,(0e701h)		;12fe	3a 01 e7 	: . . 
-	and 080h		;1301	e6 80 	. . 
-	ld c,0e4h		;1303	0e e4 	. . 
-	jr z,l1309h		;1305	28 02 	( . 
-	ld c,01ch		;1307	0e 1c 	. . 
+    ; Check Thomas' moving direction and add/subtract 28 to his position
+	ld a,(0e701h)	;12fe	3a 01 e7
+	and 080h		;1301	e6 80
+	ld c, -28		;1303	0e e4
+	jr z,l1309h		;1305	28 02
+	ld c, 28		;1307	0e 1c
 l1309h:
 	ld a,(THOMAS_POSITION_H)		;1309	3a 13 e7 	: . . 
 	add a,c			;130c	81 	. 
