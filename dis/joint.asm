@@ -86,6 +86,9 @@ M62_SPRITERAM: EQU 0xC000
 M62_TILERAM: EQU 0xD000
 M62_TILERAM_COLORS: EQU M62_TILERAM + 32*2*32
 
+; Avoids showing the text about the player number, floor, and "READY".
+AVOID_SHOWING_FLOOR_INTRO_TEXT: EQU 0xE81C
+
 ; A counter which is updated by the Z80's periodic interrupt
 INT_COUNTER: EQU 0xE880
 
@@ -1136,7 +1139,7 @@ l0447h:
 	ret			        ;0448	c9
 
 ANIMATION_THOMAS_STARTS_LEVEL:
-	ld (0e81ch),a		;0449	32 1c e8 	2 . . 
+	ld (AVOID_SHOWING_FLOOR_INTRO_TEXT),a		;0449	32 1c e8 	2 . . 
 	ld a, GAME_STATE_CLEAR		;044c	3e 01
 	ld (GAME_STATE),a		;044e	32 00 e0 	2 . . 
 	call sub_0644h		    ;0451	cd 44 06 	. D . 
@@ -1151,10 +1154,11 @@ l0461h:
 	call sub_0e9bh		;0465	cd 9b 0e 	. . . 
 	xor a			;0468	af 	. 
 	ld (0e915h),a		;0469	32 15 e9 	2 . . 
-	call 05756h		;046c	cd 56 57 	. V W 
-	ld a,(0e81ch)		;046f	3a 1c e8 	: . . 
+
+	call DRAW_SCENARIO		;046c	cd 56 57 	. V W 
+	ld a,(AVOID_SHOWING_FLOOR_INTRO_TEXT)		;046f	3a 1c e8 	: . . 
 	and a			;0472	a7 	. 
-	call z,sub_04e5h		;0473	cc e5 04 	. . . 
+	call z,PRINT_PLAYER_FLOOR_TEXT		;0473	cc e5 04 	. . . 
 	ld a, GAME_STATE_WALK_LEVEL_STARTS		;0476	3e 02
 	ld (GAME_STATE),a		;0478	32 00 e0 	2 . . 
 	ld a,027h		;047b	3e 27 	> ' 
@@ -1171,16 +1175,16 @@ l0461h:
 	inc (hl)			;0498	34 	4 
 	ld hl,05af0h		;0499	21 f0 5a 	! . Z 
 	call DRAW_FLOOR_HATCH		;049c	cd bf 04 	. . . 
-	ld a,(0e81ch)		;049f	3a 1c e8 	: . . 
+	ld a,(AVOID_SHOWING_FLOOR_INTRO_TEXT)		;049f	3a 1c e8 	: . . 
 	and a			;04a2	a7 	. 
-    ld hl, 0x053f; z80dasm wrote this as defb 021h, 03fh, 005h (bug z80dasm?)
+    ld hl, READY_STR ; z80dasm wrote this as defb 021h, 03fh, 005h (bug z80dasm?)
 	
 	call z,WRITE_TEXT		;04a6	cc 1c 11 	. . . 
 	ld a,054h		;04a9	3e 54 	> T 
 	call DELAY_A		;04ab	cd 0f 57 	. . W 
 	pop hl			;04ae	e1 	. 
 	ld (0e817h),hl		;04af	22 17 e8 	" . . 
-	call 05756h		;04b2	cd 56 57 	. V W 
+	call DRAW_SCENARIO		;04b2	cd 56 57 	. V W 
 	ld hl,0		;04b5	21 00 00 	! . . 
 	ld (0e014h),hl		;04b8	22 14 e0 	" . . 
 	ld (0e016h),hl		;04bb	22 16 e0 	" . . 
@@ -1193,7 +1197,7 @@ DRAW_FLOOR_HATCH:
 	ret z			        ;04c4	c8 Exit if it's the first level
 	and 001h		        ;04c5	e6 01 Write text if it's 2, 4: levels 3, and 5.
 	jp z,WRITE_TEXT		;04c7	ca 1c 11 	. . . 
-	call 05756h		;04ca	cd 56 57 	. V W 
+	call DRAW_SCENARIO		;04ca	cd 56 57 	. V W 
 	ld a,(0e915h)		;04cd	3a 15 e9 	: . . 
 	cp 002h		;04d0	fe 02 	. . 
 	ret nz			;04d2	c0 	. 
@@ -1208,7 +1212,9 @@ l04d9h:
 	defb 0fdh,0a7h,0d6h	;illegal sequence		;04e0	fd a7 d6 	. . . 
 	add a,e			;04e3	83 	. 
 	rst 38h			;04e4	ff 	. 
-sub_04e5h:
+
+; Print the "1-PLAYER 1-FLOOR" text which appears when starting a level
+PRINT_PLAYER_FLOOR_TEXT:
 	ld hl,l04fdh		;04e5	21 fd 04
 	call WRITE_TEXT		;04e8	cd 1c 11
 	ld a,(PLAYER_TURN)	;04eb	3a 02 e0
@@ -1218,6 +1224,7 @@ sub_04e5h:
 	call WRITE_TEXT		;04f4	cd 1c 11
 	call sub_0556h		;04f7	cd 56 05
 	jp WRITE_TEXT		;04fa	c3 1c 11
+
 l04fdh:
 	defb 0fdh,067h,0d3h	;illegal sequence		;04fd	fd 67 d3 	. g . 
 	defb 0feh, 0dbh
@@ -1230,6 +1237,8 @@ l04fdh:
 	defb "FLOOR ", 0fdh  ; 0523h
 	defb 0e7h,0d3h
 	defb "                  ", 0ffh
+    
+READY_STR:
 	defb 0feh,0dbh
 	defb 0fdh,02ch,0d4h
 	defb " READY ", 0fdh ; 0544h
@@ -3003,7 +3012,7 @@ sub_0e9bh:
 	call PRINT_TOP_SCORE		;0ea7	cd cf 10 	. . . 
 	call PRINT_TIME		;0eaa	cd d9 10 	. . . 
 	call DRAW_LIVES		;0ead	cd e6 10 	. . . 
-	ld a,(0e81ch)		;0eb0	3a 1c e8 	: . . 
+	ld a,(AVOID_SHOWING_FLOOR_INTRO_TEXT)		;0eb0	3a 1c e8 	: . . 
 	and a			;0eb3	a7 	. 
 	call z,sub_0f1ah		;0eb4	cc 1a 0f 	. . . 
 	ld a,003h		;0eb7	3e 03 	> . 
@@ -3024,29 +3033,38 @@ l0ed6h:
 	inc de			;0eda	13 	. 
 	djnz l0ed6h		;0edb	10 f9 	. . 
 	ld a,(DRAGONS_LEVEL)		;0edd	3a 80 e0 	: . . 
+    
+    ; Draw the upper part of the floor indicators in the panel
 	and 007h		;0ee0	e6 07 	. . 
 	inc a			;0ee2	3c 	< 
 	ld h,a			;0ee3	67 	g 
 	ld a,0a6h		;0ee4	3e a6 	> . 
 	ld de,0d0e0h		;0ee6	11 e0 d0 	. . . 
-	call sub_0f0ah		;0ee9	cd 0a 0f 	. . . 
-	inc a			;0eec	3c 	< 
+	call PRINT_FLOOR_INDICATORS		;0ee9	cd 0a 0f 	. . . 
+
+    ; Draw the lower part of the floor indicators in the panel
+	inc a			;0eec	3c
 	ld de,0d120h		;0eed	11 20 d1 	.   . 
-	call sub_0f0ah		;0ef0	cd 0a 0f 	. . . 
-	ld de,0d0e1h		;0ef3	11 e1 d0 	. . . 
+	call PRINT_FLOOR_INDICATORS		;0ef0	cd 0a 0f
+
+	; Draw the upper part of the arrows
+    ld de,0d0e1h		;0ef3	11 e1 d0 	. . . 
 	ld c,094h		;0ef6	0e 94 	. . 
 	ld a,0a8h		;0ef8	3e a8 	> . 
-	call sub_0f01h		;0efa	cd 01 0f 	. . . 
-	ld de,0d121h		;0efd	11 21 d1 	. ! . 
-	inc a			;0f00	3c 	< 
-sub_0f01h:
-	ld b,004h		;0f01	06 04 	. . 
+	call PRINT_FLOOR_INDICATOR_ARROWS		;0efa	cd 01 0f 	. . . 
+    
+    ; And the lower part of the arrows, now with a loop
+	ld de,0d121h	;0efd	11 21 d1
+	inc a		    ;0f00	3c
+PRINT_FLOOR_INDICATOR_ARROWS:
+	ld b, 4		    ;0f01	06 04 We have 4 arrows
 l0f03h:
 	call WRITE_CHAR_AT_SCREEN_DE		;0f03	cd 10 11 	. . . 
 	inc de			;0f06	13 	. 
 	djnz l0f03h		;0f07	10 fa 	. . 
 	ret			;0f09	c9 	. 
-sub_0f0ah:
+
+PRINT_FLOOR_INDICATORS:
 	ld l,h			;0f0a	6c 	l 
 	ld b,005h		;0f0b	06 05 	. . 
 	ld c,094h		;0f0d	0e 94 	. . 
@@ -3059,6 +3077,7 @@ l0f0fh:
 l0f17h:
 	djnz l0f0fh		;0f17	10 f6 	. . 
 	ret			;0f19	c9 	. 
+
 sub_0f1ah:
 	ld a,(DRAGONS_LEVEL)		;0f1a	3a 80 e0 	: . . 
 	and 0f8h		;0f1d	e6 f8 	. . 
@@ -3214,7 +3233,7 @@ l100fh:
 	ld de,l0040h		;1010	11 40 00 	. @ . 
 	add hl,de			;1013	19 	. 
 	ld (hl),a			;1014	77 	w 
-	ld a,(0e81ch)		;1015	3a 1c e8 	: . . 
+	ld a,(AVOID_SHOWING_FLOOR_INTRO_TEXT)		;1015	3a 1c e8 	: . . 
 	and a			;1018	a7 	. 
 	jr nz,l105ah		;1019	20 3f 	  ? 
 	ld b,a			;101b	47 	G 
@@ -4212,7 +4231,7 @@ l15fbh:
 l15ffh:
 	dec (ix + 7)		;15ff	dd 35 07 	. 5 . 
 	ret nz			;1602	c0 	. 
-	ld a,(0e81ch)		;1603	3a 1c e8 	: . . 
+	ld a,(AVOID_SHOWING_FLOOR_INTRO_TEXT)		;1603	3a 1c e8 	: . . 
 	and a			;1606	a7 	. 
 	ld a,002h		;1607	3e 02 	> . 
 	jr nz,l1615h		;1609	20 0a 	  . 
@@ -4936,7 +4955,7 @@ l1b20h:
 	call CHECK_DEMO_OR_VULNERABLE	;1b20	cd 08 12
     ; If invulnerable, simply remove the enemy
 	jr nz,REMOVE_ENEMY		        ;1b23	20 55
-	ld a,(0e81ch)		;1b25	3a 1c e8 	: . . 
+	ld a,(AVOID_SHOWING_FLOOR_INTRO_TEXT)		;1b25	3a 1c e8 	: . . 
 	and a			;1b28	a7 	. 
 	ld a,002h		;1b29	3e 02 	> . 
 	jr nz,l1b37h		;1b2b	20 0a 	  . 
@@ -9804,7 +9823,7 @@ l4098h:
 	ld a,(hl)	
 	add a,0e0h
 l40a6h:
-	call sub_5765h
+	call DRAW_SCENARIO_COL
 l40a9h:
 	pop hl	
 	ld (THOMAS_POSITION),hl
@@ -12574,21 +12593,25 @@ l5744h:
 l5751h:
 	call WRITE_CHAR_AT_SCREEN_DE
 	jr sub_5739h
-sub_5756h:
+
+DRAW_SCENARIO: ;  0x5756
 	ld hl,(0e817h)
 	ld a,h	
 l575ah:
 	push hl	
-	call sub_5765h
+	call DRAW_SCENARIO_COL
 	pop hl	
 	inc h	
 	ld a,h	
 	cp l	
 	jr nz,l575ah
-	ret	
-sub_5765h:
+	ret
+
+; Draw a column of chars of the scenario
+DRAW_SCENARIO_COL: ; 0x5765
 	cp 0e0h
-	ret nc	
+	ret nc ; Exit if finished
+
 	ld (DISTANCE_TO_LEFT),a
 	add a,020h
 	and 03fh
@@ -12596,14 +12619,16 @@ sub_5765h:
 	or l	
 	ld l,a	
 	ld a,(DISTANCE_TO_LEFT)
-	call sub_5800h
+
+	call DRAW_SCENARIO_COL_ROOF ; 0x5777
+
 	ld a,(DRAGONS_LEVEL)
 	and 001h
 	jr nz,l5786h
-	call sub_585fh
+	call DRAW_SCENARIO_COL_CORRIDOR
 	jr l5789h
 l5786h:
-	call sub_5835h
+	call DRAW_SCENARIO_COL_BOTTOM
 l5789h:
 	call GET_CURRENT_LEVEL
 	jr nz,l5793h
@@ -12648,7 +12673,8 @@ l57c4h:
 	ld (hl),a	
 	set 3,h
 	ld (hl),c	
-	ret	
+	ret
+
 sub_57d4h:
 	ld a,(DRAGONS_LEVEL)
 	and 001h
@@ -12672,7 +12698,9 @@ l57e1h:
 	ld l,a	
 	ld c,08bh
 	jr l57c4h
-sub_5800h:
+
+; Draw the part of the column of the scenario which corresponds to the roof
+DRAW_SCENARIO_COL_ROOF:
 	ld de,l61e7h
 	cp 0dah
 	jp nc,l5918h
@@ -12705,7 +12733,9 @@ l581ch:
 	ld (hl),05eh
 	add hl,de	
 	ret	
-sub_5835h:
+
+; Draw the part of the column of the scenario which corresponds to the bottom
+DRAW_SCENARIO_COL_BOTTOM:
 	ld a,(DISTANCE_TO_LEFT)
 	cp 0ddh
 	ret nc	
@@ -12726,7 +12756,9 @@ l5849h:
 	jr nc,l58c5h
 	ld de,l5c8eh
 	jr l58c5h
-sub_585fh:
+
+; Draw the part of the column of the scenario which corresponds to the corridor
+DRAW_SCENARIO_COL_CORRIDOR:
 	ld a,(DISTANCE_TO_LEFT)
 	cp 0ddh
 	ret nc	
@@ -12780,7 +12812,8 @@ l589fh:
 	jr nz,l58beh
 	cp 003h
 	jr nc,l58c8h
-	ret	
+	ret
+
 l58beh:
 	cp 002h
 	jr nc,l58c8h
