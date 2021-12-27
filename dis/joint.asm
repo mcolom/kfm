@@ -368,14 +368,21 @@ NUM_KNIVES: EQU 0xE32B
 ; calling OutP1Flipscreen @ 0d89.
 FLIP_SCREEN: EQU 0xE910
 
+; Its value is related to the detection of the coin sensor
+COIN_SENSOR: EQU 0xE911
+
 ; State of the floor's hatch
 ; 0: starting to close
 ; 1: middle closed
 ; 2: open, normal gaming
 HATCH_STATE: EQU 0xE915
 
-; Its value is related to the detection of the coin sensor
-COIN_SENSOR: EQU 0xE911
+; Audio channel, 1.. 15
+AUDIO_CHANNEL: EQU 0xE917
+
+; Sound codes at each of the 15 channels
+SOUNDS_IN_CHANNELS_LIST: EQU AUDIO_CHANNEL + 1
+
 
 ; 0: it forces 2 coins
 ; 1..7: number of coins needed add one credit
@@ -474,7 +481,9 @@ PLAYER_TURN: EQU 0xE002
 TIME: EQU 0xE003 ; Time, encoded in BCD in 0xE003 and 0xE004
 IN_FREEZE_CHEAT: EQU 0xE005
 
-
+; Controls if we're allowed to add one more non-priority sound to the
+; audio channels.
+ALLOWED_TO_ADD_SOUND: EQU 0xE006
 
 ; ************************ ROM start ************************
 	org	00000h
@@ -644,7 +653,7 @@ l0110h:
 	call sub_0d48h		;0117	cd 48 0d 	. H . 
 l011ah:
 	call sub_482fh		;011a	cd 2f 48 	. / H 
-	call sub_0de5h		;011d	cd e5 0d 	. . . 
+	call SEND_NEXT_SOUND_TO_IREM_AUDIO		;011d	cd e5 0d 	. . . 
 l0120h:
 	ld a,(IN_PLAY)	;0120	3a 01 e0
 	and a			;0123	a7
@@ -780,7 +789,7 @@ l01f8h:
 	call nz, sub_7aaeh		;0209	c4 ae 7a 	. . z 
 	call UPDATE_INTERNAL_COUNTER		;020c	cd f8 03 	. . . 
 	call CHECK_FLIPSCREEN_AND_READ_PLAYER_CONTROLS		;020f	cd 05 0d 	. . . 
-	call sub_0de5h		;0212	cd e5 0d 	. . . 
+	call SEND_NEXT_SOUND_TO_IREM_AUDIO		;0212	cd e5 0d 	. . . 
 	jr l01c4h		;0215	18 ad 	. . 
 l0217h:
 	ld sp,0f000h	;0217	31 00 f0
@@ -794,8 +803,10 @@ l0220h:
 	ld (GAME_STATE),a		;0220	32 00 e0 	2 . . 
 	ei			;0223	fb 	. 
 	call CHOOSE_1_OR_2_PLAYERS		;0224	cd 78 51 	. x Q 
+    
+    ; Set we're allowed to add sounds to the available channels
 	ld a,0ffh		;0227	3e ff 	> . 
-	ld (0e006h),a		;0229	32 06 e0 	2 . . 
+	ld (ALLOWED_TO_ADD_SOUND),a		;0229	32 06 e0 	2 . . 
 
     ; Reset all game variables
 	ld hl,DRAGONS_LEVEL		;022c	21 80 e0
@@ -1013,8 +1024,10 @@ l0382h:
 	ld hl,FLIP_SCREEN		;0389	21 10 e9 	! . . 
 	res 0,(hl)		;038c	cb 86 	. . 
 
-	xor a			;038e	af 	. 
-	ld (0e006h),a		;038f	32 06 e0 	2 . . 
+    ; We can't add sound to the audio channels
+	xor a			            ;038e	af
+	ld (ALLOWED_TO_ADD_SOUND),a	;038f	32 06 e0
+    
 	ld a,(COINS)		;0392	3a 13 e9 	: . . 
 	and a			;0395	a7 	. 
 	jp nz,l0217h		;0396	c2 17 02 	. . . 
@@ -2925,11 +2938,15 @@ sub_0db1h:
 	cp 001h		;0db8	fe 01 	. . 
 	ret nz			;0dba	c0 	. 
 	inc (hl)			;0dbb	34 	4 
-	ld a,(0e006h)		;0dbc	3a 06 e0 	: . . 
+    
+    ; Sound when inserting a coin.
+    ; Somehow inverted logic with ALLOWED_TO_ADD_SOUND here!
+	ld a,(ALLOWED_TO_ADD_SOUND)		;0dbc	3a 06 e0 	: . . 
 	and a			;0dbf	a7 	. 
 	ld a,001h		;0dc0	3e 01 	> . 
 	call z,PLAY_SOUND		;0dc2	cc fe 0d 	. . . 
-	ld a,(de)			;0dc5	1a 	. 
+	
+    ld a,(de)			;0dc5	1a 	. 
 	cp 001h		;0dc6	fe 01 	. . 
 	jr z,l0ddah		;0dc8	28 10 	( . 
 	cp 008h		;0dca	fe 08 	. . 
@@ -2955,49 +2972,73 @@ l0de3h:
 	ld (hl),a		;0de3	77
 	ret			    ;0de4	c9
 
-sub_0de5h:
-	ld hl,0e917h		;0de5	21 17 e9 	! . . 
-	ld a,(hl)			;0de8	7e 	~ 
-	and a			;0de9	a7 	. 
-	ret z			;0dea	c8 	. 
-	dec (hl)			;0deb	35 	5 
-	inc hl			;0dec	23 	# 
-	ld a,(hl)			;0ded	7e 	~ 
-	OutIremAudio		;0dee	d3 00 	. . 
-	or 080h		;0df0	f6 80 	. . 
-	OutIremAudio		;0df2	d3 00 	. . 
+; Sends the next sound in SOUNDS_IN_CHANNELS_LIST to the
+; Irem Audio hardware.
+SEND_NEXT_SOUND_TO_IREM_AUDIO:
+    ; A = AUDIO_CHANNEL
+	ld hl,AUDIO_CHANNEL		;0de5	21 17 e9
+	ld a,(hl)			    ;0de8	7e
+	and a			        ;0de9	a7
+	ret z			        ;0dea	c8 Exit if no channels playing
+    
+	dec (hl)			    ;0deb	35 AUDIO_CHANNEL = AUDIO_CHANNEL - 1
+    
+	inc hl			        ;0dec	23 HL = SOUNDS_IN_CHANNELS_LIST
+	ld a,(hl)			    ;0ded	7e Load sound code
+    
+    ; Ask the Irem Audio hardware to play the sound
+	OutIremAudio		    ;0dee	d3 00
+	or 080h		            ;0df0	f6 80
+	OutIremAudio		    ;0df2	d3 00
+    
+    ; Move the sound codes in the list one position to the left, so
+    ; next time the following sound will be played.
 	inc hl			;0df4	23 	# 
-	ld de,0e918h		;0df5	11 18 e9 	. . . 
-	ld bc,00fh		;0df8	01 0f 00 	. . . 
+	ld de,SOUNDS_IN_CHANNELS_LIST	;0df5	11 18 e9
+	ld bc, 15		                ;0df8	01 0f 00
 	ldir		;0dfb	ed b0 	. . 
 	ret			;0dfd	c9 	. 
 
-PLAY_SOUND:
-	push hl			;0dfe	e5 	. 
-	push de			;0dff	d5 	. 
-	ld d,a			;0e00	57 	W 
-	bit 7,d		;0e01	cb 7a 	. z 
-	jr z,l0e0dh		;0e03	28 08 	( . 
-	ld a,(0e006h)		;0e05	3a 06 e0 	: . . 
-	and a			;0e08	a7 	. 
-	jr z,l0e1dh		;0e09	28 12 	( . 
-	res 7,d		;0e0b	cb ba 	. . 
+PLAY_SOUND: ; 0dfe
+    ; A = sound to play
+	push hl			;0dfe	e5
+	push de			;0dff	d5
+	ld d,a			;0e00	57 D = sound to play
+	bit 7,d		    ;0e01	cb 7a D >= 0x80?
+	jr z,l0e0dh		;0e03	28 08 No, it's high priority, so play the sound without checking ALLOWED_TO_ADD_SOUND
+    
+    ; D >= 0x80: normal priority ==> check ALLOWED_TO_ADD_SOUND.
+	ld a,(ALLOWED_TO_ADD_SOUND)	        ;0e05	3a 06 e0
+	and a			        ;0e08	a7 Check ALLOWED_TO_ADD_SOUND
+	jr z,exit_play_sound	;0e09	28 12 Exit if ALLOWED_TO_ADD_SOUND = 0
+	res 7,d		            ;0e0b	cb ba D = D - 0x80. Get back to sound code.
+    ; [ALLOWED_TO_ADD_SOUND] != 0
 l0e0dh:
-	ld hl,0e917h		;0e0d	21 17 e9 	! . . 
-	ld a,(hl)			;0e10	7e 	~ 
-	cp 010h		;0e11	fe 10 	. . 
-	jr nc,l0e1dh		;0e13	30 08 	0 . 
-	inc (hl)			;0e15	34 	4 
-	inc hl			;0e16	23 	# 
-	ld e,a			;0e17	5f 	_ 
-	ld a,d			;0e18	7a 	z 
-	ld d,000h		;0e19	16 00 	. . 
-	add hl,de			;0e1b	19 	. 
-	ld (hl),a			;0e1c	77 	w 
-l0e1dh:
-	pop de			;0e1d	d1 	. 
-	pop hl			;0e1e	e1 	. 
-	ret			;0e1f	c9 	. 
+	ld hl,AUDIO_CHANNEL	    ;0e0d	21 17 e9
+	ld a,(hl)		        ;0e10	7e
+	cp 16		            ;0e11	fe 10
+	jr nc,exit_play_sound	;0e13	30 08 Exit if AUDIO_CHANNEL > 15: 
+	inc (hl)		        ;0e15	34 Increment AUDIO_CHANNEL
+
+	inc hl			;0e16	23 HL = SOUNDS_IN_CHANNELS_LIST
+    
+    ; DE = A = [AUDIO_CHANNEL]
+    ; A = D = sound to play
+	ld e,a			;0e17	5f 
+	ld a,d			;0e18	7a
+	ld d,000h		;0e19	16 00
+	add hl,de		;0e1b	19 HL = SOUNDS_IN_CHANNELS_LIST + AUDIO_CHANNEL
+	ld (hl),a		;0e1c	77 [SOUNDS_IN_CHANNELS_LIST + AUDIO_CHANNEL] <-- sound to play
+exit_play_sound:
+	pop de			;0e1d	d1
+	pop hl			;0e1e	e1
+	ret			    ;0e1f	c9
+    
+; In 0xE917: 2 0 24
+; In 0xE917: 2 5 5
+; <play sound>, <channel>, <sound #>
+
+
 l0e20h:
 	push hl			;0e20	e5 	. 
 	ld c,a			;0e21	4f 	O 
