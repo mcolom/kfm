@@ -10499,7 +10499,7 @@ l446eh:
 	ld (0e702h),hl
 	ld a, THOMAS_FRAME_READY
 	ld (THOMAS_FRAME),a
-	ld hl,l5000h
+	ld hl,0x5000
 	ld (0e710h),hl
 	ld hl,(THOMAS_POSITION)
 	ld (0e707h),hl
@@ -10733,7 +10733,7 @@ l4610h:
 	ret	
 l4625h:
     ; Check if Thomas is dying
-	ld hl,l5000h
+	ld hl,0x5000
 	ld hl,THOMAS_DAMAGE_STATUS ; Debug? It discards 0x5000 and loads a different value
 	bit 1,(hl)
 	jr z,l4643h ; Jump if Thomas is not dying
@@ -10866,7 +10866,7 @@ sub_4704h:
 	jr z,l4784h
 	ld a,(0e101h)
 	cp 001h
-	ld iy,l5000h
+	ld iy,0x5000
 	jr c,l4723h
 	ret nz	
 	ld iy,5200h
@@ -10877,7 +10877,7 @@ l4723h:
 	ret c	
 	push hl	
 	ld hl,(0e710h)
-	ld de,l5000h
+	ld de,0x5000
 	sbc hl,de
 	jr c,l4782h
 	add hl,hl	
@@ -11827,28 +11827,51 @@ l4febh:
 	ld a, GAME_STATE_GAME_ENDS
 	ld (GAME_STATE),a
 	call sub_5095h
-l5000h:
+;l5000h:
+    ; Draw a red heart and...
 	ld c,0d9h
-	ld hl,l5132h
+	ld hl,HEART1_STR
 	call WRITE_TEXT
-	ld hl,l5147h
+    
+    ; ...another...
+	ld hl,HEART2_STR
 	call WRITE_TEXT
-	ld hl,l5157h
+    
+    ; ...another...
+	ld hl,HEART3_STR
 	call WRITE_TEXT
-	ld hl,l5162h
+    
+    ; ...another...
+	ld hl,HEART4_STR
 	call WRITE_TEXT
-	ld hl,l516dh
+    
+    ; ... and another.
+	ld hl,HEART5_STR
 	call WRITE_TEXT
+    
+    ; Show the "A KUNG-FU MASTER... LITTLE WHILE." text and make the hearts move.
+    ; Play ending music
 	ld hl,ENDING_STR
-	call sub_5079h
+	call ANIMATE_TEXT_MOVE_HEARTS
+    
+    ; Show the "A KUNG-FU MASTER... LITTLE WHILE." text and make the hearts move.
+    ; Play ending music    
 	ld a,0f8h
-	call sub_5038h
+	call MOVE_ENDING_HEARTS
+    
+    ; Clear text
 	call sub_5091h
-	ld hl,50ffh
+    
+    ; Show the "BUT THEIR HAPPY DAYS DID NOT LAST LONG."
+    ; Hearts move.
+	ld hl,HAPPY_DAYS_STR
 	ld c,0d9h
-	call sub_5079h
+	call ANIMATE_TEXT_MOVE_HEARTS
+    
+    ; Here it falls into the routine to move the hearts
+    
 	ld a,0f8h
-sub_5038h:
+MOVE_ENDING_HEARTS:
 	push hl	
 	push bc	
 	push de	
@@ -11868,7 +11891,7 @@ l5040h:
 l5053h:
 	ld e,(hl)	
 	ld d,000h
-	ld hl,l506bh
+	ld hl,0x506b
 	add hl,de	
 	ld a,(hl)	
 	inc hl	
@@ -11882,8 +11905,9 @@ l5061h:
 	pop de	
 	pop bc	
 	pop hl	
-	ret	
-l506bh:
+	ret
+
+; This block seems unused junk
 	ld e,l	
 	ld d,c	
 	ld l,b	
@@ -11894,12 +11918,17 @@ l506bh:
 	ld d,c	
 	dec a	
 	ld d,c	
+
+; This is part of the look in ANIMATE_TEXT_MOVE_HEARTS
 l5075h:
 	ld e,(hl)	
 	inc hl	
 	ld d,(hl)	
-	inc hl	
-sub_5079h:
+	inc hl
+
+; Prints the given text piece by piece and moves the hearts
+; Used in the ending.
+ANIMATE_TEXT_MOVE_HEARTS:
 	ld a,(hl)	
 	inc hl	
 	inc a	
@@ -11907,24 +11936,26 @@ sub_5079h:
 	inc a	
 	inc a	
 	jr z,l5075h
+
 	sub 003h
 	call WRITE_CHAR_AT_SCREEN_DE
 	cp 020h
-	jr nz,sub_5079h
+	jr nz,ANIMATE_TEXT_MOVE_HEARTS
 	ld a,00bh
-	call sub_5038h
-	jr sub_5079h
+	call MOVE_ENDING_HEARTS
+	jr ANIMATE_TEXT_MOVE_HEARTS
+; SEGUIR
 sub_5091h:
-	ld b,008h
+	ld b, 8
 	jr l5097h
 sub_5095h:
-	ld b,019h
+	ld b, 25
 l5097h:
-	ld c,00bh
+	ld c, 11
 	ld de,0d19fh
 l509ch:
 	call CLEAR_33_CHARS
-	ld hl,001dh+2
+	ld hl,0x1f
 	add hl,de	
 	ex de,hl	
 	djnz l509ch
@@ -11937,15 +11968,15 @@ ENDING_STR:	;50a7
 	defb "SILVIA ENJOYED HAPPINESS "
 	defb 0fdh, 063h, 0d3h
 	defb "AGAIN FOR A LITTLE WHILE.", 0ffh
+
+HAPPY_DAYS_STR: ; 50ff
 	defb 0fdh, 0a6h, 0d2h
 	defb "BUT THEIR HAPPY DAYS "
 	defb 0fdh, 028h, 0d3h
 	defb "DID NOT LAST LONG.", 0ffh	
 	defb 0fdh,02eh,0d4h
-	nop			;5130
-l5131h:
-	nop	
-l5132h:
+	defb 0, 0		;5130
+HEART1_STR:
 	defb 0fdh,0ach,0d4h	;illegal sequence
 	ld h,b	
 	ld h,c	
@@ -11959,7 +11990,7 @@ l5132h:
 	defb 0fdh,0ech,0d4h	;illegal sequence
 	nop	
 	nop	
-l5147h:
+HEART2_STR:
 	defb 0fdh,06dh,0d4h	;illegal sequence
 	ld h,h	
 	ld h,l	
@@ -11972,7 +12003,7 @@ l5150h:
 l5155h:
 	nop	
 	nop	
-l5157h:
+HEART3_STR:
 	defb 0fdh,02eh,0d4h	;illegal sequence
 	ld h,(hl)	
 l515bh:
@@ -11981,7 +12012,7 @@ l515bh:
 	defb 0fdh,06dh,0d4h	;illegal sequence
 	nop	
 	nop	
-l5162h:
+HEART4_STR:
 	defb 0fdh,06fh,0d4h	;illegal sequence
 	ld l,b	
 	ld l,c	
@@ -11989,7 +12020,7 @@ l5162h:
 	defb 0fdh,06fh,0d4h	;illegal sequence
 	nop	
 	nop	
-l516dh:
+HEART5_STR:
 	defb 0fdh,0b0h,0d4h	;illegal sequence
 	ld l,d	
 	ld l,e	
