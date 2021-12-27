@@ -368,6 +368,12 @@ NUM_KNIVES: EQU 0xE32B
 ; calling OutP1Flipscreen @ 0d89.
 FLIP_SCREEN: EQU 0xE910
 
+; State of the floor's hatch
+; 0: starting to close
+; 1: middle closed
+; 2: open, normal gaming
+HATCH_STATE: EQU 0xE915
+
 ; Its value is related to the detection of the coin sensor
 COIN_SENSOR: EQU 0xE911
 
@@ -1159,7 +1165,7 @@ l0461h:
 	ld (0e817h),hl		;0462	22 17 e8 	" . . 
 	call sub_0e9bh		;0465	cd 9b 0e 	. . . 
 	xor a			;0468	af 	. 
-	ld (0e915h),a		;0469	32 15 e9 	2 . . 
+	ld (HATCH_STATE),a		;0469	32 15 e9 0: starting to close
 
 	call DRAW_SCENARIO		;046c	cd 56 57 	. V W 
 	ld a,(AVOID_SHOWING_FLOOR_INTRO_TEXT)		;046f	3a 1c e8 	: . . 
@@ -1171,14 +1177,18 @@ l0461h:
 	call DELAY_A		;047d	cd 0f 57 	. . W 
 	ld hl,0006h+1		;0480	21 07 00 	! . . 
 	ld (0e817h),hl		;0483	22 17 e8 	" . . 
-	ld hl,0e915h		;0486	21 15 e9 	! . . 
+    
+	ld hl,HATCH_STATE	;0486	21 15 e9
 	inc (hl)			;0489	34 	4 
+
 	ld hl,05aa1h		;048a	21 a1 5a 	! . Z 
 	call DRAW_FLOOR_HATCH		;048d	cd bf 04 	. . . 
 	ld a,00bh		;0490	3e 0b 	> . 
 	call DELAY_A		;0492	cd 0f 57 	. . W 
-	ld hl,0e915h		;0495	21 15 e9 	! . . 
+
+	ld hl,HATCH_STATE	;0495	21 15 e9
 	inc (hl)			;0498	34 	4 
+
 	ld hl,05af0h		;0499	21 f0 5a 	! . Z 
 	call DRAW_FLOOR_HATCH		;049c	cd bf 04 	. . . 
 	ld a,(AVOID_SHOWING_FLOOR_INTRO_TEXT)		;049f	3a 1c e8 	: . . 
@@ -1201,16 +1211,19 @@ DRAW_FLOOR_HATCH:
 	ld a,(DRAGONS_LEVEL)	;04bf	3a 80 e0
 	and 007h		        ;04c2	e6 07 Get level
 	ret z			        ;04c4	c8 Exit if it's the first level
-	and 001h		        ;04c5	e6 01 Write text if it's 2, 4: levels 3, and 5.
-	jp z,WRITE_TEXT		;04c7	ca 1c 11 	. . . 
-	call DRAW_SCENARIO		;04ca	cd 56 57 	. V W 
-	ld a,(0e915h)		;04cd	3a 15 e9 	: . . 
-	cp 002h		;04d0	fe 02 	. . 
-	ret nz			;04d2	c0 	. 
-	ld hl,l04d9h		;04d3	21 d9 04 	! . . 
+	and 1   		        ;04c5	e6 01 Write text if it's 2, 4: levels 3, and 5.
+	jp z,WRITE_TEXT		    ;04c7	ca 1c 11
+	call DRAW_SCENARIO		;04ca	cd 56 57
+
+	ld a,(HATCH_STATE)		;04cd	3a 15 e9
+	cp 2		            ;04d0	fe 02 2: hatch completly closed
+	ret nz			        ;04d2	c0
+
+    ; Draw the hatch's corner
+	ld hl,HATCH_CORNER		;04d3	21 d9 04 	! . . 
 	jp WRITE_TEXT		;04d6	c3 1c 11 	. . . 
 
-l04d9h:
+HATCH_CORNER:
 	defb 0fdh,067h,0d6h	;illegal sequence		;04d9	fd 67 d6 	. g . 
 	cp 092h		;04dc	fe 92 	. . 
 	add a,c			;04de	81 	. 
@@ -12733,8 +12746,8 @@ DRAW_SCENARIO_COL_BOTTOM:
 	jp l58c5h
 l5849h:
 	ld b,a	
-	ld a,(0e915h)
-	cp 001h
+	ld a,(HATCH_STATE)
+	cp 1
 	ld a,b	
 	ld de,l5d48h
 	jr z,l58c5h
@@ -12776,8 +12789,8 @@ l5886h:
 	ld de,l61cbh
 	call GET_CURRENT_LEVEL
 	jr z,l589ch
-	ld a,(0e915h)
-	cp 001h
+	ld a,(HATCH_STATE)
+	cp 1
 	ld de,l6176h
 	jr nc,l589ch
 	ld de,l60f5h
