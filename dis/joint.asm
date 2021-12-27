@@ -3305,8 +3305,6 @@ l1027h:
 l1037h:
 	call sub_0f58h		;1037	cd 58 0f 	. X . 
 l103ah:
-    ; Probably this is a check to give extra lives
-    
     ; Check if we've already given the extra life
 	ld a,(SKIP_LETTER_SKIP_EXTRA_LIFE)	;103a	3a 85 e0
 	and 001h		;103d	e6 01 Bit #0 of SKIP_LETTER_SKIP_EXTRA_LIFE: extra live already given
@@ -12038,132 +12036,44 @@ l521fh:
 	ld hl,HAND_AND_PAPER_DRAWING		;5229	21 32 52 	! 2 R 
 	call DRAW_HANDS_AND_PAPER		;522c	cd 39 57 	. 9 W
 
-    ; Write the text of the letter
+    ; Write the text of the letter.
+    ; Here HL = 0x5306
 	jp WRITE_TEXT		;522f	c3 1c 11 	. . . 
 
 
 HAND_AND_PAPER_DRAWING:
-	defb 0fdh,055h,0d1h	;illegal sequence		;5232	fd 55 d1 	. U . 
-	call z,sub_60fdh		;5235	cc fd 60 	. . ` 
-	pop de			;5238	d1 	. 
-	call z,sub_67fdh		;5239	cc fd 67 	. . g 
-	pop de			;523c	d1 	. 
-l523dh:
-	call z,092fdh		;523d	cc fd 92 	. . . 
-	out (0e3h),a		;5240	d3 e3 	. . 
-	defb 0fdh,0d1h,0d3h	;illegal sequence		;5242	fd d1 d3 	. . . 
-	exx			;5245	d9 	. 
-	ret c			;5246	d8 	. 
-	nop			;5247	00 	. 
-	ret nc			;5248	d0 	. 
-l5249h:
-	pop de			;5249	d1 	. 
-	call 010fdh		;524a	cd fd 10 	. . . 
-	call nc,0dbe0h		;524d	d4 e0 db 	. . . 
-	jp c,0d200h		;5250	da 00 d2 	. . . 
-	out (0cfh),a		;5253	d3 cf 	. . 
-	defb 0fdh,050h,0d4h	;illegal sequence		;5255	fd 50 d4 	. P . 
-	jp po,0dc07h		;5258	e2 07 dc 	. . . 
-	defb 0ddh,0d4h,0d5h	;illegal sequence		;525b	dd d4 d5 	. . . 
-	defb 0fdh,090h,0d4h	;illegal sequence		;525e	fd 90 d4 	. . . 
-	call po,0de07h		;5261	e4 07 de 	. . . 
-l5264h:
-	rst 18h			;5264	df 	. 
-	sub 0d7h		;5265	d6 d7 	. . 
-	defb 0fdh,0d0h,0d4h	;illegal sequence		;5267	fd d0 d4 	. . . 
-	and 007h		;526a	e6 07 	. . 
-	rlca			;526c	07 	. 
-	rlca			;526d	07 	. 
-	push hl			;526e	e5 	. 
-	defb 0fdh,010h,0d5h	;illegal sequence		;526f	fd 10 d5 	. . . 
-	pop hl			;5272	e1 	. 
-	rlca			;5273	07 	. 
-	ret pe			;5274	e8 	. 
-	jp (hl)			;5275	e9 	. 
-	rst 20h			;5276	e7 	. 
-	defb 0fdh,050h,0d5h	;illegal sequence		;5277	fd 50 d5 	. P . 
-	rlca			;527a	07 	. 
-	rlca			;527b	07 	. 
-	jp pe,0fdebh		;527c	ea eb fd 	. . . 
-	sub b			;527f	90 	. 
-	push de			;5280	d5 	. 
-	rlca			;5281	07 	. 
-	rlca			;5282	07 	. 
-	call pe,0fdedh		;5283	ec ed fd 	. . . 
-	ret nc			;5286	d0 	. 
-	push de			;5287	d5 	. 
-	rlca			;5288	07 	. 
-	rst 28h			;5289	ef 	. 
-	xor 0fdh		;528a	ee fd 	. . 
-	djnz l5264h		;528c	10 d6 	. . 
-	rlca			;528e	07 	. 
-	pop af			;528f	f1 	. 
-	defb 0fdh,050h,0d6h	;illegal sequence		;5290	fd 50 d6 	. P . 
-	ret p			;5293	f0 	. 
-	di			;5294	f3 	. 
-	defb 0fdh,090h,0d6h	;illegal sequence		;5295	fd 90 d6 	. . . 
-	jp p,0d0fdh		;5298	f2 fd d0 	. . . 
-	sub 0f4h		;529b	d6 f4 	. . 
-	defb 0fdh,0d6h,0d6h	;illegal sequence		;529d	fd d6 d6 	. . . 
-	adc a,0fdh		;52a0	ce fd 	. . 
-	call po,0ced6h		;52a2	e4 d6 ce 	. . . 
-	cp 0fdh		;52a5	fe fd 	. . 
-	xor l			;52a7	ad 	. 
-	out (0e3h),a		;52a8	d3 e3 	. . 
-	jp (iy)		;52aa	fd e9 	. . 
-	out (0cdh),a		;52ac	d3 cd 	. . 
-	pop de			;52ae	d1 	. 
-	ret nc			;52af	d0 	. 
-	nop			;52b0	00 	. 
-	ret c			;52b1	d8 	. 
-	exx			;52b2	d9 	. 
-	add iy,iy		;52b3	fd 29 	. ) 
-	call nc,0d3cfh		;52b5	d4 cf d3 	. . . 
-	jp nc,0da00h		;52b8	d2 00 da 	. . . 
-	in a,(0e0h)		;52bb	db e0 	. . 
-	defb 0fdh,06ah,0d4h	;illegal sequence		;52bd	fd 6a d4 	. j . 
-	push de			;52c0	d5 	. 
-	call nc,0dcddh		;52c1	d4 dd dc 	. . . 
-	rlca			;52c4	07 	. 
-	jp po,0aafdh		;52c5	e2 fd aa 	. . . 
-	call nc,0d6d7h		;52c8	d4 d7 d6 	. . . 
-	rst 18h			;52cb	df 	. 
-	sbc a,007h		;52cc	de 07 	. . 
-	call po,0ebfdh		;52ce	e4 fd eb 	. . . 
-	call nc,007e5h		;52d1	d4 e5 07 	. . . 
-	rlca			;52d4	07 	. 
-	rlca			;52d5	07 	. 
-	and 0fdh		;52d6	e6 fd 	. . 
-	dec hl			;52d8	2b 	+ 
-	push de			;52d9	d5 	. 
-	rst 20h			;52da	e7 	. 
-	jp (hl)			;52db	e9 	. 
-	ret pe			;52dc	e8 	. 
-	rlca			;52dd	07 	. 
-	pop hl			;52de	e1 	. 
-	defb 0fdh,06ch,0d5h	;illegal sequence		;52df	fd 6c d5 	. l . 
-	ex de,hl			;52e2	eb 	. 
-	jp pe,00707h		;52e3	ea 07 07 	. . . 
-	defb 0fdh,0ach,0d5h	;illegal sequence		;52e6	fd ac d5 	. . . 
-	defb 0edh;next byte illegal after ed		;52e9	ed 	. 
-	call pe,00707h		;52ea	ec 07 07 	. . . 
-	defb 0fdh,0edh,0d5h	;illegal sequence		;52ed	fd ed d5 	. . . 
-	xor 0efh		;52f0	ee ef 	. . 
-	rlca			;52f2	07 	. 
-	defb 0fdh,02eh,0d6h	;illegal sequence		;52f3	fd 2e d6 	. . . 
-	pop af			;52f6	f1 	. 
-	rlca			;52f7	07 	. 
-	ld l,(iy-02ah)		;52f8	fd 6e d6 	. n . 
-	di			;52fb	f3 	. 
-	ret p			;52fc	f0 	. 
-	defb 0fdh,0afh,0d6h	;illegal sequence		;52fd	fd af d6 	. . . 
-	jp p,0effdh		;5300	f2 fd ef 	. . . 
-	sub 0f4h		;5303	d6 f4 	. . 
-	rst 38h			;5305	ff 	. 
-	cp 01bh		;5306	fe 1b 	. .
+    ; Drawing of the hands holding the letter.
+    ; The text of the letter is below.
+    db 0xfd, 0x55, 0xd1, 0xcc, 0xfd, 0x60, 0xd1, 0xcc; 0x5232 - 0x5239
+    db 0xfd, 0x67, 0xd1, 0xcc, 0xfd, 0x92, 0xd3, 0xe3; 0x523a - 0x5241
+    db 0xfd, 0xd1, 0xd3, 0xd9, 0xd8, 0x0, 0xd0, 0xd1; 0x5242 - 0x5249
+    db 0xcd, 0xfd, 0x10, 0xd4, 0xe0, 0xdb, 0xda, 0x0; 0x524a - 0x5251
+    db 0xd2, 0xd3, 0xcf, 0xfd, 0x50, 0xd4, 0xe2, 0x7; 0x5252 - 0x5259
+    db 0xdc, 0xdd, 0xd4, 0xd5, 0xfd, 0x90, 0xd4, 0xe4; 0x525a - 0x5261
+    db 0x7, 0xde, 0xdf, 0xd6, 0xd7, 0xfd, 0xd0, 0xd4; 0x5262 - 0x5269
+    db 0xe6, 0x7, 0x7, 0x7, 0xe5, 0xfd, 0x10, 0xd5; 0x526a - 0x5271
+    db 0xe1, 0x7, 0xe8, 0xe9, 0xe7, 0xfd, 0x50, 0xd5; 0x5272 - 0x5279
+    db 0x7, 0x7, 0xea, 0xeb, 0xfd, 0x90, 0xd5, 0x7; 0x527a - 0x5281
+    db 0x7, 0xec, 0xed, 0xfd, 0xd0, 0xd5, 0x7, 0xef; 0x5282 - 0x5289
+    db 0xee, 0xfd, 0x10, 0xd6, 0x7, 0xf1, 0xfd, 0x50; 0x528a - 0x5291
+    db 0xd6, 0xf0, 0xf3, 0xfd, 0x90, 0xd6, 0xf2, 0xfd; 0x5292 - 0x5299
+    db 0xd0, 0xd6, 0xf4, 0xfd, 0xd6, 0xd6, 0xce, 0xfd; 0x529a - 0x52a1
+    db 0xe4, 0xd6, 0xce, 0xfe, 0xfd, 0xad, 0xd3, 0xe3; 0x52a2 - 0x52a9
+    db 0xfd, 0xe9, 0xd3, 0xcd, 0xd1, 0xd0, 0x0, 0xd8; 0x52aa - 0x52b1
+    db 0xd9, 0xfd, 0x29, 0xd4, 0xcf, 0xd3, 0xd2, 0x0; 0x52b2 - 0x52b9
+    db 0xda, 0xdb, 0xe0, 0xfd, 0x6a, 0xd4, 0xd5, 0xd4; 0x52ba - 0x52c1
+    db 0xdd, 0xdc, 0x7, 0xe2, 0xfd, 0xaa, 0xd4, 0xd7; 0x52c2 - 0x52c9
+    db 0xd6, 0xdf, 0xde, 0x7, 0xe4, 0xfd, 0xeb, 0xd4; 0x52ca - 0x52d1
+    db 0xe5, 0x7, 0x7, 0x7, 0xe6, 0xfd, 0x2b, 0xd5; 0x52d2 - 0x52d9
+    db 0xe7, 0xe9, 0xe8, 0x7, 0xe1, 0xfd, 0x6c, 0xd5; 0x52da - 0x52e1
+    db 0xeb, 0xea, 0x7, 0x7, 0xfd, 0xac, 0xd5, 0xed; 0x52e2 - 0x52e9
+    db 0xec, 0x7, 0x7, 0xfd, 0xed, 0xd5, 0xee, 0xef; 0x52ea - 0x52f1
+    db 0x7, 0xfd, 0x2e, 0xd6, 0xf1, 0x7, 0xfd, 0x6e; 0x52f2 - 0x52f9
+    db 0xd6, 0xf3, 0xf0, 0xfd, 0xaf, 0xd6, 0xf2, 0xfd; 0x52fa - 0x5301
+    db 0xef, 0xd6, 0xf4, 0xff; 0x5302 - 0x5305
 
-
-	defb 0fdh,017h,0d2h	;5308
+    ; Text of the letter
+	defb 0xfe, 0x1b, 0fdh,017h,0d2h	;5306
 	defb "YOUR LOVE "
 	defb 0feh, 01fh
 	defb "SILVIA"
