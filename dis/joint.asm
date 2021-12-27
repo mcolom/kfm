@@ -866,7 +866,7 @@ l0285h:
 	ld a, GAME_STATE_PLAY		;0292	3e 04
 	ld (GAME_STATE),a		;0294	32 00 e0 	2 . . 
 	ld a,024h		;0297	3e 24 	> $ 
-	call sub_0dfeh		;0299	cd fe 0d 	. . . 
+	call PLAY_SOUND		;0299	cd fe 0d 	. . . 
 l029ch:
 	InDSW2		;029c	db 04
 	bit 4,a		;029e	cb 67 Check bit 4: freeze cheat
@@ -887,9 +887,9 @@ l02aeh:
 	jr l029ch		;02be	18 dc 	. . 
 l02c0h:
 	ld a,000h		;02c0	3e 00 	> . 
-	call sub_0dfeh		;02c2	cd fe 0d 	. . . 
+	call PLAY_SOUND		;02c2	cd fe 0d 	. . . 
 	ld a,022h		;02c5	3e 22 	> " 
-	call sub_0dfeh		;02c7	cd fe 0d 	. . . 
+	call PLAY_SOUND		;02c7	cd fe 0d 	. . . 
 	ld a,0e1h		;02ca	3e e1 	> . 
 	call sub_0582h		;02cc	cd 82 05 	. . . 
 	ld a,038h		;02cf	3e 38 	> 8 
@@ -944,7 +944,7 @@ l0307h:
 	push de			;0312	d5 	. 
 	call INCREMENT_DE_POINTS		;0313	cd 9a 2f 	. . / 
 	ld a,016h		;0316	3e 16 	> . 
-	call sub_0dfeh		;0318	cd fe 0d 	. . . 
+	call PLAY_SOUND		;0318	cd fe 0d 	. . . 
 	jr l02eeh		;031b	18 d1 	. . 
     
 time_decrement_done:
@@ -974,7 +974,7 @@ l033ah:
 	ld a,(0e007h)		;034d	3a 07 e0 	: . . 
 	and a			;0350	a7 	. 
 	jr z,l0360h		;0351	28 0d 	( . 
-	call sub_0dfeh		;0353	cd fe 0d 	. . . 
+	call PLAY_SOUND		;0353	cd fe 0d 	. . . 
 	ld a,0a9h		;0356	3e a9 	> . 
 	call DELAY_A		;0358	cd 0f 57 	. . W 
 	jr l0360h		;035b	18 03 	. . 
@@ -1023,7 +1023,7 @@ l039ch:
 	ld hl,IN_FREEZE_CHEAT		;039c	21 05 e0 	! . . 
 	set 7,(hl)		;039f	cb fe 	. . 
 	ld a,000h		;03a1	3e 00 	> . 
-	call sub_0dfeh		;03a3	cd fe 0d 	. . . 
+	call PLAY_SOUND		;03a3	cd fe 0d 	. . . 
 	xor a			;03a6	af 	. 
 	ld (GAME_STATE),a		;03a7	32 00 e0 	2 . . 
 	call CLEAR_TILEMAP		;03aa	cd 57 11 	. W . 
@@ -1278,7 +1278,7 @@ sub_055fh:
 	ld a,003h		;0564	3e 03 	> . 
 	ld (STEP_COUNTER),a		;0566	32 83 e8 	2 . . 
 	ld a,016h		;0569	3e 16 	> . 
-	call sub_0dfeh		;056b	cd fe 0d 	. . . 
+	call PLAY_SOUND		;056b	cd fe 0d 	. . . 
 	ret			;056e	c9 	. 
 sub_056fh:
 	InDSW1		;056f	db 03 	. . 
@@ -2928,7 +2928,7 @@ sub_0db1h:
 	ld a,(0e006h)		;0dbc	3a 06 e0 	: . . 
 	and a			;0dbf	a7 	. 
 	ld a,001h		;0dc0	3e 01 	> . 
-	call z,sub_0dfeh		;0dc2	cc fe 0d 	. . . 
+	call z,PLAY_SOUND		;0dc2	cc fe 0d 	. . . 
 	ld a,(de)			;0dc5	1a 	. 
 	cp 001h		;0dc6	fe 01 	. . 
 	jr z,l0ddah		;0dc8	28 10 	( . 
@@ -2971,7 +2971,8 @@ sub_0de5h:
 	ld bc,00fh		;0df8	01 0f 00 	. . . 
 	ldir		;0dfb	ed b0 	. . 
 	ret			;0dfd	c9 	. 
-sub_0dfeh:
+
+PLAY_SOUND:
 	push hl			;0dfe	e5 	. 
 	push de			;0dff	d5 	. 
 	ld d,a			;0e00	57 	W 
@@ -3258,7 +3259,7 @@ sub_0fb8h:
 	and a			;0fcc	a7 	. 
 	jr nz,l0fd5h		;0fcd	20 06 	  . 
 	ld a,000h		;0fcf	3e 00 	> . 
-	call sub_0dfeh		;0fd1	cd fe 0d 	. . . 
+	call PLAY_SOUND		;0fd1	cd fe 0d 	. . . 
 	inc (hl)			;0fd4	34 	4 
 l0fd5h:
 	ld hl,INT_COUNTER + 5		;0fd5	21 85 e8 	! . . 
@@ -3267,7 +3268,7 @@ l0fd5h:
 	jr nz,sub_0fe3h		;0fda	20 07 	  . 
 	ld (hl),038h		;0fdc	36 38 	6 8 
 	ld a,097h		;0fde	3e 97 	> . 
-	call sub_0dfeh		;0fe0	cd fe 0d 	. . . 
+	call PLAY_SOUND		;0fe0	cd fe 0d 	. . . 
 sub_0fe3h:
 	ld hl,0e81bh		;0fe3	21 1b e8 	! . . 
 	ld a,(INT_COUNTER)		;0fe6	3a 80 e8 	: . . 
@@ -3340,7 +3341,7 @@ l103ah:
 	inc (hl)			;1051	34 	4 
     
 	ld a,098h		;1052	3e 98 	> . 
-	call sub_0dfeh		;1054	cd fe 0d 	. . . 
+	call PLAY_SOUND		;1054	cd fe 0d 	. . . 
 	call DRAW_LIVES		;1057	cd e6 10 	. . . 
 l105ah:
 	ld a,(GAME_STATE)		;105a	3a 00 e0 	: . . 
@@ -4346,7 +4347,7 @@ sub_163eh:
 	ret nc			;1644	d0 	. 
 	push af			;1645	f5 	. 
 	ld a,091h		;1646	3e 91 	> . 
-	call sub_0dfeh		;1648	cd fe 0d 	. . . 
+	call PLAY_SOUND		;1648	cd fe 0d 	. . . 
 	pop af			;164b	f1 	. 
 	jp m,l1653h		;164c	fa 53 16 	. S . 
 	ld a,080h		;164f	3e 80 	> . 
@@ -4518,7 +4519,7 @@ l1796h:
 	call GET_ENEMY_FALLING_HEIGHT_IN_HL		;1796	cd 9e 1c 	. . . 
 	ld de,l010ch		;1799	11 0c 01 	. . . 
 	ld a,091h		;179c	3e 91 	> . 
-	call sub_0dfeh		;179e	cd fe 0d 	. . . 
+	call PLAY_SOUND		;179e	cd fe 0d 	. . . 
 	call sub_2ee2h		;17a1	cd e2 2e 	. . . 
 	ld a,007h		;17a4	3e 07 	> . 
 	push af			;17a6	f5 	. 
@@ -4549,7 +4550,7 @@ l17bah:
 l17d7h:
 	call ADD_POINTS		;17d7	cd 60 2f 	. ` / 
 	ld a,091h		;17da	3e 91 	> . 
-	call sub_0dfeh		;17dc	cd fe 0d 	. . . 
+	call PLAY_SOUND		;17dc	cd fe 0d 	. . . 
 	ld hl,01c5bh		;17df	21 5b 1c 	! [ . 
 	jp l1b96h		;17e2	c3 96 1b 	. . . 
 l17e5h:
@@ -4610,7 +4611,7 @@ sub_1828h:
 l183bh:
 	ld (ix + 0),c		;183b	dd 71 00 	. q . 
 	ld a,091h		;183e	3e 91 	> . 
-	call sub_0dfeh		;1840	cd fe 0d 	. . . 
+	call PLAY_SOUND		;1840	cd fe 0d 	. . . 
 	pop af			;1843	f1 	. 
 	jp m,l184bh		;1844	fa 4b 18 	. K . 
 	ld a,081h		;1847	3e 81 	> . 
@@ -4684,7 +4685,7 @@ l18b6h:
 	dec (ix + 10)		;18b6	dd 35 0a 	. 5 . 
 	push af			;18b9	f5 	. 
 	ld a,091h		;18ba	3e 91 	> . 
-	call sub_0dfeh		;18bc	cd fe 0d 	. . . 
+	call PLAY_SOUND		;18bc	cd fe 0d 	. . . 
 	pop af			;18bf	f1 	. 
 	jr z,l18c6h		;18c0	28 04 	( . 
 	inc (ix + 1)		;18c2	dd 34 01 	. 4 . 
@@ -5389,7 +5390,7 @@ sub_1dbfh:
 	jr c,l1dceh		;1dca	38 02 	8 . 
 	ld a,099h		;1dcc	3e 99 	> . 
 l1dceh:
-	call sub_0dfeh		;1dce	cd fe 0d 	. . . 
+	call PLAY_SOUND		;1dce	cd fe 0d 	. . . 
 	pop de			;1dd1	d1 	. 
 	pop hl			;1dd2	e1 	. 
 	ret			;1dd3	c9 	. 
@@ -5404,7 +5405,7 @@ sub_1dd4h:
 	jr c,l1de3h		;1ddf	38 02 	8 . 
 	ld a,09ah		;1de1	3e 9a 	> . 
 l1de3h:
-	call sub_0dfeh		;1de3	cd fe 0d 	. . . 
+	call PLAY_SOUND		;1de3	cd fe 0d 	. . . 
 	pop de			;1de6	d1 	. 
 	pop hl			;1de7	e1 	. 
 	ret			;1de8	c9 	. 
@@ -6494,7 +6495,7 @@ l266eh:
 	jr l26d2h		;2696	18 3a 	. : 
 l2698h:
 	ld a,091h		;2698	3e 91 	> . 
-	call sub_0dfeh		;269a	cd fe 0d 	. . . 
+	call PLAY_SOUND		;269a	cd fe 0d 	. . . 
 	ld l,(ix + ENEMY_POS_L_IDX)		;269d	dd 6e 02
 	ld h,(ix + ENEMY_POS_H_IDX)		;26a0	dd 66 03
 	ld (0e31dh),hl		;26a3	22 1d e3 	" . . 
@@ -7212,7 +7213,7 @@ l2c1dh:
 	ld (ix + ENEMY_STATE_IDX), 9	;2c20	dd 36 01 09
 	ld (ix + ENEMY_FRAME_COUNTER_IDX), 11	;2c24	dd 36 07 0b
 	ld a,091h		;2c28	3e 91 	> . 
-	call sub_0dfeh		;2c2a	cd fe 0d 	. . . 
+	call PLAY_SOUND		;2c2a	cd fe 0d 	. . . 
 l2c2dh:
 	xor a			;2c2d	af 	. 
 	ld (0e2d6h),a		;2c2e	32 d6 e2 	2 . . 
@@ -7292,7 +7293,7 @@ l2c8eh:
 	ret			;2c94	c9 	. 
 l2c95h:
 	ld a,091h		;2c95	3e 91 	> . 
-	call sub_0dfeh		;2c97	cd fe 0d 	. . . 
+	call PLAY_SOUND		;2c97	cd fe 0d 	. . . 
 sub_2c9ah:
 	ld a,(ENERGY)		;2c9a	3a 09 e7 	: . . 
 	sub e			;2c9d	93 	. 
@@ -7370,9 +7371,9 @@ sub_2d13h:
 	jp l1bf2h		;2d16	c3 f2 1b 	. . . 
 sub_2d19h:
 	ld a,083h		;2d19	3e 83 	> . 
-	call sub_0dfeh		;2d1b	cd fe 0d 	. . . 
+	call PLAY_SOUND		;2d1b	cd fe 0d 	. . . 
 	ld a,091h		;2d1e	3e 91 	> . 
-	call sub_0dfeh		;2d20	cd fe 0d 	. . . 
+	call PLAY_SOUND		;2d20	cd fe 0d 	. . . 
 	push de			;2d23	d5 	. 
 	ld a,(THOMAS_FRAME)		;2d24	3a 06 e7 	: . . 
 	push hl			;2d27	e5 	. 
@@ -7389,7 +7390,7 @@ sub_2d19h:
 	pop de			;2d39	d1 	. 
 	ret nc			;2d3a	d0 	. 
 	ld a,087h		;2d3b	3e 87 	> . 
-	call sub_0dfeh		;2d3d	cd fe 0d 	. . . 
+	call PLAY_SOUND		;2d3d	cd fe 0d 	. . . 
 	scf			;2d40	37 	7 
 	ret			;2d41	c9 	. 
 l2d42h:
@@ -7675,7 +7676,7 @@ sub_2ee2h:
 	inc hl			;2ef3	23 	# 
 	ld (hl),e		;2ef4	73 Write E = amount of energy to subtract. HL = ENERGY_TO_SUBTRACT.
 	ld a,083h		;2ef5	3e 83 	> . 
-	call sub_0dfeh		;2ef7	cd fe 0d 	. . . 
+	call PLAY_SOUND		;2ef7	cd fe 0d 	. . . 
 	ret			;2efa	c9
 
 l2efbh:
@@ -7981,7 +7982,7 @@ l30cdh:
 l3106h:
 	call sub_333ah		;3106	cd 3a 33 	. : 3 
 	ld a,086h		;3109	3e 86 	> . 
-	call sub_0dfeh		;310b	cd fe 0d 	. . . 
+	call PLAY_SOUND		;310b	cd fe 0d 	. . . 
 	ld iy,TBL_MAGICAL_ELEMENTS		;310e	fd 21 82 e3 	. ! . . 
 	ld b,010h		;3112	06 10 	. . 
 	ld c,00ah		;3114	0e 0a 	. . 
@@ -8061,7 +8062,7 @@ l31c0h:
 	ld h,(ix + 5)		;31c3	dd 66 05 	. f . 
 	ld de,l0120h		;31c6	11 20 01 	.   . 
 	ld a,091h		;31c9	3e 91 	> . 
-	call sub_0dfeh		;31cb	cd fe 0d 	. . . 
+	call PLAY_SOUND		;31cb	cd fe 0d 	. . . 
 	call sub_2ee2h		;31ce	cd e2 2e 	. . . 
 	jp l3713h		;31d1	c3 13 37 	. . 7 
 	call l1be2h		;31d4	cd e2 1b 	. . . 
@@ -8090,7 +8091,7 @@ l31c0h:
 	jr l3220h		;3211	18 0d 	. . 
 l3213h:
 	ld a,086h		;3213	3e 86 	> . 
-	call sub_0dfeh		;3215	cd fe 0d 	. . . 
+	call PLAY_SOUND		;3215	cd fe 0d 	. . . 
 l3218h:
 	ld (ix + MAGICAL_ELEMENT_STATE_IDX), ME_STATE_DRAGON_SMOKE_APPEARS ;3218	dd 36 01 07
 	ld (ix + CURRENT_FRAME_IDX), 13 ;321c	dd 36 06 0d
@@ -8158,7 +8159,7 @@ l32a2h:
 	jr l32bfh		;32a6	18 17
 l32a8h:
 	ld a,086h		;32a8	3e 86 	> . 
-	call sub_0dfeh		;32aa	cd fe 0d 	. . . 
+	call PLAY_SOUND		;32aa	cd fe 0d 	. . . 
 	ld l,(ix + MAGICAL_ELEMENT_DISTANCE_L_IDX)	;32ad	dd 6e 02
 	ld h,(ix + MAGICAL_ELEMENT_DISTANCE_H_IDX)	;32b0	dd 66 03
 	ld de,0xdc		;32b3	11 dc 00 	. . . 
@@ -8183,11 +8184,11 @@ l32bfh:
 	jp l3713h		;32e3	c3 13 37 	. . 7 
 l32e6h:
 	ld a,093h		;32e6	3e 93 	> . 
-	call sub_0dfeh		;32e8	cd fe 0d 	. . . 
+	call PLAY_SOUND		;32e8	cd fe 0d 	. . . 
 	jr l32f2h		;32eb	18 05 	. . 
 l32edh:
 	ld a,086h		;32ed	3e 86 	> . 
-	call sub_0dfeh		;32ef	cd fe 0d 	. . . 
+	call PLAY_SOUND		;32ef	cd fe 0d 	. . . 
 l32f2h:
 	ld a,(0e701h)		;32f2	3a 01 e7 	: . . 
 	and 001h		;32f5	e6 01 	. . 
@@ -8211,15 +8212,15 @@ l3305h:
 l3315h:
 	ld b,088h		;3315	06 88 	. . 
 	ld a,086h		;3317	3e 86 	> . 
-	call sub_0dfeh		;3319	cd fe 0d 	. . . 
+	call PLAY_SOUND		;3319	cd fe 0d 	. . . 
 	jr l333ch		;331c	18 1e 	. . 
 l331eh:
 	ld b,087h		;331e	06 87 	. . 
 	ld a,086h		;3320	3e 86 	> . 
-	call sub_0dfeh		;3322	cd fe 0d 	. . . 
+	call PLAY_SOUND		;3322	cd fe 0d 	. . . 
 	jr l333ch		;3325	18 15 	. . 
 l3327h:
-	call sub_0dfeh		;3327	cd fe 0d 	. . . 
+	call PLAY_SOUND		;3327	cd fe 0d 	. . . 
 	ld l,(ix + 4)		;332a	dd 6e 04 	. n . 
 	ld h,(ix + 5)		;332d	dd 66 05 	. f . 
 	ld de,0x0280		;3330	11 80 02 	. . . 
@@ -8236,7 +8237,7 @@ l333ch:
 	ret			;334b	c9 	. 
 l334ch:
 	ld a,086h		;334c	3e 86 	> . 
-	call sub_0dfeh		;334e	cd fe 0d 	. . . 
+	call PLAY_SOUND		;334e	cd fe 0d 	. . . 
 	jr sub_333ah		;3351	18 e7 	. . 
 sub_3353h:
 	call sub_36f6h		;3353	cd f6 36 	. . 6 
@@ -8285,7 +8286,7 @@ l33c2h:
 	ld (ix + FRAME_COUNTER_IDX), 5	 ;33c6	dd 36 07 05
 	ld (ix + CURRENT_FRAME_IDX),004h ;33ca	dd 36 06 04
 	ld a,093h		;33ce	3e 93 	> . 
-	call sub_0dfeh		;33d0	cd fe 0d 	. . . 
+	call PLAY_SOUND		;33d0	cd fe 0d 	. . . 
 	ret			;33d3	c9 	. 
 	ld de,(0e36eh)		;33d4	ed 5b 6e e3 	. [ n . 
 	call sub_1c7ah		;33d8	cd 7a 1c 	. z . 
@@ -8315,7 +8316,7 @@ l33ffh:
 	ld hl,05600h		;340a	21 00 56 	! . V 
 	ld de,00320h		;340d	11 20 03 	.   . 
 	ld a,094h		;3410	3e 94 	> . 
-	call sub_0dfeh		;3412	cd fe 0d 	. . . 
+	call PLAY_SOUND		;3412	cd fe 0d 	. . . 
 	call sub_36cah		;3415	cd ca 36 	. . 6 
 	set 5,(ix + MAGICAL_ELEMENT_LOOKAT_IDX)		;3418	dd cb 00 ee
 l341ch:
@@ -8392,7 +8393,7 @@ l34c0h:
 	ret			;34c3	c9 	. 
 l34c4h:
 	ld a,086h		;34c4	3e 86 	> . 
-	call sub_0dfeh		;34c6	cd fe 0d 	. . . 
+	call PLAY_SOUND		;34c6	cd fe 0d 	. . . 
 	ld a,r		;34c9	ed 5f 	. _ 
 	and 003h		;34cb	e6 03 	. . 
 	jp z,l3218h		;34cd	ca 18 32 	. . 2 
@@ -8474,7 +8475,7 @@ l3567h:
 l356bh:
 	call sub_3353h		;356b	cd 53 33 	. S 3 
 	ld a,086h		;356e	3e 86 	> . 
-	call sub_0dfeh		;3570	cd fe 0d 	. . . 
+	call PLAY_SOUND		;3570	cd fe 0d 	. . . 
 	ld a,r		;3573	ed 5f 	. _ 
 	and 001h		;3575	e6 01 	. . 
 	jp z,l3713h		;3577	ca 13 37 	. . 7 
@@ -9369,7 +9370,7 @@ l3c00h:
 	jp l3cf2h		;3c0a	c3 f2 3c 	. . < 
 l3c0dh:
 	ld a,086h		;3c0d	3e 86 	> . 
-	call sub_0dfeh		;3c0f	cd fe 0d 	. . . 
+	call PLAY_SOUND		;3c0f	cd fe 0d 	. . . 
 	ld a,(0e701h)		;3c12	3a 01 e7 	: . . 
 	and 001h		;3c15	e6 01 	. . 
 	ld a,083h		;3c17	3e 83 	> . 
@@ -9380,7 +9381,7 @@ l3c1eh:
 	ld de,00115h		;3c1e	11 15 01 	. . . 
 	call sub_2ee2h		;3c21	cd e2 2e 	. . . 
 	ld a,094h		;3c24	3e 94 	> . 
-	call sub_0dfeh		;3c26	cd fe 0d 	. . . 
+	call PLAY_SOUND		;3c26	cd fe 0d 	. . . 
 	xor a			;3c29	af 	. 
 l3c2ah:
 	ld (ix + 14),a		;3c2a	dd 77 0e 	. w . 
@@ -9826,7 +9827,7 @@ l4017h:
 	jr nz,sub_402ch
 	call sub_433fh
 	ld a,090h
-	call sub_0dfeh
+	call PLAY_SOUND
 sub_402ch:
 	ld hl,(THOMAS_POSITION)
 	ld a,(NUM_GRIPPING)
@@ -10177,7 +10178,7 @@ sub_4279h:
 	ld a,00bh
 	ld (INT_COUNTER + 4),a
 	ld a,082h
-	call sub_0dfeh
+	call PLAY_SOUND
 	ret	
 l4289h:
     ; Check if Thomas is dying
@@ -10494,7 +10495,7 @@ l44a7h:
 	jr nz,l44c1h
 	ld b,0fbh
 	ld a,081h
-	call sub_0dfeh
+	call PLAY_SOUND
 	jr l44c4h
 l44c1h:
 	call sub_4279h
@@ -10624,9 +10625,9 @@ l459fh:
 	and a	
 	push af	
 	ld a,000h
-	call sub_0dfeh
+	call PLAY_SOUND
 	ld a,087h
-	call sub_0dfeh
+	call PLAY_SOUND
 	pop af	
 	ld hl,l45ech
 	ld de,000ch
@@ -10800,7 +10801,7 @@ l46e2h:
 	and 001h
 	ret nz	
 	ld a,090h
-	call sub_0dfeh
+	call PLAY_SOUND
 	ret	
 l46eeh:
 	ld a,GAME_STATE_LEVEL_ENDS
@@ -10855,7 +10856,7 @@ l4737h:
 l4749h:
 	ld (0e710h),iy
 	ld a,000h
-	call sub_0dfeh
+	call PLAY_SOUND
 	ld a, GAME_STATE_GO_UPSTAIRS_OR_SILVIA_RESCUED
 	ld (GAME_STATE),a
 	ex de,hl	
@@ -10902,7 +10903,7 @@ l4784h:
 	set 1,(hl)
 	ld (GAME_STATE),a
 	ld a,000h
-	call sub_0dfeh
+	call PLAY_SOUND
 	pop af	
 	ld a, THOMAS_FRAME_STANDING
 	ld (THOMAS_FRAME),a
@@ -11777,7 +11778,7 @@ l4f70h:
 sub_4fe9h:
 	ld a,023h
 l4febh:
-	call sub_0dfeh
+	call PLAY_SOUND
 	xor a	
 	ld (0e702h),a
 	ld (EXT_TICKS),a
@@ -12033,7 +12034,7 @@ DRAW_LETTER_SCREEN:
 	call CLEAR_TILEMAP		;520d	cd 57 11 	. W . 
 	call CONFIG_GAME_STOP		;5210	cd 03 57 	. . W 
 	ld a,020h		;5213	3e 20 	>   
-	call sub_0dfeh		;5215	cd fe 0d 	. . . 
+	call PLAY_SOUND		;5215	cd fe 0d 	. . . 
     
     ; This draws the yellow background of the letter
 	ld c,01bh		    ;5218	0e 1b 	. . 
@@ -12141,11 +12142,11 @@ l53f7h:
 	ld hl,54abh
 	call WRITE_TEXT
 	ld a,005h
-	call sub_0dfeh
+	call PLAY_SOUND
 	ld a,070h
 	call sub_5416h
 	ld a,005h
-	call sub_0dfeh
+	call PLAY_SOUND
 	ld a,0c0h
 sub_5416h:
 	ld (INT_COUNTER + 2),a
@@ -12218,7 +12219,7 @@ l5447h:
 	defb 03eh,021h
 
 l54f6h:
-	call sub_0dfeh
+	call PLAY_SOUND
 	ld de,0d340h
 l54fch:
 	ld c,0dbh
@@ -12297,7 +12298,7 @@ l555dh:
 	push de	
 	push af	
 	ld a,024h
-	call sub_0dfeh
+	call PLAY_SOUND
 	call sub_5620h
 	ld hl,568ah
 	call WRITE_TEXT
@@ -12398,7 +12399,7 @@ l560dh:
 	ld a,01ch
 	call DELAY_A
 	ld a,000h
-	call sub_0dfeh
+	call PLAY_SOUND
 	ret	
 l561bh:
 	ld a,020h
@@ -19175,9 +19176,9 @@ l79c7h:
 	ld (0e81fh),a
 	inc hl	
 	ld a,000h
-	call sub_0dfeh
+	call PLAY_SOUND
 	ld a,(hl)	
-	call sub_0dfeh
+	call PLAY_SOUND
 	ld hl,l7d56h
 	call WRITE_TEXT
 	pop af	
@@ -19195,7 +19196,7 @@ l79eeh:
 	and a	
 	jr nz,l79eeh
 	ld a,000h
-	call sub_0dfeh
+	call PLAY_SOUND
 	xor a	
 	ld (0e81fh),a
 	ld (hl),010h
@@ -19248,7 +19249,7 @@ l7a59h:
 	jr c,l7a43h
 l7a5bh:
 	ld a,000h
-	call sub_0dfeh
+	call PLAY_SOUND
 	ret	
 l7a61h:
 	dec l	
