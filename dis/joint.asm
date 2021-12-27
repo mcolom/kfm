@@ -1043,7 +1043,7 @@ l039ch:
 	ld hl,0				;03ad	21 00 00 	! . . 
 	ld (HSCROLL_LOW_W),hl		;03b0	22 02 e9 	" . . 
 	call 0570dh		;03b3	cd 0d 57 	. . W 
-	ld hl, select_game_floor_str		;03b6	21 5b 59
+	ld hl, SELECT_GAME_FLOOR_STR		;03b6	21 5b 59
 	call WRITE_TEXT		;03b9	cd 1c 11 	. . .
 
 l03bch:
@@ -12971,7 +12971,7 @@ l5958h:
 	ld c,a			;5958	4f 	O 
 	jr l5927h		;5959	18 cc 	. . 
     
-select_game_floor_str: ; 595b
+SELECT_GAME_FLOOR_STR: ; 595b
 	defb 0feh, 015h
 	defb 0fdh,0d8h,0d2h	
 	defb "SELECT GAME FLOOR"
@@ -18875,7 +18875,7 @@ l7743h:
 	call nz,sub_7be8h
 l7751h:
 	call CLEAR_TILEMAP
-	ld hl,l7cf7h
+	ld hl,MAIN_MENU_SERVICE_MODE_STR
 	call WRITE_TEXT
 	xor a	
 	ld (INT_COUNTER + 2),a
@@ -19059,7 +19059,7 @@ RAM_NG_str:
     defb "RAM  NG", 0ffh
 RAM_OK_str:
     defb "RAM  OK", 0ffh
-	ld hl,l7c30h
+	ld hl,DIP_SW_STR
 	call WRITE_TEXT
 	call sub_7bc1h
 	call WRITE_TEXT
@@ -19072,17 +19072,17 @@ l78a5h:
 	call sub_7bb2h
 	InDSW2
 	bit 1,a ; Check bit 1: cabinet setting (upright / cocktail)
-	ld hl,l7c96h
+	ld hl,TABLE_STR
 	jr nz,l78c1h
-	ld hl,l7c9eh
+	ld hl,UPRIGHT_STR
 l78c1h:
 	ld de,0d35dh
 	call WRITE_TEXT
 	InDSW1
 	and 001h    ; Check bit 0: difficulty
-	ld hl,l7ca6h
+	ld hl,EASY_STR
 	jr nz,l78d3h
-	ld hl,l7cb0h
+	ld hl,DIFFICULT_STR
 l78d3h:
 	ld de,0d39eh
 	call WRITE_TEXT
@@ -19090,9 +19090,9 @@ l78d3h:
 	InDSW1
 	and 002h ; Check bit 1: energy loss speed
 
-	ld hl,l7cbah
+	ld hl,SLOW_STR
 	jr nz,l78e5h
-	ld hl,l7cbfh
+	ld hl,FAST_STR
 l78e5h:
 	ld de,0d3deh
 	call WRITE_TEXT
@@ -19118,7 +19118,7 @@ l790ah:
 	ld de,0d2d0h
 	jr z,l7933h
 	push hl	
-	ld hl,coin_mode_str
+	ld hl,COIN_MODE_STR
 	call WRITE_TEXT
 	inc de	
 	ld a,042h
@@ -19128,7 +19128,7 @@ l790ah:
 	call sub_49f7h
 	jr l7936h
 l792ah:
-	ld hl,l7cc4h
+	ld hl,FREE_PLAY_STR
 	call WRITE_TEXT
 	ld de,0d2d0h
 l7933h:
@@ -19142,7 +19142,7 @@ l7936h:
 	ld de,0d455h
 l7944h:
 	push bc	
-	ld hl,l7cd8h
+	ld hl,INTERFACE_STR
 	call WRITE_TEXT
 	push hl	
 	inc de	
@@ -19159,7 +19159,7 @@ l7944h:
 	ex de,hl	
 	pop bc	
 	djnz l7944h
-	ld hl,l7cech
+	ld hl,TIMING_STR
 	call WRITE_TEXT
 	ld hl,09999h
 	ld (TIME),hl
@@ -19220,7 +19220,7 @@ l79c7h:
 	call PLAY_SOUND
 	ld a,(hl)	
 	call PLAY_SOUND
-	ld hl,l7d56h
+	ld hl,LIST_OF_SOUNDS_SERVICE_MODE_STR
 	call WRITE_TEXT
 	pop af	
 l79e6h:
@@ -19523,10 +19523,10 @@ sub_7bf7h:
 	pop af	
 	call WRITE_CHAR_AT_SCREEN_DE
 	inc de	
-	ld hl,l7c29h
+	ld hl,NG_STR
 	rrc b
 	jr c,l7c0dh
-	ld hl,l7c26h
+	ld hl,OK_STR
 l7c0dh:
 	jp WRITE_TEXT
 sub_7c10h:
@@ -19548,18 +19548,17 @@ l7c17h:
 	pop af	
 	ret	
 
-l7c26h:
+OK_STR:
     defb "OK", 0ffh
-l7c29h:
+NG_STR:
     defb "NG", 0ffh
 l7c2ch:
     defb "ROM", 0ffh
-l7c30h:
-	cp 014h		;7c30	fe 14
-	defb 0fdh,050h,0d1h
+DIP_SW_STR:
+	defb 0xfe, 0x14, 0fdh,050h,0d1h ;7c30
     defb "DIP SW ", 0ffh
     
-	defb 0fdh,094h,0d1h
+	defb 0fdh,094h,0d1h ; 7c3d
     defb "DSW1"
     defb 0fdh,0d4h,0d1h
     defb "DSW2"
@@ -19576,32 +19575,30 @@ l7c30h:
 	defb 0fdh,010h,0d4h
     defb "FIGHTERS"
 	defb 0fdh,090h,0d2h
-coin_mode_str:
+COIN_MODE_STR:
     defb "COIN MODE", 0ffh
-l7c96h:
+TABLE_STR:
     defb "TABLE  ", 0ffh
-l7c9eh:
+UPRIGHT_STR:
     defb "UPRIGHT", 0ffh
-l7ca6h:
+EASY_STR:
     defb "EASY     ", 0ffh
-l7cb0h:
+DIFFICULT_STR:
     defb "DIFFICULT", 0ffh
-l7cbah:
+SLOW_STR:
     defb "SLOW", 0ffh
-l7cbfh:
+FAST_STR:
     defb "FAST", 0ffh
-l7cc4h:
+FREE_PLAY_STR:
     defb "     FREE   PLAY   ", 0ffh
-l7cd8h:
+INTERFACE_STR:
     defb "INTERFACE", 0ffh
     defb "READ DATA", 0ffh ; 7ce2
-l7cech:
+TIMING_STR:
 	defb 0fdh,057h,0d5h
-l7cefh:
     defb "TIMMING", 0ffh ; (sic)
-l7cf7h:
-	cp 014h		;7cf7	fe 14
-	defb 0fdh,050h,0d1h	;7cf9
+MAIN_MENU_SERVICE_MODE_STR:
+	defb 0xfe, 0x14, 0fdh,050h,0d1h	;7cf7
     defb "01 DIP SWITCH"    
 	defb 0fdh,090h,0d1h
     defb "02 I/O PORT"
@@ -19613,16 +19610,13 @@ l7cf7h:
     defb "05 COLOR"
 	defb 0fdh,090h,0d2h
     defb "06 CROSS HATCH PATTERN", 0ffh
-l7d56h:
-	cp 014h		;7d56	fe 14
-	defb 0fdh,015h,0d1h
-l7d5bh:
+LIST_OF_SOUNDS_SERVICE_MODE_STR:
+	defb 0xfe, 0x14, 0fdh,015h,0d1h ;7d56
     defb "SOUND"
 	defb 0fdh,050h,0d1h
     defb "01 YELL OF PLAYER(JUMP-KICKS)"
 	defb 0fdh,093h,0d1h
     defb "CREDIT ADDING SOUND"
-l7d96h:
 	defb 0fdh,0d0h,0d1h
     defb "02 YELL OF PLAYER(PUNCHES,KICKS)"
 	defb 0fdh,010h,0d2h
@@ -19630,11 +19624,9 @@ l7d96h:
 	defb 0fdh,050h,0d2h
     defb "04 LAUGHING VOICE OF ENEMIES-1"
     defb 0fdh,090h,0d2h
-l7df6h:
     defb "05 LAUGHING VOICE OF ENEMIES-2"
     defb 0fdh,0d0h,0d2h
     defb "06 BURSTING OF PAPER BALL"
-l7e35h:
 	defb 0fdh,013h,0d3h
     defb "BURSTING OF DRAGON'S EGG"
 	defb 0fdh,050h,0d3h
@@ -19670,6 +19662,5 @@ l7e35h:
 	defb 0fdh,016h,0d7h
     defb "MUSIC END", 0ffh
 
-l7f9dh:
 	; 7f9dh: The ROM finishes with 99 bytes of value 0c7h
 	defs 99, 0c7h
