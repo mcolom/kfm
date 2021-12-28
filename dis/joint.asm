@@ -893,7 +893,9 @@ l0285h:
 	ld (GAME_STATE),a		;0294	32 00 e0 	2 . . 
 	ld a,024h		;0297	3e 24 	> $ 
 	call PLAY_SOUND		;0299	cd fe 0d 	. . . 
-l029ch:
+    
+; It stays in this loop while GAME_STATE != GAME_STATE_LIFE_LOST.
+LEVEL_PLAY_LOOP:
 	InDSW2		;029c	db 04
 	bit 4,a		;029e	cb 67 Check bit 4: freeze cheat
 l02a0h:
@@ -907,36 +909,47 @@ l02aeh:
 	ld a,(GAME_STATE)		;02ae	3a 00 e0 	: . . 
 	cp GAME_STATE_LIFE_LOST		;02b1	fe 0b
 	jp z,l033ah		;02b3	ca 3a 03 	. : . 
-	cp 00ch		;02b6	fe 0c 	. . 
+	cp 0xC		;02b6	fe 0c 	0xC: level ending music sounds. Energy and time decrease to gain points.
 	jp z,l02c0h		;02b8	ca c0 02 	. . . 
 	call sub_0fb8h		;02bb	cd b8 0f 	. . . 
-	jr l029ch		;02be	18 dc 	. . 
+	jr LEVEL_PLAY_LOOP		;02be	18 dc 	. . 
+
 l02c0h:
-	ld a,000h		;02c0	3e 00 	> . 
-	call PLAY_SOUND		;02c2	cd fe 0d 	. . . 
-	ld a,022h		;02c5	3e 22 	> " 
-	call PLAY_SOUND		;02c7	cd fe 0d 	. . . 
-	ld a,0e1h		;02ca	3e e1 	> . 
-	call sub_0582h		;02cc	cd 82 05 	. . . 
-	ld a,038h		;02cf	3e 38 	> 8 
-	call sub_0582h		;02d1	cd 82 05 	. . . 
+    ; Clear audio
+	ld a,000h		    ;02c0	3e 00
+	call PLAY_SOUND		;02c2	cd fe 0d
+    
+    ; Play level completed music
+	ld a,022h		;02c5	3e 22
+	call PLAY_SOUND	;02c7	cd fe 0d
+
+    ; Update the panel
+	ld a,0e1h		;02ca	3e e1
+	call DRAW_PANEL_ELEMENTS_WITH_PAUSES	;02cc	cd 82 05
+	ld a,038h		                        ;02cf	3e 38
+	call DRAW_PANEL_ELEMENTS_WITH_PAUSES	;02d1	cd 82 05
+
+; Decrease energy and give points. Make points sounds.
 l02d4h:
+    ; We make the following CALL to update the points and energy bars
 	ld a,001h		;02d4	3e 01 	> . 
-	call sub_0582h		;02d6	cd 82 05 	. . . 
-	ld hl,ENERGY		;02d9	21 09 e7 	! . . 
-	ld a,(hl)			;02dc	7e 	~ 
-	and a			;02dd	a7 	. 
-	jp m,l02eah		;02de	fa ea 02 	. . . 
-	dec (hl)			;02e1	35 	5 
-	call INCREMENT_100_POINTS		;02e2	cd 97 2f 	. . / 
-	call sub_055fh		;02e5	cd 5f 05 	. _ . 
-	jr l02d4h		;02e8	18 ea 	. . 
+	call DRAW_PANEL_ELEMENTS_WITH_PAUSES	;02d6	cd 82 05
+    
+	ld hl,ENERGY	;02d9	21 09 e7
+	ld a,(hl)		;02dc	7e
+	and a			;02dd	a7
+	jp m,l02eah		;02de	fa ea 02
+	dec (hl)		;02e1	35 	5 
+    ; Increment 100 points and make points sound
+	call INCREMENT_100_POINTS	;02e2	cd 97 2f
+	call MAKE_POINTS_SOUND		;02e5	cd 5f 05
+	jr l02d4h		;02e8	18 ea
 l02eah:
 	ld de,0			;02ea	11 00 00 	. . . 
 	push de			;02ed	d5 	. 
 l02eeh:
 	ld a,003h		;02ee	3e 03 	> . 
-	call sub_0582h		;02f0	cd 82 05 	. . . 
+	call DRAW_PANEL_ELEMENTS_WITH_PAUSES		;02f0	cd 82 05 	. . . 
 	pop de			;02f3	d1 	. 
 
     ; Here it decrements time after completing a level
@@ -975,7 +988,7 @@ l0307h:
     
 time_decrement_done:
 	ld a,038h		;031d	3e 38 	> 8 
-	call sub_0582h		;031f	cd 82 05 	. . . 
+	call DRAW_PANEL_ELEMENTS_WITH_PAUSES		;031f	cd 82 05 	. . . 
 
 	ld a,(DRAGONS_LEVEL)    ;0322	3a 80 e0
 	and 001h		        ;0325	e6 01
@@ -1296,15 +1309,21 @@ PRINT_A_PLUS_1:
 	inc a			;055b	3c 	< 
 	jp PRINT_NUMBER		;055c	c3 08 11 	. . . 
 
-sub_055fh:
-	ld a,(STEP_COUNTER)		;055f	3a 83 e8 	: . . 
-	and a			;0562	a7 	. 
-	ret nz			;0563	c0 	. 
-	ld a,003h		;0564	3e 03 	> . 
-	ld (STEP_COUNTER),a		;0566	32 83 e8 	2 . . 
-	ld a,016h		;0569	3e 16 	> . 
-	call PLAY_SOUND		;056b	cd fe 0d 	. . . 
-	ret			;056e	c9 	. 
+; Makes the energy/time decrease and give points sound
+MAKE_POINTS_SOUND:
+    ; Avoid overlapping the sounds
+	ld a,(STEP_COUNTER)		;055f	3a 83 e8
+	and a			        ;0562	a7
+	ret nz			        ;0563	c0
+    
+	ld a, 3		            ;0564	3e 03 Delay
+	ld (STEP_COUNTER),a		;0566	32 83 e8
+
+	ld a,016h		        ;0569	3e 16 Points sound
+	call PLAY_SOUND		    ;056b	cd fe 0d
+	ret			            ;056e
+
+
 sub_056fh:
 	InDSW1		;056f	db 03 	. . 
 	cpl			;0571	2f 	/ 
@@ -1321,14 +1340,19 @@ l0574h:
 	ret z			;057e	c8 	. 
 	ld a,002h		;057f	3e 02 	> . 
 	ret			;0581	c9 	. 
-sub_0582h:
-	ld (INT_COUNTER + 2),a		;0582	32 82 e8 	2 . . 
+
+; Calls DRAW_PANEL_ELEMENTS only if (INT_COUNTER + 2) == 0, to
+; update slowly in the scene.
+; A: pause
+DRAW_PANEL_ELEMENTS_WITH_PAUSES:
+	ld (INT_COUNTER + 2),a		;0582	32 82 e8
 l0585h:
-	call sub_0fe3h		;0585	cd e3 0f 	. . . 
-	ld a,(INT_COUNTER + 2)		;0588	3a 82 e8 	: . . 
-	and a			;058b	a7 	. 
-	jr nz,l0585h		;058c	20 f7 	  . 
-	ret			;058e	c9 	. 
+	call DRAW_PANEL_ELEMENTS	;0585	cd e3 0f
+	ld a,(INT_COUNTER + 2)		;0588	3a 82 e8
+	and a			            ;058b	a7
+	jr nz,l0585h		        ;058c	20 f7
+	ret			                ;058e	c9
+
 sub_058fh:
 	InDSW1		;058f	db 03 	. . 
 	cpl			;0591	2f 	/ 
@@ -3320,11 +3344,11 @@ l0fb1h:
 sub_0fb8h:
 	ld a,(GAME_STATE)		;0fb8	3a 00 e0 	: . . 
 	cp GAME_STATE_GO_UPSTAIRS_OR_SILVIA_RESCUED		;0fbb	fe 03
-	jr z,sub_0fe3h		;0fbd	28 24 	( $ 
+	jr z,DRAW_PANEL_ELEMENTS		;0fbd	28 24 	( $ 
 	ld hl,(TIME)		;0fbf	2a 03 e0 	* . . 
 	ld de, -819 		;0fc2	11 cd fc
 	add hl,de			;0fc5	19 	. 
-	jr c,sub_0fe3h		;0fc6	38 1b 	8 . 
+	jr c,DRAW_PANEL_ELEMENTS		;0fc6	38 1b 	8 . 
 	ld hl,0e008h		;0fc8	21 08 e0 	! . . 
 	ld a,(hl)			;0fcb	7e 	~ 
 	and a			;0fcc	a7 	. 
@@ -3336,11 +3360,14 @@ l0fd5h:
 	ld hl,INT_COUNTER + 5		;0fd5	21 85 e8 	! . . 
 	ld a,(hl)			;0fd8	7e 	~ 
 	and a			;0fd9	a7 	. 
-	jr nz,sub_0fe3h		;0fda	20 07 	  . 
+	jr nz,DRAW_PANEL_ELEMENTS		;0fda	20 07 	  . 
 	ld (hl),038h		;0fdc	36 38 	6 8 
 	ld a,097h		;0fde	3e 97 	> . 
 	call PLAY_SOUND		;0fe0	cd fe 0d 	. . . 
-sub_0fe3h:
+
+; Draw the player and boss energy bars, scores, time, lives.
+; It checks to grant the extra life too.
+DRAW_PANEL_ELEMENTS:
 	ld hl,0e81bh		;0fe3	21 1b e8 	! . . 
 	ld a,(INT_COUNTER)		;0fe6	3a 80 e8 	: . . 
 	cp (hl)			;0fe9	be 	. 
