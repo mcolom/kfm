@@ -369,7 +369,31 @@ NUM_KNIVES: EQU 0xE32B
 FLIP_SCREEN: EQU 0xE910
 
 ; Its value is related to the detection of the coin sensor
+; It activates for both the A and B counters
 COIN_SENSOR: EQU 0xE911
+
+; 0: it forces 2 coins
+; 1..7: number of coins needed add one credit
+; 8: no credits added regardless the number of introduced coins 
+; 9: one coin to add one credit
+; A: 1 coin gives 2 credits
+; B: 1 coin gives 3 credits
+; 0x11: 1 coin gives 9 credits
+; 0x18: 1 coin gives 10 credits
+; 0x20: 1 coin gives 18 credits
+; 0x25: 1 coin gives 23 credits
+; 0x13: 1 coin gives 12 credits
+; ...
+COINS_PER_CREDITS_A: EQU 0xE90A
+;COINS_PER_CREDITS_B: EQU COINS_PER_CREDITS_A + 1 ;0e90bh
+
+; These activate with value 1 when a coin in inserted, counters A or B.
+COIN_INSERTED_A: EQU 0xE90C
+COIN_INSERTED_B: EQU 0xE90E
+
+
+
+
 
 ; State of the floor's hatch
 ; 0: starting to close
@@ -384,17 +408,8 @@ AUDIO_CHANNEL: EQU 0xE917
 SOUNDS_IN_CHANNELS_LIST: EQU AUDIO_CHANNEL + 1
 
 
-; 0: it forces 2 coins
-; 1..7: number of coins needed add one credit
-; 8: no credits added regardless the number of introduced coins 
-; 9: one coin to add one credit
-; A: 1 coin gives 2 credits
-; B: 1 coin gives 3 credits
-; 0x11: 9 credits
-; 0x18: 10 credits
-; 0x20: 18 credits
-; 0x25: 23 credits
-; 0x13: 12 credits
+
+
 
 
 COINS: EQU 0xE913
@@ -1057,9 +1072,9 @@ l03bch:
 	rrca			;03c7	0f 	. 
 	rrca			;03c8	0f 	. 
     ; A = number of dragons
-	call sub_055bh		;03c9	cd 5b 05 	. [ . 
+	call PRINT_A_PLUS_1		;03c9	cd 5b 05 	. [ . 
 	ld de,0d427h		;03cc	11 27 d4 	. ' . 
-	call sub_0556h		;03cf	cd 56 05 	. V . 
+	call PRINT_LEVEL		;03cf	cd 56 05 	. V . 
 
 ; Level selection code
 
@@ -1233,32 +1248,27 @@ DRAW_FLOOR_HATCH:
 	ret nz			        ;04d2	c0
 
     ; Draw the hatch's corner
-	ld hl,HATCH_CORNER		;04d3	21 d9 04 	! . . 
-	jp WRITE_TEXT		;04d6	c3 1c 11 	. . . 
+	ld hl,HATCH_CORNER		;04d3	21 d9 04
+	jp WRITE_TEXT		    ;04d6	c3 1c 11
 
 HATCH_CORNER:
-	defb 0fdh,067h,0d6h	;illegal sequence		;04d9	fd 67 d6 	. g . 
-	cp 092h		;04dc	fe 92 	. . 
-	add a,c			;04de	81 	. 
-	ld a,a			;04df	7f 	 
-	defb 0fdh,0a7h,0d6h	;illegal sequence		;04e0	fd a7 d6 	. . . 
-	add a,e			;04e3	83 	. 
-	rst 38h			;04e4	ff 	. 
+    defb 0fdh,067h,0d6h, 0xfe, 0x92, 0x81, 0x7f
+    defb 0fdh, 0a7h, 0d6h, 0x83, 0xff
 
 ; Print the "1-PLAYER 1-FLOOR" text which appears when starting a level
 PRINT_PLAYER_FLOOR_TEXT:
-	ld hl,l04fdh		;04e5	21 fd 04
+	ld hl,PLAYER_FLOOR_TEXT_STR		;04e5	21 fd 04
 	call WRITE_TEXT		;04e8	cd 1c 11
 	ld a,(PLAYER_TURN)	;04eb	3a 02 e0
 	and 001h		    ;04ee	e6 01 Check number of players
 	inc a			    ;04f0	3c Increment so A = number of players
 	call PRINT_NUMBER		;04f1	cd 08 11
 	call WRITE_TEXT		;04f4	cd 1c 11
-	call sub_0556h		;04f7	cd 56 05
+	call PRINT_LEVEL		;04f7	cd 56 05
 	jp WRITE_TEXT		;04fa	c3 1c 11
 
-l04fdh:
-	defb 0fdh,067h,0d3h	;illegal sequence		;04fd	fd 67 d3 	. g . 
+PLAYER_FLOOR_TEXT_STR:
+	defb 0fdh,067h,0d3h
 	defb 0feh, 0dbh
 	defb "                  "
 	defb 0fdh,0a7h,0d3h
@@ -1269,18 +1279,20 @@ l04fdh:
 	defb "FLOOR ", 0fdh  ; 0523h
 	defb 0e7h,0d3h
 	defb "                  ", 0ffh
-    
+
 READY_STR:
 	defb 0feh,0dbh
 	defb 0fdh,02ch,0d4h
 	defb " READY ", 0fdh ; 0544h
 	defb 06ch, 0d4h
 	defb "       ", 0ffh
-sub_0556h:
-	ld a,(DRAGONS_LEVEL)		;0556	3a 80 e0 	: . . 
-l0559h:
-	and 007h		;0559	e6 07 	. . 
-sub_055bh:
+
+PRINT_LEVEL:
+	ld a,(DRAGONS_LEVEL)	;0556	3a 80 e0
+	and 007h		        ;0559	e6 07 Get level
+
+; Prints number A+1
+PRINT_A_PLUS_1:
 	inc a			;055b	3c 	< 
 	jp PRINT_NUMBER		;055c	c3 08 11 	. . . 
 
@@ -1326,7 +1338,7 @@ l0594h:
 	rra			;0594	1f 	. 
 	rra			;0595	1f 	. 
 	ld b,a			;0596	47 	G 
-	ld hl,0e90ah		;0597	21 0a e9 	! . . 
+	ld hl,COINS_PER_CREDITS_A		;0597	21 0a e9 	! . . 
 
 	InDSW2		;059a	db 04 	. . 
 	bit 2,a		;059c	cb 57  Check bit 2: coin mode
@@ -2875,17 +2887,17 @@ sub_0d48h:
 	and 049h		;0d51	e6 49 	. I 
 	cp 049h		;0d53	fe 49 	. I 
 	jr nz,l0d61h		;0d55	20 0a 	  . 
-	ld hl,0e914h		;0d57	21 14 e9 	! . . 
+	ld hl,0e914h		;0d57	21 14 e9 Is 0e914h unused?
 	inc (hl)			;0d5a	34 	4 
 	ld a,(hl)			;0d5b	7e 	~ 
 	and 00fh		;0d5c	e6 0f 	. . 
-	call z,sub_0dd6h		;0d5e	cc d6 0d 	. . . 
+	call z,ADD_ONE_CREDIT		;0d5e	cc d6 0d 	. . . 
 l0d61h:
-	ld hl,0e90ch		;0d61	21 0c e9 	! . . 
-	ld de,0e90ah		;0d64	11 0a e9 	. . . 
+	ld hl,COIN_INSERTED_A		;0d61	21 0c e9 	! . . 
+	ld de,COINS_PER_CREDITS_A		;0d64	11 0a e9 	. . . 
 	call sub_0db1h		;0d67	cd b1 0d 	. . . 
-	ld hl,0e90eh		;0d6a	21 0e e9 	! . . 
-	inc de			;0d6d	13 	. 
+	ld hl,COIN_INSERTED_B	;0d6a	21 0e e9 	! . . 
+	inc de			        ;0d6d	13 	Now DE = COINS_PER_CREDITS_B
 	call sub_0db1h		;0d6e	cd b1 0d 	. . . 
 	ld hl,COIN_SENSOR		;0d71	21 11 e9 	! . . 
 	ld (hl),c			;0d74	71 	q 
@@ -2908,7 +2920,7 @@ l0d61h:
 	inc a			;0d93	3c 	< 
 l0d94h:
 	ld (0e916h),a		;0d94	32 16 e9 	2 . . 
-	ld a,(0e90ah)		;0d97	3a 0a e9 	: . . 
+	ld a,(COINS_PER_CREDITS_A)		;0d97	3a 0a e9 	: . . 
 	and a			;0d9a	a7 	. 
 	ret nz			;0d9b	c0 	. 
 	ld a,002h		;0d9c	3e 02 	> . 
@@ -2930,7 +2942,15 @@ sub_0da2h:
 	ret nz			;0dae	c0 	. 
 	dec (hl)			;0daf	35 	5 
 	ret			;0db0	c9 	. 
+
+
 sub_0db1h:
+    ; Called from:
+	;ld hl,COIN_INSERTED_A		;0d61	21 0c e9
+	;ld de,COINS_PER_CREDITS_A		;0d64	11 0a e9
+	;call sub_0db1h		;0d67	cd b1 0d
+	;ld hl,COIN_INSERTED_B		;0d6a	21 0e e9
+
 	rrc b		;0db1	cb 08 	. . 
 	rl c		;0db3	cb 11 	. . 
 	ld a,c			;0db5	79 	y 
@@ -2957,7 +2977,8 @@ sub_0db1h:
 	ret nz			;0dd3	c0 	. 
 	ld (hl),000h		;0dd4	36 00 	6 . 
 
-sub_0dd6h: ; SEGUIR
+; Adds one more credit
+ADD_ONE_CREDIT: ; SEGUIR
 	ld a, 9		;0dd6	3e 09
 l0dd8h:
 	sub 8		;0dd8	d6 08
@@ -3034,9 +3055,9 @@ exit_play_sound:
 	pop hl			;0e1e	e1
 	ret			    ;0e1f	c9
     
+; In 0xE917: 1 24
 ; In 0xE917: 2 0 24
-; In 0xE917: 2 5 5
-; <play sound>, <channel>, <sound #>
+; <channel>, ..., <sound #>
 
 
 l0e20h:
@@ -3110,13 +3131,13 @@ l0e92h:
 	ld (0eb00h),a		;0e97	32 00 eb 	2 . . 
 	ret			;0e9a	c9 	. 
 sub_0e9bh:
-	ld hl,059a7h		;0e9b	21 a7 59 	! . Y 
-	call WRITE_TEXT		;0e9e	cd 1c 11 	. . . 
-	call PRINT_POINTS_P1		;0ea1	cd a5 10 	. . . 
-	call PRINT_POINTS_P2		;0ea4	cd ab 10 	. . . 
-	call PRINT_TOP_SCORE		;0ea7	cd cf 10 	. . . 
-	call PRINT_TIME		;0eaa	cd d9 10 	. . . 
-	call DRAW_LIVES		;0ead	cd e6 10 	. . . 
+	ld hl,PANEL_TEXT_STR	;0e9b	21 a7 59
+	call WRITE_TEXT		    ;0e9e	cd 1c 11
+	call PRINT_POINTS_P1	;0ea1	cd a5 10
+	call PRINT_POINTS_P2	;0ea4	cd ab 10
+	call PRINT_TOP_SCORE	;0ea7	cd cf 10
+	call PRINT_TIME		    ;0eaa	cd d9 10
+	call DRAW_LIVES		    ;0ead	cd e6 10
 	ld a,(AVOID_SHOWING_FLOOR_INTRO_TEXT)		;0eb0	3a 1c e8 	: . . 
 	and a			;0eb3	a7 	. 
 	call z,sub_0f1ah		;0eb4	cc 1a 0f 	. . . 
@@ -3126,13 +3147,19 @@ sub_0e9bh:
 	ld (ENERGY_DISP),a		;0ebf	32 1a e8 	2 . . 
 	ld a,(ENEMY_ENERGY)		;0ec2	3a e2 e2 	: . . 
 	ld (ENEMY_ENERGY_DISP),a		;0ec5	32 19 e8 	2 . . 
-	call sub_0f78h		;0ec8	cd 78 0f 	. x . 
-	call sub_0f6bh		;0ecb	cd 6b 0f 	. k . 
+    
+    ; Draw player's energy
+	call DRAW_PLAYER_ENERGY		;0ec8	cd 78 0f
+    
+    ; Draw enemy's energy
+	call DRAW_BOSS_ENERGY		;0ecb	cd 6b 0f 	. k . 
+
+    
+    ; Draw the 1F, ..., 5F text
 	ld de,0d0a0h		;0ece	11 a0 d0 	. . . 
-	ld bc,l0594h		;0ed1	01 94 05 	. . . 
+	ld bc,l0594h		;0ed1	01 94 05 B = 4 floors
 	ld a,0a1h		;0ed4	3e a1 	> . 
 l0ed6h:
-    ; ToDo: this must draw the upper panel
 	call WRITE_CHAR_AT_SCREEN_DE		;0ed6	cd 10 11 	. . . 
 	inc a			;0ed9	3c 	< 
 	inc de			;0eda	13 	. 
@@ -3241,13 +3268,15 @@ l0f65h:
 	call WRITE_CHAR_AT_SCREEN_DE		;0f65	cd 10 11 	. . . 
 	djnz l0f65h		;0f68	10 fb 	. . 
 	ret			;0f6a	c9 	. 
-sub_0f6bh:
+
+; Draw the energy bar of the boss or the player.
+DRAW_BOSS_ENERGY:
 	ld de,0d116h		;0f6b	11 16 d1 	. . . 
 	ld hl,ENEMY_ENERGY_DISP		;0f6e	21 19 e8 	! . . 
 	ld a,(ENEMY_ENERGY)		;0f71	3a e2 e2 	: . . 
 	ld c,015h		;0f74	0e 15 	. . 
 	jr l0f83h		;0f76	18 0b 	. . 
-sub_0f78h:
+DRAW_PLAYER_ENERGY:
 	ld de,0d096h		;0f78	11 96 d0 	. . . 
 	ld hl,ENERGY_DISP		;0f7b	21 1a e8 	! . . 
 	ld a,(ENERGY)		;0f7e	3a 09 e7 	: . . 
@@ -3287,6 +3316,7 @@ l0fb1h:
 	ld a,l			;0fb4	7d 	} 
 	djnz l0f99h		;0fb5	10 e2 	. . 
 	ret			;0fb7	c9 	. 
+
 sub_0fb8h:
 	ld a,(GAME_STATE)		;0fb8	3a 00 e0 	: . . 
 	cp GAME_STATE_GO_UPSTAIRS_OR_SILVIA_RESCUED		;0fbb	fe 03
@@ -3316,8 +3346,8 @@ sub_0fe3h:
 	cp (hl)			;0fe9	be 	. 
 	jr z,l103ah		;0fea	28 4e 	( N 
 	ld (hl),a			;0fec	77 	w 
-	call sub_0f78h		;0fed	cd 78 0f 	. x . 
-	call sub_0f6bh		;0ff0	cd 6b 0f 	. k . 
+	call DRAW_PLAYER_ENERGY		;0fed	cd 78 0f 	. x . 
+	call DRAW_BOSS_ENERGY		;0ff0	cd 6b 0f 	. k . 
 	ld hl,0d0e0h		;0ff3	21 e0 d0 	! . . 
 	ld a,(DRAGONS_LEVEL)		;0ff6	3a 80 e0 	: . . 
 	and 007h		;0ff9	e6 07 	. . 
@@ -11236,7 +11266,7 @@ sub_49c0h:
 	ld a,(INT_COUNTER)
 	and 030h
 	jp z,l571fh
-	ld hl,(0e90ah)
+	ld hl,(COINS_PER_CREDITS_A)
 	ld a,l	
 	xor h	
 	jr nz,l49e9h
@@ -13013,10 +13043,11 @@ SELECT_GAME_FLOOR_STR: ; 595b
 	defb "FLOOR NUMBER-"
 	defb 0fdh,098h,0d4h	; 5991
 	defb "PUNCH-UP KICK-DOWN", 0ffh
+
+PANEL_TEXT_STR:
 	defb 0feh, 015h
 	defb 0fdh, 011h, 0d0h	; 59a9
 	defb "1P-"
-l59afh:
 	defb 0fdh,026h,0d0h	; 59af
 	defb "2P-"
 	defb 0feh,000h
@@ -13027,21 +13058,15 @@ l59afh:
 	defb "TIME"
 	defb 0feh, 094h ;59c7
 
-	defb 0fdh,091h,0d0h	;59c9	fd 91 d0 	. . . 
-
-	sbc a,b			;59cc	98 	. 
-	sbc a,c			;59cd	99 	. 
-	sbc a,d			;59ce	9a 	. 
-	sbc a,e			;59cf	9b 	. 
-	sbc a,h			;59d0	9c 	. 
-	cp 095h		;59d1	fe 95 	. . 
-	defb 0fdh,011h,0d1h	;illegal sequence		;59d3	fd 11 d1 	. . . 
-	sbc a,l			;59d6	9d 	. 
-	sbc a,(hl)			;59d7	9e 	. 
-	sbc a,a			;59d8	9f 	. 
-l59d9h:
-	and b	
-	rst 38h	
+	defb 0fdh,091h,0d0h	;59c9
+	defb 0x98, 0x99, 0x9a, 0x9b, 0x9c, 0xfe, 0x95,0fdh,011h,0d1h
+	defb 0x9d, 0x9e, 0x9f, 0xa0, 0xff ; ... 59da
+    ; End of PANEL_TEXT_STR
+    
+    
+    
+    
+    
 l59dbh:
 	ld e,b	
 	ld e,c	
@@ -19133,7 +19158,7 @@ l78e5h:
 	call sub_058fh
 	ld b,c	
 	ld de,0d29ah
-	ld hl,(0e90ah)
+	ld hl,(COINS_PER_CREDITS_A)
 	ld a,l	
 	and a	
 	jr z,l792ah
