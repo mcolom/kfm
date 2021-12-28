@@ -993,7 +993,7 @@ l033ah:
 	ld hl,(TIME)		;033f	2a 03 e0 	* . . 
 	ld a,l			;0342	7d 	} 
 	or h			;0343	b4 	. 
-	call z,056b5h		;0344	cc b5 56 	. . V 
+	call z,DRAW_TIME_OVER_AND_DELAY		;0344	cc b5 56 	. . V 
 	ld hl,LIVES		;0347	21 84 e0 	! . . 
 	dec (hl)			;034a	35 	5 
 	jr z,l035dh		;034b	28 10 	( . 
@@ -3564,7 +3564,8 @@ WRITE_CHAR_AT_SCREEN_DE:
 l111ah:
 	ld c,(hl)			;111a	4e 	N 
 l111bh:
-	inc hl			;111b	23 	# 
+	inc hl			;111b	23 	#
+;
 WRITE_TEXT:
 	ld a,(hl)			;111c	7e 	~ 
 	inc hl			;111d	23 	# 
@@ -12234,14 +12235,14 @@ l53ebh:
 	pop af	
 	ld (DRAGONS_LEVEL),a
 l53efh:
-	ld hl,l5447h
+	ld hl,TEXT_AND_LETS_TRY_NEXT_FLOOR_DRAWING
 	call WRITE_TEXT
 	ld a, GAME_STATE_INTERLUDE
 l53f7h:
 	ld (GAME_STATE),a
 	ld a,070h
 	call sub_5416h
-	ld hl,54abh
+	ld hl,IM_COMING_RIGHT_AWAY_TEXT
 	call WRITE_TEXT
 	ld a,005h
 	call PLAY_SOUND
@@ -12259,7 +12260,7 @@ l5419h:
 	ld hl,5485h
 	and 018h
 	jr nz,l542bh
-	ld hl,05498h
+	ld hl,SMALL_ROW_OF_BLACK_CHARS
 l542bh:
 	call WRITE_TEXT
 	ld hl,INT_COUNTER + 2
@@ -12278,7 +12279,7 @@ l543eh:
 	call l4e12h
 	jp sub_47b6h
 
-l5447h:
+TEXT_AND_LETS_TRY_NEXT_FLOOR_DRAWING:
 	cp 096h		;5447	fe 96 	. . 
 	defb 0fdh,018h,0d5h	;illegal sequence		;5449	fd 18 d5 	. . . 
 	or a			;544c	b7 	. 
@@ -12304,12 +12305,15 @@ l5447h:
 	defb "HELP ME,"
 	defb 0fdh,015h,0d3h
 	defb "THOMAS!", 0ffh
+
+SMALL_ROW_OF_BLACK_CHARS:
 	defb "        "
 	defb 0fdh,015h,0d3h
 	defb "       ", 0ffh
 
 
 	; 54abh
+IM_COMING_RIGHT_AWAY_TEXT:
 	defb 0feh, 0dah
 	defb 0fdh,0a3h,0d2h
 	defb "I'M COMING"
@@ -12317,6 +12321,7 @@ l5447h:
 	defb "RIGHT AWAY,"
 	defb 0fdh,0a5h,0d3h	;illegal sequence		;54c8	fd a5 d3 	. . . 
 	defb "SILVIA!", 0ffh
+GAME_OVER_STR:
 	defb "            GAME OVER            "
 	defb 03eh,021h
 
@@ -12326,8 +12331,8 @@ l54f6h:
 l54fch:
 	ld c,0dbh
 l54feh:
-	ld ix,054d3h
-	call sub_56c3h
+	ld ix,GAME_OVER_STR
+	call WRITE_TEXT_IN_BOX
 l5505h:
 	ld a,0e1h
 	call DELAY_A
@@ -12398,12 +12403,16 @@ l555ah:
 	djnz l555ah
 l555dh:
 	push de	
-	push af	
+	push af
+
 	ld a,024h
-	call PLAY_SOUND
+	call PLAY_SOUND ; Legendary game's music! ;)
+
 	call sub_5620h
-	ld hl,568ah
+
+	ld hl,TIME_STR
 	call WRITE_TEXT
+
 	pop af	
 	ld de,0da11h
 	cp 00ah
@@ -12510,7 +12519,7 @@ l561bh:
 sub_5620h:
 	call CLEAR_TILEMAP
 	call CONFIG_GAME_STOP
-	ld hl,l5675h
+	ld hl,BEST_20_PLAYERS_STR
 	call WRITE_TEXT
 sub_562ch:
 	ld hl,0ea06h
@@ -12558,24 +12567,32 @@ l5659h:
 	jr nz,l5634h
 	ld de,0d691h
 	jr l5634h
-l5675h:
-	cp 0dbh		;5675	fe db 	. . 
+    
+BEST_20_PLAYERS_STR:
+	cp 0dbh		        ;5675	fe db
 	defb 0fdh,0d8h,0d0h	; 5677
 	defb "BEST 20 PLAYERS", 0ffh
-	defb 0fdh,05ah,0d1h	; 568a
+
+
+TIME_STR:
+	defb 0fdh,05ah,0d1h
 	defb 0feh, 014h
 	defb "TIME", 0ffh
-	
+
+TIME_OVER_STR: ; 5694
 	defb "            TIME OVER            "
 
-	ld c,0d8h		;56b5	0e d8 	. . 
-	ld ix,5694h		;56b7	dd 21 94 56 	. ! . V 
-	call sub_56c3h		;56bb	cd c3 56 	. . V 
-l56beh:
-	ld a,070h		;56be	3e 70 	> p 
+; Draws the "TIME OVER" text inside a box and wait for a while
+DRAW_TIME_OVER_AND_DELAY:
+	ld c,0d8h		        ;56b5	0e d8
+	ld ix,TIME_OVER_STR		;56b7	dd 21 94 56
+	call WRITE_TEXT_IN_BOX	;56bb	cd c3 56
+	ld a,070h		        ;56be	3e 70
 l56c0h:
 	jp DELAY_A
-sub_56c3h:
+
+; Draws a text inside a black block (as in "TIME OVER")
+WRITE_TEXT_IN_BOX: ; 56c3
 	ld hl,(HSCROLL_LOW_W)
 	ld de,4
 	add hl,de	
@@ -12603,7 +12620,7 @@ l56dbh:
 	and 03fh
 	or e	
 	ld e,a	
-	ld a,(ix + 0)
+	ld a,(ix + 0) ; 56e2
 	inc ix
 	call WRITE_CHAR_AT_SCREEN_DE
 	pop de	
@@ -12615,6 +12632,7 @@ l56dbh:
 	dec h	
 	jr nz,l56d8h
 	ret	
+
 sub_56f7h:
 	cp 010h
 	jp nc,10ffh
@@ -13065,7 +13083,7 @@ PANEL_TEXT_STR:
     
     
     
-    
+; Most probably this is data to draw the char columns of the scenario
     
 l59dbh:
 	ld e,b	
@@ -19574,7 +19592,7 @@ l7befh:
 	ret	
 sub_7bf7h:
 	push af	
-	ld hl,l7c2ch
+	ld hl,ROM_STR
 	call WRITE_TEXT
 	pop af	
 	call WRITE_CHAR_AT_SCREEN_DE
@@ -19608,7 +19626,7 @@ OK_STR:
     defb "OK", 0ffh
 NG_STR:
     defb "NG", 0ffh
-l7c2ch:
+ROM_STR:
     defb "ROM", 0ffh
 DIP_SW_STR:
 	defb 0xfe, 0x14, 0fdh,050h,0d1h ;7c30
