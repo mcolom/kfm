@@ -1515,8 +1515,8 @@ sub_0644h:
 	ld hl,l08b0h		;0678	21 b0 08 	! . . 
 	ld de,0e360h		;067b	11 60 e3 	. ` . 
 l067eh:
-	ld bc,0016h+2		;067e	01 18 00 	. . . 
-	call sub_06b2h		;0681	cd b2 06 	. . . 
+	ld bc,0x0018	    ;067e	01 18 00
+	call LDIR_WITH_INDEXED_HL		;0681	cd b2 06 	. . . 
 	ld a,001h		;0684	3e 01 	> . 
 	ld (0e380h),a		;0686	32 80 e3 	2 . . 
 l0689h:
@@ -1535,23 +1535,36 @@ l0689h:
 	and a			;069e	a7 	. 
 	ret z			;069f	c8 	. 
 	ld (0e100h),a		;06a0	32 00 e1 	2 . . 
-	ld hl,00920h		;06a3	21 20 09 	!   . 
-	ld de,0e500h		;06a6	11 00 e5 	. . . 
-	ld bc,0011h		;06a9	01 11 00 	. . . 
-	call sub_06b2h		;06ac	cd b2 06 	. . . 
-	jp l3d53h		;06af	c3 53 3d 	. S = 
-sub_06b2h:
-	add a,a			;06b2	87 	. 
-	push bc			;06b3	c5 	. 
-	ld c,a			;06b4	4f 	O 
-	add hl,bc			;06b5	09 	. 
-	pop bc			;06b6	c1 	. 
-	ld a,(hl)			;06b7	7e 	~ 
-	inc hl			;06b8	23 	# 
-	ld h,(hl)			;06b9	66 	f 
-	ld l,a			;06ba	6f 	o 
-	ldir		;06bb	ed b0 	. . 
-	ret			;06bd	c9 	. 
+	ld hl,0x0920		;06a3	21 20 09 	!   . 
+	ld de,0xe500		;06a6	11 00 e5 	. . . 
+	ld bc,0x0011		;06a9	01 11 00 	. . . 
+	call LDIR_WITH_INDEXED_HL		;06ac	cd b2 06 	. . . 
+	jp l3d53h		;06af	c3 53 3d 	. S =
+
+; Perform LDIR from HL to DE
+; It recomputes HL from the input HL0 as
+;    H = [HL0 + 2*A0 + 1]
+;    L = [HL0 + 2*A0]
+LDIR_WITH_INDEXED_HL:
+	add a,a			;06b2	87 A = 2 * A0
+	push bc			;06b3	c5 
+	ld c,a			;06b4	4f C = 2 * A0
+    
+    ; This is called always with B = 0
+	add hl,bc		;06b5	09 HL = HL0 + 2 * A0
+	pop bc			;06b6	c1
+    
+	ld a,(hl)		;06b7	7e A = [HL0 + 2 * A0]
+	inc hl			;06b8	23
+	ld h,(hl)		;06b9	66 H = [HL0 + 2 * A0 + 1]
+	ld l,a			;06ba	6f L = [HL0 + 2 * A0]
+    
+    
+    ; Perform LDIR from HL to DE
+    ; H, L = [HL0 + 2*A0 + 1], [HL0 + 2*A0]
+	ldir		    ;06bb	ed b0
+	ret			    ;06bd	c9
+
 sub_06beh:
     ; Clear 35 bytes from THOMAS_GLOBAL_STATE
 	ld hl,THOMAS_GLOBAL_STATE		;06be	21 00 e7
