@@ -1208,7 +1208,7 @@ ANIMATION_THOMAS_STARTS_LEVEL:
 l0461h:
 	push hl			;0461	e5 	. 
 	ld (0e817h),hl		;0462	22 17 e8 	" . . 
-	call sub_0e9bh		;0465	cd 9b 0e 	. . . 
+	call RESET_PANEL		;0465	cd 9b 0e 	. . . 
 	xor a			;0468	af 	. 
 	ld (HATCH_STATE),a		;0469	32 15 e9 0: starting to close
 
@@ -3207,7 +3207,10 @@ l0e92h:
 	ld a,b			;0e96	78 	x 
 	ld (0eb00h),a		;0e97	32 00 eb 	2 . . 
 	ret			;0e9a	c9 	. 
-sub_0e9bh:
+
+; Draw the panel after resetting its values.
+; To draw the actual elements contained, the DRAW_PANEL_ELEMENTS routine is used.
+RESET_PANEL:
 	ld hl,PANEL_TEXT_STR	;0e9b	21 a7 59
 	call WRITE_TEXT		    ;0e9e	cd 1c 11
 	call PRINT_POINTS_P1	;0ea1	cd a5 10
@@ -3215,10 +3218,10 @@ sub_0e9bh:
 	call PRINT_TOP_SCORE	;0ea7	cd cf 10
 	call PRINT_TIME		    ;0eaa	cd d9 10
 	call DRAW_LIVES		    ;0ead	cd e6 10
-	ld a,(AVOID_SHOWING_FLOOR_INTRO_TEXT)		;0eb0	3a 1c e8 	: . . 
-	and a			;0eb3	a7 	. 
-	call z,sub_0f1ah		;0eb4	cc 1a 0f 	. . . 
-	ld a,003h		;0eb7	3e 03 	> . 
+	ld a,(AVOID_SHOWING_FLOOR_INTRO_TEXT)		;0eb0	3a 1c e8
+	and a			        ;0eb3	a7
+	call z,sub_0f1ah		;0eb4	cc 1a 0f
+	ld a,3		            ;0eb7	3e 03 	> . 
 	ld (INT_COUNTER + 1),a		;0eb9	32 81 e8 	2 . . 
 	ld a,(ENERGY)		;0ebc	3a 09 e7 	: . . 
 	ld (ENERGY_DISP),a		;0ebf	32 1a e8 	2 . . 
