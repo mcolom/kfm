@@ -528,7 +528,7 @@ ALLOWED_TO_ADD_SOUND: EQU 0xE006
 	jp z,SERVICE_MODE
 
 l0020h:
-	call sub_058fh		;0020	cd 8f 05 	. . . 
+	call GET_COINS_PER_CREDITS_FROM_DSWs	;0020	cd 8f 05
 l0023h:
 	ld hl,l05cch		;0023	21 cc 05 	! . . 
 	ld de,0ea06h		;0026	11 06 ea 	. . . 
@@ -1371,34 +1371,37 @@ l0585h:
 	jr nz,l0585h		        ;058c	20 f7
 	ret			                ;058e	c9
 
-sub_058fh:
-	InDSW1		;058f	db 03 	. . 
-	cpl			;0591	2f 	/ 
-	rra			;0592	1f 	. 
-	rra			;0593	1f 	. 
-l0594h:
-	rra			;0594	1f 	. 
-	rra			;0595	1f 	. 
-	ld b,a			;0596	47 	G 
-	ld hl,COINS_PER_CREDITS_A		;0597	21 0a e9 	! . . 
+; Read the DSWs to get COINS_PER_CREDITS_A and COINS_PER_CREDITS_B
+GET_COINS_PER_CREDITS_FROM_DSWs:
+	; Get coinage (ex: 1 Coin/2 Credits, etc.) in B
+    InDSW1		;058f	db 03
+	cpl			;0591	2f
+	rra			;0592	1f
+	rra			;0593	1f
+	rra			;0594	1f
+	rra			;0595	1f
+	ld b,a		;0596	47
+    
+	ld hl,COINS_PER_CREDITS_A	;0597	21 0a e9
 
 	InDSW2		;059a	db 04 	. . 
 	bit 2,a		;059c	cb 57  Check bit 2: coin mode
 
-	jr nz,l05b1h		;059e	20 11 	  . 
-	ld a,b			;05a0	78 	x 
-	inc a			;05a1	3c 	< 
-	and 003h		;05a2	e6 03 	. . 
-	ld (hl),a			;05a4	77 	w 
-	inc hl			;05a5	23 	# 
-	ld a,b			;05a6	78 	x 
-	rra			;05a7	1f 	. 
-	rra			;05a8	1f 	. 
-	and 003h		;05a9	e6 03 	. . 
-	cp 002h		;05ab	fe 02 	. . 
-	sbc a,0f5h		;05ad	de f5 	. . 
-	ld (hl),a			;05af	77 	w 
-	ret			;05b0	c9 	. 
+	jr nz,l05b1h	;059e	20 11
+	ld a,b			;05a0	78
+	inc a		    ;05a1	3c
+	and 003h	    ;05a2	e6
+	ld (hl),a	    ;05a4	77
+	inc hl		    ;05a5	23 HL = COINS_PER_CREDITS_B
+	ld a,b		    ;05a6	78
+	rra			    ;05a7	1f
+	rra			    ;05a8	1f
+	and 003h	    ;05a9	e6 03
+	cp 002h		    ;05ab	fe 02
+	sbc a,0f5h	    ;05ad	de f5
+	ld (hl),a	    ;05af	77
+	ret			    ;05b0	c9
+
 l05b1h:
 	ld a,b			;05b1	78 	x 
 	inc a			;05b2	3c 	< 
@@ -3199,7 +3202,7 @@ sub_0e9bh:
     
     ; Draw the 1F, ..., 5F text
 	ld de,0d0a0h		;0ece	11 a0 d0 	. . . 
-	ld bc,l0594h		;0ed1	01 94 05 B = 4 floors
+	ld bc,0x0594		;0ed1	01 94 05 B = 4 floors
 	ld a,0a1h		;0ed4	3e a1 	> . 
 l0ed6h:
 	call WRITE_CHAR_AT_SCREEN_DE		;0ed6	cd 10 11 	. . . 
@@ -19218,7 +19221,7 @@ l78e5h:
 	call GET_LIVES_FROM_DSW1
 	ld de,0d41fh
 	call PRINT_NUMBER
-	call sub_058fh
+	call GET_COINS_PER_CREDITS_FROM_DSWs
 	ld b,c	
 	ld de,0d29ah
 	ld hl,(COINS_PER_CREDITS_A)
