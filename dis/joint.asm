@@ -1765,6 +1765,7 @@ l0822h:
 	ld c,009h		;0840	0e 09 	. . 
 	ldir		;0842	ed b0 	. . 
 	ret			;0844	c9 	. 
+
 sub_0845h:
 	ld a,(iy+000h)		;0845	fd 7e 00 	. ~ . 
 	push af			;0848	f5 	. 
@@ -1774,6 +1775,7 @@ sub_0845h:
 	rrca			;084c	0f 	. 
 	call sub_0851h		;084d	cd 51 08 	. Q . 
 	pop af			;0850	f1 	. 
+
 sub_0851h:
 	and 00fh		;0851	e6 0f 	. . 
 	add a,a			;0853	87 	. 
@@ -2965,17 +2967,21 @@ sub_0d48h:
 	and 00fh		;0d5c	e6 0f 	. . 
 	call z,ADD_ONE_CREDIT		;0d5e	cc d6 0d 	. . . 
 l0d61h:
-	ld hl,COIN_INSERTED_A		;0d61	21 0c e9 	! . . 
-	ld de,COINS_PER_CREDITS_A		;0d64	11 0a e9 	. . . 
-	call INCREMENT_CREDITS_WITH_COIN_MODE		;0d67	cd b1 0d 	. . . 
-	ld hl,COIN_INSERTED_B	;0d6a	21 0e e9 	! . . 
-	inc de			        ;0d6d	13 	Now DE = COINS_PER_CREDITS_B
-	call INCREMENT_CREDITS_WITH_COIN_MODE		;0d6e	cd b1 0d 	. . . 
+	ld hl,COIN_INSERTED_A		            ;0d61	21 0c e9
+	ld de,COINS_PER_CREDITS_A		        ;0d64	11 0a e9
+	call INCREMENT_CREDITS_WITH_COIN_MODE	;0d67	cd b1 0d
+
+	ld hl,COIN_INSERTED_B	                ;0d6a	21 0e e9
+	inc de			                        ;0d6d	13 	Now DE = COINS_PER_CREDITS_B
+	call INCREMENT_CREDITS_WITH_COIN_MODE	;0d6e	cd b1 0d
+
 	ld hl,COIN_SENSOR		;0d71	21 11 e9 	! . . 
 	ld (hl),c			;0d74	71 	q 
-	dec hl			;0d75	2b 	+ 
-	ld c,(hl)			;0d76	4e 	N 
-	dec hl			;0d77	2b 	+ 
+
+	dec hl			    ;0d75	2b HL = FLIP_SCREEN
+	ld c,(hl)			;0d76	4e
+
+	dec hl			;0d77	2b HL = FLIP_SCREEN
 	ld b,004h		;0d78	06 04 	. . 
 	call sub_0da2h		;0d7a	cd a2 0d 	. . . 
 	ld hl,0e90dh		;0d7d	21 0d e9 	! . . 
@@ -2999,20 +3005,32 @@ l0d94h:
 	ld (COINS),a		;0d9e	32 13 e9 	2 . . 
 	ret			;0da1	c9 	. 
 
+; SEGUIR
+; (HL) seems to be some kind of downcounter 12 ... 0.
+; Input C
 sub_0da2h:
-	dec (hl)			;0da2	35 	5 
-	ret p			;0da3	f0 	. 
-	ld (hl),00ch		;0da4	36 0c 	6 . 
-	dec hl			;0da6	2b 	+ 
-	ld a,(hl)			;0da7	7e 	~ 
-	and a			;0da8	a7 	. 
-	ret z			;0da9	c8 	. 
-	ld a,b			;0daa	78 	x 
-	xor c			;0dab	a9 	. 
-	ld c,a			;0dac	4f 	O 
-	and b			;0dad	a0 	. 
-	ret nz			;0dae	c0 	. 
-	dec (hl)			;0daf	35 	5 
+    ; Q K
+
+	dec (hl)		;0da2	35      We call K this first byte
+	ret p			;0da3	f0      Exit when K < 0.
+    
+	ld (hl), 12		;0da4	36 0c   Start over with K = 12.
+    
+    ; Go to the other byte at HL-1. We call it Q
+	dec hl			;0da6	2b
+    
+	; Exit if Q = 0
+    ld a,(hl)		;0da7	7e
+	and a			;0da8	a7
+	ret z			;0da9	c8
+    
+	ld a,b			;0daa	78  A = Q
+	xor c			;0dab	a9  A = Q xor C
+	ld c,a			;0dac	4f  C = Q xor C
+	and b			;0dad	a0  A = (Q xor C) & B
+	ret nz			;0dae	c0  Exit if (Q xor C) & B != 0
+    
+	dec (hl)		;0daf	35  Decrement Q
 	ret			;0db0	c9 	. 
 
 ; Updates COINS according to the coinage policy
@@ -3290,6 +3308,7 @@ l0f17h:
 	djnz l0f0fh		;0f17	10 f6 	. . 
 	ret			;0f19	c9 	. 
 
+; SEGUIR
 sub_0f1ah:
 	ld a,(DRAGONS_LEVEL)		;0f1a	3a 80 e0 	: . . 
 	and 0f8h		;0f1d	e6 f8 	. . 
@@ -3825,6 +3844,7 @@ l121ch:
 	inc hl			;121d	23 	# 
 	ld a,(hl)			;121e	7e 	~ 
 	ret			;121f	c9 	. 
+
 sub_1220h:
 	ld (0e805h),hl		;1220	22 05 e8 	" . . 
 	ld a,(THOMAS_FRAME)		;1223	3a 06 e7 	: . . 
@@ -3868,6 +3888,7 @@ l126bh:
 l126ch:
 	pop de			;126c	d1 	. 
 	ret			;126d	c9 	. 
+
 l126eh:
 	nop			;126e	00 	. 
 	nop			;126f	00 	. 
@@ -5121,6 +5142,7 @@ l1ac6h:
 	sbc hl,de		;1ac6	ed 52 	. R 
 	ret			;1ac8	c9 	. 
 
+; SEGUIR
 sub_1ac9h:
 	ld a,(0e702h)		;1ac9	3a 02 e7 	: . . 
 	cp 008h		;1acc	fe 08 	. . 
@@ -5258,6 +5280,7 @@ l1b96h:
 	ld (ix + ENEMY_ATTACK_STEP_IDX),a		;1ba3	dd 77 0e level 1
 	ld (ix + ENEMY_BOOMERANG_TYPE_IDX),a	;1ba6	dd 77 0f level 1
 	ret			;1ba9	c9 	. 
+
 l1baah:
 	dec (ix + ENEMY_FRAME_COUNTER_IDX)	;1baa	dd 35 07 level 1
 	jp nz,l1bc4h		                ;1bad	c2 c4 1b
@@ -5321,6 +5344,7 @@ l1c21h:
 	and a			;1c24	a7 	. 
 	ret			;1c25	c9 	. 
 
+; Seguir
 sub_1c26h:
 	ld hl,(THOMAS_POSITION)		;1c26	2a 12 e7 	* . . 
 	ld de,l1000h		;1c29	11 00 10 	. . . 
@@ -5333,6 +5357,7 @@ sub_1c26h:
 	res 5,(hl)		;1c3a	cb ae 	. . 
 	ret			;1c3c	c9 	. 
 
+; Seguir
 sub_1c3dh:
 	call GET_ENEMY_POS_IN_HL		;1c3d	cd 8a 1c 	. . . 
 	ld de,l1000h		;1c40	11 00 10 	. . . 
@@ -5344,6 +5369,7 @@ sub_1c3dh:
 	ld hl,0e260h		;1c4f	21 60 e2 	! ` . 
 	res 3,(hl)		;1c52	cb 9e 	. . 
 	ret			;1c54	c9 	. 
+
 l1c55h:
 	dec b			;1c55	05 	. 
 	rlca			;1c56	07 	. 
@@ -5367,6 +5393,7 @@ GET_EFFECTIVE_PLAYER_MOVE:
 	and 00fh		        ;1c6d	e6 0f Consider only joystick directions, not buttons
 	ret			            ;1c6f	c9
 
+; An update of the boss position
 sub_1c70h:
 	call GET_ENEMY_POS_IN_HL	;1c70	cd 8a 1c
 	bit 6,c		                ;1c73	cb 71 	. q 
@@ -5536,6 +5563,8 @@ l1da7h:
 l1db9h:
 	ld hl,075a5h		;1db9	21 a5 75 	! . u 
 	jp l1a7eh		;1dbc	c3 7e 1a 	. ~ . 
+
+; SEGUIR
 sub_1dbfh:
 	push hl			;1dbf	e5 	. 
 	push de			;1dc0	d5 	. 
@@ -5576,6 +5605,7 @@ sub_1defh:
 	ld (ix + 2),l		;1df6	dd 75 02 	. u . 
 	ld (ix + 3),h		;1df9	dd 74 03 	. t . 
 	ret			;1dfc	c9 	. 
+
 sub_1dfdh:
 	ld ix,TBL_E31B		;1dfd	dd 21 1b e3 	. ! . . 
 	ld c,(ix + 0)		;1e01	dd 4e 00 	. N . 
@@ -5953,6 +5983,7 @@ l20d9h:
 	call sub_2d01h		;20da	cd 01 2d 	. . - 
 	ld a,(ix + ENEMY_PROPS_IDX)	;20dd	dd 7e 00
 	jp l1a7eh		;20e0	c3 7e 1a 	. ~ . 
+
 sub_20e3h:
 	call sub_2109h		;20e3	cd 09 21 	. . ! 
 	ret nc			;20e6	d0 	. 
@@ -5974,6 +6005,7 @@ l2100h:
     ; Bit 5: enemy is being attacked
 	set 5,(ix + ENEMY_PROPS_IDX)		;2104	dd cb 00 ee
 	ret			                        ;2108	c9
+
 sub_2109h:
 	ld a,(ix + ENEMY_PROPS_IDX)		;2109	dd 7e 00
     ;        7654 3219 
@@ -6873,10 +6905,15 @@ l285ch:
 	ld (ix + FRAME_COUNTER_IDX + 16), 8		;2872	dd 36 17 08 	. 6 . . 
 	ld (ix + CURRENT_FRAME_IDX + 16), 30	;2876	dd 36 16 1e 	. 6 . . 
 	ld (ix + ENEMY_STATE_IDX + 16), 9		;287a	dd 36 11 09 	. 6 . .
+
+; Some state/frame update of the boss
+; SEGUIR
 sub_287eh:
 	ld (ix + ENEMY_STATE_IDX), 8	;287e	dd 36 01 08
 	ld (ix + ENEMY_FRAME_IDX), 26	;2882	dd 36 06 1a
 	ret			;2886	c9 	. 
+
+; SEGUIR
 sub_2887h:
 	ld a,(0e702h)		;2887	3a 02 e7 	: . . 
 	cp 001h		;288a	fe 01 	. . 
@@ -6885,6 +6922,7 @@ sub_2887h:
 	ret z			;288f	c8 	. 
 	cp 00ah		;2890	fe 0a 	. . 
 	ret			;2892	c9 	. 
+
 l2893h:
 	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;2893	2a 0c e8 	* . . 
 	ld de,0e800h		;2896	11 00 e8 	. . . 
@@ -6978,6 +7016,7 @@ l292fh:
 l2937h:
 	ld (ix + ENEMY_STATE_IDX), 6	;2937	dd 36 01 06
 	ret			;293b	c9 	. 
+
 sub_293ch:
 	dec (ix + ENEMY_FRAME_COUNTER_IDX)		;293c	dd 35 07 level 5
 	jr nz,l2952h		;293f	20 11 	  . 
@@ -6992,6 +7031,7 @@ l294fh:
 l2952h:
 	ld de, 18  		;2952	11 12 00 	. . . 
 	ret			;2955	c9 	. 
+
 	call l1be2h		;2956	cd e2 1b 	. . . 
 	ld de,0f760h		;2959	11 60 f7 	. ` . 
 	add hl,de			;295c	19 	. 
@@ -7466,6 +7506,7 @@ l2cb3h:
 	ld (0e007h),a		;2cb3	32 07 e0 	2 . . 
 l2cb6h:
 	jp sub_2ee2h		;2cb6	c3 e2 2e 	. . . 
+
 sub_2cb9h:
 	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;2cb9	2a 0c e8 	* . . 
 	ld de,0f760h		;2cbc	11 60 f7 	. ` . 
@@ -7481,6 +7522,8 @@ sub_2cb9h:
 	ret nz			;2cd0	c0 	. 
 	set 4,(hl)		;2cd1	cb e6 	. . 
 	ret			;2cd3	c9 	. 
+
+; SEGUIR
 sub_2cd4h:
 	ld hl,(0e2f8h)		;2cd4	2a f8 e2 	* . . 
 	ld a,l			;2cd7	7d 	} 
@@ -7495,6 +7538,8 @@ sub_2cd4h:
 l2ce6h:
 	and a			;2ce6	a7 	. 
 	ret			;2ce7	c9 	. 
+
+;SEGUIR
 sub_2ce8h:
 	ld a,(EXT_RANDOM)		;2ce8	3a 10 e0 	: . . 
 	ld hl,0e19ch		;2ceb	21 9c e1 	! . . 
@@ -7510,6 +7555,8 @@ l2cf9h:
 	ld (ix + ENEMY_STEADY_COUNTER_IDX),b	;2cf9	dd 70 0b level 1
 	ld (ix + ENEMY_STATE_IDX), 4	        ;2cfc	dd 36 01 04
 	ret			;2d00	c9 	. 
+
+; SEGUIR
 sub_2d01h:
 	push hl			;2d01	e5 	. 
 	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;2d02	2a 0c e8 	* . . 
@@ -7519,12 +7566,15 @@ sub_2d01h:
 	ret nc			;2d0a	d0 	. 
 	pop af			;2d0b	f1 	. 
 	ret			;2d0c	c9 	. 
+
 sub_2d0dh:
 	ld de,001bh		;2d0d	11 1b 00 	. . . 
 	jp l1beah		;2d10	c3 ea 1b 	. . . 
 sub_2d13h:
 	ld de,001bh		;2d13	11 1b 00 	. . . 
 	jp l1bf2h		;2d16	c3 f2 1b 	. . . 
+
+; SEGUIR
 sub_2d19h:
 	ld a,083h		;2d19	3e 83 	> . 
 	call PLAY_SOUND		;2d1b	cd fe 0d 	. . . 
@@ -7549,6 +7599,7 @@ sub_2d19h:
 	call PLAY_SOUND		;2d3d	cd fe 0d 	. . . 
 	scf			;2d40	37 	7 
 	ret			;2d41	c9 	. 
+
 l2d42h:
 	nop			;2d42	00 	. 
 	nop			;2d43	00 	. 
@@ -7817,6 +7868,7 @@ sub_2ec1h:
 	ret			;2ee1	c9 	. 
 
 ; E = amount of energy to subtract
+; SEGUIR
 sub_2ee2h:
 	ld a,(THOMAS_DAMAGE_STATUS)	;2ee2	3a 1f e7
 	and 1		                ;2ee5	e6 01 	. . 
@@ -7892,6 +7944,7 @@ l2f41h:
 	pop bc			;2f42	c1 	. 
 	djnz l2f0bh		;2f43	10 c6 	. . 
 	ret			;2f45	c9 	. 
+
 l2f46h:
 	dec b			;2f46	05 	. 
 	jr z,l2f5dh		;2f47	28 14 	( . 
@@ -7980,7 +8033,7 @@ POINTS_TABLE:
     defw  0x20,  0x30,  0x40,  0x50,   0x60,   0x80, 0x90
     defw 0x100, 0x200, 0x300, 0x500, 0x1000, 0x0010
     
-	
+; SEGUIR
 sub_2fc7h:
 	ld a,(NUM_MAGICAL_ELEMENTS)	    ;2fc7	3a 81 e3
 	and a			;2fca	a7
@@ -8383,6 +8436,8 @@ l3327h:
 	add hl,de			;3333	19 	. 
 	ld de,l0120h		;3334	11 20 01 	.   . 
 	call sub_36cah		;3337	cd ca 36 	. . 6 
+
+; SEGUIR
 sub_333ah:
 	ld b,000h		;333a	06 00 	. . 
 l333ch:
@@ -8391,10 +8446,12 @@ l333ch:
 	ld (ix + MAGICAL_ELEMENT_STATE_IDX), ME_STATE_CONFETTI_EXPLODES    ;3343	dd 36 01 05
 	ld (ix + CURRENT_FRAME_IDX), 10	;3347	dd 36 06 0a
 	ret			;334b	c9 	. 
+
 l334ch:
 	ld a,086h		;334c	3e 86 	> . 
 	call PLAY_SOUND		;334e	cd fe 0d 	. . . 
 	jr sub_333ah		;3351	18 e7 	. . 
+
 sub_3353h:
 	call sub_36f6h		;3353	cd f6 36 	. . 6 
 	ld a,(ix + 2)		;3356	dd 7e 02 	. ~ . 
@@ -8410,6 +8467,7 @@ sub_3353h:
 	ld (iy+001h),005h		;3376	fd 36 01 05 	. 6 . . 
 	ld (iy+006h),00ah		;337a	fd 36 06 0a 	. 6 . . 
 	ret			;337e	c9 	. 
+
 	call l1be2h		;337f	cd e2 1b 	. . . 
 	call sub_3773h		;3382	cd 73 37 	. s 7 
 	jp c,l32e6h		;3385	da e6 32 	. . 2 
@@ -8559,6 +8617,7 @@ l34c4h:
 	cp 001h		;34d5	fe 01 	. . 
 	jp z,l3435h		;34d7	ca 35 34 	. 5 4 
 	jp l3713h		;34da	c3 13 37 	. . 7 
+
 sub_34ddh:
 	call sub_36f6h		;34dd	cd f6 36 	. . 6 
 	ld l,(ix + ENEMY_POS_L_IDX)		;34e0	dd 6e 02
@@ -8598,6 +8657,7 @@ l3525h:
 	ld a,(0e365h)		;3525	3a 65 e3 	: e . 
 	ld (iy+008h),a		;3528	fd 77 08 	. w . 
 	ret			;352b	c9 	. 
+
 l352ch:
 	ld (iy+006h),01bh		;352c	fd 36 06 1b 	. 6 . . 
 	ret			;3530	c9 	. 
@@ -8644,6 +8704,8 @@ l356bh:
 	ld a,(0e366h)		;358e	3a 66 e3 	: f . 
 	ld (ix + FIREBALL_TIMEOUT_IDX),a		;3591	dd 77 08
 	ret			;3594	c9 	. 
+
+; SEGUIR
 sub_3595h:
 	ld a,(0e360h)		;3595	3a 60 e3 	: ` . 
 	ld de,(THOMAS_POSITION)		;3598	ed 5b 12 e7 	. [ . . 
@@ -8662,6 +8724,7 @@ l35afh:
 	xor a			;35b0	af 	. 
 	ld (0e100h),a		;35b1	32 00 e1 	2 . . 
 	ret			;35b4	c9 	. 
+
 l35b5h:
 	ld hl,0e380h		;35b5	21 80 e3 	! . . 
 	dec (hl)			;35b8	35 	5 
@@ -8832,6 +8895,8 @@ l36e7h:
 	ld hl,0748eh		;36ef	21 8e 74 	! . t 
 	ld a,c			;36f2	79 	y 
 	jp l1a7eh		;36f3	c3 7e 1a 	. ~ . 
+
+; SEGUIR
 sub_36f6h:
 	ld a,(NUM_MAGICAL_ELEMENTS)		;36f6	3a 81 e3 	: . . 
 	cp 010h		;36f9	fe 10 	. . 
@@ -8848,6 +8913,7 @@ l3708h:
 l3711h:
 	pop af			;3711	f1 	. 
 	ret			;3712	c9 	. 
+
 l3713h:
 	ld (ix + MAGICAL_ELEMENT_LOOKAT_IDX), 0		;3713	dd 36 00 00
 	ld hl,NUM_MAGICAL_ELEMENTS		;3717	21 81 e3 	! . . 
@@ -8900,6 +8966,7 @@ l3763h:
 	add hl,de			;376c	19 	. 
 	ld de,0006h+2		;376d	11 08 00 	. . . 
 	jp sub_1172h		;3770	c3 72 11 	. r . 
+
 sub_3773h:
 	ld hl,l0140h		;3773	21 40 01 	! @ . 
 	call sub_1220h		;3776	cd 20 12 	.   . 
@@ -8916,6 +8983,7 @@ sub_3773h:
 	and a			;378e	a7 	. 
 	sbc hl,de		;378f	ed 52 	. R 
 	ret			;3791	c9 	. 
+
 sub_3792h:
 	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;3792	2a 0c e8 	* . . 
 	ld de,l0300h		;3795	11 00 03 	. . . 
@@ -8935,6 +9003,7 @@ sub_3792h:
 	add hl,de			;37b8	19 	. 
 	ld de,4				;37b9	11 04 00 	. . . 
 	jp sub_1172h		;37bc	c3 72 11 	. r . 
+
 sub_37bfh:
 	ld hl,l00e0h		;37bf	21 e0 00 	! . . 
 	call sub_1220h		;37c2	cd 20 12 	.   . 
@@ -8951,6 +9020,7 @@ sub_37bfh:
 	and a			;37da	a7 	. 
 	sbc hl,de		;37db	ed 52 	. R 
 	ret			;37dd	c9 	. 
+
 sub_37deh:
 	ld hl,(THOMAS_POSITION)		;37de	2a 12 e7 	* . . 
 	ld de,08000h		;37e1	11 00 80 	. . . 
@@ -8960,10 +9030,14 @@ sub_37deh:
 	call sub_38ffh		;37ea	cd ff 38 	. . 8 
 	call sub_3960h		;37ed	cd 60 39 	. ` 9 
 	ret			;37f0	c9 	. 
+
+; SEGUIR
 l37f1h:
 	xor a			;37f1	af 	. 
 	ld (0e100h),a		;37f2	32 00 e1 	2 . . 
 	ret			;37f5	c9 	. 
+
+
 sub_37f6h:
 	ld b,004h		;37f6	06 04 	. . 
 	ld hl,0e572h		;37f8	21 72 e5 	! r . 
@@ -8976,6 +9050,7 @@ l3800h:
 	inc hl			;3800	23 	# 
 	djnz l37fbh		;3801	10 f8 	. . 
 	ret			;3803	c9 	. 
+
 l3804h:
 	push bc			;3804	c5 	. 
 	push hl			;3805	e5 	. 
@@ -8995,7 +9070,7 @@ l3813h:
 	ld d,(hl)			;381d	56 	V 
 	push hl			;381e	e5 	. 
 	ld bc,(THOMAS_POSITION)		;381f	ed 4b 12 e7 	. K . . 
-	ld hl,sub_0f3fh+1		;3823	21 40 0f 	! @ . 
+	ld hl,0x0f40	;3823	21 40 0f 	! @ . 
 	add hl,bc			;3826	09 	. 
 	sbc hl,de		;3827	ed 52 	. R 
 	jp c,l38d9h		;3829	da d9 38 	. . 8 
@@ -9245,6 +9320,7 @@ l39b9h:
 	inc ix		;39bb	dd 23 	. # 
 	djnz l396ah		;39bd	10 ab 	. . 
 	ret			;39bf	c9 	. 
+
 sub_39c0h:
 	ld a,(0e576h)		;39c0	3a 76 e5 	: v . 
 	and a			;39c3	a7 	. 
@@ -9262,6 +9338,7 @@ l39cdh:
 	add ix,de		;39da	dd 19 	. . 
 	djnz l39cdh		;39dc	10 ef 	. . 
 	ret			;39de	c9 	. 
+
 sub_39dfh:
 	ld a,(ix + 1)		;39df	dd 7e 01 	. ~ . 
 	cp 004h		;39e2	fe 04 	. . 
@@ -9497,6 +9574,7 @@ l3bbch:
 l3bcfh:
 	ld (ix + 1),a		;3bcf	dd 77 01 	. w . 
 	jp l3c7ah		;3bd2	c3 7a 3c 	. z < 
+
 sub_3bd5h:
 	ld a,(hl)			;3bd5	7e 	~ 
 	cp 0ffh		;3bd6	fe ff 	. . 
@@ -9509,6 +9587,7 @@ sub_3bd5h:
 	ld (ix + 14),l		;3be2	dd 75 0e 	. u . 
 	ld (ix + 15),h		;3be5	dd 74 0f 	. t . 
 	ret			;3be8	c9 	. 
+
 l3be9h:
 	dec (ix + 7)		;3be9	dd 35 07 	. 5 . 
 	jp nz,l3ca9h		;3bec	c2 a9 3c 	. . < 
@@ -9603,6 +9682,8 @@ l3ca9h:
 	ld a,c			;3cb4	79 	y 
 	xor 040h		;3cb5	ee 40 	. @ 
 	jp l1a80h		;3cb7	c3 80 1a 	. . . 
+
+; SEGUIR
 sub_3cbah:
 	ld l,(ix + 4)		;3cba	dd 6e 04 	. n . 
 	ld h,(ix + 5)		;3cbd	dd 66 05 	. f . 
@@ -9613,6 +9694,7 @@ sub_3cbah:
 	ld l,(ix + 2)		;3cc6	dd 6e 02 	. n . 
 	ld h,(ix + 3)		;3cc9	dd 66 03 	. f . 
 	jp ADD_POINTS		;3ccc	c3 60 2f 	. ` / 
+
 sub_3ccfh:
 	ld hl,l0140h		;3ccf	21 40 01 	! @ . 
 	call sub_1220h		;3cd2	cd 20 12 	.   . 
@@ -9631,6 +9713,7 @@ sub_3ccfh:
 	and a			;3cee	a7 	. 
 	sbc hl,de		;3cef	ed 52 	. R 
 	ret			;3cf1	c9 	. 
+
 l3cf2h:
 	ld hl,0e576h		;3cf2	21 76 e5 	! v . 
 	dec (hl)			;3cf5	35 	5 
@@ -9642,9 +9725,11 @@ l3cfbh:
 	bit 6,(ix + 0)		;3cff	dd cb 00 76 	. . . v 
 	ld (ix + 0),000h		;3d03	dd 36 00 00 	. 6 . . 
 	jr nz,sub_3d0eh		;3d07	20 05 	  . 
+
 sub_3d09h:
 	ld hl,TBL_E520		;3d09	21 20 e5 	!   . 
 	jr l3d11h		;3d0c	18 03 	. . 
+
 sub_3d0eh:
 	ld hl,0e549h		;3d0e	21 49 e5 	! I . 
 l3d11h:
@@ -9686,6 +9771,7 @@ l3d4ch:
 	ld (ix + 10),e		    ;3d4c	dd 73 0a
 	ld (ix + 11),d    ;3d4f	dd 72 0b
 	ret			;3d52	c9 	. 
+
 l3d53h:
 	ld c,000h		;3d53	0e 00 	. . 
 sub_3d55h:
@@ -9746,6 +9832,7 @@ l3db2h:
 	ld a,(hl)			;3dc0	7e 	~ 
 	ld (iy+00dh),a		;3dc1	fd 77 0d 	. w . 
 	ret			;3dc4	c9 	. 
+
 sub_3dc5h:
 	ld hl,0e649h		;3dc5	21 49 e6 	! I . 
 	ld a,(hl)			;3dc8	7e 	~ 
@@ -10092,6 +10179,7 @@ l40d6h:
 	ld h,a	
 	ld (0e717h),hl
 	ret	
+
 sub_40e5h:
 	ld hl,(0e717h)
 	ld (KNIFE_STATUS),hl
@@ -10143,6 +10231,7 @@ l4134h:
 	call z,sub_2ec1h
 	ret
 
+; SEGUIR
 sub_413fh:
 	call CHECK_DEMO_OR_VULNERABLE
 	jr nz,l4150h ; Don't check the time if invulnerable
@@ -10327,6 +10416,8 @@ l4244h:
 l4275h:
 	ld (THOMAS_FRAME),a
 	inc (hl)	
+
+; SEGUIR
 sub_4279h:
 	ld a,(INT_COUNTER + 4)
 	and a	
@@ -10336,6 +10427,7 @@ sub_4279h:
 	ld a,082h
 	call PLAY_SOUND
 	ret	
+
 l4289h:
     ; Check if Thomas is dying
 	ld a,(THOMAS_DAMAGE_STATUS)
@@ -10435,6 +10527,8 @@ l4331h:
 	ld a,(0e703h)
 	and a	
 	ret nz	
+
+; SEGUIR
 sub_433fh:
 	ld a,(THOMAS_FRAME)
 	inc a	
@@ -10447,6 +10541,7 @@ l4349h:
 	ld a, THOMAS_FRAME_DOWN
 	ld (0e703h),a
 	ret	
+
 l4352h:
 	ld a,(hl)	
 	cp 003h
@@ -10915,7 +11010,8 @@ sub_468eh:
 	ld a,020h
 	ret c	
 	inc a	
-	ret	
+	ret
+
 l46a0h:
 	call GET_CURRENT_LEVEL
 	cp 004h
@@ -10972,7 +11068,8 @@ l46f4h:
 	xor a	
 l4700h:
 	ld (SILVIA_LEFT_OR_RIGHT),a
-	ret	
+	ret
+
 sub_4704h:
 	ld hl,(0e102h)
 	ld de,(THOMAS_POSITION)
@@ -11064,6 +11161,7 @@ l4784h:
 	ld a, THOMAS_FRAME_STANDING
 	ld (THOMAS_FRAME),a
 	ret	
+
 sub_47b6h:
 	ld ix,SILVIA_STATE
 	bit 4,(ix + 0)
@@ -11085,6 +11183,7 @@ sub_47d4h:
 	ld a, THOMAS_FRAME_WITH_SILVIA
 	ld (THOMAS_FRAME),a
 	jr sub_4821h
+
 l47e7h:
 	dec (ix + 7)
 	jr nz,sub_4821h
@@ -11121,6 +11220,7 @@ sub_4821h:
 ; Update the effective PLAYER_MOVE.
 ; It takes into account if it's in player mode (fake input) or if
 ; Thomas is being gripped.
+; SEGUIR: give a name
 sub_482fh:
 	ld a,(GAME_STATE)
 	cp GAME_STATE_DEMO
@@ -11178,7 +11278,7 @@ l484dh:
 	or c	
 l4874h:
 	ld (PLAYER_MOVE),a
-	ret	
+	ret
 l4878h:
 	ld a, GAME_STATE_LIFE_LOST
 	ld (GAME_STATE),a
@@ -11333,6 +11433,8 @@ l4994h:
 	ld a,0e1h
 	call DELAY_A
 	jp l487eh
+
+; SEGUIR
 sub_49aeh:
 	ld de,0d150h
 	ld b,004h
@@ -11344,7 +11446,8 @@ l49b3h:
 	add hl,de	
 	ex de,hl	
 	djnz l49b3h
-	ret	
+	ret
+
 sub_49c0h:
 	ld de,0d316h
 	ld bc,0190bh
@@ -11409,7 +11512,9 @@ l4a14h:
 	pop de	
 	inc de	
 	pop hl	
-	ret	
+	ret
+
+;SEGUIR
 sub_4a2ch:
 	call WRITE_CHAR_AT_SCREEN_DE
 	ld a,02dh
@@ -11931,6 +12036,8 @@ l4f70h:
 	ld bc,0608h
 	ld bc,04a9h
 	rst 38h	
+
+;SEGUIR
 sub_4fe9h:
 	ld a,023h
 l4febh:
@@ -12335,6 +12442,8 @@ l53f7h:
 	ld a,005h
 	call PLAY_SOUND
 	ld a,0c0h
+
+;SEGUIR
 sub_5416h:
 	ld (INT_COUNTER + 2),a
 l5419h:
@@ -12600,6 +12709,9 @@ l561bh:
 	ld a,020h
 	ld (de),a	
 	jr l560dh
+
+;SEGUIR
+; This most probably writes the BEST 20 PLAYERS scores
 sub_5620h:
 	call CLEAR_TILEMAP
 	call CONFIG_GAME_STOP
@@ -12717,12 +12829,15 @@ l56dbh:
 	jr nz,l56d8h
 	ret	
 
+;SEGUIR
 sub_56f7h:
 	cp 010h
 	jp nc,10ffh
 	inc de	
 	jp PRINT_NUMBER
+
 sub_5700h:
+    ; It falls into CLEAR_TILEMAP
 	call 1153h
 
 ; Set the GAME_STATE to stop and reset the horizontal scroll, thus
@@ -13166,11 +13281,14 @@ PANEL_TEXT_STR:
     ; End of PANEL_TEXT_STR
     
     
-    
+; SEGUIR
 ; Most probably this is data to draw the char columns of the scenario
-    
+; ToDo: write as DBs in that case.
+;
+; Each byte is 2 chars of the column.
 l59dbh:
-	ld e,b	
+    ; starts with 0x58, 0x59, 0x60, 0x61.
+	ld e,b
 	ld e,c	
 	ld h,b	
 	ld h,c	
@@ -14534,7 +14652,6 @@ l60f5h:
 	ld (hl),05bh
 	cp 096h
 	xor d	
-sub_60fdh:
 	xor h	
 	xor (hl)	
 	or b	
@@ -15634,7 +15751,6 @@ l665bh:
 	add a,b	
 	ld l,b	
 	or 068h
-sub_667fh:
 	or 068h
 	nop	
 	nop	
@@ -15953,7 +16069,6 @@ l67f6h:
 	ld e,040h
 	nop	
 	nop	
-sub_67fdh:
 	nop	
 	rst 38h	
 	jr z,l684ah
@@ -18888,6 +19003,7 @@ l7641h:
 	adc a,h	
 	ret m	
 	rst 38h	
+    ; End of data here?
 
 ; Service mode
 ;l7666h:
@@ -19500,7 +19616,8 @@ l7aa4h:
 	bit 1,a
 	jr z,l7a93h
 	ld (hl),0ffh
-	ret	
+	ret
+
 sub_7aaeh:
 	ld c,000h
 	inc a	
@@ -19538,6 +19655,7 @@ l7ae5h:
 	call sub_7b0ch
 	ld de,0130h
 	ld hl,l726bh
+
 sub_7b0ch:
 	xor a	
 	jp l0e20h
@@ -19621,6 +19739,8 @@ l7b9bh:
 	inc hl	
 	ld (hl),00fh
 	jp sub_7be8h
+
+; SEGUIR
 sub_7bb2h:
 	cpl	
 	ld l,a	
@@ -19632,16 +19752,20 @@ l7bb6h:
 	call PRINT_NUMBER
 	djnz l7bb6h
 	ret	
+
+;SEGUIR
 sub_7bc1h:
 	inc de	
 	inc de	
 	ld a,031h
 	ld b,008h
+;SEGUIR
 sub_7bc7h:
 	call WRITE_CHAR_AT_SCREEN_DE
 	inc a	
 	djnz sub_7bc7h
 	ret	
+
 sub_7bceh:
 	cp 006h
 	jr c,l7bd3h
@@ -19665,6 +19789,8 @@ sub_7bd7h:
 	inc hl	
 	ld (hl),c	
 	ret	
+
+;SEGUIR
 sub_7be8h:
 	ld a,(PLAYER_INPUT_2)
 	bit 1,a
@@ -19674,6 +19800,8 @@ l7befh:
 	bit 1,a
 	jr nz,l7befh
 	ret	
+
+;SEGUIR
 sub_7bf7h:
 	push af	
 	ld hl,ROM_STR
@@ -19687,6 +19815,7 @@ sub_7bf7h:
 	ld hl,OK_STR
 l7c0dh:
 	jp WRITE_TEXT
+
 sub_7c10h:
 	push af	
 	ld bc,sub_4000h
