@@ -372,6 +372,10 @@ FLIP_SCREEN: EQU 0xE910
 ; It activates for both the A and B counters
 COIN_SENSOR: EQU 0xE911
 
+; Number of coins inserted so far before granting a credit.
+; It becomes 0 when a credit is given
+COINS_INSERTED_BEFORE_CREDIT: EQU 0xE912
+
 ; 0: it forces 2 coins
 ; 1..7: number of coins needed add one credit
 ; 8: no credits added regardless the number of introduced coins 
@@ -1640,7 +1644,8 @@ l072ch:
 	ld a,0dfh		;0747	3e df 	> . 
 l0749h:
 	ld (0e714h),a		;0749	32 14 e7 	2 . . 
-	ret			;074c	c9 	. 
+	ret			;074c	c9 	.
+
 sub_074dh:
 	ld hl,0e200h		;074d	21 00 e2 	! . . 
 	ld de,0e201h		;0750	11 01 e2 	. . . 
@@ -1783,26 +1788,35 @@ sub_0851h:
 	inc ix		;0861	dd 23 	. # 
 	inc ix		;0863	dd 23 	. # 
 	ret			;0865	c9 	. 
+
+; SEGUIR
+; Output: BC
 sub_0866h:
-	ld a,(DRAGONS_LEVEL)		;0866	3a 80 e0 	: . . 
-	ld l,a			;0869	6f 	o 
-	and 007h		;086a	e6 07 	. . 
-	ld h,a			;086c	67 	g 
-	ld a,l			;086d	7d 	} 
-	and 038h		;086e	e6 38 	. 8 
-	cp 020h		;0870	fe 20 	.   
-	jr c,l0876h		;0872	38 02 	8 . 
-	ld a,018h		;0874	3e 18 	> . 
+	ld a,(DRAGONS_LEVEL)	;0866	3a 80 e0
+	ld l,a			        ;0869	6f      L = DRAGONS_LEVEL
+	and 007h		        ;086a	e6 07   A = level
+	ld h,a			        ;086c	67      H = level
+	ld a,l			        ;086d	7d      A = DRAGONS_LEVEL
+	and 038h		        ;086e	e6 38   A = DRAGONS << 3
+	cp 020h		            ;0870	fe 20 	Compare DRAGONS with 4
+	jr c,l0876h		        ;0872	38 02 	Jump if DRAGONS < 4
+    
+    ; Dragons >= 4
+	ld a,018h		        ;0874	3e 18 Set A = 3 dragons, first level (11 000)
 l0876h:
-	rrca			;0876	0f 	. 
-	ld l,a			;0877	6f 	o 
-	rrca			;0878	0f 	. 
-	rrca			;0879	0f 	. 
-	add a,l			;087a	85 	. 
-	add a,h			;087b	84 	. 
-	ld c,a			;087c	4f 	O 
-	ld b,000h		;087d	06 00 	. . 
+    ; A
+    ; DDD.000
+	rrca			;0876	0f 	A = DRAGONS << 3
+	ld l,a			;0877	6f 	L = DRAGONS << 3
+	rrca			;0878	0f 	A = DRAGONS << 2
+	rrca			;0879	0f 	A = DRAGONS << 1 = DRAGONS
+	add a,l			;087a	85 	A = DRAGONS + DRAGONS << 3 = 9*DRAGONS
+	add a,h			;087b	84 	A = 9*DRAGONS + level = 8*DRAGONS + (DRAGONS + level) =
+                    ;             = DRAGONS | DRAGONS + level
+	ld c,a			;087c	4f
+	ld b,000h		;087d	06 00 BC = DRAGONS | DRAGONS + level
 	ret			;087f	c9 	. 
+
 l0880h:
 	nop			;0880	00 	. 
 	jr nz,l0883h		;0881	20 00 	  . 
@@ -2953,10 +2967,10 @@ sub_0d48h:
 l0d61h:
 	ld hl,COIN_INSERTED_A		;0d61	21 0c e9 	! . . 
 	ld de,COINS_PER_CREDITS_A		;0d64	11 0a e9 	. . . 
-	call sub_0db1h		;0d67	cd b1 0d 	. . . 
+	call INCREMENT_CREDITS_WITH_COIN_MODE		;0d67	cd b1 0d 	. . . 
 	ld hl,COIN_INSERTED_B	;0d6a	21 0e e9 	! . . 
 	inc de			        ;0d6d	13 	Now DE = COINS_PER_CREDITS_B
-	call sub_0db1h		;0d6e	cd b1 0d 	. . . 
+	call INCREMENT_CREDITS_WITH_COIN_MODE		;0d6e	cd b1 0d 	. . . 
 	ld hl,COIN_SENSOR		;0d71	21 11 e9 	! . . 
 	ld (hl),c			;0d74	71 	q 
 	dec hl			;0d75	2b 	+ 
@@ -3001,39 +3015,44 @@ sub_0da2h:
 	dec (hl)			;0daf	35 	5 
 	ret			;0db0	c9 	. 
 
+; Updates COINS according to the coinage policy
+; Input:
+; A: from COIN_SENSOR
+; HL: COIN_INSERTED_A or COIN_INSERTED_B
+; DE: COINS_PER_CREDITS_A or COINS_PER_CREDITS_B
+INCREMENT_CREDITS_WITH_COIN_MODE:
+    ; Increment coin counter
+	rrc b		;0db1	cb 08
+	rl c		;0db3	cb 11
+	ld a,c		;0db5	79
+	and 049h	;0db6	e6 49
+	cp 001h		;0db8	fe 01
+	ret nz		;0dba	c0
+	inc (hl)	;0dbb	34
 
-sub_0db1h:
-    ; Called from:
-	;ld hl,COIN_INSERTED_A		;0d61	21 0c e9
-	;ld de,COINS_PER_CREDITS_A		;0d64	11 0a e9
-	;call sub_0db1h		;0d67	cd b1 0d
-	;ld hl,COIN_INSERTED_B		;0d6a	21 0e e9
-
-	rrc b		;0db1	cb 08 	. . 
-	rl c		;0db3	cb 11 	. . 
-	ld a,c			;0db5	79 	y 
-	and 049h		;0db6	e6 49 	. I 
-	cp 001h		;0db8	fe 01 	. . 
-	ret nz			;0dba	c0 	. 
-	inc (hl)			;0dbb	34 	4 
-    
     ; Sound when inserting a coin.
     ; Somehow inverted logic with ALLOWED_TO_ADD_SOUND here!
-	ld a,(ALLOWED_TO_ADD_SOUND)		;0dbc	3a 06 e0 	: . . 
-	and a			;0dbf	a7 	. 
-	ld a,001h		;0dc0	3e 01 	> . 
-	call z,PLAY_SOUND		;0dc2	cc fe 0d 	. . . 
+	ld a,(ALLOWED_TO_ADD_SOUND)	;0dbc	3a 06 e0
+	and a			            ;0dbf	a7
+	ld a,001h		            ;0dc0	3e 01
+	call z,PLAY_SOUND		    ;0dc2	cc fe 0d
 	
-    ld a,(de)			;0dc5	1a 	. 
-	cp 001h		;0dc6	fe 01 	. . 
-	jr z,l0ddah		;0dc8	28 10 	( . 
-	cp 008h		;0dca	fe 08 	. . 
-	jr nc,l0dd8h		;0dcc	30 0a 	0 . 
-	ld hl,0e912h		;0dce	21 12 e9 	! . . 
-	inc (hl)			;0dd1	34 	4 
-	cp (hl)			;0dd2	be 	. 
-	ret nz			;0dd3	c0 	. 
-	ld (hl),000h		;0dd4	36 00 	6 . 
+    ld a,(de)			                ;0dc5	1a
+	cp 1		                        ;0dc6	fe 01
+	jr z,l0ddah		                    ;0dc8	28 10 Give a credit if just one coin/credit is needed
+
+    ; Ignore asking the player to put more than 7 coins/credit.
+    ; The maximum is 7.
+	cp 8		        ;0dca	fe 08
+	jr nc,l0dd8h		;0dcc	30 0a
+
+    ; Check if we have inserted the required number of coins.
+    ; Give one crete if so, and exit otherwise.
+	ld hl,COINS_INSERTED_BEFORE_CREDIT	;0dce	21 12 e9
+	inc (hl)			                ;0dd1	34
+	cp (hl)			                    ;0dd2	be
+	ret nz			                    ;0dd3	c0
+	ld (hl),000h		                ;0dd4	36 00
 
 ; Adds one more credit
 ADD_ONE_CREDIT: ; SEGUIR
@@ -3046,7 +3065,7 @@ l0ddah:
 	daa			;0dde	27
     ; See here for a good description of DAA: https://ehaskins.com/2018-01-30%20Z80%20DAA/
 	jr nc,l0de3h	;0ddf	30 02 If we have more than 99 coins, limit to 99
-	ld a,099h		;0de1	3e 99
+	ld a,099h		;0de1	3e 99 Ignore if we add more than 99 coins
 l0de3h:
 	ld (hl),a		;0de3	77
 	ret			    ;0de4	c9
