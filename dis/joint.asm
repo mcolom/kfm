@@ -915,7 +915,7 @@ l02aeh:
 	jp z,l033ah		;02b3	ca 3a 03 	. : . 
 	cp 0xC		;02b6	fe 0c 	0xC: level ending music sounds. Energy and time decrease to gain points.
 	jp z,l02c0h		;02b8	ca c0 02 	. . . 
-	call sub_0fb8h		;02bb	cd b8 0f 	. . . 
+	call DECREASE_TIME_UPDATE_PANEL		;02bb	cd b8 0f 	. . . 
 	jr LEVEL_PLAY_LOOP		;02be	18 dc 	. . 
 
 l02c0h:
@@ -3397,7 +3397,8 @@ l0fb1h:
 	djnz l0f99h		;0fb5	10 e2 	. . 
 	ret			;0fb7	c9 	. 
 
-sub_0fb8h:
+; Decreases the time, plays the time decrease sound, and updates the panel
+DECREASE_TIME_UPDATE_PANEL:
 	ld a,(GAME_STATE)		;0fb8	3a 00 e0 	: . . 
 	cp GAME_STATE_GO_UPSTAIRS_OR_SILVIA_RESCUED		;0fbb	fe 03
 	jr z,DRAW_PANEL_ELEMENTS		;0fbd	28 24 	( $ 
@@ -11322,7 +11323,7 @@ l496fh:
 	ld (0e012h),hl
 	ei	
 l4994h:
-	call sub_0fb8h
+	call DECREASE_TIME_UPDATE_PANEL
 	ld a,(GAME_STATE)
 	cp GAME_STATE_LIFE_LOST
 	jr nz,l4994h
