@@ -1,6 +1,7 @@
 ; Tilemap of the scenario, used by DRAW_SCENARIO_COL.
 
-l59dbh:
+;l59dbh:
+SCENARIO_TILEMAP_ZONE_1:
     ; starts with 0x58, 0x59, 0x60, 0x61.
 	ld e,b
 	ld e,c	

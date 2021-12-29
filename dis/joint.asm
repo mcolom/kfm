@@ -13026,7 +13026,7 @@ DRAW_SCENARIO_COL_ROOF:
 	sub 0d5h
 	jr c,l5818h
 	push hl	
-	ld hl,l59dbh
+	ld hl,SCENARIO_TILEMAP_ZONE_1
 	ld e,a	
 	ld d,000h
 	add hl,de	
