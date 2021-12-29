@@ -840,7 +840,7 @@ l0220h:
 
 	ld (0e090h),a		;0244	32 90 e0 	2 . . 
 l0247h:
-	call sub_056fh		;0247	cd 6f 05 	. o . 
+	call GET_LIVES_FROM_DSW1		;0247	cd 6f 05 	. o . 
 	ld (LIVES),a		;024a	32 84 e0 	2 . . 
 	ld (0e094h),a		;024d	32 94 e0 	2 . . 
 
@@ -1323,23 +1323,41 @@ MAKE_POINTS_SOUND:
 	call PLAY_SOUND		    ;056b	cd fe 0d
 	ret			            ;056e
 
+; SEGUIR
+	;PORT_START("DSW1")
+	;PORT_DIPNAME( 0x01, 0x01, DEF_STR( Difficulty ) ) PORT_DIPLOCATION("SW1:1")
+	;PORT_DIPSETTING(    0x01, DEF_STR( Easy ) )
+	;PORT_DIPSETTING(    0x00, DEF_STR( Hard ) )
+	;PORT_DIPNAME( 0x02, 0x02, "Energy Loss" ) PORT_DIPLOCATION("SW1:2")
+	;PORT_DIPSETTING(    0x02, "Slow" )
+	;PORT_DIPSETTING(    0x00, "Fast" )
+	;PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Lives ) ) PORT_DIPLOCATION("SW1:3,4")
+	;PORT_DIPSETTING(    0x08, "2" )
+	;PORT_DIPSETTING(    0x0c, "3" )
+	;PORT_DIPSETTING(    0x04, "4" )
+	;PORT_DIPSETTING(    0x00, "5" )
 
-sub_056fh:
-	InDSW1		;056f	db 03 	. . 
-	cpl			;0571	2f 	/ 
-l0572h:
-	and 00ch		;0572	e6 0c 	. . 
-l0574h:
-	rrca			;0574	0f 	. 
-	rrca			;0575	0f 	. 
-	add a,002h		;0576	c6 02 	. . 
-	cp 004h		;0578	fe 04 	. . 
-	ret nc			;057a	d0 	. 
-	inc a			;057b	3c 	< 
-	cp 003h		;057c	fe 03 	. . 
-	ret z			;057e	c8 	. 
-	ld a,002h		;057f	3e 02 	> . 
-	ret			;0581	c9 	. 
+
+; Read DSW1 and obtain the configured number of lives
+GET_LIVES_FROM_DSW1:
+	InDSW1		;056f	db 03    
+	cpl			;0571	2f The bits are inverted in the DSWs
+    
+    ; Check SW1:3,4: lives
+	and 00ch	;0572	e6 0c and 0000.1100
+    rrca			;0574	0f  
+	rrca			;0575	0f
+	add a, 2		;0576	c6 02
+
+	cp 4		    ;0578	fe 04
+	ret nc			;057a	d0 4 or 5 lives
+    
+	inc a			;057b	3c
+	cp 3		    ;057c	fe 03 3 lives
+	ret z			;057e	c8
+    
+	ld a,2		    ;057f	3e 02 2 lives
+	ret			    ;0581	c9
 
 ; Calls DRAW_PANEL_ELEMENTS only if (INT_COUNTER + 2) == 0, to
 ; update slowly in the scene.
@@ -19197,7 +19215,7 @@ l78d3h:
 l78e5h:
 	ld de,0d3deh
 	call WRITE_TEXT
-	call sub_056fh
+	call GET_LIVES_FROM_DSW1
 	ld de,0d41fh
 	call PRINT_NUMBER
 	call sub_058fh
