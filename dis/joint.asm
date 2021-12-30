@@ -2950,6 +2950,8 @@ sub_0d3bh:
     ; DEBUG, H = 0x02    
 	ret			    ;0d47	c9
 
+; SEGUIR
+; Give a name
 sub_0d48h:
 	rrca			;0d48	0f 	. 
 	rrca			;0d49	0f 	. 
@@ -5401,6 +5403,8 @@ sub_1c70h:
 l1c77h:
 	add hl,de			;1c77	19 	. 
 	jr SET_ENEMY_POS_FROM_HL		;1c78	18 09 	. . 
+    
+; SEGUIR
 sub_1c7ah:
 	call GET_ENEMY_POS_IN_HL		;1c7a	cd 8a 1c 	. . . 
 	bit 6,c		;1c7d	cb 71 	. q 
@@ -5580,6 +5584,7 @@ l1dceh:
 	pop hl			;1dd2	e1 	. 
 	ret			;1dd3	c9 	. 
 
+; SEGUIR
 sub_1dd4h:
 	push hl			;1dd4	e5 	. 
 	push de			;1dd5	d5 	. 
@@ -5595,6 +5600,7 @@ l1de3h:
 	pop hl			;1de7	e1 	. 
 	ret			;1de8	c9 	. 
 
+; SEGUIR
 sub_1de9h:
 	ld l,(ix + 12)		;1de9	dd 6e 0c 	. n . 
 	ld h,(ix + 13)		;1dec	dd 66 0d 	. f . 
@@ -5606,6 +5612,7 @@ sub_1defh:
 	ld (ix + 3),h		;1df9	dd 74 03 	. t . 
 	ret			;1dfc	c9 	. 
 
+; SEGUIR, to discover what TBL_E31B is.
 sub_1dfdh:
 	ld ix,TBL_E31B		;1dfd	dd 21 1b e3 	. ! . . 
 	ld c,(ix + 0)		;1e01	dd 4e 00 	. N . 
@@ -5984,6 +5991,7 @@ l20d9h:
 	ld a,(ix + ENEMY_PROPS_IDX)	;20dd	dd 7e 00
 	jp l1a7eh		;20e0	c3 7e 1a 	. ~ . 
 
+; SEGUIR
 sub_20e3h:
 	call sub_2109h		;20e3	cd 09 21 	. . ! 
 	ret nc			;20e6	d0 	. 
@@ -7017,6 +7025,7 @@ l2937h:
 	ld (ix + ENEMY_STATE_IDX), 6	;2937	dd 36 01 06
 	ret			;293b	c9 	. 
 
+; SEGUIR
 sub_293ch:
 	dec (ix + ENEMY_FRAME_COUNTER_IDX)		;293c	dd 35 07 level 5
 	jr nz,l2952h		;293f	20 11 	  . 
@@ -7468,10 +7477,13 @@ l2c69h:
 	ret z			;2c73	c8 	. 
 	dec (ix-002h)		;2c74	dd 35 fe 	. 5 . 
 	ret			;2c77	c9 	. 
+
+; SEGUIR, easy function
 sub_2c78h:
 	ld a,(DRAGONS_LEVEL)		;2c78	3a 80 e0 	: . . 
 	and 0fch		;2c7b	e6 fc 	. . 
 	ret nz			;2c7d	c0 	. 
+
 sub_2c7eh:
 	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;2c7e	2a 0c e8 	* . . 
 	ld de,0e800h		;2c81	11 00 e8 	. . . 
@@ -7487,6 +7499,7 @@ l2c8eh:
 	ld (de),a			;2c91	12 	. 
 	ld (hl),000h		;2c92	36 00 	6 . 
 	ret			;2c94	c9 	. 
+
 l2c95h:
 	ld a,091h		;2c95	3e 91 	> . 
 	call PLAY_SOUND		;2c97	cd fe 0d 	. . . 
@@ -7507,6 +7520,7 @@ l2cb3h:
 l2cb6h:
 	jp sub_2ee2h		;2cb6	c3 e2 2e 	. . . 
 
+; SEGUIR
 sub_2cb9h:
 	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;2cb9	2a 0c e8 	* . . 
 	ld de,0f760h		;2cbc	11 60 f7 	. ` . 
@@ -12957,14 +12971,18 @@ l5793h:
 	call sub_58f1h
 l5796h:
 	call sub_57d4h
+    
+    ; Check current level
 	call GET_CURRENT_LEVEL
-	cp 003h
-	ret nz	
+	cp 003h ; Are we in level 4?
+	ret nz	; 579e C0   No, get out
+    
 	ld a,(DISTANCE_TO_LEFT)
-	ld bc,0006h+2
+	ld bc, 8
 	ld hl,SCENARIO_TILEMAP_ZONE_4
-	cpdr
-	ret nz	
+	cpdr ; CP (HL), DEC HL, DEC BC. Repeat until BC=0 or A=HL.
+	ret nz
+
 	rlc c
 	rlc c
 	ld a,(DRAGONS_LEVEL)
@@ -12996,10 +13014,11 @@ l57c4h:
 
 sub_57d4h:
 	ld a,(DRAGONS_LEVEL)
-	and 001h
-	ld hl,SCENARIO_TILEMAP_ZONE_7
+	and 001h ; Level 2?
+    ; Kind of the same, but inverted order of the column numbers
+	ld hl,SCENARIO_TILEMAP_ZONE_7 ; For level 2
 	jr nz,l57e1h
-	ld hl,SCENARIO_TILEMAP_ZONE_8
+	ld hl,SCENARIO_TILEMAP_ZONE_8 ; For level 1
 l57e1h:
 	ld a,(DISTANCE_TO_LEFT)
 	ld bc,000ch
@@ -13057,9 +13076,11 @@ l581ch:
 DRAW_SCENARIO_COL_BOTTOM:
 	ld a,(DISTANCE_TO_LEFT)
 	cp 0ddh
-	ret nc	
+	ret nc
+    
+    ; Check distance to see if the should draw the hatch already
 	cp 00dh
-	jr c,l5849h
+	jr c,l5849h ; Yes, draw the hatch
 	cp 0cfh
 	jr c,l586dh
 	ld de,SCENARIO_TILEMAP_ZONE_15
