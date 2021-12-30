@@ -3374,13 +3374,15 @@ WRITE_CHAR_AND_NEXT:
 	inc a			                    ;0f56	3c
 	ret			                        ;0f57	c9
 
-sub_0f58h:
+; Erase the dragons from the panel.
+; Use to make them blink from DRAW_PANEL_ELEMENTS.
+ERASE_DRAGONS:
 	ld de,0d129h		;0f58	11 29 d1 	. ) . 
 	xor a			;0f5b	af 	. 
 	ld c,a			;0f5c	4f 	O 
-	call sub_0f63h		;0f5d	cd 63 0f 	. c . 
+	call WRITE_6_CHARS		;0f5d	cd 63 0f 	. c . 
 	ld de,0d169h		;0f60	11 69 d1 	. i . 
-sub_0f63h:
+WRITE_6_CHARS:
 	ld b,006h		;0f63	06 06 	. . 
 l0f65h:
 	call WRITE_CHAR_AT_SCREEN_DE		;0f65	cd 10 11 	. . . 
@@ -3504,13 +3506,15 @@ l100fh:
 l1027h:
 	cp 020h		;1027	fe 20 	.   
 	jr c,l103ah		;1029	38 0f 	8 . 
+
+    ; Dragon blinking
 	ld a,(INT_COUNTER)		;102b	3a 80 e8 	: . . 
 	and 018h		;102e	e6 18 	. . 
 	jr z,l1037h		;1030	28 05 	( . 
 	call DRAW_DRAGONS		;1032	cd 1a 0f 	. . . 
 	jr l103ah		;1035	18 03 	. . 
 l1037h:
-	call sub_0f58h		;1037	cd 58 0f 	. X . 
+	call ERASE_DRAGONS		;1037	cd 58 0f 	. X . 
 l103ah:
     ; Check if we've already given the extra life
 	ld a,(SKIP_LETTER_SKIP_EXTRA_LIFE)	;103a	3a 85 e0
