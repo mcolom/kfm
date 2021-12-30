@@ -669,9 +669,9 @@ l0110h:
 	add a,(hl)			;0112	86 	. 
 	ld (hl),a			;0113	77 	w 
 	call CHECK_FLIPSCREEN_AND_READ_PLAYER_CONTROLS		;0114	cd 05 0d 	. . . 
-	call sub_0d48h		;0117	cd 48 0d 	. H . 
+	call CHECK_UPDATE_COINS		;0117	cd 48 0d 	. H . 
 l011ah:
-	call sub_482fh		;011a	cd 2f 48 	. / H 
+	call UPDATE_PLAYER_MOVE		;011a	cd 2f 48 	. / H 
 	call SEND_NEXT_SOUND_TO_IREM_AUDIO		;011d	cd e5 0d 	. . . 
 l0120h:
 	ld a,(IN_PLAY)	;0120	3a 01 e0
@@ -2956,9 +2956,8 @@ sub_0d3bh:
     ; DEBUG, H = 0x02    
 	ret			    ;0d47	c9
 
-; SEGUIR
-; Give a name
-sub_0d48h:
+; Update the counter of inserted coins
+CHECK_UPDATE_COINS:
 	rrca			;0d48	0f 	. 
 	rrca			;0d49	0f 	. 
 	rrca			;0d4a	0f 	. 
@@ -3009,6 +3008,7 @@ l0d94h:
 	ld a,(COINS_PER_CREDITS_A)		;0d97	3a 0a e9 	: . . 
 	and a			;0d9a	a7 	. 
 	ret nz			;0d9b	c0 	. 
+    ; Free play
 	ld a,002h		;0d9c	3e 02 	> . 
 	ld (COINS),a		;0d9e	32 13 e9 	2 . . 
 	ret			;0da1	c9 	. 
@@ -3246,7 +3246,7 @@ RESET_PANEL:
 	call DRAW_LIVES		    ;0ead	cd e6 10
 	ld a,(AVOID_SHOWING_FLOOR_INTRO_TEXT)		;0eb0	3a 1c e8
 	and a			        ;0eb3	a7
-	call z,sub_0f1ah		;0eb4	cc 1a 0f
+	call z,DRAW_DRAGONS		;0eb4	cc 1a 0f
 	ld a,3		            ;0eb7	3e 03 	> . 
 	ld (INT_COUNTER + 1),a		;0eb9	32 81 e8 	2 . . 
 	ld a,(ENERGY)		;0ebc	3a 09 e7 	: . . 
@@ -3317,46 +3317,55 @@ l0f17h:
 	ret			;0f19	c9 	. 
 
 ; SEGUIR
-sub_0f1ah:
-	ld a,(DRAGONS_LEVEL)		;0f1a	3a 80 e0 	: . . 
-	and 0f8h		;0f1d	e6 f8 	. . 
-	rrca			;0f1f	0f 	. 
-	rrca			;0f20	0f 	. 
-	rrca			;0f21	0f 	. 
-	ld b,a			;0f22	47 	G 
+DRAW_DRAGONS:
+	ld a,(DRAGONS_LEVEL)	;0f1a	3a 80 e0
+	and 0f8h		        ;0f1d	e6 f8 Check dragons
+	rrca			;0f1f	0f
+	rrca			;0f20	0f
+	rrca			;0f21	0f A = dragons
+	ld b,a			;0f22	47 B = dragons
 
 	InDSW1		    ;0f23	db 03
 	and 001h		;0f25	e6 01  Check bit 0: difficulty
-	jr nz,l0f2ah		;0f27	20 01 	  . 
-	dec b			;0f29	05 	. 
+	jr nz,l0f2ah	;0f27	20 01 Jump if 1 (easy)
+    ; It's hard
+	dec b			;0f29	05 B = dragons-1
 l0f2ah:
-	ld a,b			;0f2a	78 	x 
-	and a			;0f2b	a7 	. 
-	ret z			;0f2c	c8 	. 
-	cp 003h		;0f2d	fe 03 	. . 
-	jr c,l0f33h		;0f2f	38 02 	8 . 
-	ld a,003h		;0f31	3e 03 	> . 
-l0f33h:
-	ld b,a			;0f33	47 	G 
-	ld c,080h		;0f34	0e 80 	. . 
-	ld de,0d129h		;0f36	11 29 d1 	. ) . 
-l0f39h:
-	call sub_0f3fh		;0f39	cd 3f 0f 	. ? . 
-	djnz l0f39h		;0f3c	10 fb 	. . 
-	ret			;0f3e	c9 	. 
+	ld a,b			;0f2a	78 A = dragons or dragons-1 depending on the difficulty
+	and a			;0f2b	a7
+	ret z			;0f2c	c8 Exit if no dragons
 
-sub_0f3fh:
-	ld a,0b8h		;0f3f	3e b8 	> . 
-	call sub_0f4fh		;0f41	cd 4f 0f 	. O . 
-	push de			;0f44	d5 	. 
-	ld hl,0003eh		;0f45	21 3e 00 	! > . 
-	add hl,de			;0f48	19 	. 
-	ex de,hl			;0f49	eb 	. 
-	call sub_0f4fh		;0f4a	cd 4f 0f 	. O . 
-	pop de			;0f4d	d1 	. 
-	ret			;0f4e	c9 	. 
+	cp 3		    ;0f2d	fe 03 More than 4 dragons?
+	jr c,l0f33h		;0f2f	38 02   No, go on normally
+	ld a,003h		;0f31	3e 03   Yes, set a maximum of 3 dragons
     
-sub_0f4fh:
+    ; It'll print now the dragons, with A = number of dragons
+l0f33h:
+	ld b,a			;0f33	47      B = dragons, uses in the loop
+	ld c,080h		;0f34	0e 80   Color
+	ld de,0d129h	;0f36	11 29 d1
+l0f39h:
+	call DRAW_ONE_DRAGON	;0f39	cd 3f 0f
+	djnz l0f39h		;0f3c	10 fb
+	ret			    ;0f3e	c9
+
+; Writes one dragon (2 chars)
+DRAW_ONE_DRAGON:
+	ld a,0b8h		            ;0f3f	3e b8
+	call WRITE_CHAR_AND_NEXT	;0f41	cd 4f 0f
+	push de			            ;0f44	d5
+	ld hl,0003eh		        ;0f45	21 3e 00
+	add hl,de			        ;0f48	19
+	ex de,hl			        ;0f49	eb
+	call WRITE_CHAR_AND_NEXT	;0f4a	cd 4f 0f
+	pop de			            ;0f4d	d1
+	ret			                ;0f4e	c9
+    
+; Write A and char A+1.
+; A: initial character
+; C: color
+; DE: position in the screen
+WRITE_CHAR_AND_NEXT:
 	call WRITE_CHAR_AT_SCREEN_DE		;0f4f	cd 10 11 	. . . 
 	inc a			;0f52	3c 	< 
 	call WRITE_CHAR_AT_SCREEN_DE		;0f53	cd 10 11 	. . . 
@@ -3496,7 +3505,7 @@ l1027h:
 	ld a,(INT_COUNTER)		;102b	3a 80 e8 	: . . 
 	and 018h		;102e	e6 18 	. . 
 	jr z,l1037h		;1030	28 05 	( . 
-	call sub_0f1ah		;1032	cd 1a 0f 	. . . 
+	call DRAW_DRAGONS		;1032	cd 1a 0f 	. . . 
 	jr l103ah		;1035	18 03 	. . 
 l1037h:
 	call sub_0f58h		;1037	cd 58 0f 	. X . 
@@ -11241,7 +11250,7 @@ sub_4821h:
 ; It takes into account if it's in player mode (fake input) or if
 ; Thomas is being gripped.
 ; SEGUIR: give a name
-sub_482fh:
+UPDATE_PLAYER_MOVE:
 	ld a,(GAME_STATE)
 	cp GAME_STATE_DEMO
 	jr nz,l484dh
