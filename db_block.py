@@ -43,7 +43,7 @@ offset = args.offset
 start = args.start
 end = args.end
 
-# Read words
+# Read bytes
 with open(input_filename, 'rb') as f:
 	f.seek(start - offset)
 	data = f.read(end-start+1)

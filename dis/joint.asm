@@ -10185,7 +10185,7 @@ sub_40e5h:
 	ld (KNIFE_STATUS),hl
 	ld a,(THOMAS_FRAME)
 	add a,a	
-	ld hl,l65ffh
+	ld hl,SCENARIO_TILEMAP_ZONE_30
 	ld b,000h
 	ld c,a	
 	add hl,bc	
@@ -10395,7 +10395,7 @@ l4244h:
 	add a,a	
 	add a,e	
 	ld e,a	
-	ld hl,l658dh
+	ld hl,SCENARIO_TILEMAP_ZONE_26
 	add hl,de	
 	ld a,(hl)	
 	ld (0e703h),a
@@ -10629,7 +10629,7 @@ l43d8h:
 	ldi
 	inc bc	
 	ld (0e70ch),hl
-	ld hl,l65a9h
+	ld hl,SCENARIO_TILEMAP_ZONE_27
 	add hl,bc	
 	ld a,(hl)	
 	inc hl	
@@ -10756,7 +10756,7 @@ l44c4h:
 	add a,a	
 	ld d,000h
 	ld e,a	
-	ld hl,l65adh
+	ld hl,SCENARIO_TILEMAP_ZONE_28
 	add hl,de	
 	ld a,(hl)	
 	inc hl	
@@ -11214,7 +11214,7 @@ sub_4821h:
 	ld de,0ee00h
 	add hl,de	
 	ret c	
-	ld hl,l73f0h
+	ld hl,SCENARIO_TILEMAP_ZONE_34
 	jp l1a7dh
 
 ; Update the effective PLAYER_MOVE.
@@ -11303,7 +11303,7 @@ l487eh:
 	ld (0e705h),a
 	ld hl,030a0h
 	ld (THOMAS_POSITION),hl
-	ld hl,l5c00h
+	ld hl,SCENARIO_TILEMAP_ZONE_10
 	ld (0e710h),hl
 	ld (0e344h),hl
 	ld hl,034a0h
@@ -11664,7 +11664,7 @@ l4d43h:
 	bit 5,a
 	jr z,l4d54h
 	push af	
-	ld hl,l65b7h
+	ld hl,SCENARIO_TILEMAP_ZONE_29
 	ld a,(hl)	
 	inc hl	
 	ld (0e70ch),hl
@@ -12962,16 +12962,16 @@ l5796h:
 	ret nz	
 	ld a,(DISTANCE_TO_LEFT)
 	ld bc,0006h+2
-	ld hl,l5a30h
+	ld hl,SCENARIO_TILEMAP_ZONE_4
 	cpdr
 	ret nz	
 	rlc c
 	rlc c
 	ld a,(DRAGONS_LEVEL)
 	cp 010h
-	ld hl,l5a31h
+	ld hl,SCENARIO_TILEMAP_ZONE_5
 	jr c,l57bch
-	ld hl,l5a51h
+	ld hl,SCENARIO_TILEMAP_ZONE_6
 l57bch:
 	add hl,bc	
 	ld e,(hl)	
@@ -12997,15 +12997,15 @@ l57c4h:
 sub_57d4h:
 	ld a,(DRAGONS_LEVEL)
 	and 001h
-	ld hl,l5a7ch
+	ld hl,SCENARIO_TILEMAP_ZONE_7
 	jr nz,l57e1h
-	ld hl,l5a88h
+	ld hl,SCENARIO_TILEMAP_ZONE_8
 l57e1h:
 	ld a,(DISTANCE_TO_LEFT)
 	ld bc,000ch
 	cpdr
 	ret nz	
-	ld hl,l5a88h+1
+	ld hl,0x5a89
 	add hl,bc	
 	add hl,bc	
 	ld a,(DISTANCE_TO_LEFT)
@@ -13020,7 +13020,7 @@ l57e1h:
 
 ; Draw the part of the column of the scenario which corresponds to the roof
 DRAW_SCENARIO_COL_ROOF:
-	ld de,l61e7h
+	ld de,SCENARIO_TILEMAP_ZONE_20
 	cp 0dah
 	jp nc,l5918h
 	sub 0d5h
@@ -13042,7 +13042,7 @@ l581ch:
 	ld a,(DISTANCE_TO_LEFT)
 	and 007h
 	push hl	
-	ld hl,l59e1h
+	ld hl,SCENARIO_TILEMAP_ZONE_2
 	ld c,a	
 	add hl,bc	
 	ld a,(hl)	
@@ -13062,18 +13062,18 @@ DRAW_SCENARIO_COL_BOTTOM:
 	jr c,l5849h
 	cp 0cfh
 	jr c,l586dh
-	ld de,l5f83h
+	ld de,SCENARIO_TILEMAP_ZONE_15
 	jp l58c5h
 l5849h:
 	ld b,a	
 	ld a,(HATCH_STATE)
 	cp 1
 	ld a,b	
-	ld de,l5d48h
+	ld de,SCENARIO_TILEMAP_ZONE_12
 	jr z,l58c5h
-	ld de,l5e18h
+	ld de,SCENARIO_TILEMAP_ZONE_13
 	jr nc,l58c5h
-	ld de,l5c8eh
+	ld de,SCENARIO_TILEMAP_ZONE_11
 	jr l58c5h
 
 ; Draw the part of the column of the scenario which corresponds to the corridor
@@ -13091,7 +13091,7 @@ l586dh:
 	push hl	
 	add a,a	
 	ld c,a	
-	ld hl,l59e9h
+	ld hl,SCENARIO_TILEMAP_ZONE_3
 	add hl,bc	
 	ld a,(hl)	
 	inc hl	
@@ -13102,18 +13102,18 @@ l586dh:
 	ld (hl),c	
 	add hl,de	
 	pop af	
-	ld de,l5b6ah
+	ld de,SCENARIO_TILEMAP_ZONE_9
 	jr l58c5h
 l5886h:
 	ld b,a	
-	ld de,l61cbh
+	ld de,SCENARIO_TILEMAP_ZONE_19
 	call GET_CURRENT_LEVEL
 	jr z,l589ch
 	ld a,(HATCH_STATE)
 	cp 1
-	ld de,l6176h
+	ld de,SCENARIO_TILEMAP_ZONE_18
 	jr nc,l589ch
-	ld de,l60f5h
+	ld de,SCENARIO_TILEMAP_ZONE_17
 l589ch:
 	ld a,b	
 	jr l58c5h
@@ -13122,9 +13122,9 @@ l589fh:
 	call GET_CURRENT_LEVEL
 	cp 004h
 	ld a,e	
-	ld de,l60b3h
+	ld de,SCENARIO_TILEMAP_ZONE_16
 	jr z,l58c5h
-	ld de,l5ea9h
+	ld de,SCENARIO_TILEMAP_ZONE_14
 	call l5918h
 	call GET_CURRENT_LEVEL
 	ld a,(DISTANCE_TO_LEFT)
@@ -13136,7 +13136,7 @@ l589fh:
 l58beh:
 	cp 002h
 	jr nc,l58c8h
-	ld de,l6554h
+	ld de,SCENARIO_TILEMAP_ZONE_25
 l58c5h:
 	call l5918h
 l58c8h:
@@ -13154,17 +13154,17 @@ sub_58d3h:
 	cp 020h
 	jr c,l58e7h
 	and 01fh
-	ld de,l650ch
+	ld de,SCENARIO_TILEMAP_ZONE_24
 	jr l5918h
 l58e7h:
-	ld de,l6402h
+	ld de,SCENARIO_TILEMAP_ZONE_23
 	jr l5918h
 l58ech:
-	ld de,l62f8h
+	ld de,SCENARIO_TILEMAP_ZONE_21
 	jr l5918h
 sub_58f1h:
 	ld a,(DISTANCE_TO_LEFT)
-	ld de,l63a7h
+	ld de,SCENARIO_TILEMAP_ZONE_22
 	cp 0dch
 	jr nc,l5918h
 	and 001h
@@ -13282,8 +13282,6 @@ PANEL_TEXT_STR:
     
     
 ; Most probably this is data to draw the char columns of the scenario
-; ToDo: write as DBs in that case.
-;
 ; Each byte is 2 chars of the column.
 include 'scenario_tilemap.asm'
 
@@ -13921,22 +13919,22 @@ sub_7aaeh:
 	ld a,0c0h
 sub_7adch:
 	ld (KNIFE_STATUS),hl
-	ld hl,l75deh
+	ld hl,SCENARIO_TILEMAP_ZONE_35
 	jp l0e20h
 l7ae5h:
 	ld hl,0x00c0
 	ld (KNIFE_STATUS),hl
 	ld de,00d0h
-	ld hl,l669bh
+	ld hl,SCENARIO_TILEMAP_ZONE_31
 	call sub_7b0ch
 	ld de,00f0h
-	ld hl,l6c6ah
+	ld hl,SCENARIO_TILEMAP_ZONE_32
 	call sub_7b0ch
 	ld de,l0110h
 	ld hl,06e7dh
 	call sub_7b0ch
 	ld de,0130h
-	ld hl,l726bh
+	ld hl,SCENARIO_TILEMAP_ZONE_33
 
 sub_7b0ch:
 	xor a	
