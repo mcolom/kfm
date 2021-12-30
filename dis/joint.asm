@@ -3349,14 +3349,16 @@ l0f39h:
 	djnz l0f39h		;0f3c	10 fb
 	ret			    ;0f3e	c9
 
-; Writes one dragon (2 chars)
+; Writes one dragon (4 chars)
 DRAW_ONE_DRAGON:
 	ld a,0b8h		            ;0f3f	3e b8
+    ; Upper part
 	call WRITE_CHAR_AND_NEXT	;0f41	cd 4f 0f
 	push de			            ;0f44	d5
 	ld hl,0003eh		        ;0f45	21 3e 00
 	add hl,de			        ;0f48	19
 	ex de,hl			        ;0f49	eb
+    ; Lower part
 	call WRITE_CHAR_AND_NEXT	;0f4a	cd 4f 0f
 	pop de			            ;0f4d	d1
 	ret			                ;0f4e	c9
@@ -3366,11 +3368,11 @@ DRAW_ONE_DRAGON:
 ; C: color
 ; DE: position in the screen
 WRITE_CHAR_AND_NEXT:
-	call WRITE_CHAR_AT_SCREEN_DE		;0f4f	cd 10 11 	. . . 
-	inc a			;0f52	3c 	< 
-	call WRITE_CHAR_AT_SCREEN_DE		;0f53	cd 10 11 	. . . 
-	inc a			;0f56	3c 	< 
-	ret			;0f57	c9 	. 
+	call WRITE_CHAR_AT_SCREEN_DE		;0f4f	cd 10 11
+	inc a			                    ;0f52	3c
+	call WRITE_CHAR_AT_SCREEN_DE		;0f53	cd 10 11
+	inc a			                    ;0f56	3c
+	ret			                        ;0f57	c9
 
 sub_0f58h:
 	ld de,0d129h		;0f58	11 29 d1 	. ) . 
