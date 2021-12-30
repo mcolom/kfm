@@ -1655,8 +1655,14 @@ sub_074dh:
 	ld a,(DRAGONS_LEVEL)		;075a	3a 80 e0 	: . . 
 	and 007h		;075d	e6 07 	. . 
 	cp 004h		;075f	fe 04 	. . 
-	defb 020h, 02eh
-	defb 021h, 000h, 006h
+    
+    ; Bad decompiled by z80dasm?
+	;defb 020h, 02eh
+	;defb 021h, 000h, 006h
+    ;
+    jr nz, l0791h
+    ld hl, 0x0600
+    
 	ld (0e342h),hl		;0766	22 42 e3 	" B . 
 	ld hl,00780h		;0769	21 80 07 	! . . 
 	ld (0e34eh),hl		;076c	22 4e e3 	" N . 
