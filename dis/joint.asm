@@ -255,6 +255,11 @@ TBL_ENEMIES: EQU 0xE2D8
 ; Bit 1: 1 if it's a boss
 ENEMY_PROPS_IDX: EQU 0
 
+; 1: enemy disappears
+; 3: unknown (see 1a3c)
+; 4: enemy goes back, without turning back
+; 5: enemy goes back, turning back
+; 9: enemy is gripping
 ENEMY_STATE_IDX: EQU 1
 ENEMY_STATE: EQU TBL_ENEMIES + ENEMY_STATE_IDX ; Enemy's state
 
@@ -4420,7 +4425,7 @@ l1556h:
 	bit 3,c		        ;1566	cb 59 Can we add more guys behind, on the left?
 	call nz,sub_1c3dh	;1568	c4 3d 1c 	. = . 
 	bit 0,c		        ;156b	cb 41 Is it a gripper (0) of a knifer (1)?
-	ld a,(ix + 1)		;156d	dd 7e 01
+	ld a,(ix + ENEMY_STATE_IDX)		;156d	dd 7e 01
 	jp nz,l186eh		;1570	c2 6e 18 Jump if he's a knifer
     ; He's a gripper or a kid
 	bit 2,c		        ;1573	Is he a kid?
@@ -4470,7 +4475,7 @@ l15c5h:
 	ld a,00ah		;15c5	3e 0a 	> . 
 	add a,(ix + 6)		;15c7	dd 86 06 	. . . 
 	ld (ix + 6),a		;15ca	dd 77 06 	. w . 
-	ld (ix + 1),00ah		;15cd	dd 36 01 0a 	. 6 . . 
+	ld (ix + ENEMY_STATE_IDX),00ah	;15cd	dd 36 01 0a Guy hand raised
 	ret			;15d1	c9 	. 
 l15d2h:
 	call sub_1be7h		;15d2	cd e7 1b 	. . . 
@@ -4527,9 +4532,9 @@ l1626h:
 l162fh:
 	ld hl,06a7bh		;162f	21 7b 6a 	! { j 
 l1632h:
-	ld a,(ix + 1)		;1632	dd 7e 01 	. ~ . 
-	cp 005h		;1635	fe 05 	. . 
-	jp nz,l1a7dh		;1637	c2 7d 1a 	. } . 
+	ld a,(ix + ENEMY_STATE_IDX)		;1632	dd 7e 01 	. ~ . 
+	cp 5		    ;1635	fe 05 	5: the enemy turns back and leaves
+	jp nz,l1a7dh	;1637	c2 7d 1a 	. } . 
 	ld a,c			;163a	79 	y 
 	jp l1a80h		;163b	c3 80 1a 	. . . 
 sub_163eh:
@@ -4879,7 +4884,7 @@ l18b6h:
 	call PLAY_SOUND		;18bc	cd fe 0d 	. . . 
 	pop af			;18bf	f1 	. 
 	jr z,l18c6h		;18c0	28 04 	( . 
-	inc (ix + 1)		;18c2	dd 34 01 	. 4 . 
+	inc (ix + ENEMY_STATE_IDX)		;18c2	dd 34 01
 	ret			;18c5	c9 	. 
 l18c6h:
 	call l1677h		;18c6	cd 77 16 	. w . 
@@ -5033,10 +5038,11 @@ l19d7h:
 l19eah:
 	call sub_1ab8h		;19ea	cd b8 1a 	. . . 
 	ret c			;19ed	d8 	. 
-	ld (ix + 1),005h		;19ee	dd 36 01 05 	. 6 . . 
+	ld (ix + ENEMY_STATE_IDX), 5		;19ee	dd 36 01 05 5=enemy turns back and leaves
 	ret			;19f2	c9 	. 
+
 l19f3h:
-	ld (ix + 1),004h		;19f3	dd 36 01 04 	. 6 . . 
+	ld (ix + ENEMY_STATE_IDX), 4	;19f3	dd 36 01 04 4=guy moves back, without turning back
 	ld a,(0e1f0h)		;19f7	3a f0 e1 	: . . 
 	ld (ix + 11),a		;19fa	dd 77 0b 	. w . 
 l19fdh:
@@ -5073,7 +5079,7 @@ l1a1bh:
 	and a			;1a39	a7 	. 
 	jr z,l19f3h		;1a3a	28 b7 	( . 
 l1a3ch:
-	ld (ix + 1),003h		;1a3c	dd 36 01 03 	. 6 . . 
+	ld (ix + ENEMY_STATE_IDX), 3	;1a3c	dd 36 01 03 3=unknown!
 	ld (ix + 6),002h		;1a40	dd 36 06 02 	. 6 . . 
 	ld (ix + 7),002h		;1a44	dd 36 07 02 	. 6 . . 
 	ret			;1a48	c9 	. 
@@ -5234,8 +5240,11 @@ l1b20h:
 	ld a,003h		;1b35	3e 03 	> . 
 l1b37h:
 	ld (ix + 7),a		;1b37	dd 77 07 	. w . 
-	ld (ix + 6),009h		;1b3a	dd 36 06 09 	. 6 . . 
-	ld (ix + 1),009h		;1b3e	dd 36 01 09 	. 6 . . 
+	ld (ix + 6),009h		;1b3a	dd 36 06 09 	. 6 . .
+
+    ; Set guy is gripping
+	ld (ix + ENEMY_STATE_IDX), 9    ;1b3e	dd 36 01 09
+
 	ld hl,NUM_GRIPPING		;1b42	21 1a e7 	! . . 
 	inc (hl)			;1b45	34 	4 
 	call GET_EFFECTIVE_PLAYER_MOVE		;1b46	cd 61 1c 	. a . 
@@ -5275,7 +5284,7 @@ REMOVE_ENEMY:
 	ret			        ;1b88	c9
 l1b89h:
     ; Mark the guy as inactive, but don't remove from TBL_GUYS
-	res 4,(ix + 0)		;1b89	dd cb 00 a6
+	res 4,(ix + ENEMY_PROPS_IDX)		;1b89	dd cb 00 a6
 	ret			        ;1b8d	c9
 
 
@@ -5285,7 +5294,7 @@ l1b90h:
 	ld (ix + 6),a		;1b90	dd 77 06 	. w . 
 	ld hl,l1c55h		;1b93	21 55 1c 	! U . 
 l1b96h:
-	ld (ix + ENEMY_STATE_IDX), 1 ;1b96	dd 36 01 01
+	ld (ix + ENEMY_STATE_IDX), 1 ;1b96	dd 36 01 01 1=enemy disappears
 	ld a,(hl)			;1b9a	7e 	~ 
 	inc hl			;1b9b	23 	# 
 	ld (ix + ENEMY_FRAME_COUNTER_IDX),a		;1b9c	dd 77 07 level 1
