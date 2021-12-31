@@ -5743,8 +5743,8 @@ l1ecch:
 	jr nz,l1f03h		;1ed0	20 31 Jump if it's a knifer
     ; It's a gripper
 	ld hl,(THOMAS_POSITION)		;1ed2	2a 12 e7
-	ld e,(ix + 2)		;1ed5	dd 5e 02
-	ld d,(ix + 3)		;1ed8	dd 56 03
+	ld e,(ix + ENEMY_POS_L_IDX)		;1ed5	dd 5e 02
+	ld d,(ix + ENEMY_POS_H_IDX)		;1ed8	dd 56 03
 	bit 0,c		        ;1edb	cb 41
 	jr z,l1eebh		    ;1edd	28 0c
 	bit 6,(ix + 0)		;1edf	dd cb 00 76 Check moving direction (0: to the right, 1: to the left)
@@ -6419,6 +6419,8 @@ l2427h:
 	ld (ENEMY_FRAME),a		;242a	32 de e2 	2 . . 
 	ld (ix + 1),004h		;242d	dd 36 01 04 	. 6 . . 
 	ret			;2431	c9 	. 
+    
+    ; Unused code?
 	ld de,(0e106h)		;2432	ed 5b 06 e1 	. [ . . 
 	ld l,(ix + 2)		;2436	dd 6e 02 	. n . 
 	ld h,(ix + 3)		;2439	dd 66 03 	. f . 
@@ -6640,8 +6642,8 @@ sub_25afh:
 	ret nz			;25f6	c0 	. 
 	inc (ix + 1)		;25f7	dd 34 01 	. 4 . 
 	ld (ix + CURRENT_FRAME_IDX),30	;25fa	dd 36 06 1e
-	ld l,(ix + 2)		;25fe	dd 6e 02 	. n . 
-	ld h,(ix + 3)		;2601	dd 66 03 	. f . 
+	ld l,(ix + ENEMY_POS_L_IDX)		;25fe	dd 6e 02 	. n . 
+	ld h,(ix + ENEMY_POS_H_IDX)		;2601	dd 66 03 	. f . 
 	bit 6,(ix + 0)		;2604	dd cb 00 76 	. . . v 
 	jr z,l2618h		;2608	28 0e 	( . 
 	ld de,0a100h		;260a	11 00 a1 	. . . 
@@ -6660,8 +6662,8 @@ l2618h:
 	jr c,l2626h		;2623	38 01 	8 . 
 	ex de,hl			;2625	eb 	. 
 l2626h:
-	ld (ix + 2),l		;2626	dd 75 02 	. u . 
-	ld (ix + 3),h		;2629	dd 74 03 	. t . 
+	ld (ix + ENEMY_POS_L_IDX),l		;2626	dd 75 02 	. u . 
+	ld (ix + ENEMY_POS_H_IDX),h		;2629	dd 74 03 	. t . 
 	jp l1be2h		;262c	c3 e2 1b 	. . . 
 	call l1be2h		;262f	cd e2 1b 	. . . 
 	dec (ix + FRAME_COUNTER_IDX)		;2632	dd 35 07
@@ -8276,8 +8278,8 @@ l3174h:
 	ld de,l0300h		;3180	11 00 03 	. . . 
 	sbc hl,de		;3183	ed 52 	. R 
 	jr nc,l31aah		;3185	30 23 	0 # 
-	ld e,(ix + 2)		;3187	dd 5e 02 	. ^ . 
-	ld d,(ix + 3)		;318a	dd 56 03 	. V . 
+	ld e,(ix + MAGICAL_ELEMENT_DISTANCE_L_IDX)		;3187	dd 5e 02 	. ^ . 
+	ld d,(ix + MAGICAL_ELEMENT_DISTANCE_H_IDX)		;318a	dd 56 03 	. V . 
 	ld hl,0ffe0h		;318d	21 e0 ff 	! . . 
 	add hl,de			;3190	19 	. 
 	ld (0e80fh),hl		;3191	22 0f e8 	" . . 
