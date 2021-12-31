@@ -245,6 +245,9 @@ BOUNCING_BALL_EXPLODE_TIMEOUT_INIT: EQU 0xE371
 ; *******************************************************************
 TBL_ENEMIES: EQU 0xE2D8
 
+; The meaning of these indices seems to be mainly shared with TBL_GUYS too.
+; ToDo: put them as common variables, perhaps in a separate file.
+
 ; Enemy's properties
 ; Bit 6: looking (and moving!) direction. 0 = look left and 1 = look right
 ; Bit 5: set to 1 when the enemy is attacked
@@ -1327,21 +1330,6 @@ MAKE_POINTS_SOUND:
 	call PLAY_SOUND		    ;056b	cd fe 0d
 	ret			            ;056e
 
-; SEGUIR
-	;PORT_START("DSW1")
-	;PORT_DIPNAME( 0x01, 0x01, DEF_STR( Difficulty ) ) PORT_DIPLOCATION("SW1:1")
-	;PORT_DIPSETTING(    0x01, DEF_STR( Easy ) )
-	;PORT_DIPSETTING(    0x00, DEF_STR( Hard ) )
-	;PORT_DIPNAME( 0x02, 0x02, "Energy Loss" ) PORT_DIPLOCATION("SW1:2")
-	;PORT_DIPSETTING(    0x02, "Slow" )
-	;PORT_DIPSETTING(    0x00, "Fast" )
-	;PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Lives ) ) PORT_DIPLOCATION("SW1:3,4")
-	;PORT_DIPSETTING(    0x08, "2" )
-	;PORT_DIPSETTING(    0x0c, "3" )
-	;PORT_DIPSETTING(    0x04, "4" )
-	;PORT_DIPSETTING(    0x00, "5" )
-
-
 ; Read DSW1 and obtain the configured number of lives
 GET_LIVES_FROM_DSW1:
 	InDSW1		;056f	db 03    
@@ -1799,6 +1787,9 @@ sub_0851h:
 
 ; SEGUIR
 ; Output: BC
+; Adding a RET at the beginning of this function makes the ME not to
+; appear at level 2, and neither the moths at level 4. Instead, you
+; have normal grippers.
 sub_0866h:
 	ld a,(DRAGONS_LEVEL)	;0866	3a 80 e0
 	ld l,a			        ;0869	6f      L = DRAGONS_LEVEL
@@ -3316,7 +3307,7 @@ l0f17h:
 	djnz l0f0fh		;0f17	10 f6 	. . 
 	ret			;0f19	c9 	. 
 
-; SEGUIR
+; Draw the dragons in the panel
 DRAW_DRAGONS:
 	ld a,(DRAGONS_LEVEL)	;0f1a	3a 80 e0
 	and 0f8h		        ;0f1d	e6 f8 Check dragons
@@ -4420,7 +4411,7 @@ l1556h:
 	ld hl,l1534h	;1557	21 34 15 	! 4 . 
 	push hl			;155a	e5
     ;
-	ld c,(ix + 0)	;155b	dd 4e 00 Guy is alive?
+	ld c,(ix + ENEMY_PROPS_IDX)	;155b	dd 4e 00 Guy is alive?
 	bit 4,c		    ;155e	cb 61
 	ret z			;1560	c8 Guy is falling, get out
     ;
@@ -5090,14 +5081,14 @@ sub_1a49h:
 	ld a,(0e701h)		;1a49	3a 01 e7 	: . . 
 	and 003h		;1a4c	e6 03 	. . 
 	jr nz,l1a54h		;1a4e	20 04 	  . 
-	res 2,(ix + 0)		;1a50	dd cb 00 96 	. . . . 
+	res 2,(ix + ENEMY_PROPS_IDX)		;1a50	dd cb 00 96 	. . . . 
 l1a54h:
-	bit 2,(ix + 0)		;1a54	dd cb 00 56 	. . . V 
+	bit 2,(ix + ENEMY_PROPS_IDX)		;1a54	dd cb 00 56 	. . . V 
 	ret nz			;1a58	c0 	. 
 	ld de,l1680h		;1a59	11 80 16 	. . . 
 	call sub_1ad2h		;1a5c	cd d2 1a 	. . . 
 	ret nc			;1a5f	d0 	. 
-	set 2,(ix + 0)		;1a60	dd cb 00 d6 	. . . . 
+	set 2,(ix + ENEMY_PROPS_IDX)		;1a60	dd cb 00 d6 	. . . . 
 	ld a,085h		;1a64	3e 85 	> . 
 	ret p			;1a66	f0 	. 
 	call sub_1ac9h		;1a67	cd c9 1a 	. . . 
@@ -5253,14 +5244,14 @@ l1b37h:
 	ld (ix + 14),005h		;1b50	dd 36 0e 05 	. 6 . . 
 
 sub_1b54h:
-	bit 2,(ix + 0)		            ;1b54	dd cb 00 56 Check if guy is a kid
+	bit 2,(ix + ENEMY_PROPS_IDX)    ;1b54	dd cb 00 56 Check if guy is a kid
 	ld hl,ACTIVE_GRIPPERS_LEFT		;1b58	21 1b e7
 	jr z,l1b5fh		                ;1b5b	28 02 Jump if he's not a kind
 	inc hl			;1b5d	23
 	inc hl			;1b5e	23 Now HL = ACTIVE_GRIPPERS_RIGHT
 l1b5fh:
     ; HL = ACTIVE_GRIPPERS (left or right)
-	bit 6,(ix + 0)		;1b5f	dd cb 00 76 Check the moving direction
+	bit 6,(ix + ENEMY_PROPS_IDX)		;1b5f	dd cb 00 76 Check the moving direction
 	ld de, -128		    ;1b63	11 80 ff
 	jr nz,l1b6ch		;1b66	20 04 Jump if moving to the left
 	inc hl			    ;1b68	23
@@ -5276,9 +5267,9 @@ l1b71h:
 	jp l1be2h		;1b77	c3 e2 1b 	. . . 
 
 REMOVE_ENEMY:
-	bit 1,(ix + 0)		;1b7a	dd cb 00 4e Is enemy a boss?
+	bit 1,(ix + ENEMY_PROPS_IDX)		;1b7a	dd cb 00 4e Is enemy a boss?
 	jr nz,l1b89h		;1b7e	20 09 If so, mark it as inactive, but don't remove it from TBL_GUYS.
-	ld (ix + 0), 0  	;1b80	dd 36 00 00 Guy is no longer active
+	ld (ix + ENEMY_PROPS_IDX), 0  	;1b80	dd 36 00 00 Guy is no longer active
 	ld hl,TBL_GUYS_LEN	;1b84	21 61 e2 Decrease length of table
 	dec (hl)			;1b87	35
 	ret			        ;1b88	c9
@@ -5375,7 +5366,7 @@ sub_1c26h:
 	call GET_ENEMY_POS_IN_DE		;1c2d	cd 91 1c 	. . . 
 	sbc hl,de		;1c30	ed 52 	. R 
 	ret c			;1c32	d8 	. 
-	res 5,(ix + 0)		;1c33	dd cb 00 ae 	. . . . 
+	res 5,(ix + ENEMY_PROPS_IDX)	;1c33	dd cb 00 ae 	. . . . 
 	ld hl,0e260h		;1c37	21 60 e2 	! ` . 
 	res 5,(hl)		;1c3a	cb ae 	. . 
 	ret			;1c3c	c9 	. 
@@ -5388,7 +5379,7 @@ sub_1c3dh:
 	ld de,(THOMAS_POSITION)		;1c44	ed 5b 12 e7 	. [ . . 
 	sbc hl,de		;1c48	ed 52 	. R 
 	ret c			;1c4a	d8 	. 
-	res 3,(ix + 0)		;1c4b	dd cb 00 9e 	. . . . 
+	res 3,(ix + ENEMY_PROPS_IDX)		;1c4b	dd cb 00 9e 	. . . . 
 	ld hl,0e260h		;1c4f	21 60 e2 	! ` . 
 	res 3,(hl)		;1c52	cb 9e 	. . 
 	ret			;1c54	c9 	. 

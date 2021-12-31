@@ -95,6 +95,8 @@ It's very useful to print messages when accesing tables of the
 form IX + off or IY + off. The effective addresses are computed with the
 eax() and eay() functions. We can modify them to add our debugging code:
 
+const uint16_t TBL = 0xE262;
+
 inline void z80_device::eax()
 {
     uint8_t game_state = rm(0xE000);    
