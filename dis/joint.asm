@@ -175,6 +175,20 @@ TBL_GUYS: EQU 0xE262
 ;ENEMY_STEADY_COUNTER_IDX: EQU 11
 
 ;ENEMY_REACTION_L_IDX: EQU 12
+;ENEMY_REACTION_H_IDX: EQU 13
+
+; Number of Thomas' shakes the gripper needs to release.
+; ENEMY_ATTACK_STEP_IDX: EQU 14
+
+; This variable stores the last move Thomas did in order to get
+; released from a gripper.
+; The code checks that indeed the moves are different to perform an
+; effective shake.
+;
+; This variable with index 15 is "ENEMY_BOOMERANG_TYPE_IDX" in the case of
+; the boomerang guy at level 2.
+THOMAS_LAST_SHAKE_MOVE: EQU 15
+
 
 
 TBL_GUYS_ENTRY_2: EQU TBL_GUYS + 2*16
@@ -310,8 +324,12 @@ ENEMY_MOVE_COUNTER: EQU TBL_ENEMIES + ENEMY_MOVE_COUNTER_L_IDX
 ENEMY_ENERGY_IDX: EQU 10
 ENEMY_ENERGY: EQU TBL_ENEMIES + ENEMY_ENERGY_IDX ; Enemy's energy
 
+
+; This controls the time left the enemy is standing without moving.
+; For grippers, it's the number of shakes for the gripper before
+; releasing Thomas.
 ENEMY_STEADY_COUNTER_IDX: EQU 11
-ENEMY_STEADY_COUNTER: EQU TBL_ENEMIES + ENEMY_STEADY_COUNTER_IDX ; This controls the time left the enemy is standing without moving.
+ENEMY_STEADY_COUNTER: EQU TBL_ENEMIES + ENEMY_STEADY_COUNTER_IDX 
 ;
 ; This controls how Mr. X reacts to attacks
 ; 7A: low kick, that he avoids by jumping
@@ -319,10 +337,12 @@ ENEMY_STEADY_COUNTER: EQU TBL_ENEMIES + ENEMY_STEADY_COUNTER_IDX ; This controls
 ;
 ; For the stick guy: 27: punch, kick
 
-; For grippers:
+; For grippers/knifers:
 ;   56, 1C: about to start falling because of kick/punch or un-gripped
 ;   58, 1C: falling
 ;   5A, 1C: normal
+;   5C, 1C: knifer attacked
+;   5E, 1C: knifer falling
 
 ENEMY_REACTION_L_IDX: EQU 12
 ENEMY_REACTION_H_IDX: EQU 13
@@ -4517,16 +4537,29 @@ l15d2h:
 l15ddh:
 	call sub_1b54h		;15dd	cd 54 1b 	. T . 
 	call GET_EFFECTIVE_PLAYER_MOVE		;15e0	cd 61 1c 	. a . 
-	cp (ix + 15)		;15e3	dd be 0f 	. . . 
-	jr z,l15f2h		;15e6	28 0a 	( . 
-	dec (ix + 11)		;15e8	dd 35 0b 	. 5 . 
-	jr z,l1626h		;15eb	28 39 	( 9 
-	ld (ix + 15),a		;15ed	dd 77 0f 	. w . 
+    
+    ; Is Thomas shaking trying to release from a gripper?
+    ; That is, is Thomas' movement different?
+	cp (ix + THOMAS_LAST_SHAKE_MOVE)	;15e3	dd be 0f
+	jr z,l15f2h		                    ;15e6	28 0a Jump if it's the same
+    
+    ; The movement is different, Thomas is shaking.
+    ; Decrement the counter the gripper stays attached when Thomas
+    ; shakes to get released
+	dec (ix + ENEMY_STEADY_COUNTER_IDX)		;15e8	dd 35 0b
+	jr z,l1626h		                        ;15eb	28 39 Released: kill that gripper
+    
+    ; The gripper hasn't released yet.
+    ; Update the last movement Thomas tried to get released.
+	ld (ix + THOMAS_LAST_SHAKE_MOVE),a		;15ed	dd 77 0f
 	jr l15fbh		;15f0	18 09 	. . 
 l15f2h:
 	dec (ix + 14)		;15f2	dd 35 0e 	. 5 . 
 	jr nz,l15ffh		;15f5	20 08 	  . 
-	ld (ix + 11),006h		;15f7	dd 36 0b 06 	. 6 . . 
+    
+    ; Set to 6 the number of steps needed for Thomas to get released from
+    ; a gripper.
+	ld (ix + ENEMY_STEADY_COUNTER_IDX), 6	;15f7	dd 36 0b 06
 l15fbh:
 	ld (ix + 14),005h		;15fb	dd 36 0e 05 	. 6 . . 
 l15ffh:
@@ -5284,12 +5317,16 @@ l1b37h:
     ; Set guy is gripping
 	ld (ix + ENEMY_STATE_IDX), 9    ;1b3e	dd 36 01 09
 
-	ld hl,NUM_GRIPPING		;1b42	21 1a e7 	! . . 
+    ; Increment number of gripping guys
+	ld hl,NUM_GRIPPING	;1b42	21 1a e7
 	inc (hl)			;1b45	34 	4 
-	call GET_EFFECTIVE_PLAYER_MOVE		;1b46	cd 61 1c 	. a . 
-	ld (ix + 15),a		;1b49	dd 77 0f 	. w . 
-	ld (ix + 11),006h		;1b4c	dd 36 0b 06 	. 6 . . 
-	ld (ix + 14),005h		;1b50	dd 36 0e 05 	. 6 . . 
+
+	call GET_EFFECTIVE_PLAYER_MOVE		;1b46	cd 61 1c
+	ld (ix + THOMAS_LAST_SHAKE_MOVE),a	;1b49	dd 77 0f
+
+    ; Steps the gripper needs that Thomas shake before releasing him
+	ld (ix + ENEMY_STEADY_COUNTER_IDX), 6	;1b4c	dd 36 0b 06
+	ld (ix + 14),005h		                ;1b50	dd 36 0e 05
 
 sub_1b54h:
 	bit 2,(ix + ENEMY_PROPS_IDX)    ;1b54	dd cb 00 56 Check if guy is a kid
@@ -5340,7 +5377,7 @@ l1b96h:
 	call SET_ENEMY_REACTION_FROM_HL		    ;1b9f	cd a5 1c
 	xor a			;1ba2	af 	. 
 	ld (ix + ENEMY_ATTACK_STEP_IDX),a		;1ba3	dd 77 0e level 1
-	ld (ix + ENEMY_BOOMERANG_TYPE_IDX),a	;1ba6	dd 77 0f level 1
+	ld (ix + THOMAS_LAST_SHAKE_MOVE),a	;1ba6	dd 77 0f level 1
 	ret			;1ba9	c9 	. 
 
 l1baah:
@@ -5357,12 +5394,16 @@ l1baah:
 	ld (ix + ENEMY_FRAME_COUNTER_IDX),a		;1bbe	dd 77 07 level 1
 	call SET_ENEMY_REACTION_FROM_HL		    ;1bc1	cd a5 1c
 l1bc4h:
+    ; Question:
+    ; Why are we mising ENEMY_ATTACK_STEP_IDX and THOMAS_LAST_SHAKE_MOVE and adding 16h?
+    ; What is the meaning of this?
+    ; Do these variables have a different meaning here?
 	ld e,(ix + ENEMY_ATTACK_STEP_IDX)		;1bc4	dd 5e 0e level 1
-	ld d,(ix + ENEMY_BOOMERANG_TYPE_IDX)	;1bc7	dd 56 0f level 1
+	ld d,(ix + THOMAS_LAST_SHAKE_MOVE)	;1bc7	dd 56 0f level 1
 	ld hl,0016h		;1bca	21 16 00 	! . . 
 	add hl,de			;1bcd	19 	. 
 	ld (ix + ENEMY_ATTACK_STEP_IDX),l		;1bce	dd 75 0e level 1
-	ld (ix + ENEMY_BOOMERANG_TYPE_IDX),h	;1bd1	dd 74 0f level 1
+	ld (ix + THOMAS_LAST_SHAKE_MOVE),h	;1bd1	dd 74 0f level 1
 	call GET_ENEMY_HEIGHT_IN_HL		;1bd4	cd 9e 1c 	. . . 
 	sbc hl,de		;1bd7	ed 52 	. R 
 	call SET_ENEMY_HEIGHT_FROM_HL		;1bd9	cd 97 1c 	. . . 
