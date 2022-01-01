@@ -313,11 +313,16 @@ ENEMY_ENERGY: EQU TBL_ENEMIES + ENEMY_ENERGY_IDX ; Enemy's energy
 ENEMY_STEADY_COUNTER_IDX: EQU 11
 ENEMY_STEADY_COUNTER: EQU TBL_ENEMIES + ENEMY_STEADY_COUNTER_IDX ; This controls the time left the enemy is standing without moving.
 ;
-; This mainly controls how Mr. X reacts to attacks
+; This controls how Mr. X reacts to attacks
 ; 7A: low kick, that he avoids by jumping
 ; 6A: attack that he can't avoid
 ;
 ; For the stick guy: 27: punch, kick
+
+; For grippers:
+;   56, 1C: about to start falling because of kick/punch or un-gripped
+;   58, 1C: falling
+;   5A, 1C: normal
 
 ENEMY_REACTION_L_IDX: EQU 12
 ENEMY_REACTION_H_IDX: EQU 13
