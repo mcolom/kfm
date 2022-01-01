@@ -107,6 +107,18 @@ DEMO_LEVEL: EQU 0xE025
 LIVES: EQU 0xE084
 DRAGONS_LEVEL: EQU 0xE080 ; 00 DDD LLL, where D is the number of dragons, and L the level - 1.
 
+; This controls at which stage of the floor Thomas is.
+; The stage changes at the middle of the floor, and it can have falling
+; magical elements, butterflies, or normal enemies. 
+;
+; 0: normal enemies
+; 3, 4: falling magical elements of level 2
+; B, C: butterflies, 
+FLOOR_STAGE: EQU 0xE100
+
+
+
+
 ; This variable controls if it should avoid giving an extra life because
 ; it was already given (bit #0) and to skip the letter scene (bit #1).
 SKIP_LETTER_SKIP_EXTRA_LIFE: EQU 0xE085
@@ -401,6 +413,7 @@ SILVIA_STATE: EQU 0xE34C
 ; Number of "magic elements".
 ; At floor 2: dragons, snakes, bursting balls, ...
 ; Also at floor 4, with elements thrown by the magician
+; Unknown at 0xE380
 NUM_MAGICAL_ELEMENTS: EQU 0xE381
 
 ; Absolute position of Thomas ìn the complete floor
@@ -805,7 +818,7 @@ l017fh:
 	call 040e5h		;0182	cd e5 40 	. . @ 
 l0185h:
 	call 047b6h		;0185	cd b6 47 	. . G 
-	ld a,(0e100h)		;0188	3a 00 e1 	: . . 
+	ld a,(FLOOR_STAGE)		;0188	3a 00 e1 	: . . 
 l018bh:
 	and a			;018b	a7 	. 
 	jr z,l019ch		;018c	28 0e 	( . 
@@ -1570,7 +1583,7 @@ sub_0644h:
 	ld hl,l088ah		;066d	21 8a 08 	! . . 
 	add hl,bc			;0670	09 	. 
 	ld a,(hl)			;0671	7e 	~ 
-	ld (0e100h),a		;0672	32 00 e1 	2 . . 
+	ld (FLOOR_STAGE),a		;0672	32 00 e1 	2 . . 
 	and a			;0675	a7 	. 
 	jr z,l0689h		;0676	28 11 	( . 
 	ld hl,l08b0h		;0678	21 b0 08 	! . . 
@@ -1595,7 +1608,7 @@ l0689h:
 	ld a,(hl)			;069d	7e 	~ 
 	and a			;069e	a7 	. 
 	ret z			;069f	c8 	. 
-	ld (0e100h),a		;06a0	32 00 e1 	2 . . 
+	ld (FLOOR_STAGE),a		;06a0	32 00 e1 	2 . . 
 	ld hl,0x0920		;06a3	21 20 09 	!   . 
 	ld de,0xe500		;06a6	11 00 e5 	. . . 
 	ld bc,0x0011		;06a9	01 11 00 	. . . 
@@ -4690,7 +4703,7 @@ l168ah:
 	call sub_1828h		;16a9	cd 28 18 	. ( . 
 	ret c			;16ac	d8 	. 
 	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;16ad	2a 0c e8 	* . . 
-	ld de,0e100h		;16b0	11 00 e1 	. . . 
+	ld de,FLOOR_STAGE		;16b0	11 00 e1 	. . . 
 	add hl,de			;16b3	19 	. 
 	jp c,REMOVE_ENEMY		;16b4	da 7a 1b 	. z . 
 	bit 0,(ix + 11)		;16b7	dd cb 0b 46 	. . . F 
@@ -8873,7 +8886,7 @@ l35aeh:
 l35afh:
 	ret nz			;35af	c0 	. 
 	xor a			;35b0	af 	. 
-	ld (0e100h),a		;35b1	32 00 e1 	2 . . 
+	ld (FLOOR_STAGE),a		;35b1	32 00 e1 	2 . . 
 	ret			;35b4	c9 	. 
 
 l35b5h:
@@ -9185,7 +9198,7 @@ sub_37deh:
 ; SEGUIR
 l37f1h:
 	xor a			;37f1	af 	. 
-	ld (0e100h),a		;37f2	32 00 e1 	2 . . 
+	ld (FLOOR_STAGE),a		;37f2	32 00 e1 	2 . . 
 	ret			;37f5	c9 	. 
 
 
