@@ -167,6 +167,13 @@ TBL_GUYS: EQU 0xE262
 
 ;ENEMY_FRAME_COUNTER_IDX: EQU 7
 
+; Step counter to decrease the energy. It's related to the configuration
+; of DSW1 (energy loss slow/fast).
+; I guess this was added afterwards, since it's weird to have this
+; variable and also ENEMY_ATTACK_STEP_IDX to the same.
+GRIPPING_ENERGY_DECREASE_DSW_STEP: EQU 7
+
+
 ;ENEMY_MOVE_COUNTER_L_IDX: EQU 8
 ;ENEMY_MOVE_COUNTER_H_IDX: EQU 9
 
@@ -181,14 +188,6 @@ TBL_GUYS: EQU 0xE262
 ;ENEMY_REACTION_H_IDX: EQU 13
 
 ; ENEMY_ATTACK_STEP_IDX: EQU 14
-
-
-
-; Step counter to decrease the energy. It's related to the configuration
-; of DSW1 (energy loss slow/fast).
-; I guess this was added afterwards, since it's weird to have this
-; variable and also ENEMY_ATTACK_STEP_IDX to the same.
-GRIPPING_ENERGY_DECREASE_DSW_STEP: EQU 7
 
 
 ; This variable stores the last move Thomas did in order to get
@@ -3708,6 +3707,7 @@ PRINT_NUMBER_TWO_DIGITS_DEC_HL:
 	ld a,(hl)		;10fd	Read number
 	dec hl			;10fe	Move pointer to the previous digit
 
+PRINT_NUMBER_TWO_DIGITS:
 	push af			;10ff	f5
     ; Rotate num 4 times to the right
     ; This is to move the MSB to the LSB
@@ -11577,7 +11577,7 @@ l4994h:
 	jr nz,l4994h
 	ld a,038h
 	call DELAY_A
-	call sub_5620h
+	call PRINT_SCORE_BOARD
 	ld a,0e1h
 	call DELAY_A
 	jp l487eh
@@ -12436,7 +12436,7 @@ l51abh:
     ; Write number of credits
     ; I really love the optimization he does, jumping in the middle of a
     ; routine and calling it twice the way it does :)
-	call 10ffh 
+	call PRINT_NUMBER_TWO_DIGITS 
 	
     ld a,(PLAYER_INPUT_2)
 	and 003h
@@ -12749,7 +12749,7 @@ l555dh:
 	ld a,024h
 	call PLAY_SOUND ; Legendary game's music! ;)
 
-	call sub_5620h
+	call PRINT_SCORE_BOARD
 
 	ld hl,TIME_STR
 	call WRITE_TEXT
@@ -12784,7 +12784,7 @@ l5596h:
 	push de	
 	ld de,0d160h
 	ld c,000h
-	call 10ffh
+	call PRINT_NUMBER_TWO_DIGITS
 	pop de	
 	ld a,038h
 	ld (INT_COUNTER + 1),a
@@ -12845,9 +12845,9 @@ l5600h:
 	jr nz,l5596h
 	ld de,0d160h
 	ld c,000h
-	call 10ffh
+	call PRINT_NUMBER_TWO_DIGITS
 l560dh:
-	call sub_562ch
+	call PRINT_SCORE_BOARD_WITHOUT_HEADER
 	ld a,01ch
 	call DELAY_A
 	ld a,000h
@@ -12858,59 +12858,75 @@ l561bh:
 	ld (de),a	
 	jr l560dh
 
-;SEGUIR
-; This most probably writes the BEST 20 PLAYERS scores
-sub_5620h:
+; Clear the screen, write the "BEST 20 PLAYERS" text, and show the
+; score board.
+PRINT_SCORE_BOARD: ; 5620
 	call CLEAR_TILEMAP
 	call CONFIG_GAME_STOP
 	ld hl,BEST_20_PLAYERS_STR
 	call WRITE_TEXT
-sub_562ch:
+; Show the score board without clearing the screen or printing the
+; "BEST 20 PLAYERS". 
+PRINT_SCORE_BOARD_WITHOUT_HEADER: ; 562c
 	ld hl,0ea06h
 	ld de,0d6a1h
 	ld a,020h
 l5634h:
 	push af	
 	ld c,0d8h
-	call sub_56f7h
+    
+    ; Print position of the player
+	call sub_56f7h ; 5637
 	ld c,015h
 	inc de	
 	ld a,(hl)	
 	inc hl	
 	and a	
 	push de	
-	call nz,PRINT_NUMBER
+	call nz,PRINT_NUMBER ; 5641
 	pop de	
 	inc de	
-	ld b,002h
+	
+    ; Print score
+    ld b, 2 ; The score is 2 bytes
 l5648h:
 	ld a,(hl)	
 	inc hl	
-	call 10ffh
+	call PRINT_NUMBER_TWO_DIGITS ; 564a
 	djnz l5648h
-	ld a,030h
+
+    ; Write the trailing zero of the score
+	ld a, '0' ; The '0' char. 564f
 	call WRITE_CHAR_AT_SCREEN_DE
+    
+    ; Print player's name
 	ld c,000h
 	inc de	
-	ld b,003h
+	ld b, 3 ; The 3 initials of the player's name
 l5659h:
 	ld a,(hl)	
 	inc hl	
 	call WRITE_CHAR_AT_SCREEN_DE
 	djnz l5659h
+
 	pop af	
 	sub 001h
 	daa	
-	ret z	
+	ret z	    ; All scores printed, exit
+
 	push hl	
 	ld hl,0ff73h
 	add hl,de	
 	ex de,hl	
-	pop hl	
-	cp 010h
+	pop hl
+    
+    ; Have we printed the last (20 ... 10) players?
+	cp 010h ; 566c
 	jr nz,l5634h
+    
+    ; Yes, change the position to go on writing on the screen
 	ld de,0d691h
-	jr l5634h
+	jr l5634h ; Go on...
     
 BEST_20_PLAYERS_STR:
 	cp 0dbh		        ;5675	fe db
