@@ -163,10 +163,11 @@ TBL_GUYS: EQU 0xE262
 ;ENEMY_HEIGHT_L_IDX: EQU 4
 ;ENEMY_HEIGHT_H_IDX: EQU 5 ; Height of boss when falling after being defeated
 
-; ENEMY_FRAME_IDX: EQU 6 ; Enemy's displayed frame
+;ENEMY_FRAME_IDX: EQU 6 ; Enemy's displayed frame
 
 ;ENEMY_FRAME_COUNTER_IDX: EQU 7
 
+;ENEMY_MOVE_COUNTER_L_IDX: EQU 8
 
 
 TBL_GUYS_ENTRY_2: EQU TBL_GUYS + 2*16
@@ -289,11 +290,14 @@ ENEMY_FRAME: EQU TBL_ENEMIES + ENEMY_FRAME_IDX
 ENEMY_FRAME_COUNTER_IDX: EQU 7
 ENEMY_FRAME_COUNTER: EQU TBL_ENEMIES + ENEMY_FRAME_COUNTER_IDX ; Ticks the enemy stays in its current frame
 
-; Surprisingly only for levels 1, 2, and 5
-ENEMY_MOVE_COUNTER_IDX: EQU 8
-ENEMY_MOVE_COUNTER: EQU TBL_ENEMIES + ENEMY_MOVE_COUNTER_IDX ; 8: enemy moving counter (forward and backwards)
-; IDX 9 is not used, but in 0x1E54 ENEMY_MOVE_COUNTER is used as a 16-bit word (it seems useless, however)
-; The programmer probably designed this as a 16-bit word and then realized that a byte was enough.
+; If ENEMY_MOVE_COUNTER_L_IDX !=0, the enemy won't do anything.
+; For example, this is the time the knifers wait before throwing.
+; Also, when the boss moves forward and backwards.
+ENEMY_MOVE_COUNTER_L_IDX: EQU 8
+ENEMY_MOVE_COUNTER_H_IDX: EQU 9
+ENEMY_MOVE_COUNTER: EQU TBL_ENEMIES + ENEMY_MOVE_COUNTER_L_IDX
+
+; It seems IDX 9 is not used.
 
 ENEMY_ENERGY_IDX: EQU 10
 ENEMY_ENERGY: EQU TBL_ENEMIES + ENEMY_ENERGY_IDX ; Enemy's energy
@@ -4854,13 +4858,13 @@ l186eh:
 	ld hl,THOMAS_GLOBAL_STATE	;1872	21 00 e7 Check if Thomas is fighting
 	bit 1,(hl)		;1875	cb 4e
 	jr nz,l18a3h	;1877	20 2a Skip if he's not
-	ld l,(ix + 8)		;1879	dd 6e 08 	. n . 
-	ld h,(ix + 9)		;187c	dd 66 09 	. f . 
+	ld l,(ix + ENEMY_MOVE_COUNTER_L_IDX)		;1879	dd 6e 08
+	ld h,(ix + ENEMY_MOVE_COUNTER_H_IDX)		;187c	dd 66 09
 	dec hl			;187f	2b 	+ 
 	bit 7,h		;1880	cb 7c 	. | 
 	jr nz,l188ah		;1882	20 06 	  . 
-	ld (ix + 8),l		;1884	dd 75 08 	. u . 
-	ld (ix + 9),h		;1887	dd 74 09 	. t . 
+	ld (ix + ENEMY_MOVE_COUNTER_L_IDX),l		;1884	dd 75 08
+	ld (ix + ENEMY_MOVE_COUNTER_H_IDX),h		;1887	dd 74 09
 l188ah:
 	add a,a			;188a	87 	. 
 	ld d,000h		;188b	16 00 	. . 
@@ -4919,7 +4923,7 @@ l18d6h:
 	ld (ix + ENEMY_FRAME_IDX),002h		;18e4	dd 36 06 02 	. 6 . . 
 	jr l194fh		;18e8	18 65 	. e 
 l18eah:
-	ld a,(ix + 8)		;18ea	dd 7e 08 	. ~ . 
+	ld a,(ix + ENEMY_MOVE_COUNTER_L_IDX)		;18ea	dd 7e 08 	. ~ . 
 	and a			;18ed	a7 	. 
 	jp z,l19fdh		;18ee	ca fd 19 	. . . 
 	ld a,(ix + ENEMY_FRAME_IDX)		;18f1	dd 7e 06 	. ~ . 
@@ -4962,6 +4966,7 @@ l1926h:
 	or b			;192e	b0 	. 
 	ld (hl),a			;192f	77 	w 
 	inc hl			;1930	23 	# 
+
 sub_1931h:
 	ld (hl),e			;1931	73 	s 
 	inc hl			;1932	23 	# 
@@ -4971,6 +4976,7 @@ sub_1931h:
 	ld (ix + ENEMY_FRAME_COUNTER_IDX),010h		;193a	dd 36 07 10 	. 6 . . 
 	inc (ix + ENEMY_FRAME_IDX)		;193e	dd 34 06 	. 4 . 
 	ret			;1941	c9 	. 
+
 l1942h:
 	ld (ix + ENEMY_FRAME_IDX),002h		;1942	dd 36 06 02 	. 6 . . 
 	dec (ix + 11)		;1946	dd 35 0b 	. 5 . 
@@ -4978,11 +4984,12 @@ l1942h:
 	ld hl,(0e1f5h)		;194a	2a f5 e1 	* . . 
 	ld a,003h		;194d	3e 03 	> . 
 l194fh:
-	ld (ix + 8),l		;194f	dd 75 08 	. u . 
-	ld (ix + 9),h		;1952	dd 74 09 	. t . 
-	ld (ix + ENEMY_STATE_IDX),a		;1955	dd 77 01
-	ld (ix + ENEMY_FRAME_COUNTER_IDX), 2	;1958	dd 36 07 02
-	ret			;195c	c9 	. 
+	ld (ix + ENEMY_MOVE_COUNTER_L_IDX),l		;194f	dd 75 08
+	ld (ix + ENEMY_MOVE_COUNTER_H_IDX),h		;1952	dd 74 09
+    ;
+	ld (ix + ENEMY_STATE_IDX),a		            ;1955	dd 77 01
+	ld (ix + ENEMY_FRAME_COUNTER_IDX), 2	    ;1958	dd 36 07 02
+	ret			                                ;195c	c9
 l195dh:
 	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;195d	2a 0c e8 	* . . 
 	ld de,0f5a0h		;1960	11 a0 f5 	. . . 
@@ -5005,10 +5012,12 @@ l1982h:
 	jp c,l18b6h		;1985	da b6 18 	. . . 
 	dec (ix + ENEMY_FRAME_COUNTER_IDX)		;1988	dd 35 07 	. 5 . 
 	ret nz			;198b	c0 	. 
-	ld (ix + 8),004h		;198c	dd 36 08 04 	. 6 . . 
-	ld (ix + 9),000h		;1990	dd 36 09 00 	. 6 . . 
-	ld (ix + ENEMY_STATE_IDX),003h		;1994	dd 36 01 03 	. 6 . . 
+	ld (ix + ENEMY_MOVE_COUNTER_L_IDX), 4		;198c	dd 36 08 04
+	ld (ix + ENEMY_MOVE_COUNTER_H_IDX), 0		;1990	dd 36 09 00
+	ld (ix + ENEMY_STATE_IDX), 3		        ;1994	dd 36 01 03
 	ret			;1998	c9 	. 
+
+    ; Unused/unreacheable code here?
 	call sub_1befh		;1999	cd ef 1b 	. . . 
 	call sub_1a49h		;199c	cd 49 1a 	. I . 
 	jp c,l18b6h		;199f	da b6 18 	. . . 
@@ -5033,10 +5042,10 @@ l19bdh:
 	call l1be2h		;19c2	cd e2 1b 	. . . 
 	call sub_1a49h		;19c5	cd 49 1a 	. I . 
 	jp c,l18b6h		;19c8	da b6 18 	. . . 
-	ld a,(ix + 8)		;19cb	dd 7e 08 	. ~ . 
+	ld a,(ix + ENEMY_MOVE_COUNTER_L_IDX)		;19cb	dd 7e 08
 	and a			;19ce	a7 	. 
 	jr nz,l19d7h		;19cf	20 06 	  . 
-	ld a,(ix + 9)		;19d1	dd 7e 09 	. ~ . 
+	ld a,(ix + ENEMY_MOVE_COUNTER_H_IDX)		;19d1	dd 7e 09
 	and a			;19d4	a7 	. 
 	jr z,l19f3h		;19d5	28 1c 	( . 
 l19d7h:
@@ -5078,20 +5087,23 @@ l1a0ah:
 	inc hl			;1a1a	23 	# 
 l1a1bh:
 	ld a,(hl)			;1a1b	7e 	~ 
-	ld (ix + 8),a		;1a1c	dd 77 08 	. w . 
+	ld (ix + ENEMY_MOVE_COUNTER_L_IDX),a		;1a1c	dd 77 08 	. w . 
 	ld (ix + 14),000h		;1a1f	dd 36 0e 00 	. 6 . . 
 	ld (ix + ENEMY_FRAME_COUNTER_IDX),00bh	;1a23	dd 36 07 0b
 	ret			;1a27	c9 	. 
+
+    ; Mystery: how can one arrive here?
+    ; I've checked that code at PC=1A30 was indeed executed.
 	call sub_1be7h		;1a28	cd e7 1b 	. . . 
 	ld de,0f600h		;1a2b	11 00 f6 	. . . 
 	add hl,de			;1a2e	19 	. 
 	ret c			;1a2f	d8 	. 
-	ld a,(ix + 8)		;1a30	dd 7e 08 	. ~ . 
-	and a			;1a33	a7 	. 
-	jr nz,l1a3ch		;1a34	20 06 	  . 
-	ld a,(ix + 9)		;1a36	dd 7e 09 	. ~ . 
-	and a			;1a39	a7 	. 
-	jr z,l19f3h		;1a3a	28 b7 	( . 
+	ld a,(ix + ENEMY_MOVE_COUNTER_L_IDX)		;1a30	dd 7e 08
+	and a			                            ;1a33	a7
+	jr nz,l1a3ch		                        ;1a34	20 06
+	ld a,(ix + ENEMY_MOVE_COUNTER_H_IDX)		;1a36	dd 7e 09
+	and a			                            ;1a39	a7
+	jr z,l19f3h		                            ;1a3a	28 b7
 l1a3ch:
 	ld (ix + ENEMY_STATE_IDX), 3	        ;1a3c	dd 36 01 03 3=unknown!
 	ld (ix + ENEMY_FRAME_IDX), 2	        ;1a40	dd 36 06 02
@@ -5687,11 +5699,15 @@ sub_1e4ah:
 	jr z,$+63		;1e4f	28 3d 	( = 
 	and 010h		;1e51	e6 10 	. . 
 	ret z			;1e53	c8 	. 
-	ld hl,(ENEMY_MOVE_COUNTER)		;1e54	2a e0 e2 	* . . 
-	dec hl			;1e57	2b 	+ 
-	bit 7,h		;1e58	cb 7c 	. | 
-	jr nz,l1e5fh		;1e5a	20 03 	  . 
-	ld (ENEMY_MOVE_COUNTER),hl		;1e5c	22 e0 e2 	" . . 
+    
+    ; Here it's using the ENEMY_MOVE_COUNTER as a 16-bit word only to
+    ; look for an overflow when decrementing. Actually ENEMY_MOVE_COUNTER is
+    ; used always as a byte.
+	ld hl,(ENEMY_MOVE_COUNTER)		;1e54	2a e0 e2
+	dec hl			                ;1e57	2b
+	bit 7,h		                    ;1e58	cb 7c Overflow?
+	jr nz,l1e5fh		            ;1e5a	20 03 Jump if ENEMY_MOVE_COUNTER < 0
+	ld (ENEMY_MOVE_COUNTER),hl		;1e5c	22 e0 e2
 l1e5fh:
 	ld ix,TBL_ENEMIES		;1e5f	dd 21 d8 e2 	. ! . . 
 	ld a,(ENEMY_ENERGY)		;1e63	3a e2 e2 	: . . 
@@ -5970,7 +5986,7 @@ l2071h:
 	ld h,(ix + ENEMY_POS_H_IDX)		;2074	dd 66 03
 	sbc hl,de		;2077	ed 52 	. R 
 	jr c,l2080h		;2079	38 05 	8 . 
-	ld a,(ix + ENEMY_MOVE_COUNTER_IDX)		;207b	dd 7e 08 level 1
+	ld a,(ix + ENEMY_MOVE_COUNTER_L_IDX)		;207b	dd 7e 08 level 1
 	and a			;207e	a7 	. 
 	ret nz			;207f	c0 	. 
 l2080h:
@@ -5980,7 +5996,7 @@ l2085h:
 	ld (ix + CURRENT_FRAME_IDX), 0	        ;2085	dd 36 06 00
 	ld (ix + ENEMY_FRAME_COUNTER_IDX), 7	;2089	dd 36 07 07 level 1
 	ld (ix + ENEMY_STATE_IDX), 5            ;208d	dd 36 01 05
-	ld (ix + ENEMY_MOVE_COUNTER_IDX), 37  ;2091	dd 36 08 25 level 1
+	ld (ix + ENEMY_MOVE_COUNTER_L_IDX), 37  ;2091	dd 36 08 25 level 1
 	ret			                            ;2095	c9
 l2096h:
 	call sub_2cb9h		;2096	cd b9 2c 	. . , 
@@ -6200,7 +6216,7 @@ l2220h:
 	ld a,(0e013h)		;222c	3a 13 e0 	: . . 
 	ld hl,0e1a0h		;222f	21 a0 e1 	! . . 
 	call sub_1214h		;2232	cd 14 12 	. . . 
-	ld (ix + ENEMY_MOVE_COUNTER_IDX),a	;2235	dd 77 08 level 2
+	ld (ix + ENEMY_MOVE_COUNTER_L_IDX),a	;2235	dd 77 08 level 2
 	ret			;2238	c9 	. 
 l2239h:
 	call sub_2cb9h		;2239	cd b9 2c 	. . , 
@@ -6475,7 +6491,7 @@ l2488h:
 	ld h,(ix + ENEMY_POS_H_IDX)		;248f	dd 66 03
 	sbc hl,de		;2492	ed 52 	. R 
 	jp nc,l2080h		;2494	d2 80 20 	. .   
-	ld a,(ix + ENEMY_MOVE_COUNTER_IDX)	;2497	dd 7e 08 level 2
+	ld a,(ix + ENEMY_MOVE_COUNTER_L_IDX)	;2497	dd 7e 08 level 2
 	and a			;249a	a7 	. 
 	jp z,l2080h		;249b	ca 80 20 	. .   
 	ret			;249e	c9 	. 
@@ -7092,7 +7108,7 @@ l2965h:
 	ld de,0fb80h		;296b	11 80 fb 	. . . 
 	add hl,de			;296e	19 	. 
 	ret c			;296f	d8 	. 
-	ld a,(ix + ENEMY_MOVE_COUNTER_IDX)	;2970	dd 7e 08 level 5
+	ld a,(ix + ENEMY_MOVE_COUNTER_L_IDX)	;2970	dd 7e 08 level 5
 	and a			;2973	a7 	. 
 	jp nz,l2ae9h		;2974	c2 e9 2a 	. . * 
 l2977h:
@@ -7240,7 +7256,7 @@ l2a87h:
 	call sub_1c7ah		;2a8f	cd 7a 1c
 	call sub_2ab6h		;2a92	cd b6 2a
 	call sub_2ba0h		;2a95	cd a0 2b
-	ld a,(ix + ENEMY_MOVE_COUNTER_IDX)		;2a98	dd 7e 08 level 5
+	ld a,(ix + ENEMY_MOVE_COUNTER_L_IDX)		;2a98	dd 7e 08 level 5
 	and a			;2a9b	a7
 	jp z,l2977h		;2a9c	ca 77 29
 	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;2a9f	2a 0c e8
@@ -7270,7 +7286,7 @@ l2ad9h:
 	ld a,(0e012h)		;2ad9	3a 12 e0 	: . . 
 	ld hl,0e1a0h		;2adc	21 a0 e1 	! . . 
 	call sub_1214h		;2adf	cd 14 12 	. . . 
-	ld (ix + ENEMY_MOVE_COUNTER_IDX),a	;2ae2	dd 77 08 level 5
+	ld (ix + ENEMY_MOVE_COUNTER_L_IDX),a	;2ae2	dd 77 08 level 5
 	ld (ix + ENEMY_FRAME_COUNTER_IDX), 9	;2ae5	dd 36 07 09 level 5
 l2ae9h:
 	ld (ix + ENEMY_STATE_IDX), 5    ;2ae9	dd 36 01 05
