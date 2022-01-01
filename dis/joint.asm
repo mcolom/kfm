@@ -4450,7 +4450,7 @@ l1556h:
 	bit 1,(hl)		            ;157f	cb 4e Check if Thomas is fighting
 	jp nz,l1be2h		        ;1581	c2 e2 1b Get out if he's not fighting
     ; Thomas is fighting
-	cp 001h		    ;1584	fe 01 Here A comes from ld a,(ix + 1) @ 156d
+	cp 001h		    ;1584	fe 01 Here A comes from ld a,(ix + ENEMY_STATE_IDX) @ 156d
 	jp z,l1baah		;1586	ca aa 1b 	. . . 
 	jr c,l15d2h		;1589	38 47 	8 G 
 	cp 009h		;158b	fe 09 	. . 
@@ -4649,9 +4649,9 @@ l16fah:
 	jp c,l1b20h		;16fa	da 20 1b 	.   . 
 	ret			;16fd	c9 	. 
 l16feh:
-	ld (ix + 1),000h		;16fe	dd 36 01 00 	. 6 . . 
-	ld (ix + ENEMY_FRAME_IDX), 0	;1702	dd 36 06 00 	. 6 . . 
-	ld (ix + ENEMY_FRAME_COUNTER_IDX),007h		;1706	dd 36 07 07 	. 6 . . 
+	ld (ix + ENEMY_STATE_IDX), 0		    ;16fe	dd 36 01 00
+	ld (ix + ENEMY_FRAME_IDX), 0	        ;1702	dd 36 06 00
+	ld (ix + ENEMY_FRAME_COUNTER_IDX),7 	;1706	dd 36 07 07
 	ret			;170a	c9 	. 
 l170bh:
 	ld e,(ix + 14)		;170b	dd 5e 0e 	. ^ . 
@@ -4764,9 +4764,9 @@ l17d7h:
 	ld hl,01c5bh		;17df	21 5b 1c 	! [ . 
 	jp l1b96h		;17e2	c3 96 1b 	. . . 
 l17e5h:
-	ld (ix + 1),00ah		;17e5	dd 36 01 0a 	. 6 . . 
-	ld hl,003a0h		;17e9	21 a0 03 	! . . 
-	call SET_ENEMY_REACTION_FROM_HL		;17ec	cd a5 1c 	. . . 
+	ld (ix + ENEMY_STATE_IDX),00ah		;17e5	dd 36 01 0a
+	ld hl,003a0h		                ;17e9	21 a0 03
+	call SET_ENEMY_REACTION_FROM_HL		;17ec	cd a5 1c
 	ld hl,00028h		;17ef	21 28 00 	! ( . 
 	ld (ix + 14),l		;17f2	dd 75 0e 	. u . 
 	ld (ix + 15),h		;17f5	dd 74 0f 	. t . 
@@ -4980,7 +4980,7 @@ l1942h:
 l194fh:
 	ld (ix + 8),l		;194f	dd 75 08 	. u . 
 	ld (ix + 9),h		;1952	dd 74 09 	. t . 
-	ld (ix + 1),a		;1955	dd 77 01 	. w . 
+	ld (ix + ENEMY_STATE_IDX),a		;1955	dd 77 01
 	ld (ix + ENEMY_FRAME_COUNTER_IDX), 2	;1958	dd 36 07 02
 	ret			;195c	c9 	. 
 l195dh:
@@ -5007,7 +5007,7 @@ l1982h:
 	ret nz			;198b	c0 	. 
 	ld (ix + 8),004h		;198c	dd 36 08 04 	. 6 . . 
 	ld (ix + 9),000h		;1990	dd 36 09 00 	. 6 . . 
-	ld (ix + 1),003h		;1994	dd 36 01 03 	. 6 . . 
+	ld (ix + ENEMY_STATE_IDX),003h		;1994	dd 36 01 03 	. 6 . . 
 	ret			;1998	c9 	. 
 	call sub_1befh		;1999	cd ef 1b 	. . . 
 	call sub_1a49h		;199c	cd 49 1a 	. I . 
@@ -5047,7 +5047,7 @@ l19d7h:
 	ld de,0fe00h		;19e0	11 00 fe 	. . . 
 	add hl,de			;19e3	19 	. 
 	ret nc			;19e4	d0 	. 
-	ld (ix + 1),000h		;19e5	dd 36 01 00 	. 6 . . 
+	ld (ix + ENEMY_STATE_IDX),0	;19e5	dd 36 01 00
 	ret			;19e9	c9 	. 
 l19eah:
 	call sub_1ab8h		;19ea	cd b8 1a 	. . . 
@@ -5488,7 +5488,7 @@ sub_1cb3h:
 	call sub_1dfdh		;1cb6	cd fd 1d 	. . . 
 	ld ix,TBL_E2FB		;1cb9	dd 21 fb e2 	. ! . . 
 	call sub_1cc4h		;1cbd	cd c4 1c 	. . . 
-	ld ix,0e30bh		;1cc0	dd 21 0b e3 	. ! . . 
+	ld ix,0e30bh		;1cc0	dd 21 0b e3 ToDo: what is this table???
 sub_1cc4h:
 	ld a,(ix + 0)		;1cc4	dd 7e 00 	. ~ . 
 	ld c,a			;1cc7	4f 	O 
@@ -5774,15 +5774,15 @@ l1eebh:
 	jr nc,l1f03h		;1ef3	30 0e 	0 . 
 l1ef5h:
 	ld l,a			;1ef5	6f 	o 
-	ld a,(ix + 1)		;1ef6	dd 7e 01 	. ~ . 
+	ld a,(ix + ENEMY_STATE_IDX)		;1ef6	dd 7e 01 	. ~ . 
 	and a			;1ef9	a7 	. 
 	ld a,l			;1efa	7d 	} 
 	jr nz,l1f03h		;1efb	20 06 	  . 
-	ld (ix + 1),005h		;1efd	dd 36 01 05 	. 6 . . 
-	dec a			;1f01	3d 	= 
-	ret z			;1f02	c8 	. 
+	ld (ix + ENEMY_STATE_IDX), 5	;1efd	dd 36 01 05
+	dec a			                ;1f01	3d
+	ret z			                ;1f02	c8
 l1f03h:
-	ld de,000fh+1		;1f03	11 10 00 	. . . 
+	ld de,0010h		;1f03	11 10 00 	. . . 
 	add ix,de		;1f06	dd 19 	. . 
 	djnz l1ecch		;1f08	10 c2 	. . 
 	ret			;1f0a	c9 	. 
@@ -5921,7 +5921,7 @@ l1ff9h:
 	res 4,(hl)		;200a	cb a6 	. . 
 	ret			;200c	c9 	. 
 l200dh:
-	ld (ix + 1),002h		;200d	dd 36 01 02 	. 6 . . 
+	ld (ix + ENEMY_STATE_IDX),002h		;200d	dd 36 01 02 	. 6 . . 
 l2011h:
 	call l1be2h		                    ;2011	cd e2 1b
 	dec (ix + ENEMY_FRAME_COUNTER_IDX)	;2014	dd 35 07
@@ -5938,7 +5938,7 @@ l2011h:
 	call sub_1c7ah		;202c	cd 7a 1c 	. z . 
 	jr l2011h		;202f	18 e0 	. . 
 l2031h:
-	ld (ix + 1),006h		;2031	dd 36 01 06 	. 6 . . 
+	ld (ix + ENEMY_STATE_IDX),006h		;2031	dd 36 01 06 	. 6 . . 
 	ret			;2035	c9 	. 
 l2036h:
 	add a,013h		;2036	c6 13 	. . 
@@ -6414,7 +6414,7 @@ l23f9h:
 	ld (ix + ENEMY_ATTACK_STEP_IDX), 2      ;2400	dd 36 0e 02 level 2
 	ret			;2404	c9 	. 
 l2405h:
-	ld (ix + 1), 2          		;2405	dd 36 01 02
+	ld (ix + ENEMY_STATE_IDX), 2          		;2405	dd 36 01 02
 l2409h:
 	call l1be2h		;2409	cd e2 1b 	. . . 
 	dec (ix + ENEMY_FRAME_COUNTER_IDX)		;240c	dd 35 07 level 2
@@ -6431,7 +6431,7 @@ l2409h:
 l2427h:
 	ld a,(ENEMY_REACTION)		;2427	3a e4 e2 	: . . 
 	ld (ENEMY_FRAME),a		;242a	32 de e2 	2 . . 
-	ld (ix + 1),004h		;242d	dd 36 01 04 	. 6 . . 
+	ld (ix + ENEMY_STATE_IDX),004h		;242d	dd 36 01 04
 	ret			;2431	c9 	. 
     
     ; Unused code?
@@ -6639,7 +6639,7 @@ sub_25afh:
 	ld a,(0e2d7h)		;25ca	3a d7 e2 	: . . 
 	and a			;25cd	a7 	. 
 	jp z,l1f50h		;25ce	ca 50 1f 	. P . 
-	ld (ix + 1),00dh		;25d1	dd 36 01 0d 	. 6 . . 
+	ld (ix + ENEMY_STATE_IDX),00dh		;25d1	dd 36 01 0d 	. 6 . . 
 	ld (ix + CURRENT_FRAME_IDX), 26	;25d5	dd 36 06 1a
 	ld (ix + FRAME_COUNTER_IDX), 8	;25d9	dd 36 07 08
     ; Set Thomas is frozen
@@ -6654,7 +6654,7 @@ sub_25afh:
 	ld a,(ix + CURRENT_FRAME_IDX)		;25f1	dd 7e 06
 	cp 34		                        ;25f4	fe 22
 	ret nz			;25f6	c0 	. 
-	inc (ix + 1)		;25f7	dd 34 01 	. 4 . 
+	inc (ix + ENEMY_STATE_IDX)		;25f7	dd 34 01 	. 4 . 
 	ld (ix + CURRENT_FRAME_IDX),30	;25fa	dd 36 06 1e
 	ld l,(ix + ENEMY_POS_L_IDX)		;25fe	dd 6e 02 	. n . 
 	ld h,(ix + ENEMY_POS_H_IDX)		;2601	dd 66 03 	. f . 
@@ -6872,9 +6872,9 @@ l27b0h:
 	ld (0e2f8h),hl		;27d1	22 f8 e2
     ; Set enemy is dead
 	ld (ix + ENEMY_PROPS_IDX), 0	;27d4	dd 36 00 00
-	ld hl,0e701h		;27d8	21 01 e7
-	res 4,(hl)		;27db	cb a6 	. . 
-	jr l283dh		;27dd	18 5e 	. ^ 
+	ld hl,0e701h		            ;27d8	21 01 e7
+	res 4,(hl)		                ;27db	cb a6 Set enemy is not alive
+	jr l283dh		                ;27dd	18 5e
 l27dfh:
     ; Set Thomas is frozen
 	ld hl,THOMAS_GLOBAL_STATE	;27df	21 00 e7
@@ -7039,9 +7039,9 @@ l28dch:
 	jr l2923h		;2905	18 1c 	. . 
 l2907h:
 	ld (ix + ENEMY_FRAME_COUNTER_IDX), 7	;2907	dd 36 07 07
-	ld (ix + 1),000h		;290b	dd 36 01 00 	. 6 . . 
-	ld (ix + ENEMY_FRAME_IDX),000h		;290f	dd 36 06 00 	. 6 . . 
-	ret			;2913	c9 	. 
+	ld (ix + ENEMY_STATE_IDX), 0		    ;290b	dd 36 01 00
+	ld (ix + ENEMY_FRAME_IDX), 0		    ;290f	dd 36 06 00
+	ret			                            ;2913	c9
 l2914h:
 	call sub_293ch		;2914	cd 3c 29 	. < ) 
 	call sub_1c70h		;2917	cd 70 1c 	. p . 
@@ -8648,7 +8648,7 @@ l348eh:
 	dec (ix + ENEMY_FRAME_COUNTER_IDX)		;34ae	dd 35 07 	. 5 . 
 	ret z			;34b1	c8 	. 
 	ld (ix + ENEMY_FRAME_COUNTER_IDX),00bh		;34b2	dd 36 07 0b 	. 6 . . 
-	ld a,(ix + ENEMY_FRAME_IDX)		;34b6	dd 7e 06 	. ~ . 
+	ld a,(ix + ENEMY_FRAME_IDX)		;34b6	dd 7e 06
 	inc a			;34b9	3c 	< 
 	cp 01dh		;34ba	fe 1d 	. . 
 	jr c,l34c0h		;34bc	38 02 	8 . 
