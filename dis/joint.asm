@@ -153,6 +153,17 @@ TBL_GUYS: EQU 0xE262
 ; Bit 5: 1=avoid adding guys behind this one on the right
 ; Bit 6: moving direction of the guy (0 to the right, 1 to the left)
 
+;ENEMY_PROPS_IDX: EQU 0
+;ENEMY_STATE_IDX: EQU 1
+;ENEMY_STATE: EQU TBL_ENEMIES + ENEMY_STATE_IDX ; Enemy's state
+;
+;ENEMY_POS_L_IDX: EQU 2
+;ENEMY_POS_H_IDX: EQU 3
+
+;ENEMY_HEIGHT_L_IDX: EQU 4
+;ENEMY_HEIGHT_H_IDX: EQU 5 ; Height of boss when falling after being defeated
+
+; ENEMY_FRAME_IDX: EQU 6 ; Enemy's displayed frame
 
 
 
@@ -267,8 +278,8 @@ ENEMY_POS_L_IDX: EQU 2
 ENEMY_POS_H_IDX: EQU 3
 ENEMY_POS: EQU TBL_ENEMIES + ENEMY_POS_L_IDX ; Position of the enemy
 
-ENEMY_FALLING_HEIGHT_L_IDX: EQU 4
-ENEMY_FALLING_HEIGHT_H_IDX: EQU 5 ; Height of boss when falling after being defeated
+ENEMY_HEIGHT_L_IDX: EQU 4
+ENEMY_HEIGHT_H_IDX: EQU 5 ; Height of boss when falling after being defeated
 
 ENEMY_FRAME_IDX: EQU 6 ; Enemy's displayed frame
 ENEMY_FRAME: EQU TBL_ENEMIES + ENEMY_FRAME_IDX
@@ -4459,10 +4470,10 @@ l1592h:
 	ret			;15a7	c9 	. 
 l15a8h:
 	call sub_1be7h		;15a8	cd e7 1b 	. . . 
-	ld a,(ix + 6)		;15ab	dd 7e 06 	. ~ . 
+	ld a,(ix + ENEMY_FRAME_IDX)		;15ab	dd 7e 06 	. ~ . 
 	cp 00ah		;15ae	fe 0a 	. . 
 	jr nc,l15b6h		;15b0	30 04 	0 . 
-	ld (ix + 6),00dh		;15b2	dd 36 06 0d 	. 6 . . 
+	ld (ix + ENEMY_FRAME_IDX),00dh		;15b2	dd 36 06 0d 	. 6 . . 
 l15b6h:
 	call sub_163eh		;15b6	cd 3e 16 	. > . 
 	ret c			;15b9	d8 	. 
@@ -4473,10 +4484,11 @@ l15b6h:
 	ret			;15c4	c9 	. 
 l15c5h:
 	ld a,00ah		;15c5	3e 0a 	> . 
-	add a,(ix + 6)		;15c7	dd 86 06 	. . . 
-	ld (ix + 6),a		;15ca	dd 77 06 	. w . 
+	add a,(ix + ENEMY_FRAME_IDX)		;15c7	dd 86 06 	. . . 
+	ld (ix + ENEMY_FRAME_IDX),a		;15ca	dd 77 06 	. w . 
 	ld (ix + ENEMY_STATE_IDX),00ah	;15cd	dd 36 01 0a Guy hand raised
 	ret			;15d1	c9 	. 
+
 l15d2h:
 	call sub_1be7h		;15d2	cd e7 1b 	. . . 
 	ld de,0f800h		;15d5	11 00 f8 	. . . 
@@ -4636,14 +4648,14 @@ l16fah:
 	ret			;16fd	c9 	. 
 l16feh:
 	ld (ix + 1),000h		;16fe	dd 36 01 00 	. 6 . . 
-	ld (ix + 6),000h		;1702	dd 36 06 00 	. 6 . . 
+	ld (ix + ENEMY_FRAME_IDX), 0	;1702	dd 36 06 00 	. 6 . . 
 	ld (ix + 7),007h		;1706	dd 36 07 07 	. 6 . . 
 	ret			;170a	c9 	. 
 l170bh:
 	ld e,(ix + 14)		;170b	dd 5e 0e 	. ^ . 
 	ld d,(ix + 15)		;170e	dd 56 0f 	. V . 
-	ld a,(ix + 6)		;1711	dd 7e 06 	. ~ . 
-	cp 00ah		;1714	fe 0a 	. . 
+	ld a,(ix + ENEMY_FRAME_IDX)		;1711	dd 7e 06 	. ~ . 
+	cp 00ah		;1714	fe 0a
 	push af			;1716	f5 	. 
 	call nz,sub_1c70h		;1717	c4 70 1c 	. p . 
 	call l1be2h		;171a	cd e2 1b 	. . . 
@@ -4654,7 +4666,7 @@ l170bh:
 	add hl,de			;1726	19 	. 
 	call SET_ENEMY_REACTION_FROM_HL		;1727	cd a5 1c 	. . . 
 	ex de,hl			;172a	eb 	. 
-	call GET_ENEMY_FALLING_HEIGHT_IN_HL		;172b	cd 9e 1c 	. . . 
+	call GET_ENEMY_HEIGHT_IN_HL		;172b	cd 9e 1c 	. . . 
 	add hl,de			;172e	19 	. 
 	ld de,05000h		;172f	11 00 50 	. . P 
 	sbc hl,de		;1732	ed 52 	. R 
@@ -4662,7 +4674,7 @@ l170bh:
 	jr nc,l1738h		;1735	30 01 	0 . 
 	ex de,hl			;1737	eb 	. 
 l1738h:
-	call SET_ENEMY_FALLING_HEIGHT_FROM_HL		;1738	cd 97 1c 	. . . 
+	call SET_ENEMY_HEIGHT_FROM_HL		;1738	cd 97 1c 	. . . 
 	jr c,l16feh		;173b	38 c1 	8 . 
 l173dh:
 	bit 1,(ix + 11)		;173d	dd cb 0b 4e 	. . . N 
@@ -4674,7 +4686,7 @@ l173dh:
 	ld de,l0140h		;174d	11 40 01 	. @ . 
 	add hl,de			;1750	19 	. 
 	ld (0e811h),hl		;1751	22 11 e8 	" . . 
-	call GET_ENEMY_FALLING_HEIGHT_IN_HL		;1754	cd 9e 1c 	. . . 
+	call GET_ENEMY_HEIGHT_IN_HL		;1754	cd 9e 1c 	. . . 
 	ld de,0013h+1		;1757	11 14 00 	. . . 
 	call sub_1172h		;175a	cd 72 11 	. r . 
 	jr c,l1787h		;175d	38 28 	8 ( 
@@ -4694,9 +4706,9 @@ l1768h:
 	ld (ix + 7),a		;1774	dd 77 07 	. w . 
 	inc hl			;1777	23 	# 
 	ld a,(hl)			;1778	7e 	~ 
-	ld (ix + 6),a		;1779	dd 77 06 	. w . 
+	ld (ix + ENEMY_FRAME_IDX),a		;1779	dd 77 06 	. w . 
 l177ch:
-	ld a,(ix + 6)		;177c	dd 7e 06 	. ~ . 
+	ld a,(ix + ENEMY_FRAME_IDX)		;177c	dd 7e 06 	. ~ . 
 	cp 00fh		;177f	fe 0f 	. . 
 	ret c			;1781	d8 	. 
 	ld a,c			;1782	79 	y 
@@ -4712,7 +4724,7 @@ l1787h:
 	cp 007h		;1792	fe 07 	. . 
 	jr nz,l17bah		;1794	20 24 	  $ 
 l1796h:
-	call GET_ENEMY_FALLING_HEIGHT_IN_HL		;1796	cd 9e 1c 	. . . 
+	call GET_ENEMY_HEIGHT_IN_HL		;1796	cd 9e 1c 	. . . 
 	ld de,l010ch		;1799	11 0c 01 	. . . 
 	ld a,091h		;179c	3e 91 	> . 
 	call PLAY_SOUND		;179e	cd fe 0d 	. . . 
@@ -4729,7 +4741,7 @@ l1796h:
 	jr l1768h		;17b8	18 ae 	. . 
 l17bah:
 	ld (ix + CURRENT_FRAME_IDX),9	;17ba	dd 36 06 09
-	call GET_ENEMY_FALLING_HEIGHT_IN_HL		    ;17be	cd 9e 1c
+	call GET_ENEMY_HEIGHT_IN_HL		    ;17be	cd 9e 1c
 	ld de,l0a00h		;17c1	11 00 0a 	. . . 
 	add hl,de			;17c4	19 	. 
 	xor a			;17c5	af 	. 
@@ -4902,13 +4914,13 @@ l18d6h:
 	jr c,l18eah		;18dd	38 0b 	8 . 
 	ld a,005h		;18df	3e 05 	> . 
 	ld hl,0x5a		;18e1	21 5a 00 	! Z . 
-	ld (ix + 6),002h		;18e4	dd 36 06 02 	. 6 . . 
+	ld (ix + ENEMY_FRAME_IDX),002h		;18e4	dd 36 06 02 	. 6 . . 
 	jr l194fh		;18e8	18 65 	. e 
 l18eah:
 	ld a,(ix + 8)		;18ea	dd 7e 08 	. ~ . 
 	and a			;18ed	a7 	. 
 	jp z,l19fdh		;18ee	ca fd 19 	. . . 
-	ld a,(ix + 6)		;18f1	dd 7e 06 	. ~ . 
+	ld a,(ix + ENEMY_FRAME_IDX)		;18f1	dd 7e 06 	. ~ . 
 	cp 002h		;18f4	fe 02 	. . 
 	jr z,l195dh		;18f6	28 65 	( e 
 	dec (ix + 7)		;18f8	dd 35 07 	. 5 . 
@@ -4955,10 +4967,10 @@ sub_1931h:
 	call sub_1dbfh		;1934	cd bf 1d 	. . . 
 	dec (ix + 14)		;1937	dd 35 0e 	. 5 . 
 	ld (ix + 7),010h		;193a	dd 36 07 10 	. 6 . . 
-	inc (ix + 6)		;193e	dd 34 06 	. 4 . 
+	inc (ix + ENEMY_FRAME_IDX)		;193e	dd 34 06 	. 4 . 
 	ret			;1941	c9 	. 
 l1942h:
-	ld (ix + 6),002h		;1942	dd 36 06 02 	. 6 . . 
+	ld (ix + ENEMY_FRAME_IDX),002h		;1942	dd 36 06 02 	. 6 . . 
 	dec (ix + 11)		;1946	dd 35 0b 	. 5 . 
 	ret nz			;1949	c0 	. 
 	ld hl,(0e1f5h)		;194a	2a f5 e1 	* . . 
@@ -4979,11 +4991,11 @@ l195dh:
 	ret			;196b	c9 	. 
 	call l1be2h		;196c	cd e2 1b 	. . . 
 	ld a,002h		;196f	3e 02 	> . 
-	cp (ix + 6)		;1971	dd be 06 	. . . 
+	cp (ix + ENEMY_FRAME_IDX)		;1971	dd be 06 	. . . 
 	jr z,l1982h		;1974	28 0c 	( . 
 	dec (ix + 7)		;1976	dd 35 07 	. 5 . 
 	ret nz			;1979	c0 	. 
-	ld (ix + 6),a		;197a	dd 77 06 	. w . 
+	ld (ix + ENEMY_FRAME_IDX),a		;197a	dd 77 06 	. w . 
 	ld (ix + 7),003h		;197d	dd 36 07 03 	. 6 . . 
 	ret			;1981	c9 	. 
 l1982h:
@@ -5053,7 +5065,7 @@ l19fdh:
 	jr c,l1a0ah		;1a06	38 02 	8 . 
 	ld a,00bh		;1a08	3e 0b 	> . 
 l1a0ah:
-	ld (ix + 6),a		;1a0a	dd 77 06 	. w . 
+	ld (ix + ENEMY_FRAME_IDX),a		;1a0a	dd 77 06 	. w . 
 	inc hl			;1a0d	23 	# 
 	ld a,(EXT_RANDOM + 1)		;1a0e	3a 11 e0 	: . . 
 	cp 055h		;1a11	fe 55 	. U 
@@ -5080,7 +5092,7 @@ l1a1bh:
 	jr z,l19f3h		;1a3a	28 b7 	( . 
 l1a3ch:
 	ld (ix + ENEMY_STATE_IDX), 3	;1a3c	dd 36 01 03 3=unknown!
-	ld (ix + 6),002h		;1a40	dd 36 06 02 	. 6 . . 
+	ld (ix + ENEMY_FRAME_IDX), 2	;1a40	dd 36 06 02 	. 6 . . 
 	ld (ix + 7),002h		;1a44	dd 36 07 02 	. 6 . . 
 	ret			;1a48	c9 	. 
 sub_1a49h:
@@ -5120,7 +5132,7 @@ l1a80h:
 	bit 4,(ix + ENEMY_PROPS_IDX)	;1a82	dd cb 00 66
 	ret z			;1a86	c8 	. 
 	ex de,hl			;1a87	eb 	. 
-	call GET_ENEMY_FALLING_HEIGHT_IN_HL		;1a88	cd 9e 1c
+	call GET_ENEMY_HEIGHT_IN_HL		;1a88	cd 9e 1c
 	add hl,hl			;1a8b	29 	) 
 	ld l,h			;1a8c	6c 	l 
 	ld h,000h		;1a8d	26 00 	& . 
@@ -5239,8 +5251,8 @@ l1b20h:
 	jr nz,l1b37h		;1b33	20 02 	  . 
 	ld a,003h		;1b35	3e 03 	> . 
 l1b37h:
-	ld (ix + 7),a		;1b37	dd 77 07 	. w . 
-	ld (ix + 6),009h		;1b3a	dd 36 06 09 	. 6 . .
+	ld (ix + 7),a		    ;1b37	dd 77 07 	. w . 
+	ld (ix + ENEMY_FRAME_IDX), 9	;1b3a	dd 36 06 09 	. 6 . .
 
     ; Set guy is gripping
 	ld (ix + ENEMY_STATE_IDX), 9    ;1b3e	dd 36 01 09
@@ -5291,7 +5303,7 @@ l1b89h:
 sub_1b8eh:
 	add a,004h		;1b8e	c6 04 	. . 
 l1b90h:
-	ld (ix + 6),a		;1b90	dd 77 06 	. w . 
+	ld (ix + ENEMY_FRAME_IDX),a		;1b90	dd 77 06 	. w . 
 	ld hl,l1c55h		;1b93	21 55 1c 	! U . 
 l1b96h:
 	ld (ix + ENEMY_STATE_IDX), 1 ;1b96	dd 36 01 01 1=enemy disappears
@@ -5324,9 +5336,9 @@ l1bc4h:
 	add hl,de			;1bcd	19 	. 
 	ld (ix + ENEMY_ATTACK_STEP_IDX),l		;1bce	dd 75 0e level 1
 	ld (ix + ENEMY_BOOMERANG_TYPE_IDX),h	;1bd1	dd 74 0f level 1
-	call GET_ENEMY_FALLING_HEIGHT_IN_HL		;1bd4	cd 9e 1c 	. . . 
+	call GET_ENEMY_HEIGHT_IN_HL		;1bd4	cd 9e 1c 	. . . 
 	sbc hl,de		;1bd7	ed 52 	. R 
-	call SET_ENEMY_FALLING_HEIGHT_FROM_HL		;1bd9	cd 97 1c 	. . . 
+	call SET_ENEMY_HEIGHT_FROM_HL		;1bd9	cd 97 1c 	. . . 
 	ld de,l0039h		;1bdc	11 39 00 	. 9 . 
 	call sub_1c7ah		;1bdf	cd 7a 1c 	. z . 
 l1be2h:
@@ -5449,14 +5461,14 @@ GET_ENEMY_POS_IN_DE:
 	ex de,hl			            ;1c95	eb
 	ret			                    ;1c96	c9
 
-SET_ENEMY_FALLING_HEIGHT_FROM_HL:
-	ld (ix + ENEMY_FALLING_HEIGHT_L_IDX),l		;1c97	dd 75 04
-	ld (ix + ENEMY_FALLING_HEIGHT_H_IDX),h		;1c9a	dd 74 05
+SET_ENEMY_HEIGHT_FROM_HL:
+	ld (ix + ENEMY_HEIGHT_L_IDX),l		;1c97	dd 75 04
+	ld (ix + ENEMY_HEIGHT_H_IDX),h		;1c9a	dd 74 05
 	ret			;1c9d	c9 	. 
 
-GET_ENEMY_FALLING_HEIGHT_IN_HL:
-	ld l,(ix + ENEMY_FALLING_HEIGHT_L_IDX)		;1c9e	dd 6e 04
-	ld h,(ix + ENEMY_FALLING_HEIGHT_H_IDX)		;1ca1	dd 66 05
+GET_ENEMY_HEIGHT_IN_HL:
+	ld l,(ix + ENEMY_HEIGHT_L_IDX)		;1c9e	dd 6e 04
+	ld h,(ix + ENEMY_HEIGHT_H_IDX)		;1ca1	dd 66 05
 	ret			;1ca4	c9 	. 
 
 SET_ENEMY_REACTION_FROM_HL:
@@ -11356,8 +11368,8 @@ l487eh:
 	ld b, 7 ; 7 guys in the intro. However, the programmer already set B with ld bc,0750h. Question: debug?
 iterate_guys_intro:
     ; IX = TBL_GUYS
-	ld (ix + ENEMY_FALLING_HEIGHT_L_IDX), 0
-	ld (ix + ENEMY_FALLING_HEIGHT_H_IDX), 92 ; Distance (from top) of the enemy
+	ld (ix + ENEMY_HEIGHT_L_IDX), 0
+	ld (ix + ENEMY_HEIGHT_H_IDX), 92 ; Distance (from top) of the enemy
 
 	ld (ix + ENEMY_FRAME_COUNTER_IDX), 7
 	ld (ix + ENEMY_ATTACK_STEP_IDX), 038h
