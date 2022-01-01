@@ -172,13 +172,24 @@ TBL_GUYS: EQU 0xE262
 
 ;ENEMY_ENERGY_IDX: EQU 10
 
+; This controls the time left the enemy is standing without moving.
+; For grippers, it's the number of shakes for the gripper before
+; releasing Thomas.
 ;ENEMY_STEADY_COUNTER_IDX: EQU 11
 
 ;ENEMY_REACTION_L_IDX: EQU 12
 ;ENEMY_REACTION_H_IDX: EQU 13
 
-; Number of Thomas' shakes the gripper needs to release.
 ; ENEMY_ATTACK_STEP_IDX: EQU 14
+
+
+
+; Step counter to decrease the energy. It's related to the configuration
+; of DSW1 (energy loss slow/fast).
+; I guess this was added afterwards, since it's weird to have this
+; variable and also ENEMY_ATTACK_STEP_IDX to the same.
+GRIPPING_ENERGY_DECREASE_DSW_STEP: EQU 7
+
 
 ; This variable stores the last move Thomas did in order to get
 ; released from a gripper.
@@ -188,6 +199,8 @@ TBL_GUYS: EQU 0xE262
 ; This variable with index 15 is "ENEMY_BOOMERANG_TYPE_IDX" in the case of
 ; the boomerang guy at level 2.
 THOMAS_LAST_SHAKE_MOVE: EQU 15
+
+
 
 
 
@@ -348,6 +361,8 @@ ENEMY_REACTION_L_IDX: EQU 12
 ENEMY_REACTION_H_IDX: EQU 13
 ENEMY_REACTION: EQU TBL_ENEMIES + ENEMY_REACTION_L_IDX
 
+; When the action of the gripper is to remove energy, the
+; energy decrease rate is also governed by this counter.
 ENEMY_ATTACK_STEP_IDX: EQU 14
 ENEMY_ATTACK_STEP: EQU TBL_ENEMIES + ENEMY_ATTACK_STEP_IDX ; Enemy attack step
 ;
@@ -4554,40 +4569,52 @@ l15ddh:
 	ld (ix + THOMAS_LAST_SHAKE_MOVE),a		;15ed	dd 77 0f
 	jr l15fbh		;15f0	18 09 	. . 
 l15f2h:
-	dec (ix + 14)		;15f2	dd 35 0e 	. 5 . 
-	jr nz,l15ffh		;15f5	20 08 	  . 
+    ; Thomas is being gripped, so we need to decrease the energy.
+    ; But it's done slowly, only when ENEMY_ATTACK_STEP_IDX == 0.
+    ; We can think of it as some kind of gripper "attack".
+
+	dec (ix + ENEMY_ATTACK_STEP_IDX)		;15f2	dd 35 0e
+	jr nz,l15ffh		                    ;15f5	20 08
     
     ; Set to 6 the number of steps needed for Thomas to get released from
     ; a gripper.
 	ld (ix + ENEMY_STEADY_COUNTER_IDX), 6	;15f7	dd 36 0b 06
 l15fbh:
-	ld (ix + 14),005h		;15fb	dd 36 0e 05 	. 6 . . 
+    ; Reset the energy decrease step
+	ld (ix + ENEMY_ATTACK_STEP_IDX), 5		;15fb	dd 36 0e 05
 l15ffh:
-	dec (ix + 7)		;15ff	dd 35 07 	. 5 . 
-	ret nz			;1602	c0 	. 
-	ld a,(AVOID_SHOWING_FLOOR_INTRO_TEXT)		;1603	3a 1c e8 	: . . 
-	and a			;1606	a7 	. 
-	ld a,002h		;1607	3e 02 	> . 
-	jr nz,l1615h		;1609	20 0a 	  . 
+    ; Now we have a second check (counter) to decide if we decrease the
+    ; energy now. It's related to the configuration of DSW1 (energy loss
+    ; slow/fast). I guess this was added afterwards, since it's weird to
+    ; have two variables for this.
+	dec (ix + GRIPPING_ENERGY_DECREASE_DSW_STEP) ;15ff	dd 35 07
+	ret nz			                            ;1602	c0
+	ld a,(AVOID_SHOWING_FLOOR_INTRO_TEXT)		;1603	3a 1c e8
+	and a			                            ;1606	a7
+	ld a,002h		                            ;1607	3e 02
+	jr nz,l1615h		                        ;1609	20 0a
 
 	InDSW1		    ;160b	db 03
 	and 002h		;160d	e6 02 Bit 1: energy loss speed
 
-	ld a,004h		;160f	3e 04 	> . 
-	jr nz,l1615h		;1611	20 02 	  . 
-	ld a,003h		;1613	3e 03 	> . 
+	ld a,004h		;160f	3e 04
+	jr nz,l1615h	;1611	20 02
+	ld a,003h		;1613	3e 03
 l1615h:
-	ld (ix + 7),a		;1615	dd 77 07 	. w . 
-	ld hl,ENERGY		;1618	21 09 e7 	! . . 
-	ld a,(hl)			;161b	7e 	~ 
-	and a			;161c	a7 	. 
-	ret m			;161d	f8 	. 
-	dec (hl)			;161e	35 	5 
-	ret p			;161f	f0 	. 
-    ; Set Thomas must die :-O
-	ld hl,THOMAS_DAMAGE_STATUS		;1620	21 1f e7
-	set 1,(hl)		;1623	cb ce 	. . 
-	ret			;1625	c9 	. 
+	ld (ix + GRIPPING_ENERGY_DECREASE_DSW_STEP),a	;1615	dd 77 07
+	ld hl,ENERGY	                                ;1618	21 09 e7
+	ld a,(hl)			                            ;161b	7e
+	and a			                                ;161c	a7
+	ret m			                                ;161d	f8
+    ; Do decrease the energy due to gripping here
+	dec (hl)			                            ;161e	35
+	ret p			                                ;161f	f0
+    ; Set Thomas must die :-O Too much gripping :/
+	ld hl,THOMAS_DAMAGE_STATUS		                ;1620	21 1f e7
+	set 1,(hl)		                                ;1623	cb ce
+	ret			                                    ;1625	c9
+
+
 l1626h:
 	ld hl,NUM_GRIPPING		;1626	21 1a e7 	! . . 
 	dec (hl)			;1629	35 	5 
