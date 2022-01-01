@@ -1567,7 +1567,7 @@ sub_0644h:
 	ld (hl),000h		;0666	36 00 	6 . 
 	ldir		;0668	ed b0 	. . 
 	call sub_0866h		;066a	cd 66 08 	. f . 
-	ld hl,l0889h+1		;066d	21 8a 08 	! . . 
+	ld hl,l088ah		;066d	21 8a 08 	! . . 
 	add hl,bc			;0670	09 	. 
 	ld a,(hl)			;0671	7e 	~ 
 	ld (0e100h),a		;0672	32 00 e1 	2 . . 
@@ -1634,16 +1634,17 @@ sub_06beh:
 	ld (hl), 0		                ;06c7	36 00
 	ldir		                    ;06c9	ed b0
 
-	ld a,(DRAGONS_LEVEL)		;06cb	3a 80 e0 	: . . 
-	and 007h		;06ce	e6 07 	. . 
-	add a,a			;06d0	87 	. 
-	ld c,a			;06d1	4f 	O 
-	ld hl,l0880h		;06d2	21 80 08 	! . . 
-	add hl,bc			;06d5	09 	. 
-	ld a,(hl)			;06d6	7e 	~ 
-	inc hl			;06d7	23 	# 
-	ld h,(hl)			;06d8	66 	f 
-	ld l,a			;06d9	6f 	o 
+	ld a,(DRAGONS_LEVEL)	;06cb	3a 80 e0
+	and 007h		        ;06ce	e6 07 A = level
+	add a,a			        ;06d0	87 A = 2*level
+	ld c,a			        ;06d1	4f BC = 2*level
+	ld hl,TIME_BY_LEVEL_TABLE		    ;06d2	21 80 08
+	add hl,bc			    ;06d5	09 HL = TIME_BY_LEVEL_TABLE + 2*level
+    
+	ld a,(hl)			    ;06d6	A = [TIME_BY_LEVEL_TABLE + 2*level]
+	inc hl			        ;06d7
+	ld h,(hl)			    ;06d8	H = [TIME_BY_LEVEL_TABLE + 2*level + 1]
+	ld l,a			        ;06d9	L = [TIME_BY_LEVEL_TABLE + 2*level]
 	ld (TIME),hl		;06da	22 03 e0 	" . . 
 
 	ld a,03fh		;06dd	3e 3f 	> ? 
@@ -1885,21 +1886,23 @@ l0876h:
 	ld b,000h		;087d	06 00 BC = DRAGONS | DRAGONS + level
 	ret			;087f	c9 	. 
 
-l0880h:
-	nop			;0880	00 	. 
-	jr nz,l0883h		;0881	20 00 	  . 
-l0883h:
-	jr nz,l0885h		;0883	20 00 	  . 
-l0885h:
-	jr nz,l0887h		;0885	20 00 	  . 
-l0887h:
-	jr nz,l0889h		;0887	20 00 	  . 
-l0889h:
-	jr nz,l088bh		;0889	20 00 	  . 
-l088bh:
-	ld bc,00200h		;088b	01 00 02 	. . . 
-	nop			;088e	00 	. 
-	nop			;088f	00 	. 
+
+; Starting time according to the level.
+; It's set to the same for all levels, 2000.
+TIME_BY_LEVEL_TABLE:
+    defw 0x2000
+    defw 0x2000
+    defw 0x2000
+    defw 0x2000
+    defw 0x2000
+
+; Unknown table
+l088ah:
+    defw 0x0100
+    defw 0x0200
+
+    defw 0x0000
+    
 	inc bc			;0890	03 	. 
 	nop			;0891	00 	. 
 	ld (bc),a			;0892	02 	. 
