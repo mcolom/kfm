@@ -172,6 +172,8 @@ TBL_GUYS: EQU 0xE262
 
 ;ENEMY_ENERGY_IDX: EQU 10
 
+;ENEMY_STEADY_COUNTER_IDX: EQU 11
+
 
 TBL_GUYS_ENTRY_2: EQU TBL_GUYS + 2*16
 
@@ -4982,8 +4984,8 @@ sub_1931h:
 	ret			;1941	c9 	. 
 
 l1942h:
-	ld (ix + ENEMY_FRAME_IDX),002h		;1942	dd 36 06 02 	. 6 . . 
-	dec (ix + 11)		;1946	dd 35 0b 	. 5 . 
+	ld (ix + ENEMY_FRAME_IDX), 2		    ;1942	dd 36 06 02
+	dec (ix + ENEMY_STEADY_COUNTER_IDX)		;1946	dd 35 
 	ret nz			;1949	c0 	. 
 	ld hl,(0e1f5h)		;194a	2a f5 e1 	* . . 
 	ld a,003h		;194d	3e 03 	> . 
@@ -5071,7 +5073,7 @@ l19eah:
 l19f3h:
 	ld (ix + ENEMY_STATE_IDX), 4	;19f3	dd 36 01 04 4=guy moves back, without turning back
 	ld a,(0e1f0h)		;19f7	3a f0 e1 	: . . 
-	ld (ix + 11),a		;19fa	dd 77 0b 	. w . 
+	ld (ix + ENEMY_STEADY_COUNTER_IDX),a	;19fa	dd 77 0b
 l19fdh:
 	ld hl,0e1f1h		;19fd	21 f1 e1 	! . . 
 	ld a,(EXT_RANDOM)		;1a00	3a 10 e0 	: . . 
