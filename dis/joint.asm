@@ -174,6 +174,8 @@ TBL_GUYS: EQU 0xE262
 
 ;ENEMY_STEADY_COUNTER_IDX: EQU 11
 
+;ENEMY_REACTION_L_IDX: EQU 12
+
 
 TBL_GUYS_ENTRY_2: EQU TBL_GUYS + 2*16
 
@@ -317,9 +319,9 @@ ENEMY_STEADY_COUNTER: EQU TBL_ENEMIES + ENEMY_STEADY_COUNTER_IDX ; This controls
 ;
 ; For the stick guy: 27: punch, kick
 
-ENEMY_REACTION_IDX: EQU 12
-ENEMY_REACTION: EQU TBL_ENEMIES + ENEMY_REACTION_IDX
-; IDX 13 is used in the code, but actually it seems it's just a byte
+ENEMY_REACTION_L_IDX: EQU 12
+ENEMY_REACTION_H_IDX: EQU 13
+ENEMY_REACTION: EQU TBL_ENEMIES + ENEMY_REACTION_L_IDX
 
 ENEMY_ATTACK_STEP_IDX: EQU 14
 ENEMY_ATTACK_STEP: EQU TBL_ENEMIES + ENEMY_ATTACK_STEP_IDX ; Enemy attack step
@@ -5492,13 +5494,13 @@ GET_ENEMY_HEIGHT_IN_HL:
 	ret			;1ca4	c9 	. 
 
 SET_ENEMY_REACTION_FROM_HL:
-	ld (ix + ENEMY_REACTION_IDX),l		;1ca5	dd 75 0c
-	ld (ix + ENEMY_REACTION_IDX + 1),h	;1ca8	dd 74 0d
+	ld (ix + ENEMY_REACTION_L_IDX),l		;1ca5	dd 75 0c
+	ld (ix + ENEMY_REACTION_H_IDX),h	;1ca8	dd 74 0d
 	ret			;1cab	c9 	. 
 
 GET_ENEMY_REACTION_IN_HL:
-	ld l,(ix + ENEMY_REACTION_IDX)		;1cac	dd 6e 0c
-	ld h,(ix + ENEMY_REACTION_IDX + 1)	;1caf	dd 66 0d
+	ld l,(ix + ENEMY_REACTION_L_IDX)		;1cac	dd 6e 0c
+	ld h,(ix + ENEMY_REACTION_H_IDX)	;1caf	dd 66 0d
 	ret			;1cb2	c9 	. 
 
 sub_1cb3h:
@@ -6472,7 +6474,7 @@ l2448h:
 	ld hl,l2d6dh		;2450	21 6d 2d 	! m - 
 	call sub_2d19h		;2453	cd 19 2d 	. . - 
 	jr c,l246fh		;2456	38 17 	8 . 
-	ld (ix + ENEMY_REACTION_IDX),b		    ;2458	dd 70 0c
+	ld (ix + ENEMY_REACTION_L_IDX),b		    ;2458	dd 70 0c
 	ld (ix + ENEMY_FRAME_COUNTER_IDX), 6	;245b	dd 36 07 06 level 2
 	ld a,(ix-002h)		;245f	dd 7e fe 	. ~ . 
 	ld (ix-002h),01ch		;2462	dd 36 fe 1c 	. 6 . . 
@@ -6839,8 +6841,8 @@ l2737h:
 	ld (ix + ENEMY_FRAME_IDX), 3	;274e	dd 36 06 03
 l2752h:
 	ld hl,(THOMAS_POSITION)		;2752	2a 12 e7 	* . . 
-	ld e,(ix + ENEMY_REACTION_IDX)		;2755	dd 5e 0c
-	ld d,(ix + ENEMY_REACTION_IDX + 1)	;2758	dd 56 0d
+	ld e,(ix + ENEMY_REACTION_L_IDX)		;2755	dd 5e 0c
+	ld d,(ix + ENEMY_REACTION_H_IDX)	;2758	dd 56 0d
 	sbc hl,de		;275b	ed 52 	. R 
 	ex de,hl			;275d	eb
     ; Bit 6: looking direction
