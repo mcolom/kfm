@@ -168,6 +168,9 @@ TBL_GUYS: EQU 0xE262
 ;ENEMY_FRAME_COUNTER_IDX: EQU 7
 
 ;ENEMY_MOVE_COUNTER_L_IDX: EQU 8
+;ENEMY_MOVE_COUNTER_H_IDX: EQU 9
+
+;ENEMY_ENERGY_IDX: EQU 10
 
 
 TBL_GUYS_ENTRY_2: EQU TBL_GUYS + 2*16
@@ -297,8 +300,9 @@ ENEMY_MOVE_COUNTER_L_IDX: EQU 8
 ENEMY_MOVE_COUNTER_H_IDX: EQU 9
 ENEMY_MOVE_COUNTER: EQU TBL_ENEMIES + ENEMY_MOVE_COUNTER_L_IDX
 
-; It seems IDX 9 is not used.
-
+; The energy of an boss or a knifer.
+; In the case of a knifer it's set to 2.
+; This way you need to attack twice to defeat him.
 ENEMY_ENERGY_IDX: EQU 10
 ENEMY_ENERGY: EQU TBL_ENEMIES + ENEMY_ENERGY_IDX ; Enemy's energy
 
@@ -4699,10 +4703,10 @@ l173dh:
 l175fh:
 	dec (ix + FRAME_COUNTER_IDX)		;175f	dd 35 07 	. 5 . 
 	jr nz,l177ch		;1762	20 18 	  . 
-	ld a,(ix + 10)		;1764	dd 7e 0a 	. ~ . 
+	ld a,(ix + ENEMY_ENERGY_IDX)		;1764	dd 7e 0a 	. ~ . 
 	inc a			;1767	3c 	< 
 l1768h:
-	ld (ix + 10),a		;1768	dd 77 0a 	. w . 
+	ld (ix + ENEMY_ENERGY_IDX),a		;1768	dd 77 0a 	. w . 
 	add a,a			;176b	87 	. 
 	ld e,a			;176c	5f 	_ 
 	ld d,000h		;176d	16 00 	. . 
@@ -4896,7 +4900,7 @@ l18a3h:
 	call sub_1a49h		;18b1	cd 49 1a 	. I . 
 	jr nc,l18d6h		;18b4	30 20 	0   
 l18b6h:
-	dec (ix + 10)		;18b6	dd 35 0a 	. 5 . 
+	dec (ix + ENEMY_ENERGY_IDX)	;18b6	dd 35 0a 	. 5 . 
 	push af			;18b9	f5 	. 
 	ld a,091h		;18ba	3e 91 	> . 
 	call PLAY_SOUND		;18bc	cd fe 0d 	. . . 
