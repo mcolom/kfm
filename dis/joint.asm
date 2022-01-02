@@ -4710,7 +4710,7 @@ sub_163eh:
 l1653h:
 	ld hl,0e2d2h		;1653	21 d2 e2 	! . . 
 	inc (hl)			;1656	34 	4 
-	call sub_1ac9h		;1657	cd c9 1a 	. . . 
+	call CHECK_THOMAS_IS_JUMPING		;1657	cd c9 1a 	. . . 
 	ld a,(hl)			;165a	7e 	~ 
 	jr nz,l166bh		;165b	20 0e 	  . 
 	cp 002h		;165d	fe 02 	. . 
@@ -4900,7 +4900,7 @@ l17bah:
 	ld h,a			;17c9	67 	g 
 	ex de,hl			;17ca	eb 	. 
 	call GET_ENEMY_POS_IN_HL		;17cb	cd 8a 1c 	. . . 
-	call sub_1ac9h		;17ce	cd c9 1a 	. . . 
+	call CHECK_THOMAS_IS_JUMPING		;17ce	cd c9 1a 	. . . 
 	ld a,080h		;17d1	3e 80 	> . 
 	jr nz,l17d7h		;17d3	20 02 	  . 
 	ld a,082h		;17d5	3e 82 	> . 
@@ -5267,7 +5267,7 @@ l1a54h:
 	set 2,(ix + ENEMY_PROPS_IDX)		;1a60	dd cb 00 d6 	. . . . 
 	ld a,085h		;1a64	3e 85 	> . 
 	ret p			;1a66	f0 	. 
-	call sub_1ac9h		;1a67	cd c9 1a 	. . . 
+	call CHECK_THOMAS_IS_JUMPING		;1a67	cd c9 1a 	. . . 
 	ld a,083h		;1a6a	3e 83 	> . 
 	jr nz,l1a70h		;1a6c	20 02 	  . 
 	ld a,087h		;1a6e	3e 87 	> . 
@@ -5332,8 +5332,9 @@ l1ac6h:
 	sbc hl,de		;1ac6	ed 52 	. R 
 	ret			;1ac8	c9 	. 
 
-; SEGUIR
-sub_1ac9h:
+; Checks if Thomas is jumping.
+; It sets Z if jumping.
+CHECK_THOMAS_IS_JUMPING:
 	ld a,(THOMAS_STATE)		;1ac9	3a 02 e7 	: . . 
 	cp THOMAS_STATE_JUMPING		;1acc	fe 08 	. . 
 	ret z			;1ace	c8 	. 
