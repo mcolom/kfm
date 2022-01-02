@@ -624,7 +624,8 @@ l0023h:
 l0029h:
 	ld bc,0x78		;0029	01 78 00 	. x . 
 	ldir		;002c	ed b0 	. . 
-	ld hl,(0x63f) ; ToDo: check this: in the middle of the scores?
+
+	ld hl,(TOP_SCORE_IN_TABLE)
 	ld a,l			;0031	7d 	} 
 	ld l,h			;0032	6c 	l 
 	ld h,a			;0033	67 	g 
@@ -662,8 +663,9 @@ l0040h:
     defb 0x85, 0x56, 0x35, 0x23
 
 l0082h:
-        ld (0e980h),hl          ;0082   22 80 e9        " . . 
-        ld hl,0e917h            ;0085   21 17 e9        ! . . 
+        ld (POINTS_TOP),hl          ;0082   22 80 e9        " . . 
+
+        ld hl,AUDIO_CHANNEL            ;0085   21 17 e9        ! . . 
         inc (hl)                        ;0088   34      4 
         ei                      ;0089   fb      . 
         jp l487eh               ;008a   c3 7e 48        . ~ H 
@@ -1567,6 +1569,7 @@ l05cch:
 	defb 043h, 015h ;0639
 	defb "SUI", 0
 
+TOP_SCORE_IN_TABLE:
 	defb 048h, 052h ;063f
 	defb "N.A"
 
