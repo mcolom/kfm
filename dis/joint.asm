@@ -11614,7 +11614,7 @@ l4925h:
 	ld hl,LARGE_KUNG_FU_MASTER_LOGO
 	call WRITE_TEXT
 l4943h:
-	call sub_49c0h
+	call PRINT_X_COINS_Y_PLAYERS_BLINKING
 	ld a,(GAME_STATE)
 	cp GAME_STATE_LIFE_LOST
 	jr nz,l4943h
@@ -11676,25 +11676,32 @@ l49b3h:
 	djnz l49b3h
 	ret
 
-sub_49c0h:
+; Print the "X COIN(S)  Y PLAYER(S)" text, and control the blinking.
+PRINT_X_COINS_Y_PLAYERS_BLINKING:
 	ld de,0d316h
 	ld bc,0190bh
-	ld a,(INT_COUNTER)
+    
+	; This controls the blinking of the text "X COIN(S)  Y PLAYER(S)"
+    ld a,(INT_COUNTER)
 	and 030h
 	jp z,l571fh
+
 	ld hl,(COINS_PER_CREDITS_A)
 	ld a,l	
 	xor h	
 	jr nz,l49e9h
-	inc de	
-	call sub_49f7h
+	inc de
+    
+    ; Print the "X COIN(S)  Y PLAYER(S)" text
+	call PRINT_X_COINS_Y_PLAYERS ; 49d6
+
 	bit 3,l
 	ret nz	
 	ld de,0d397h
 	ld a,l	
 	add a,a	
 	daa	
-	call sub_4a10h
+	call PRINT_NUMBER_AND_WORD ; Print the number in "X COIN(S)"
 	ld a,002h
 	jr l4a0ah
 l49e9h:
@@ -11705,13 +11712,13 @@ l49e9h:
 	ld a,042h
 sub_49f4h:
 	call sub_4a2ch
-sub_49f7h:
+PRINT_X_COINS_Y_PLAYERS:
 	bit 3,l
 	ld a,001h
 	jr nz,l49feh
 	ld a,l	
 l49feh:
-	call sub_4a10h
+	call PRINT_NUMBER_AND_WORD
 	bit 3,l
 	ld a,001h
 	jr z,l4a0ah
@@ -11721,21 +11728,26 @@ l4a0ah:
 	push hl	
 	ld hl,PLAYER_STR
 	jr l4a14h
-sub_4a10h:
+
+; Prints a number and a word.
+; For example, "3 coins".
+; It's used when printing the text "X COIN(S)   Y PLAYER(S)"
+PRINT_NUMBER_AND_WORD:
 	push hl	
 	ld hl,COIN_STR
 l4a14h:
 	push af	
 	push bc	
 	ld c,b	
-	call PRINT_NUMBER ; Text 111 coin  111 player
+	call PRINT_NUMBER ; Text 
 	pop bc	
 	inc de	
 	call WRITE_TEXT
-	pop af	
+	pop af
+
 	push de	
 	cp 001h
-	ld a,053h
+	ld a, 'S' ; Add a "S" to write plural "PLAYERS" (or "COINS") instead of "PLAYER"
 	call nz,WRITE_CHAR_AT_SCREEN_DE
 	pop de	
 	inc de	
@@ -11745,7 +11757,7 @@ l4a14h:
 ;SEGUIR
 sub_4a2ch:
 	call WRITE_CHAR_AT_SCREEN_DE
-	ld a,02dh
+	ld a, '-'
 	jp WRITE_CHAR_AT_SCREEN_DE
 
 
@@ -13916,10 +13928,10 @@ l78e5h:
 	push af	
 	ld a,020h
 	jr z,l790ah
-	ld a,041h
+	ld a, 'A' ; Coin mode
 l790ah:
 	call WRITE_CHAR_AT_SCREEN_DE
-	call sub_49f7h
+	call PRINT_X_COINS_Y_PLAYERS
 	pop af	
 	ld de,0d2d0h
 	jr z,l7933h
@@ -13927,11 +13939,11 @@ l790ah:
 	ld hl,COIN_MODE_STR
 	call WRITE_TEXT
 	inc de	
-	ld a,042h
+	ld a, 'B' ; Coin mode
 	call WRITE_CHAR_AT_SCREEN_DE
 	pop hl	
 	ld l,h	
-	call sub_49f7h
+	call PRINT_X_COINS_Y_PLAYERS
 	jr l7936h
 l792ah:
 	ld hl,FREE_PLAY_STR
