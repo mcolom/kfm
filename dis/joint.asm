@@ -624,11 +624,11 @@ l0023h:
 l0029h:
 	ld bc,0x78		;0029	01 78 00 	. x . 
 	ldir		;002c	ed b0 	. . 
-	defb 02ah, 03fh, 006h
+	ld hl,(0x63f) ; ToDo: check this: in the middle of the scores?
 	ld a,l			;0031	7d 	} 
 	ld l,h			;0032	6c 	l 
 	ld h,a			;0033	67 	g 
-	jr 0x82		;0034	18 4c 	. L 
+	jr l0082h		;0034	18 4c 	. L 
 l0036h:
 	rst 0			;0036	c7 	. 
 	rst 0			;0037	c7 	. 
@@ -659,8 +659,14 @@ l0040h:
     defb 0xed, 0x45, 0x63, 0xad, 0x9c, 0x52, 0x72, 0xcf
 	defb 0x87, 0x41, 0x54, 0x37, 0xa7, 0x43, 0x91, 0x51
     defb 0xa7, 0x43, 0x91, 0x51, 0x9f, 0xb8, 0xe5, 0xd6
-    defb 0x85, 0x56, 0x35, 0x23, 0x22, 0x80, 0xe9, 0x21
-	defb 0x17, 0xe9, 0x34, 0xfb, 0xc3, 0x7e, 0x48
+    defb 0x85, 0x56, 0x35, 0x23
+
+l0082h:
+        ld (0e980h),hl          ;0082   22 80 e9        " . . 
+        ld hl,0e917h            ;0085   21 17 e9        ! . . 
+        inc (hl)                        ;0088   34      4 
+        ei                      ;0089   fb      . 
+        jp l487eh               ;008a   c3 7e 48        . ~ H 
 
 l008dh:
 	ld a,(GAME_STATE)		;008d	3a 00 e0 	: . . 
