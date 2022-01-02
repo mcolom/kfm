@@ -803,19 +803,19 @@ l0156h:
 	cp c			;0164	b9 	. 
 	ld bc,l01beh		;0165	01 be 01 	. . . 
 l0168h:
-	call 0413fh		;0168	cd 3f 41 	. ? A 
-	call 0402ch		;016b	cd 2c 40 	. , @ 
+	call sub_413fh  		;0168	cd 3f 41 	. ? A 
+	call sub_402ch  		;016b	cd 2c 40 	. , @ 
 
 	ld a,(DRAGONS_LEVEL)	;016e	3a 80 e0
 	and 007h		        ;0171	e6 07 Get level
 	cp 004h		            ;0173	fe 04 Check if it's the last level
 	jr z,l017fh		        ;0175	28 08
-	call 040e5h		        ;0177	cd e5 40
+	call sub_40e5h	        ;0177	cd e5 40
 	call sub_1cb3h		    ;017a	cd b3 1c
 	jr l0185h		        ;017d	18 06
 l017fh:
 	call sub_1cb3h		;017f	cd b3 1c 	. . . 
-	call 040e5h		;0182	cd e5 40 	. . @ 
+	call sub_40e5h		;0182	cd e5 40 	. . @ 
 l0185h:
 	call 047b6h		;0185	cd b6 47 	. . G 
 	ld a,(FLOOR_STAGE)		;0188	3a 00 e1 	: . . 
@@ -837,7 +837,7 @@ l019fh:
 	and a			;01a5	a7 	. 
 	call nz,sub_2ec1h		;01a6	c4 c1 2e 	. . . 
 	call sub_39c0h		;01a9	cd c0 39 	. . 9 
-	call 02d72h		;01ac	cd 72 2d 	. r - 
+	call sub_2d72h		;01ac	cd 72 2d 	. r - 
 	call sub_2f06h		;01af	cd 06 2f 	. . / 
 	jr l01c4h		;01b2	18 10 	. . 
 	call sub_4d24h		;01b4	cd 24 4d 	. $ M 
@@ -846,7 +846,7 @@ l019fh:
 	jr l01c4h		;01bc	18 06 	. . 
 l01beh:
 	call 04000h		;01be	cd 00 40 	. . @ 
-	call 040e5h		;01c1	cd e5 40 	. . @ 
+	call sub_40e5h		;01c1	cd e5 40 	. . @ 
 l01c4h:
 	ld a,(0eb00h)		;01c4	3a 00 eb 	: . . 
 	and a			;01c7	a7 	. 
@@ -7797,17 +7797,19 @@ l2d42h:
 	nop			;2d65	00 	. 
 	nop			;2d66	00 	. 
 l2d67h:
-	nop			;2d67	00 	. 
-	djnz l2d76h		;2d68	10 0c 	. . 
+    defb 0x00, 0x10, 0x0c
 l2d6ah:
-	jr nz,l2d78h		;2d6a	20 0c 	  . 
-	ex af,af'			;2d6c	08 	. 
+    defb 0x20, 0x0c, 0x08
 l2d6dh:
-	jr l2d7fh		;2d6d	18 10 	. . 
-	djnz l2d91h		;2d6f	10 20 	.   
-	djnz $+35		;2d71	10 21 	. ! 
-	dec hl			;2d73	2b 	+ 
-	ex (sp),hl			;2d74	e3 	. 
+    defb 0x18, 0x10, 0x10, 0x20, 0x10
+    
+    
+; This part was incorrectly disassembled by z80dasm.
+; It's normal, since it followed a table.
+; Do it manually with
+; tail -c +11631 a.bin > dela.bin && z80dasm -g11630 -l -t dela.bin |less
+sub_2d72h:
+    ld hl,0e32bh            ;2d72   21 2b e3        ! + .
 	ld a,(hl)			;2d75	7e 	~ 
 l2d76h:
 	and a			;2d76	a7 	. 
