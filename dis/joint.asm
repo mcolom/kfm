@@ -424,12 +424,22 @@ PLAYER_CONTROLS: EQU 0xE907 ; It seems this contains everything in a single byte
 PLAYER_BUTTONS_AND_UP:  EQU 0xE908
 
 ; This is the effective movement.
-; The difference between PLAYER_MOVE and PLAYER_INPUT_1 is that
-; PLAYER_INPUT_1 is very low-level and PLAYER_MOVE is computed.
+; The difference between PLAYER_MOVE and PLAYER_INPUT is that
+; PLAYER_INPUT is very low-level and PLAYER_MOVE is computed.
 ; Thus, during the demo PLAYER_MOVE will be written.
 PLAYER_MOVE: EQU 0xE909
 
-; Player input (joystick, punch, and kick buttons bitmask.
+
+; Call 7be8 to figure out the values
+
+PLAYER_INPUT_COINS_P1P2_BUTTONS: EQU 0xE904
+; bit #0: P1 pressed
+; bit #1: P2 pressed
+; bit #3: coin A inserted
+; bit #4: coin B inserted
+
+
+; Player input (joystick, kick/punch buttons bitmask).
 ; This variable is updated continuosly, even when not playing.
 ;
 ; Bit #0: joystick pushing right
@@ -440,8 +450,7 @@ PLAYER_MOVE: EQU 0xE909
 ; Bit #5: punch button pressed
 ; Bit #6: unused
 ; Bit #7: kick button pressed
-PLAYER_INPUT_1: EQU 0xE906
-PLAYER_INPUT_2: EQU 0xE904
+PLAYER_INPUT: EQU 0xE906
 
 KNIFE_STATUS: EQU 0xE807
 KNIFE_DIST: EQU 0xE32E
@@ -616,7 +625,6 @@ ALLOWED_TO_ADD_SOUND: EQU 0xE006
 	bit 7,a ; Service mode: bit 7 of DSW2. Active LOW.
 	jp z,SERVICE_MODE
 
-l0020h:
 	call GET_COINS_PER_CREDITS_FROM_DSWs	;0020	cd 8f 05
 l0023h:
 	ld hl,l05cch		;0023	21 cc 05 	! . . 
@@ -696,9 +704,10 @@ l00b7h:
 	bit 3,a		;00b9	cb 5f Check bit 3 of DSW2: slow motion mode cheat
 	jr nz,l00cdh		;00bb	20 10 Jump if slow motion OFF
     ; slow motion ON
-	ld hl,PLAYER_INPUT_2	;00bd	21 04 e9
-	bit 1,(hl)		;00c0	cb 4e Bit #1 of PLAYER_INPUT_2: slow motion ON
-	jr z,l00cdh		;00c2	28 09 	( . 
+	ld hl,PLAYER_INPUT_COINS_P1P2_BUTTONS	;00bd	21 04 e9
+	bit 1,(hl)		;00c0	cb 4e Bit #1: P2 button pressed
+	jr z,l00cdh		;00c2	28 09 P2 not pressed
+    ; P2 pressed
 	ld hl,0e80eh		;00c4	21 0e e8 Number of credits coin 2?
 	dec (hl)			;00c7	35 	5 
 	jp p,l01f0h		;00c8	f2 f0 01 	. . . 
@@ -706,7 +715,6 @@ l00b7h:
 l00cdh:
 	ld a,(GAME_STATE)		;00cd	3a 00 e0
 	cp GAME_STATE_DEMO		;00d0	fe 06
-l00d2h:
 	ld a,047h		;00d2	3e 47
 	jr z,l00d8h		;00d4	28 02
     ; If NOT in demo, set A to a "random" number. Set A=0x47 in demo mode
@@ -996,12 +1004,14 @@ LEVEL_PLAY_LOOP:
 	InDSW2		;029c	db 04
 	bit 4,a		;029e	cb 67 Check bit 4: freeze cheat
 l02a0h:
-	jr z,l02aeh		;02a0	28 0c 	( . 
-	bit 5,a		;02a2	cb 6f Check bit 5: level selection mode cheat
-	jr nz,l02aeh		;02a4	20 08 	  . 
-	ld hl,PLAYER_INPUT_2		;02a6	21 04 e9 	! . . 
-	bit 0,(hl)		;02a9	cb 46 	. F 
-	jp nz,l039ch		;02ab	c2 9c 03 	. . . 
+    ; Check level selection cheat
+	jr z,l02aeh		    ;02a0	28 0c
+	bit 5,a		        ;02a2	cb 6f Check bit 5: level selection mode cheat
+	jr nz,l02aeh		;02a4	20 08
+	ld hl,PLAYER_INPUT_COINS_P1P2_BUTTONS		;02a6	21 04 e9
+	bit 0,(hl)		                            ;02a9	cb 46 Bit #0: P1 pressed
+	jp nz,l039ch		                        ;02ab	c2 9c 03 Jump if not pressed
+    ; P1 pressed
 l02aeh:
 	ld a,(GAME_STATE)		;02ae	3a 00 e0 	: . . 
 	cp GAME_STATE_LIFE_LOST		;02b1	fe 0b
@@ -1190,16 +1200,16 @@ l03bch:
 
 ; Wait until kick and punch buttons are released
 l03d2h:
-	ld a,(PLAYER_INPUT_1)		;03d2	3a 06 e9
+	ld a,(PLAYER_INPUT)		;03d2	3a 06 e9
 	and 0a0h		        ;03d5	e6 a0 Check bits 7 (kick) and 5 (punch)
 	jr nz,l03d2h		    ;03d7	20 f9 Wait until both buttons released
 
 ; Wait until a button is pressed, to decrement or increment the level
 l03d9h:
-	ld hl,PLAYER_INPUT_2		    ;03d9	21 04 e9
-	bit 1,(hl)		        ;03dc	cb 4e
-	jp nz,sub_0250h		    ;03de	c2 50 02
-	ld hl,PLAYER_INPUT_1		;03e1	21 06 e9
+	ld hl,PLAYER_INPUT_COINS_P1P2_BUTTONS	;03d9	21 04 e9
+	bit 1,(hl)		        ;03dc	cb 4e Bit #1: P2 pressed
+	jp nz,sub_0250h		    ;03de	c2 50 02 Only call if P2 not pressed
+	ld hl,PLAYER_INPUT		;03e1	21 06 e9
 	bit 7,(hl)		        ;03e4	cb 7e Check bit 7 (kick)
 	jr nz,l03eeh		    ;03e6	20 06 Jump to decrement level if pressed
 	bit 5,(hl)		        ;03e8	cb 6e Check bit 5 (punch)
@@ -1295,9 +1305,9 @@ ANIMATION_THOMAS_STARTS_LEVEL:
 	call sub_0644h		    ;0451	cd 44 06 	. D . 
 	ld a,(DRAGONS_LEVEL)	;0454	3a 80 e0 	: . . 
 	and 1		            ;0457	e6 01 Check if it's level 1
-	ld hl,l0020h+1		;0459	21 21 00 	! ! . 
+	ld hl,0x0021		;0459	21 21 00 	! ! . 
 	jr nz,l0461h		;045c	20 03 	  . 
-	ld hl,0bfe0h		;045e	21 e0 bf 	! . . 
+	ld hl,0xbfe0		;045e	21 e0 bf 	! . . 
 l0461h:
 	push hl			;0461	e5 	. 
 	ld (0e817h),hl		;0462	22 17 e8 	" . . 
@@ -2933,7 +2943,8 @@ l0cbfh:
 
 ;SEGUIR
 ; This routine seems to read the I/O ports of the player controls and
-; store the info in a proper (packet?) format in PLAYER_INPUT_2.
+; store the info in a proper (packet?) format in
+; PLAYER_INPUT_COINS_P1P2_BUTTONS and PLAYER_INPUT.
 
 CHECK_FLIPSCREEN_AND_READ_PLAYER_CONTROLS:
 	ld a,(FLIP_SCREEN)	;0d05	3a 10 e9
@@ -2951,11 +2962,11 @@ CHECK_FLIPSCREEN_AND_READ_PLAYER_CONTROLS:
 l0d10h:
     ; In A we have the read the player controls (P1 or P2)
 
-	ld hl,(PLAYER_INPUT_1)  ;0d10	2a 06 e9
+	ld hl,(PLAYER_INPUT)  ;0d10	2a 06 e9
     ; DEBUG, HL = 0x0000
     
 	call sub_0d3bh		    ;0d13	cd 3b 0d
-	ld (PLAYER_INPUT_1),hl	;0d16	22 06 e9
+	ld (PLAYER_INPUT),hl	;0d16	22 06 e9
 
 	ld hl,PLAYER_BUTTONS_AND_UP		;0d19	21 08 e9
     ; RL: 9-bit rotation to the left. the register's bits are shifted left.
@@ -2982,9 +2993,9 @@ l0d10h:
 	InP2Controls		;0d2c	db 02
 	and 010h		    ;0d2e	e6 10 I don't get this. Why not and 0xF?
 	or b			    ;0d30	b0 A = ?0000 | controls = ?CCCC
-	ld hl,(PLAYER_INPUT_2)		;0d31	2a 04 e9 	* . . 
+	ld hl,(PLAYER_INPUT_COINS_P1P2_BUTTONS)		;0d31	2a 04 e9 	* . . 
 	call sub_0d3bh		;0d34	cd 3b 0d 	. ; . 
-	ld (PLAYER_INPUT_2),hl		;0d37	22 04 e9 	" . . 
+	ld (PLAYER_INPUT_COINS_P1P2_BUTTONS),hl		;0d37	22 04 e9 	" . . 
 	ret			;0d3a	c9 	. 
 
 ; This transforms HL according to A, B, C
@@ -3256,7 +3267,7 @@ l0e20h:
 	ld b,a			;0e25	47 	G 
 	ld iy,(0eb01h)		;0e26	fd 2a 01 eb 	. * . . 
 	bit 6,c		;0e2a	cb 71 	. q 
-	ld hl,l0020h		;0e2c	21 20 00 	!   . 
+	ld hl,0x0020		;0e2c	21 20 00 	!   . 
 	jr nz,l0e34h		;0e2f	20 03 	  . 
 	ld hl,0ffd0h		;0e31	21 d0 ff 	! . . 
 l0e34h:
@@ -4689,7 +4700,7 @@ l166bh:
 	jr z,l1677h		;1673	28 02 	( . 
 	ld a,082h		;1675	3e 82 	> . 
 l1677h:
-	ld hl,l00d2h		;1677	21 d2 00 	! . . 
+	ld hl,0x00d2	;1677	21 d2 00 	! . . 
 l167ah:
 	ex de,hl			;167a	eb 	. 
 	call ADD_POINTS		;167b	cd 60 2f 	. ` / 
@@ -7838,12 +7849,12 @@ l2d7ah:
 l2d7fh:
 	bit 1,c		;2d7f	cb 49 	. I 
 	jr z,l2d86h		;2d81	28 03 	( . 
-	ld de,l00d2h		;2d83	11 d2 00 	. . . 
+	ld de,0x00d2		;2d83	11 d2 00 	. . . 
 l2d86h:
 	bit 4,c		;2d86	cb 61 	. a 
 	jr z,l2d91h		;2d88	28 07 	( . 
 	push hl			;2d8a	e5 	. 
-	ld hl,0016h+2		;2d8b	21 18 00 	! . . 
+	ld hl,0x0018		;2d8b	21 18 00 	! . . 
 	add hl,de			;2d8e	19 	. 
 	ex de,hl			;2d8f	eb 	. 
 	pop hl			;2d90	e1 	. 
@@ -8299,7 +8310,7 @@ l3049h:
 	jp z,l3106h		;304f	ca 06 31 	. . 1 
 	ld l,(ix + MAGICAL_ELEMENT_HOR_OFFSET_L_IDX)		;3052	dd 6e 0e
 	ld h,(ix + MAGICAL_ELEMENT_HOR_OFFSET_H_IDX)		;3055	dd 66 0f
-	ld de,l0020h		;3058	11 20 00 	.   . 
+	ld de,0x0020		;3058	11 20 00 	.   . 
 	bit 2,(ix + MAGICAL_ELEMENT_LOOKAT_IDX)		;305b	dd cb 00 56
 	jr z,l306eh		;305f	28 0d 	( . 
 	sbc hl,de		;3061	ed 52 	. R 
@@ -8429,7 +8440,7 @@ l3174h:
 	ld hl,0ffe0h		;318d	21 e0 ff 	! . . 
 	add hl,de			;3190	19 	. 
 	ld (0e80fh),hl		;3191	22 0f e8 	" . . 
-	ld hl,l0020h		;3194	21 20 00 	!   . 
+	ld hl,0x0020		;3194	21 20 00 	!   . 
 	add hl,de			;3197	19 	. 
 	ld (0e811h),hl		;3198	22 11 e8 	" . . 
 	ld l,(ix + 4)		;319b	dd 6e 04 	. n . 
@@ -11432,13 +11443,13 @@ UPDATE_PLAYER_MOVE:
 	ld (DEMO_FAKE_INPUT_ADDR),hl ; Update current fake input table pointer
 	jr l4874h ; Set fake input in A
 l484dh:
-	ld a,(PLAYER_INPUT_1)
+	ld a,(PLAYER_INPUT)
 	and 4 ; Bit 2: joystick pushing down
     ; Check if Thomas is frozen
 	ld hl,THOMAS_GLOBAL_STATE
 	bit 0,(hl)
 	jr nz,l4874h ; If he's frozen, don't read any input
-	ld a,(PLAYER_INPUT_1)
+	ld a,(PLAYER_INPUT)
 	and 7 ; Bits 0, 1, 2: joystick right, left, or down
 	ld c,a	
 	ld a,(NUM_GRIPPING)
@@ -12473,10 +12484,10 @@ l51abh:
     ; routine and calling it twice the way it does :)
 	call PRINT_NUMBER_TWO_DIGITS 
 	
-    ld a,(PLAYER_INPUT_2)
-	and 003h
-	jr z,l5183h
-	and 2 ; Check number of players
+    ld a,(PLAYER_INPUT_COINS_P1P2_BUTTONS)
+	and 003h    ; Check P1 and P2 buttons
+	jr z,l5183h ; Jump if neither P1 nor P2 are pressed
+	and 2 ; Check P2 pressed
 	ld (PLAYER_TURN),a
 	ld b, 1 ; Subtract one coin
 	jr z,l51c9h ; Z means only one player, so we won't increment B to require 2 coins
@@ -12826,10 +12837,10 @@ l5596h:
 	ld (INT_COUNTER + 1),a
 l55a8h:
 	call DELAY_1
-	ld a,(PLAYER_INPUT_2)
-	and 003h
-	jr nz,l561bh
-	ld a,(PLAYER_INPUT_1)
+	ld a,(PLAYER_INPUT_COINS_P1P2_BUTTONS)
+	and 003h    ; Check P1 and P2 buttons
+	jr nz,l561bh    ; Jump if neither P1 nor P2 are pressed
+	ld a,(PLAYER_INPUT)
 	and 3 ; Bits 0 and 1: joystick pushing right and left
 	jr z,l55deh
 	ld a,(STEP_COUNTER)
@@ -12837,7 +12848,7 @@ l55a8h:
 	jr nz,l55e2h
 	ld a,00bh
 	ld (STEP_COUNTER),a
-	ld a,(PLAYER_INPUT_1)
+	ld a,(PLAYER_INPUT)
 	bit 0,a ; Bit 0: joystick pushing right
 	ld a,(hl)	
 	jr nz,l55d5h
@@ -13633,7 +13644,7 @@ l7743h:
 	call DELAY_A
 	ld a,b	
 	and a	
-	call nz,sub_7be8h
+	call nz,WAIT_P2_BUTTON_PRESSED_AND_RELEASED
 l7751h:
 	call CLEAR_TILEMAP
 	ld hl,MAIN_MENU_SERVICE_MODE_STR
@@ -13646,7 +13657,7 @@ l7761h:
 	ld c,000h
 	call sub_7bd7h
 l7769h:
-	ld a,(PLAYER_INPUT_1)
+	ld a,(PLAYER_INPUT)
 	and 3 ; Bits 0 and 1: joystick pushing right and left
 	ld hl,INT_COUNTER + 2
 	jr z,l7798h
@@ -13675,8 +13686,8 @@ l7790h:
 l7798h:
 	ld (hl),000h
 l779ah:
-	ld a,(PLAYER_INPUT_2)
-	bit 0,a
+	ld a,(PLAYER_INPUT_COINS_P1P2_BUTTONS)
+	bit 0,a ; bit #0: P1 pressed
 	jr z,l7769h
 	call CLEAR_TILEMAP
 	ld hl,l7751h
@@ -13700,11 +13711,11 @@ l77bdh:
 	exx	
 	ld de,GAME_STATE
 	ld hl,0d155h
-	ld bc,l0020h
+	ld bc,0x0020
 	ldir
 	ld de,EXT_TICKS
 	ld hl,0d955h
-	ld bc,l0020h
+	ld bc,0x0020
 	ldir
 	ld ix,l77dbh
 	jr l77fch
@@ -13712,11 +13723,11 @@ l77dbh:
 	exx	
 	ld hl,GAME_STATE
 	ld de,0d155h
-	ld bc,l0020h
+	ld bc,0x0020
 	ldir
 	ld hl,EXT_TICKS
 	ld de,0d955h
-	ld bc,l0020h
+	ld bc,0x0020
 	ldir
 	exx	
 	jp l76d4h
@@ -13953,10 +13964,10 @@ l798dh:
 	ld a,(INT_COUNTER + 2)
 	and a	
 	jr z,l7971h
-	ld a,(PLAYER_INPUT_2)
-	bit 1,a
+	ld a,(PLAYER_INPUT_COINS_P1P2_BUTTONS)
+	bit 1,a ; but #1: P2 pressed
 	jr z,l798dh
-	ld a,(PLAYER_INPUT_1)
+	ld a,(PLAYER_INPUT)
 	bit 1,a ; Bit 1: joystick pushing left
 	jr z,l798dh
 	ret	
@@ -13970,8 +13981,8 @@ l79beh:
 	add hl,de	
 	add hl,de	
 l79c7h:
-	ld a,(PLAYER_INPUT_2)
-	bit 0,a
+	ld a,(PLAYER_INPUT_COINS_P1P2_BUTTONS)
+	bit 0,a ; bit #0: P1 pressed
 	jr nz,l79c7h
 	ld a,(hl)	
 	ld (STEP_COUNTER),a
@@ -13989,7 +14000,7 @@ l79e6h:
 	ld c,000h
 	call sub_7bceh
 l79eeh:
-	ld a,(PLAYER_INPUT_1)
+	ld a,(PLAYER_INPUT)
 	and 3 ; Bits 0 and 1: joystick pushing right and left
 	ld hl,INT_COUNTER + 2
 	jr z,l7a26h
@@ -14028,9 +14039,9 @@ l7a26h:
 	ld a,(STEP_COUNTER)
 	and a	
 	jr z,l7a46h
-	ld a,(PLAYER_INPUT_2)
-	and 003h
-	jr z,l79eeh
+	ld a,(PLAYER_INPUT_COINS_P1P2_BUTTONS)
+	and 003h    ; Check P1 and P2 buttons
+	jr z,l79eeh ; Jump of neither P1 nor P2 are pressed
 	bit 1,a
 	jr nz,l7a5bh
 l7a40h:
@@ -14085,11 +14096,11 @@ l7a61h:
 	dec l	
 	jr l7a59h
 	ld d,e	
-	ld de,l0020h+1
+	ld de,0x0021
 	ret po	
 	ld (hl),0feh
 l7a93h:
-	ld a,(PLAYER_INPUT_1)
+	ld a,(PLAYER_INPUT)
 	and 3 ; Bits 0 and 1: joystick pushing right and left
 	jr z,l7aa4h
 	bit 1,a
@@ -14099,8 +14110,8 @@ l7a93h:
 l7aa2h:
 	ld (hl),0feh
 l7aa4h:
-	ld a,(PLAYER_INPUT_2)
-	bit 1,a
+	ld a,(PLAYER_INPUT_COINS_P1P2_BUTTONS)
+	bit 1,a ; bit #1: P2 pressed
 	jr z,l7a93h
 	ld (hl),0ffh
 	ret
@@ -14155,17 +14166,17 @@ sub_7b0ch:
 	ld a,030h
 	ld b,00ah
 	call sub_7bc7h
-	call sub_7be8h
+	call WAIT_P2_BUTTON_PRESSED_AND_RELEASED
 	ld a,004h
 	ld de,4
 	call CLEAR_TILEMAP_WITH_DE
-	call sub_7be8h
+	call WAIT_P2_BUTTON_PRESSED_AND_RELEASED
 	ld e,001h
 	call CLEAR_TILEMAP_WITH_DE
-	call sub_7be8h
+	call WAIT_P2_BUTTON_PRESSED_AND_RELEASED
 	ld e,002h
 	call CLEAR_TILEMAP_WITH_DE
-	call sub_7be8h
+	call WAIT_P2_BUTTON_PRESSED_AND_RELEASED
 	ld bc,0200h
 	ld e,006h
 	call CLEAR_TILEMAP_WITH_DE_BC
@@ -14188,11 +14199,11 @@ l7b65h:
 	inc a	
 	and 007h
 	jr nz,l7b63h
-	ld de,l0020h
+	ld de,0x0020
 	add hl,de	
 	dec c	
 	jr nz,l7b61h
-	jp sub_7be8h
+	jp WAIT_P2_BUTTON_PRESSED_AND_RELEASED
 	ld c,000h
 	ld de,SCREEN_ADDR
 	ld a,00bh
@@ -14206,7 +14217,7 @@ l7b84h:
 	call WRITE_CHAR_AT_SCREEN_DE
 	inc a	
 	djnz l7b84h
-	ld hl,l0020h
+	ld hl,0x0020
 	add hl,de	
 	ex de,hl	
 	cp 00bh
@@ -14225,7 +14236,7 @@ l7b9bh:
 	ld (hl),00eh
 	inc hl	
 	ld (hl),00fh
-	jp sub_7be8h
+	jp WAIT_P2_BUTTON_PRESSED_AND_RELEASED
 
 ; SEGUIR
 sub_7bb2h:
@@ -14277,13 +14288,15 @@ sub_7bd7h:
 	ld (hl),c	
 	ret	
 
-;SEGUIR
-sub_7be8h:
-	ld a,(PLAYER_INPUT_2)
-	bit 1,a
-	jr z,sub_7be8h
+; Waits until the P2 button if pressed and released
+WAIT_P2_BUTTON_PRESSED_AND_RELEASED:
+    ; Wait until P2 is pressed
+	ld a,(PLAYER_INPUT_COINS_P1P2_BUTTONS)
+	bit 1,a ; bit #1: P2 pressed
+	jr z,WAIT_P2_BUTTON_PRESSED_AND_RELEASED
 l7befh:
-	ld a,(PLAYER_INPUT_2)
+    ; Wait until P2 is released
+	ld a,(PLAYER_INPUT_COINS_P1P2_BUTTONS)
 	bit 1,a
 	jr nz,l7befh
 	ret	
