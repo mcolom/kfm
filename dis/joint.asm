@@ -817,7 +817,7 @@ l017fh:
 	call sub_1cb3h		;017f	cd b3 1c 	. . . 
 	call sub_40e5h		;0182	cd e5 40 	. . @ 
 l0185h:
-	call 047b6h		;0185	cd b6 47 	. . G 
+	call sub_47b6h		;0185	cd b6 47 	. . G 
 	ld a,(FLOOR_STAGE)		;0188	3a 00 e1 	: . . 
 l018bh:
 	and a			;018b	a7 	. 
@@ -842,10 +842,10 @@ l019fh:
 	jr l01c4h		;01b2	18 10 	. . 
 	call sub_4d24h		;01b4	cd 24 4d 	. $ M 
 	jr l01c4h		;01b7	18 0b 	. . 
-	call 05436h		;01b9	cd 36 54 	. 6 T 
+	call sub_5436h		;01b9	cd 36 54 	. 6 T 
 	jr l01c4h		;01bc	18 06 	. . 
 l01beh:
-	call 04000h		;01be	cd 00 40 	. . @ 
+	call sub_4000h		;01be	cd 00 40 	. . @ 
 	call sub_40e5h		;01c1	cd e5 40 	. . @ 
 l01c4h:
 	ld a,(0eb00h)		;01c4	3a 00 eb 	: . . 
@@ -1107,7 +1107,7 @@ l033ah:
 	call DELAY_A		;0358	cd 0f 57 	. . W 
 	jr l0360h		;035b	18 03 	. . 
 l035dh:
-	call 054f4h		;035d	cd f4 54 	. . T 
+	call sub_54f4h		;035d	cd f4 54 	. . T 
 l0360h:
 	ld hl,PLAYER_TURN	;0360	21 02 e0
 	bit 1,(hl)		    ;0363	cb 4e
@@ -1159,7 +1159,7 @@ l039ch:
 	call CLEAR_TILEMAP		;03aa	cd 57 11 	. W . 
 	ld hl,0				;03ad	21 00 00 	! . . 
 	ld (HSCROLL_LOW_W),hl		;03b0	22 02 e9 	" . . 
-	call 0570dh		;03b3	cd 0d 57 	. . W 
+	call DELAY_1		;03b3	cd 0d 57 	. . W 
 	ld hl, SELECT_GAME_FLOOR_STR		;03b6	21 5b 59
 	call WRITE_TEXT		;03b9	cd 1c 11 	. . .
 
@@ -1567,6 +1567,7 @@ l05cch:
 sub_0644h:
 	ld hl,0x80		;0644	21 80 00 	! . . 
 	ld (HSCROLL_LOW_W),hl		;0647	22 02 e9 	" . . 
+sub_064a:
 	ld hl,0eb25h		;064a	21 25 eb 	! % . 
 	ld de,0eb26h		;064d	11 26 eb 	. & . 
 	ld bc,000bfh		;0650	01 bf 00 	. . . 
@@ -3811,9 +3812,10 @@ l114eh:
 	inc hl			;114f	23 	# 
 	ld d,(hl)			;1150	56 	V 
 	jr l1133h		;1151	18 e0 	. . 
+
+sub_1153:
 	ld d,001h		;1153	16 01 	. . 
-	jr l1159h		;1155	18 02 	Question: is this code compiled or assembly? This jump to the middle of
-    ;                               another routine is a clear sign it's human assembly code.
+	jr l1159h		;1155	18 02
 
 
 ; Clears the tilemap visibles on the screen.
@@ -3822,7 +3824,9 @@ CLEAR_TILEMAP:
 	ld d,0dbh		;1157	16 db
 l1159h:
 	ld e,020h		;1159	1e 20
+CLEAR_TILEMAP_WITH_DE:
 	ld bc,32*2*32	;115b	01 00 08
+CLEAR_TILEMAP_WITH_DE_BC:
 	ld hl,M62_TILERAM		;115e	21 00 d0
 	ld iy,M62_TILERAM_COLORS ;1161	fd 21 00 d8
 l1165h:
@@ -4854,6 +4858,7 @@ l17d7h:
 	call ADD_POINTS		;17d7	cd 60 2f 	. ` / 
 	ld a,091h		;17da	3e 91 	> . 
 	call PLAY_SOUND		;17dc	cd fe 0d 	. . . 
+sub_17df:
 	ld hl,01c5bh		;17df	21 5b 1c 	! [ . 
 	jp l1b96h		;17e2	c3 96 1b 	. . . 
 l17e5h:
@@ -7988,6 +7993,8 @@ l2e70h:
 	call l0e20h		;2e8c	cd 20 0e 	.   . 
 	pop bc			;2e8f	c1 	. 
 	ret			;2e90	c9 	. 
+
+sub_2e91:
 	ld a,(0e720h)		;2e91	3a 20 e7 	:   . 
 	cp 003h		;2e94	fe 03 	. . 
 	ld a,001h		;2e96	3e 01 	> . 
@@ -8013,6 +8020,7 @@ l2eb8h:
 	ld a,00eh		;2ebb	3e 0e 	> . 
 	ld (0e33ah),a		;2ebd	32 3a e3 	2 : . 
 	ret			;2ec0	c9 	. 
+
 sub_2ec1h:
 	ld hl,0e33ah		;2ec1	21 3a e3 	! : . 
 	ld a,(hl)			;2ec4	7e 	~ 
@@ -11010,7 +11018,7 @@ l4561h:
 l4564h:
 	ld (THOMAS_FRAME),a
 l4567h:
-	call 2e91h
+	call sub_2e91
 	ld hl,(THOMAS_POSITION)
 	ld (0e707h),hl
 	ld a,(0e701h)
@@ -11089,7 +11097,7 @@ l45f6h:
 	jr z,l4609h ; Jump if Thomas is not receiving damage
 	
     ; Thomas is receiving damage
-    call 2e91h
+    call sub_2e91
 	call LOSE_ENERGY_AND_UPDATE_DAMAGE_STATUS
 	call sub_468eh
 	ld (THOMAS_FRAME),a
@@ -11129,7 +11137,7 @@ l4643h:
 	ld (hl),000h
 	jp l4347h
 l464bh:
-	call 2e91h
+	call sub_2e91
 	call LOSE_ENERGY_AND_UPDATE_DAMAGE_STATUS
 	call sub_468eh
 	jr l4658h
@@ -11460,7 +11468,7 @@ l487eh:
 	ld (DRAGONS_LEVEL),a
 	ei	
 	call sub_5700h
-	call 064ah
+	call sub_064a
 	ld hl,IREM_COPYRIGHT_STR
 	call WRITE_TEXT
 	ld hl,l4f01h
@@ -12006,7 +12014,7 @@ l4e76h:
     ; Increment external ticks
 	ld hl,EXT_TICKS
 	inc (hl)	
-	call 17dfh
+	call sub_17df
 	jr l4e68h
 	ld hl,TBL_GUYS_ENTRY_4 ;4e7f
 	ld de, 16 ; Length of each entry in TBL_GUYS
@@ -12574,12 +12582,12 @@ HAND_AND_PAPER_DRAWING:
 
 	call sub_5700h		;53c2	cd 00 57 	. . W 
 	ld a,005h		;53c5	3e 05 	> . 
-	call 00dfeh		;53c7	cd fe 0d 	. . . 
+	call PLAY_SOUND		;53c7	cd fe 0d 	. . . 
 	ld a,(DRAGONS_LEVEL)		;53ca	3a 80 e0 	: . . 
 	push af			;53cd	f5 	. 
 	ld a,004h		;53ce	3e 04 	> . 
 	ld (DRAGONS_LEVEL),a		;53d0	32 80 e0 	2 . . 
-	call 0064ah		;53d3	cd 4a 06 	. J . 
+	call sub_064a		;53d3	cd 4a 06 	. J . 
 	ld hl,05400h		;53d6	21 00 54 	! . T 
 l53d9h:
 	ld (0e710h),hl
@@ -12627,6 +12635,7 @@ l542bh:
 	and a	
 	jr nz,l5419h
 	ret	
+
 sub_5436h:
 	ld hl,0e703h
 	ld a,(hl)	
@@ -12682,36 +12691,36 @@ IM_COMING_RIGHT_AWAY_TEXT:
 	defb "SILVIA!", 0ffh
 GAME_OVER_STR:
 	defb "            GAME OVER            "
-	defb 03eh,021h
 
-l54f6h:
+sub_54f4h:
+    ld a, 0x21
 	call PLAY_SOUND
+
 	ld de,0d340h
-l54fch:
 	ld c,0dbh
-l54feh:
 	ld ix,GAME_OVER_STR
 	call WRITE_TEXT_IN_BOX
-l5505h:
+
 	ld a,0e1h
 	call DELAY_A
-l550ah:
+
 	ld a,038h
-l550ch:
 	call DELAY_A
+
 	xor a	
-l5510h:
 	ld (THOMAS_GLOBAL_STATE),a
 	ld (NUM_GRIPPING),a
 	ld de,POINTS + 2
 	ld hl,0ea00h
 	ld b,003h
+
 l551eh:
 	ld a,(de)	
 	ld (hl),a	
 	inc hl	
 	dec de	
 	djnz l551eh
+
 	ld b,003h
 l5526h:
 	ld (hl),020h
@@ -13020,7 +13029,7 @@ sub_56f7h:
 
 sub_5700h:
     ; It falls into CLEAR_TILEMAP
-	call 1153h
+	call sub_1153
 
 ; Set the GAME_STATE to stop and reset the horizontal scroll, thus
 ; preparing to start the game. It does also a very short pause.
@@ -14140,17 +14149,17 @@ sub_7b0ch:
 	call sub_7be8h
 	ld a,004h
 	ld de,4
-	call 115bh
+	call CLEAR_TILEMAP_WITH_DE
 	call sub_7be8h
 	ld e,001h
-	call 115bh
+	call CLEAR_TILEMAP_WITH_DE
 	call sub_7be8h
 	ld e,002h
-	call 115bh
+	call CLEAR_TILEMAP_WITH_DE
 	call sub_7be8h
 	ld bc,0200h
 	ld e,006h
-	call 115eh
+	call CLEAR_TILEMAP_WITH_DE_BC
 	ld bc,00400h
 	ld e,000h
 	call l1165h
