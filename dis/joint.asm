@@ -1599,7 +1599,7 @@ sub_064a:
 	ld bc,00131h		;0663	01 31 01 	. 1 . 
 	ld (hl),000h		;0666	36 00 	6 . 
 	ldir		;0668	ed b0 	. . 
-	call sub_0866h		;066a	cd 66 08 	. f . 
+	call GET_ROUND_IN_BC		;066a	cd 66 08 	. f . 
 	ld hl,l088ah		;066d	21 8a 08 	! . . 
 	add hl,bc			;0670	09 	. 
 	ld a,(hl)			;0671	7e 	~ 
@@ -1622,7 +1622,7 @@ l0689h:
 	ld (hl),000h		;0692	36 00
 	ldir		        ;0694	ed b0
     
-	call sub_0866h		;0696	cd 66 08 	. f . 
+	call GET_ROUND_IN_BC		;0696	cd 66 08 	. f . 
 	ld hl,l089eh		;0699	21 9e 08 	! . . 
 	add hl,bc			;069c	09 	. 
 	ld a,(hl)			;069d	7e 	~ 
@@ -1786,7 +1786,7 @@ l0791h:
 l07b6h:
 	ld (ENEMY_POS),hl		;07b6	22 da e2 	" . . 
 	ld (0e2d3h),de		;07b9	ed 53 d3 e2 	. S . . 
-	call sub_0866h		;07bd	cd 66 08 	. f . 
+	call GET_ROUND_IN_BC		;07bd	cd 66 08 	. f . 
 	push bc			;07c0	c5 	. 
 	sla c		;07c1	cb 21 	. ! 
 	push bc			;07c3	c5 	. 
@@ -1848,7 +1848,7 @@ l0822h:
 	djnz l0822h		;0827	10 f9 	. . 
 	ld hl,0e1ffh		;0829	21 ff e1 	! . . 
 	ld (0e108h),hl		;082c	22 08 e1 	" . . 
-	call sub_0866h		;082f	cd 66 08 	. f . 
+	call GET_ROUND_IN_BC		;082f	cd 66 08 	. f . 
 	ld d,b			;0832	50 	P 
 	ld e,c			;0833	59 	Y 
 	ld hl,l0b2ch		;0834	21 2c 0b 	! , . 
@@ -1888,36 +1888,36 @@ sub_0851h:
 	inc ix		;0863	dd 23 	. # 
 	ret			;0865	c9 	. 
 
-; SEGUIR
+
+; Computes the effective round, computed as 5*DRAGONS + LEVEL.
 ; Output: BC
+;
 ; Adding a RET at the beginning of this function makes the ME not to
 ; appear at level 2, and neither the moths at level 4. Instead, you
 ; have normal grippers.
-sub_0866h:
+GET_ROUND_IN_BC:
 	ld a,(DRAGONS_LEVEL)	;0866	3a 80 e0
 	ld l,a			        ;0869	6f      L = DRAGONS_LEVEL
-	and 007h		        ;086a	e6 07   A = level
-	ld h,a			        ;086c	67      H = level
+	and 007h		        ;086a	e6 07   A = LEVEL
+	ld h,a			        ;086c	67      H = LEVEL
 	ld a,l			        ;086d	7d      A = DRAGONS_LEVEL
-	and 038h		        ;086e	e6 38   A = DRAGONS << 3
-	cp 020h		            ;0870	fe 20 	Compare DRAGONS with 4
+	and 038h		        ;086e	e6 38   A = 00DDD000
+	cp 020h		            ;0870	fe 20 	    00100000: compare DRAGONS with 4
 	jr c,l0876h		        ;0872	38 02 	Jump if DRAGONS < 4
     
     ; Dragons >= 4
-	ld a,018h		        ;0874	3e 18 Set A = 3 dragons, first level (11 000)
+	ld a,018h		        ;0874	3e 18 Set A = 3 dragons, first level (00.011.000)
 l0876h:
-    ; A
-    ; DDD.000
-	rrca			;0876	0f 	A = DRAGONS << 3
-	ld l,a			;0877	6f 	L = DRAGONS << 3
-	rrca			;0878	0f 	A = DRAGONS << 2
-	rrca			;0879	0f 	A = DRAGONS << 1 = DRAGONS
-	add a,l			;087a	85 	A = DRAGONS + DRAGONS << 3 = 9*DRAGONS
-	add a,h			;087b	84 	A = 9*DRAGONS + level = 8*DRAGONS + (DRAGONS + level) =
-                    ;             = DRAGONS | DRAGONS + level
+    ; A = 00DDD000
+	rrca			;0876	0f 	A = 000DDD00 = 4*DRAGONS
+	ld l,a			;0877	6f 	L = A = 4*DRAGONS
+	rrca			;0878	0f 	A = 2*DRAGONS
+	rrca			;0879	0f 	A = 1*DRAGONS
+	add a,l			;087a	85 	A = DRAGONS + 4*DRAGONS = 5*DRAGONS    
+	add a,h			;087b	84 	A = 5*DRAGONS + LEVEL
 	ld c,a			;087c	4f
-	ld b,000h		;087d	06 00 BC = DRAGONS | DRAGONS + level
-	ret			;087f	c9 	. 
+	ld b,000h		;087d	06 00 BC = 5*DRAGONS + LEVEL
+	ret			    ;087f	c9
 
 
 ; Starting time according to the level.
@@ -2941,11 +2941,9 @@ l0cbfh:
 	ld d,b			;0d03	50 	P 
 	nop			;0d04	00 	. 
 
-;SEGUIR
-; This routine seems to read the I/O ports of the player controls and
-; store the info in a proper (packet?) format in
+; This routine reads the I/O ports of the player controls and
+; store the info in a proper format in
 ; PLAYER_INPUT_COINS_P1P2_BUTTONS and PLAYER_INPUT.
-
 CHECK_FLIPSCREEN_AND_READ_PLAYER_CONTROLS:
 	ld a,(FLIP_SCREEN)	;0d05	3a 10 e9
 	and 001h		    ;0d08	e6 01
@@ -2965,7 +2963,7 @@ l0d10h:
 	ld hl,(PLAYER_INPUT)  ;0d10	2a 06 e9
     ; DEBUG, HL = 0x0000
     
-	call sub_0d3bh		    ;0d13	cd 3b 0d
+	call FORMAT_PLAYER_INPUT		    ;0d13	cd 3b 0d
 	ld (PLAYER_INPUT),hl	;0d16	22 06 e9
 
 	ld hl,PLAYER_BUTTONS_AND_UP		;0d19	21 08 e9
@@ -2994,23 +2992,14 @@ l0d10h:
 	and 010h		    ;0d2e	e6 10 I don't get this. Why not and 0xF?
 	or b			    ;0d30	b0 A = ?0000 | controls = ?CCCC
 	ld hl,(PLAYER_INPUT_COINS_P1P2_BUTTONS)		;0d31	2a 04 e9 	* . . 
-	call sub_0d3bh		;0d34	cd 3b 0d 	. ; . 
+	call FORMAT_PLAYER_INPUT		;0d34	cd 3b 0d 	. ; . 
 	ld (PLAYER_INPUT_COINS_P1P2_BUTTONS),hl		;0d37	22 04 e9 	" . . 
 	ret			;0d3a	c9 	. 
 
-; This transforms HL according to A, B, C
-; A: player input
-;	PORT_START("P1")
-;	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY
-;	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY
-;	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY
-;	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY
-;	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN ) /* probably unused */
-;	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 )
-;	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN ) /* probably unused */
-;	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 )
-
-sub_0d3bh:
+; This formats the player input according to A, B, and C.
+; The exact meaning of this transformation remains unknown yet.
+; Input HL: either (PLAYER_INPUT) or (PLAYER_INPUT_COINS_P1P2_BUTTONS)
+FORMAT_PLAYER_INPUT:
     ; A: player controls
     ; HL: (PLAYER_INPUT_x)
     
