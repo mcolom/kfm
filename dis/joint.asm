@@ -680,10 +680,10 @@ l0036h:
 	ex af,af'			;0038	08 	. 
 l0039h:
 	exx			;0039	d9 	. 
-	ld hl,(0eb03h)		;003a	2a 03 eb 	* . . 
-	ld de,0c020h		;003d	11 20 c0 	.   . 
+	ld hl,(0eb03h)		;003a	2a 03 eb 	* . .  SEGUIR
+	ld de,M62_SPRITERAM + 0x20	;003d	11 20 c0 	.   . 
 l0040h:
-	ld bc,0x00c0		;0040	01 c0 00 	. . . 
+	ld bc, 192	;0040	01 c0 00 	. . . 
 	ldir		;0043	ed b0 	. . 
     
     ; Read progra's scroll position, and update M62's config to actually do it
@@ -928,9 +928,14 @@ l01f0h:
 	pop ix		;01f0	dd e1 	. . 
 	pop iy		;01f2	fd e1 	. . 
 	exx			;01f4	d9 	. 
+
 	ex af,af'			;01f5	08 	. 
 	ei			;01f6	fb 	. 
 	ret			;01f7	c9 	. 
+; End of Z80 periodic interrupt
+
+
+
 l01f8h:
 	push af			;01f8	f5 	. 
 	ld a,018h		;01f9	3e 18 	> . 
@@ -1416,7 +1421,7 @@ PRINT_PLAYER_FLOOR_TEXT:
 	ld a,(PLAYER_TURN)	;04eb	3a 02 e0
 	and 001h		    ;04ee	e6 01 Check number of players
 	inc a			    ;04f0	3c Increment so A = number of players
-	call PRINT_NUMBER		;04f1	cd 08 11
+	call PRINT_DIGIT		;04f1	cd 08 11
 	call WRITE_TEXT		;04f4	cd 1c 11
 	call PRINT_LEVEL		;04f7	cd 56 05
 	jp WRITE_TEXT		;04fa	c3 1c 11
@@ -1448,7 +1453,7 @@ PRINT_LEVEL:
 ; Prints number A+1
 PRINT_A_PLUS_1:
 	inc a			;055b	3c 	< 
-	jp PRINT_NUMBER		;055c	c3 08 11 	. . . 
+	jp PRINT_DIGIT		;055c	c3 08 11 	. . . 
 
 ; Makes the energy/time decrease and give points sound
 MAKE_POINTS_SOUND:
@@ -3722,12 +3727,12 @@ l10bfh:
 l10c1h:
 	ld a,(hl)			;10c1	7e 	~ 
 	dec hl			;10c2	2b 	+ 
-	call PRINT_NUMBER		;10c3	cd 08 11 	. . . 
-	call PRINT_NUMBER_TWO_DIGITS_DEC_HL		;10c6	cd fd 10 	. . . 
-	call PRINT_NUMBER_TWO_DIGITS_DEC_HL		;10c9	cd fd 10 	. . . 
+	call PRINT_DIGIT		;10c3	cd 08 11 	. . . 
+	call PRINT_TWO_DIGITS_DEC_HL		;10c6	cd fd 10 	. . . 
+	call PRINT_TWO_DIGITS_DEC_HL		;10c9	cd fd 10 	. . . 
     ; Print a zero
 	xor a			;10cc	af 	. 
-	jr PRINT_NUMBER		;10cd	18 39 	. 9 
+	jr PRINT_DIGIT		;10cd	18 39 	. 9 
 
 PRINT_TOP_SCORE:
 	ld hl,0e982h		;10cf	21 82 e9 	! . . 
@@ -3739,8 +3744,8 @@ PRINT_TIME:
 	ld c,014h		;10d9	0e 14
 	ld hl, TIME + 1	;10db	21 04 e0
 	ld de,0d0eah		;10de	11 ea d0 	. . . 
-	call PRINT_NUMBER_TWO_DIGITS_DEC_HL		;10e1	cd fd 10 	. . . 
-	jr PRINT_NUMBER_TWO_DIGITS_DEC_HL		;10e4	18 17 	. . 
+	call PRINT_TWO_DIGITS_DEC_HL		;10e1	cd fd 10 	. . . 
+	jr PRINT_TWO_DIGITS_DEC_HL		;10e4	18 17 	. . 
 
 DRAW_LIVES:
 	ld a,(LIVES)		;10e6	3a 84 e0 	: . . 
@@ -3763,11 +3768,11 @@ l10f7h:
 ; A: the two numbers (NNNN.MMMM)
 ; C: color
 ; DE: position in the screen
-PRINT_NUMBER_TWO_DIGITS_DEC_HL:
+PRINT_TWO_DIGITS_DEC_HL:
 	ld a,(hl)		;10fd	Read number
 	dec hl			;10fe	Move pointer to the previous digit
 
-PRINT_NUMBER_TWO_DIGITS:
+PRINT_TWO_DIGITS:
 	push af			;10ff	f5
     ; Rotate num 4 times to the right
     ; This is to move the MSB to the LSB
@@ -3776,17 +3781,17 @@ PRINT_NUMBER_TWO_DIGITS:
 	rrca			;1102	0f
 	rrca			;1103	0f
     ; Now it'll print the number which was at NNNNxxxx.
-	call PRINT_NUMBER	;1104	cd 08 11
+	call PRINT_DIGIT	;1104	cd 08 11
 	pop af			    ;1107	f1
     
     ; With the POP it's recoved the original A, so now it'll print the
     ; number at the LSB: xxxxMMMM.
 
-; Write a number on the screen
+; Write a digit on the screen
 ; A: number (the 4 LSB)
 ; C: color
 ; DE: position in the screen
-PRINT_NUMBER:
+PRINT_DIGIT:
 	and 00fh		;1108	e6 0f Consider only the 4 LSB
 	add a,090h		;110a	c6 90 	. . 
 	daa			;110c	27 	' 
@@ -11723,7 +11728,7 @@ l4a14h:
 	push af	
 	push bc	
 	ld c,b	
-	call sub_56f7h
+	call PRINT_NUMBER ; Text 111 coin  111 player
 	pop bc	
 	inc de	
 	call WRITE_TEXT
@@ -12511,7 +12516,7 @@ l51abh:
     ; Write number of credits
     ; I really love the optimization he does, jumping in the middle of a
     ; routine and calling it twice the way it does :)
-	call PRINT_NUMBER_TWO_DIGITS 
+	call PRINT_TWO_DIGITS 
 	
     ld a,(PLAYER_INPUT_COINS_P1P2_BUTTONS)
 	and 003h    ; Check P1 and P2 buttons
@@ -12860,7 +12865,7 @@ l5596h:
 	push de	
 	ld de,0d160h
 	ld c,000h
-	call PRINT_NUMBER_TWO_DIGITS
+	call PRINT_TWO_DIGITS
 	pop de	
 	ld a,038h
 	ld (INT_COUNTER + 1),a
@@ -12921,7 +12926,7 @@ l5600h:
 	jr nz,l5596h
 	ld de,0d160h
 	ld c,000h
-	call PRINT_NUMBER_TWO_DIGITS
+	call PRINT_TWO_DIGITS
 l560dh:
 	call PRINT_SCORE_BOARD_WITHOUT_HEADER
 	ld a,01ch
@@ -12952,14 +12957,14 @@ l5634h:
 	ld c,0d8h
     
     ; Print position of the player
-	call sub_56f7h ; 5637
+	call PRINT_NUMBER ; 5637
 	ld c,015h
 	inc de	
 	ld a,(hl)	
 	inc hl	
 	and a	
 	push de	
-	call nz,PRINT_NUMBER ; 5641
+	call nz,PRINT_DIGIT ; 5641
 	pop de	
 	inc de	
 	
@@ -12968,7 +12973,7 @@ l5634h:
 l5648h:
 	ld a,(hl)	
 	inc hl	
-	call PRINT_NUMBER_TWO_DIGITS ; 564a
+	call PRINT_TWO_DIGITS ; 564a
 	djnz l5648h
 
     ; Write the trailing zero of the score
@@ -13069,12 +13074,12 @@ l56dbh:
 	jr nz,l56d8h
 	ret	
 
-;SEGUIR
-sub_56f7h:
+; Prints a number (1 or 2 digits) without the trailing zero
+PRINT_NUMBER:
 	cp 010h
-	jp nc,10ffh
+	jp nc, PRINT_TWO_DIGITS
 	inc de	
-	jp PRINT_NUMBER
+	jp PRINT_DIGIT
 
 sub_5700h:
     ; It falls into CLEAR_TILEMAP
@@ -13899,7 +13904,7 @@ l78e5h:
 	call WRITE_TEXT
 	call GET_LIVES_FROM_DSW1
 	ld de,0d41fh
-	call PRINT_NUMBER
+	call PRINT_DIGIT
 	call GET_COINS_PER_CREDITS_FROM_DSWs
 	ld b,c	
 	ld de,0d29ah
@@ -13948,7 +13953,7 @@ l7944h:
 	push hl	
 	inc de	
 	ld a,b	
-	call PRINT_NUMBER
+	call PRINT_DIGIT
 	call sub_7bc1h
 	ld hl,002ch
 	add hl,de	
@@ -13978,8 +13983,8 @@ l7971h:
 	daa	
 	ld (hl),a	
 	ld de,0d562h
-	call PRINT_NUMBER_TWO_DIGITS_DEC_HL
-	call PRINT_NUMBER_TWO_DIGITS_DEC_HL
+	call PRINT_TWO_DIGITS_DEC_HL
+	call PRINT_TWO_DIGITS_DEC_HL
 l798dh:
 	InSystem
 	ld de,0d2a2h
@@ -14276,7 +14281,7 @@ l7bb6h:
 	xor a	
 	rrc l
 	rl a
-	call PRINT_NUMBER
+	call PRINT_DIGIT
 	djnz l7bb6h
 	ret	
 
