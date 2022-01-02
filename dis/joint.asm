@@ -13625,10 +13625,10 @@ l771fh:
 	ld c,014h
 	ld de,0d1d5h
 	ld a,031h
-	call sub_7bf7h
+	call PRINT_ROM_TEST_RESULT
 	ld de,0d255h
 	ld a,032h
-	call sub_7bf7h
+	call PRINT_ROM_TEST_RESULT
 	push ix
 	pop hl	
 	ld a,l	
@@ -14301,8 +14301,9 @@ l7befh:
 	jr nz,l7befh
 	ret	
 
-;SEGUIR
-sub_7bf7h:
+; Prints the ROM check result: "OK" or "NG" (not good)
+; Input: the result of the test at bin #0 of reg. B (1: NG, 0: OK).
+PRINT_ROM_TEST_RESULT:
 	push af	
 	ld hl,ROM_STR
 	call WRITE_TEXT
@@ -14310,8 +14311,8 @@ sub_7bf7h:
 	call WRITE_CHAR_AT_SCREEN_DE
 	inc de	
 	ld hl,NG_STR
-	rrc b
-	jr c,l7c0dh
+	rrc b ; check bit #0 of B (test result)
+	jr c,l7c0dh ; 1 ==> NG, 0 ==> OK
 	ld hl,OK_STR
 l7c0dh:
 	jp WRITE_TEXT
