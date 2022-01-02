@@ -29,6 +29,7 @@ Once you've done this, you can edit ROM values directly."
 For example:
 wpset 0,65535,rw,ix==e395
 bp d0c, A != 0xFF
+wp e702,1,w, wpdata== 1
 
 
 The lives (+1) are stored at 0xE084.
