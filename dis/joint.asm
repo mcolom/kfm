@@ -649,11 +649,11 @@ SPRITE_BUFFER_PTR: EQU 0xEB03
 	; Stack at 0f00h
 	ld sp,0f000h		;0003
 
-    ; Clear 4096 bytes from 0xe000
+    ; Clear game variables
 	ld hl,GAME_STATE
-	ld de,IN_PLAY
-	ld bc,00fffh
-	ld (hl),000h
+	ld de,GAME_STATE + 1
+	ld bc, 4095
+	ld (hl), 0
 	ldir
 
 	;0013
@@ -674,13 +674,12 @@ l0029h:
 	ldir		;002c	ed b0 	. . 
 
 	ld hl,(TOP_SCORE_IN_TABLE)
-	ld a,l			;0031	7d 	} 
-	ld l,h			;0032	6c 	l 
-	ld h,a			;0033	67 	g 
-	jr l0082h		;0034	18 4c 	. L 
+	ld a,l			;0031	7d
+	ld l,h			;0032	6c
+	ld h,a			;0033	67
+	jr l0082h		;0034	18 4c
 l0036h:
-	rst 0			;0036	c7 	. 
-	rst 0			;0037	c7 	. 
+	defb 0xc7, 0xc7
 
     ; Z80 periodic interrupt handler
 	ex af,af'			;0038	08 	. 
@@ -3869,7 +3868,7 @@ l114eh:
 	ld d,(hl)			;1150	56 	V 
 	jr l1133h		;1151	18 e0 	. . 
 
-sub_1153:
+CLS_CYAN:
 	ld d,001h		;1153	16 01 	. . 
 	jr l1159h		;1155	18 02
 
@@ -3877,11 +3876,13 @@ sub_1153:
 ; Clears the tilemap visibles on the screen.
 ; It sets tile 0x20 (blank space) and color 0xDB.
 CLEAR_TILEMAP:
-	ld d,0dbh		;1157	16 db
+    ; D is the color
+	ld d,0dbh		    ;1157	16 db
 l1159h:
-	ld e,020h		;1159	1e 20
+    ; E is the character
+	ld e, ' '       	;1159	1e 20
 CLEAR_TILEMAP_WITH_DE:
-	ld bc,32*2*32	;115b	01 00 08
+	ld bc,32*2*32	    ;115b	01 00 08
 CLEAR_TILEMAP_WITH_DE_BC:
 	ld hl,M62_TILERAM		;115e	21 00 d0
 	ld iy,M62_TILERAM_COLORS ;1161	fd 21 00 d8
@@ -11532,23 +11533,32 @@ l487eh:
 	ld (EXT_TICKS + 1),a
 	ld (DRAGONS_LEVEL),a
 	ei	
-	call sub_5700h
-	call sub_064a
+	call CLS_CYAN_AND_PAUSE
+	call sub_064a ; Some kind of init
+    
+    ; Write IREM copyright
 	ld hl,IREM_COPYRIGHT_STR
 	call WRITE_TEXT
+
 	ld hl,l4f01h
 	ld (0e70eh),hl
+
 	ld a,09ch
 	ld (0e705h),a
+
 	ld hl,030a0h
 	ld (THOMAS_POSITION),hl
+
 	ld hl,SCENARIO_TILEMAP_ZONE_10
 	ld (0e710h),hl
 	ld (0e344h),hl
+
 	ld hl,034a0h
 	ld (0e342h),hl
+
 	ld a,010h
 	ld (SILVIA_LEFT_OR_RIGHT),a
+
 	ld a,005h
 	ld (0e347h),a
 
@@ -11563,16 +11573,16 @@ iterate_guys_intro:
 
 	ld (ix + ENEMY_FRAME_COUNTER_IDX), 7
 	ld (ix + ENEMY_ATTACK_STEP_IDX), 038h
-	ld (ix + ENEMY_BOOMERANG_TYPE_IDX),b
+	ld (ix + THOMAS_LAST_SHAKE_MOVE),b
 
     ; 0x50: look right, not being attacked, enemy is alive
 	ld (ix + ENEMY_PROPS_IDX),c ; Set to 0x50 or 0x10 ; 48e5
 
-    ; Set position to HL = 3840
+    ; Set position to HL
 	ld (ix + ENEMY_POS_L_IDX),l
 	ld (ix + ENEMY_POS_H_IDX),h
 
-	ld a,b	
+	ld a,b ; A = current index, 7, ..., 0.
 	cp 7
 	jr z,l48fbh
 	cp 4
@@ -11587,7 +11597,7 @@ l48ffh:
     ; Set looking direction.
     ; 0x10: look left, not being attacked, enemy is alive
 	ld c, 0x10
-next_guy_intro:
+next_guy_intro: ; 4902
     ; Next guy in TBL_GUYS
 	ld de, 16
 	add ix,de
@@ -12657,7 +12667,7 @@ HAND_AND_PAPER_DRAWING:
 	defb 0fdh,017h,0d6h
 	defb "WILL ENTERTAIN YOU.", 0ffh
 
-	call sub_5700h		;53c2	cd 00 57 	. . W 
+	call CLS_CYAN_AND_PAUSE		;53c2	cd 00 57 	. . W 
 	ld a,005h		;53c5	3e 05 	> . 
 	call PLAY_SOUND		;53c7	cd fe 0d 	. . . 
 	ld a,(DRAGONS_LEVEL)		;53ca	3a 80 e0 	: . . 
@@ -13104,9 +13114,9 @@ PRINT_NUMBER:
 	inc de	
 	jp PRINT_DIGIT
 
-sub_5700h:
+CLS_CYAN_AND_PAUSE:
     ; It falls into CLEAR_TILEMAP
-	call sub_1153
+	call CLS_CYAN
 
 ; Set the GAME_STATE to stop and reset the horizontal scroll, thus
 ; preparing to start the game. It does also a very short pause.
