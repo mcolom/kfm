@@ -1141,9 +1141,10 @@ time_decrement_done:
 	ld a,038h		;031d	3e 38 	> 8 
 	call DRAW_PANEL_ELEMENTS_WITH_PAUSES		;031f	cd 82 05 	. . . 
 
+    ; Call the interlude if the level is odd (1=level 2, 3=level 4)
 	ld a,(DRAGONS_LEVEL)    ;0322	3a 80 e0
 	and 001h		        ;0325	e6 01
-	call nz,053c2h		    ;0327	c4 c2 53 Call if level is odd (1=level 2, 3=level 4)
+	call nz, INTERLUDE		;0327	c4 c2 53
 
 	ld a,(DRAGONS_LEVEL)	;032a	3a 80 e0
 	and 007h		        ;032d	e6 07 Get level
@@ -12667,51 +12668,65 @@ HAND_AND_PAPER_DRAWING:
 	defb 0fdh,017h,0d6h
 	defb "WILL ENTERTAIN YOU.", 0ffh
 
+; Interlude scene
+INTERLUDE: ; 53c2
 	call CLS_CYAN_AND_PAUSE		;53c2	cd 00 57 	. . W 
 	ld a,005h		;53c5	3e 05 	> . 
 	call PLAY_SOUND		;53c7	cd fe 0d 	. . . 
 	ld a,(DRAGONS_LEVEL)		;53ca	3a 80 e0 	: . . 
+
 	push af			;53cd	f5 	. 
 	ld a,004h		;53ce	3e 04 	> . 
 	ld (DRAGONS_LEVEL),a		;53d0	32 80 e0 	2 . . 
+
 	call sub_064a		;53d3	cd 4a 06 	. J . 
-	ld hl,05400h		;53d6	21 00 54 	! . T 
-l53d9h:
+	ld hl,05400h		;53d6	21 00 54 	! . T 9h:
 	ld (0e710h),hl
 	ld (0e344h),hl
+
 	ld hl,2700h
 	ld (THOMAS_POSITION),hl
+
 	ld hl,1a00h
 	ld (0e342h),hl
-l53ebh:
 	pop af	
+
 	ld (DRAGONS_LEVEL),a
-l53efh:
+
 	ld hl,TEXT_AND_LETS_TRY_NEXT_FLOOR_DRAWING
 	call WRITE_TEXT
+
 	ld a, GAME_STATE_INTERLUDE
-l53f7h:
 	ld (GAME_STATE),a
-	ld a,070h
-	call sub_5416h
+
+	ld a,070h ; 53fa
+	call HELP_ME_THOMAS_BLINKING_TEXT
+
 	ld hl,IM_COMING_RIGHT_AWAY_TEXT
 	call WRITE_TEXT
+
 	ld a,005h
 	call PLAY_SOUND
+
 	ld a,070h
-	call sub_5416h
+	call HELP_ME_THOMAS_BLINKING_TEXT
+
 	ld a,005h
 	call PLAY_SOUND
 	ld a,0c0h
 
-;SEGUIR
-sub_5416h:
+; Writes the "HELP ME, THOMAS", etc. text during the interlude.
+; Interestingly, you can call this (PC = 53FC in the debugger) at
+; any time, even during the game, and the animation will work.
+; It's because the logic of the game goes on at the Z80 interrupt
+; handler at address 0x38.
+HELP_ME_THOMAS_BLINKING_TEXT: ; 5416
 	ld (INT_COUNTER + 2),a
 l5419h:
 	ld a,(INT_COUNTER)
 	ld de,0d295h
 	ld c,0d9h
-	ld hl,5485h
+	ld hl, HELP_ME_THOMAS_STR
 	and 018h
 	jr nz,l542bh
 	ld hl,SMALL_ROW_OF_BLACK_CHARS
@@ -12757,6 +12772,7 @@ TEXT_AND_LETS_TRY_NEXT_FLOOR_DRAWING:
 	cp 0d7h		;546e	fe d7 	. . 
 
 	defb "LET'S TRY NEXT FLOOR", 0ffh ; 5470
+HELP_ME_THOMAS_STR:
 	defb "HELP ME,"
 	defb 0fdh,015h,0d3h
 	defb "THOMAS!", 0ffh
