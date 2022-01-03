@@ -1751,7 +1751,7 @@ sub_06beh:
 	ld hl,00900h		;0700	21 00 09 	! . . 
 	ld (THOMAS_POSITION),hl		;0703	22 12 e7 	" . . 
 
-	ld hl,l1000h		;0706	21 00 10 	! . . 
+	ld hl,0x1000		;0706	21 00 10 	! . . 
 	ld (0e707h),hl		;0709	22 07 e7 	" . . 
 
 	ld hl,0cd00h		;070c	21 00 cd 	! . . 
@@ -1768,7 +1768,7 @@ l071dh:
 	ld hl,010e0h		;0722	21 e0 10 	! . . 
 	cp 004h		;0725	fe 04 	. . 
 	jr nz,l072ch		;0727	20 03 	  . 
-	ld hl,l1000h		;0729	21 00 10 	! . . 
+	ld hl,0x1000		;0729	21 00 10 	! . . 
 l072ch:
 	ld (0e102h),hl		;072c	22 02 e1 	" . . 
 	ld hl,0d560h		;072f	21 60 d5 	! ` . 
@@ -3612,7 +3612,6 @@ DRAW_PANEL_ELEMENTS:
 	ld e,a			;0ffc	5f 	_ 
 	ld d,000h		;0ffd	16 00 	. . 
 	add hl,de			;0fff	19 	. 
-l1000h:
 	ld a,(INT_COUNTER)		;1000	3a 80 e8 	: . . 
 	set 3,h		;1003	cb dc 	. . 
 	ld a,(INT_COUNTER)		;1005	3a 80 e8 	: . . 
@@ -5559,7 +5558,7 @@ l1c21h:
 ; Seguir
 sub_1c26h:
 	ld hl,(THOMAS_POSITION)		;1c26	2a 12 e7 	* . . 
-	ld de,l1000h		;1c29	11 00 10 	. . . 
+	ld de,0x1000		;1c29	11 00 10 	. . . 
 	add hl,de			;1c2c	19 	. 
 	call GET_ENEMY_POS_IN_DE		;1c2d	cd 91 1c 	. . . 
 	sbc hl,de		;1c30	ed 52 	. R 
@@ -5572,7 +5571,7 @@ sub_1c26h:
 ; Seguir
 sub_1c3dh:
 	call GET_ENEMY_POS_IN_HL		;1c3d	cd 8a 1c 	. . . 
-	ld de,l1000h		;1c40	11 00 10 	. . . 
+	ld de,0x1000		;1c40	11 00 10 	. . . 
 	add hl,de			;1c43	19 	. 
 	ld de,(THOMAS_POSITION)		;1c44	ed 5b 12 e7 	. [ . . 
 	sbc hl,de		;1c48	ed 52 	. R 
@@ -7936,7 +7935,7 @@ l2dc5h:
 	sbc hl,de		;2dcc	ed 52 	. R 
 	ld (0e80ah),hl		;2dce	22 0a e8 	" . . 
 	jr nc,l2ddch		;2dd1	30 09 	0 . 
-	ld de,l1000h		;2dd3	11 00 10 	. . . 
+	ld de,0x1000		;2dd3	11 00 10 	. . . 
 	add hl,de			;2dd6	19 	. 
 	jr nc,l2e1ah		;2dd7	30 41 	0 A 
 l2dd9h:
@@ -9465,7 +9464,7 @@ l3921h:
 	ld c,0ffh		;3934	0e ff 	. . 
 	jr l3940h		;3936	18 08 	. . 
 l3938h:
-	ld de,l1000h		;3938	11 00 10 	. . . 
+	ld de,0x1000		;3938	11 00 10 	. . . 
 	add hl,de			;393b	19 	. 
 	jr nc,l3959h		;393c	30 1b 	0 . 
 	ld c,000h		;393e	0e 00 	. . 
@@ -9525,7 +9524,7 @@ l3981h:
 	ld c,0ffh		;3994	0e ff 	. . 
 	jr l39a0h		;3996	18 08 	. . 
 l3998h:
-	ld de,l1000h		;3998	11 00 10 	. . . 
+	ld de,0x1000		;3998	11 00 10 	. . . 
 	add hl,de			;399b	19 	. 
 	jr nc,l39b9h		;399c	30 1b 	0 . 
 	ld c,000h		;399e	0e 00 	. . 
@@ -13873,7 +13872,7 @@ l7844h:
 	jp z,l76e7h
 	bit 1,a
 	jr nz,l7844h
-	ld bc,l1000h
+	ld bc,0x1000
 l7852h:
 	dec bc	
 	ld a,c	
