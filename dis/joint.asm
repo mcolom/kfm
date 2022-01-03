@@ -632,6 +632,12 @@ IN_FREEZE_CHEAT: EQU 0xE005
 ; audio channels.
 ALLOWED_TO_ADD_SOUND: EQU 0xE006
 
+; The buffer of the sprites shown, and a pointer to that address
+SPRITE_BUFFER: EQU 0xEB25
+SPRITE_BUFFER_PTR: EQU 0xEB03
+
+
+
 ; ************************ ROM start ************************
 	org	00000h
 
@@ -651,8 +657,8 @@ ALLOWED_TO_ADD_SOUND: EQU 0xE006
 	ldir
 
 	;0013
-	ld hl,0eb25h
-	ld (0eb03h),hl
+	ld hl,SPRITE_BUFFER
+	ld (SPRITE_BUFFER_PTR),hl
 	
 	; Check DSW2 and jump to service mode if needed
 	InDSW2
@@ -680,7 +686,7 @@ l0036h:
 	ex af,af'			;0038	08 	. 
 l0039h:
 	exx			;0039	d9 	. 
-	ld hl,(0eb03h)		;003a	2a 03 eb 	* . .  SEGUIR
+	ld hl,(SPRITE_BUFFER_PTR)		;003a	2a 03 eb 	* . .  SEGUIR
 	ld de,M62_SPRITERAM + 0x20	;003d	11 20 c0 	.   . 
 l0040h:
 	ld bc, 192	;0040	01 c0 00 	. . . 
@@ -825,9 +831,9 @@ l012dh:
 	jp nc,l01ddh		;0135	d2 dd 01 	. . . 
 	ld a,018h		;0138	3e 18 	> . 
 	ld (0eb00h),a		;013a	32 00 eb 	2 . . 
-	ld hl,0eb25h		;013d	21 25 eb 	! % . 
+	ld hl,SPRITE_BUFFER		;013d	21 25 eb 	! % . 
 l0140h:
-	ld (0eb03h),hl		;0140	22 03 eb 	" . . 
+	ld (SPRITE_BUFFER_PTR),hl		;0140	22 03 eb 	" . . 
 l0143h:
 	ld (0eb01h),hl		;0143	22 01 eb 	" . . 
 	ld a,(GAME_STATE)		;0146	3a 00 e0 	: . . 
@@ -940,8 +946,8 @@ l01f8h:
 	push af			;01f8	f5 	. 
 	ld a,018h		;01f9	3e 18 	> . 
 	ld (0eb00h),a		;01fb	32 00 eb 	2 . . 
-	ld hl,0eb25h		;01fe	21 25 eb 	! % . 
-	ld (0eb03h),hl		;0201	22 03 eb 	" . . 
+	ld hl,SPRITE_BUFFER		;01fe	21 25 eb 	! % . 
+	ld (SPRITE_BUFFER_PTR),hl		;0201	22 03 eb 	" . . 
 	ld (0eb01h),hl		;0204	22 01 eb 	" . . 
 	pop af			;0207	f1 	. 
 	inc a			;0208	3c 	< 
@@ -1626,11 +1632,13 @@ sub_0644h:
 	ld hl,0x80		;0644	21 80 00 	! . . 
 	ld (HSCROLL_LOW_W),hl		;0647	22 02 e9 	" . . 
 sub_064a:
-	ld hl,0eb25h		;064a	21 25 eb 	! % . 
-	ld de,0eb26h		;064d	11 26 eb 	. & . 
-	ld bc,000bfh		;0650	01 bf 00 	. . . 
-	ld (hl),000h		;0653	36 00 	6 . 
-	ldir		;0655	ed b0 	. . 
+    ; Clear SPRITE_BUFFER
+	ld hl,SPRITE_BUFFER		;064a	21 25 eb
+	ld de,SPRITE_BUFFER + 1	;064d	11 26 eb
+	ld bc, 191      		;0650	01 bf 00
+	ld (hl),000h		    ;0653	36 00
+	ldir		            ;0655	ed b0
+    
 	call sub_074dh		;0657	cd 4d 07 	. M . 
 	call sub_06beh		;065a	cd be 06 	. . . 
 	ld hl,0e380h		;065d	21 80 e3 	! . . 
@@ -9858,11 +9866,13 @@ l3c3bh:
 	ld (0eb00h),a		;3c46	32 00 eb 	2 . . 
 	ld hl,(0eb01h)		;3c49	2a 01 eb 	* . . 
 	push hl			;3c4c	e5 	. 
-	ld hl,(0eb03h)		;3c4d	2a 03 eb 	* . . 
-	ld de,0fff8h		;3c50	11 f8 ff 	. . . 
-	add hl,de			;3c53	19 	. 
-	ld (0eb01h),hl		;3c54	22 01 eb 	" . . 
-	ld (0eb03h),hl		;3c57	22 03 eb 	" . . 
+
+	ld hl,(SPRITE_BUFFER_PTR)		;3c4d	2a 03 eb 	* . . 
+	ld de, -8		            ;3c50	11 f8 ff
+	add hl,de			        ;3c53	19
+	ld (0eb01h),hl		        ;3c54	22 01 eb
+
+	ld (SPRITE_BUFFER_PTR),hl		;3c57	22 03 eb 	" . . 
 	call l3ca9h		;3c5a	cd a9 3c 	. . < 
 	pop hl			;3c5d	e1 	. 
 	ld (0eb01h),hl		;3c5e	22 01 eb 	" . . 
@@ -13644,15 +13654,20 @@ l76dch:
 	jr nz,l76b2h
 l76e7h:
 	call CLEAR_TILEMAP
+    
+    ; Clear game variables
 	ld hl,GAME_STATE
 	ld de,GAME_STATE+1
-	ld bc,0fffh
-	ld (hl), GAME_STATE_STOP
+	ld bc, 4095
+	ld (hl), 0
 	ldir
-	ld hl,0eb25h
-	ld (0eb03h),hl
+
+	ld hl,SPRITE_BUFFER
+	ld (SPRITE_BUFFER_PTR),hl
+
 	ld a, GAME_STATE_SERVICE_MODE
 	ld (GAME_STATE),a
+
 	ld de,0
 	call sub_7c10h
 	ld bc,(006ah)
