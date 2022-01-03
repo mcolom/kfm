@@ -151,6 +151,13 @@ ACTIVE_GRIPPERS_RIGHT: EQU 0xE71D
 
 TBL_E10A: EQU 0xE10A
 
+
+; Side of the screen where the new guy (gripper of knifer) will appear
+; 00: nothing
+; 08  (bit #3): new enemy on the left
+; 20: (bit #5): new enemy on the right
+NEW_GUY_SIDE: EQU 0xE260
+
 ; TBL_GUYS: each entry is 16 bytes
 ; Setting a large number in TBL_GUYS_LEN will prevent adding more guys
 TBL_GUYS_LEN: EQU 0xE261
@@ -4370,7 +4377,7 @@ l141ch:
 	ld hl,0e21ah		;143a	21 1a e2 	! . . 
 	jr l13ddh		;143d	18 9e 	. . 
 sub_143fh:
-	ld a,(0e260h)		;143f	3a 60 e2 	: ` . 
+	ld a,(NEW_GUY_SIDE)		;143f	3a 60 e2 	: ` . 
 	ld b,a			;1442	47 	G 
 	xor 028h		;1443	ee 28 	. ( 
 	ret z			;1445	c8 	. 
@@ -4440,7 +4447,7 @@ l14aah:
 	ld (hl),000h		;14ae	36 00 	6 . 
 	ret			;14b0	c9 	. 
 l14b1h:
-	ld hl,0e260h		;14b1	21 60 e2 	! ` . 
+	ld hl,NEW_GUY_SIDE		;14b1	21 60 e2 	! ` . 
 	set 3,(hl)		;14b4	cb de 	. . 
 	jr l14f6h		;14b6	18 3e 	. > 
 l14b8h:
@@ -4477,7 +4484,7 @@ l14ech:
 	ld hl,0e215h		;14ec	21 15 e2 	! . . 
 	jr l14aah		;14ef	18 b9 	. . 
 l14f1h:
-	ld hl,0e260h		;14f1	21 60 e2 	! ` . 
+	ld hl,NEW_GUY_SIDE		;14f1	21 60 e2 	! ` . 
 	set 5,(hl)		;14f4	cb ee 	. . 
 l14f6h:
 	ld hl,TBL_GUYS_LEN	;14f6	21 61 e2
@@ -4557,18 +4564,22 @@ l1556h:
 	push bc			;1556	c5 	. 
 	ld hl,l1534h	;1557	21 34 15 	! 4 . 
 	push hl			;155a	e5
-    ;
-	ld c,(ix + ENEMY_PROPS_IDX)	;155b	dd 4e 00 Guy is alive?
+
+    ; Guy is alive?
+	ld c,(ix + ENEMY_PROPS_IDX)	;155b	dd 4e 00
 	bit 4,c		    ;155e	cb 61
 	ret z			;1560	c8 Guy is falling, get out
-    ;
+
 	bit 5,c		        ;1561	cb 69 Can we add more guys behind, on the right?
-	call nz,sub_1c26h	;1563	c4 26 1c
+	call nz,CHECK_RESET_NEW_ENEMY_ON_THE_RIGHT	;1563	c4 26 1c Check, if we can't
+
 	bit 3,c		        ;1566	cb 59 Can we add more guys behind, on the left?
-	call nz,sub_1c3dh	;1568	c4 3d 1c 	. = . 
+	call nz,CHECK_RESET_NEW_ENEMY_ON_THE_LEFT	;1568	c4 3d 1c Check, if we can't
+
 	bit 0,c		        ;156b	cb 41 Is it a gripper (0) of a knifer (1)?
 	ld a,(ix + ENEMY_STATE_IDX)		;156d	dd 7e 01
 	jp nz,l186eh		;1570	c2 6e 18 Jump if he's a knifer
+
     ; He's a gripper or a kid
 	bit 2,c		        ;1573	Is he a kid?
 	jp nz,l168ah		;1575	Jump if he's a kind
@@ -4594,7 +4605,7 @@ l1592h:
 	ld a,c			;159d	79 	y 
 	and 028h		;159e	e6 28 	. ( 
 	cpl			;15a0	2f 	/ 
-	ld hl,0e260h		;15a1	21 60 e2 	! ` . 
+	ld hl,NEW_GUY_SIDE		;15a1	21 60 e2 	! ` . 
 	and (hl)			;15a4	a6 	. 
 	ld (hl),a			;15a5	77 	w 
 	pop hl			;15a6	e1 	. 
@@ -5555,31 +5566,56 @@ l1c21h:
 	and a			;1c24	a7 	. 
 	ret			;1c25	c9 	. 
 
-; Seguir
-sub_1c26h:
-	ld hl,(THOMAS_POSITION)		;1c26	2a 12 e7 	* . . 
-	ld de,0x1000		;1c29	11 00 10 	. . . 
-	add hl,de			;1c2c	19 	. 
-	call GET_ENEMY_POS_IN_DE		;1c2d	cd 91 1c 	. . . 
-	sbc hl,de		;1c30	ed 52 	. R 
-	ret c			;1c32	d8 	. 
-	res 5,(ix + ENEMY_PROPS_IDX)	;1c33	dd cb 00 ae 	. . . . 
-	ld hl,0e260h		;1c37	21 60 e2 	! ` . 
-	res 5,(hl)		;1c3a	cb ae 	. . 
-	ret			;1c3c	c9 	. 
+; Check if we can add a new enemy of the right.
+; We can add a new one if the distance |ENEMY_POSITION - THOMAS_POSITION| >=  0x1000
+CHECK_RESET_NEW_ENEMY_ON_THE_RIGHT:
+	ld hl,(THOMAS_POSITION)		;1c26
+	ld de,0x1000		        ;1c29	11 00 10
+	add hl,de			        ;1c2c	19          HL = THOMAS_POSITION + 0x1000
 
-; Seguir
-sub_1c3dh:
-	call GET_ENEMY_POS_IN_HL		;1c3d	cd 8a 1c 	. . . 
-	ld de,0x1000		;1c40	11 00 10 	. . . 
-	add hl,de			;1c43	19 	. 
-	ld de,(THOMAS_POSITION)		;1c44	ed 5b 12 e7 	. [ . . 
-	sbc hl,de		;1c48	ed 52 	. R 
-	ret c			;1c4a	d8 	. 
-	res 3,(ix + ENEMY_PROPS_IDX)		;1c4b	dd cb 00 9e 	. . . . 
-	ld hl,0e260h		;1c4f	21 60 e2 	! ` . 
-	res 3,(hl)		;1c52	cb 9e 	. . 
-	ret			;1c54	c9 	. 
+	call GET_ENEMY_POS_IN_DE	;1c2d	cd 91 1c    DE = ENEMY_POSITION
+	sbc hl,de		            ;1c30	ed 52       HL = THOMAS_POSITION + 0x1000 - ENEMY_POSITION
+    
+    ; Check carry
+    ; Carry if
+    ;       ENEMY_POSITION >= THOMAS_POSITION + 0x1000
+    ;       ENEMY_POSITION - THOMAS_POSITION >=  0x1000
+	ret c			            ;1c32	d8
+    
+    ;ENEMY_POSITION - THOMAS_POSITION <  0x1000
+    
+    ; we can add guys on the right
+	res 5,(ix + ENEMY_PROPS_IDX)	;1c33	dd cb 00 ae
+
+    ; Reset bit #5 (new enemy on the right) of NEW_GUY_SIDE ==> We can add
+	ld hl,NEW_GUY_SIDE	;1c37	21 60 e2
+	res 5,(hl)		    ;1c3a	cb ae
+	ret			        ;1c3c	c9
+
+; Check if we can add a new enemy of the left.
+; We can add a new one if the distance |THOMAS_POSITION - ENEMY_POSITION| >=  0x1000
+CHECK_RESET_NEW_ENEMY_ON_THE_LEFT:
+	call GET_ENEMY_POS_IN_HL	;1c3d	cd 8a 1c    HL = ENEMY_POSITION
+	ld de,0x1000		        ;1c40	11 00 10    DE = 0x1000
+	add hl,de			        ;1c43	19          HL = ENEMY_POSITION + 0x1000
+
+	ld de,(THOMAS_POSITION)		;1c44	ed 5b 12 e7 DE = THOMAS_POSITION
+	sbc hl,de		            ;1c48	ed 52       HL = ENEMY_POSITION + 0x1000 - THOMAS_POSITION
+    
+    ; Check carry
+    ; Carry if
+    ;       THOMAS_POSITION >= ENEMY_POSITION + 0x1000
+    ;       THOMAS_POSITION - ENEMY_POSITION >=  0x1000
+    
+	ret c			            ;1c4a	d8
+    
+    ; we can add guys on the left
+	res 3,(ix + ENEMY_PROPS_IDX)		;1c4b	dd cb 00 9e
+
+    ; Reset bit #3 (new enemy on the left) of NEW_GUY_SIDE  ==> We can add
+	ld hl,NEW_GUY_SIDE		            ;1c4f	21 60 e2
+	res 3,(hl)		                    ;1c52	cb 9e
+	ret			                        ;1c54	c9
 
 l1c55h:
 	dec b			;1c55	05 	. 
