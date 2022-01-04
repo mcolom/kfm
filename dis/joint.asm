@@ -5638,6 +5638,7 @@ GET_EFFECTIVE_PLAYER_MOVE:
 	ret			            ;1c6f	c9
 
 ; An update of the boss position
+; SEGUIR
 sub_1c70h:
 	call GET_ENEMY_POS_IN_HL	;1c70	cd 8a 1c
 	bit 6,c		                ;1c73	cb 71 	. q 
@@ -6155,9 +6156,9 @@ l2036h:
 	add a,013h		;2036	c6 13 	. . 
 	ld (ENEMY_FRAME),a		;2038	32 de e2 	2 . . 
 	cp 016h		;203b	fe 16 	. . 
-	ld hl,l2126h		;203d	21 26 21 	! & ! 
+	ld hl,ENEMY_FRAMESEQ_TABLE4		;203d	21 26 21 	! & ! 
 	jr c,l2045h		;2040	38 03 	8 . 
-	ld hl,0212ch		;2042	21 2c 21 	! , ! 
+	ld hl,ENEMY_FRAMESEQ_TABLE3		;2042	21 2c 21 	! , ! 
 l2045h:
 	call APPLY_FRAMESEQ_FROM_HL		;2045	cd 96 1b 	. . . 
 	ld hl,l2d67h		;2048	21 67 2d 	! g - 
@@ -6289,15 +6290,15 @@ l211ch:
 	ld (bc),a			;2121	02 	. 
 	ld bc,0ffffh		;2122	01 ff ff 	. . . 
 	rst 38h			;2125	ff 	. 
-l2126h:
-	ld b,018h		;2126	06 18 	. . 
-	ex af,af'			;2128	08 	. 
-	add hl,de			;2129	19 	. 
-	ld de,006ffh		;212a	11 ff 06 	. . . 
-	ld a,(de)			;212d	1a 	. 
-	ex af,af'			;212e	08 	. 
-	dec de			;212f	1b 	. 
-	ld de,048ffh		;2130	11 ff 48 	. . H 
+
+ENEMY_FRAMESEQ_TABLE4: ; 2126
+    defb 0x06, 0x18, 0x08, 0x19, 0x11, 0xff
+    
+ENEMY_FRAMESEQ_TABLE3: ; 212c
+    defb 6, 0x1a, 0x8, 0x1b, 0x11, 0xff
+
+    ; Unused data/code here?
+    ld c, b             ;2132   48
 	ld hl,l1ff9h		;2133	21 f9 1f 	! . . 
 	nop			;2136	00 	. 
 	ld (l215dh),hl		;2137	22 5d 21 	" ] ! 
@@ -6444,14 +6445,12 @@ l2271h:
 	ld a,009h		;2275	3e 09 	> . 
 	call l247ah		;2277	cd 7a 24 	. z $ 
 	ld (ix + ENEMY_FRAME_IDX), 0	;227a	dd 36 06 00
-	ld hl,l2284h		;227e	21 84 22 	! . " 
+	ld hl,ENEMY_FRAMESEQ_TABLE5		;227e	21 84 22 	! . " 
 	jp APPLY_FRAMESEQ_FROM_HL		;2281	c3 96 1b 	. . . 
-l2284h:
-	ld b,00ah		;2284	06 0a 	. . 
-	ex af,af'			;2286	08 	. 
-	dec bc			;2287	0b 	. 
-	inc de			;2288	13 	. 
-	rst 38h			;2289	ff 	. 
+
+ENEMY_FRAMESEQ_TABLE5:
+    defb 0x06, 0x0a, 0x08, 0x0b, 0x13, 0xff
+
 l228ah:
 	and l			;228a	a5 	. 
 	ld (l1ff9h),hl		;228b	22 f9 1f 	" . . 
@@ -6670,7 +6669,7 @@ l2448h:
 	ld (ix + ENEMY_STATE_IDX), 2    ;246a	dd 36 01 02
 	ret			;246e	c9 	. 
 l246fh:
-	ld hl,l24cch		;246f	21 cc 24 	! . $ 
+	ld hl,ENEMY_FRAMESEQ_TABLE6		;246f	21 cc 24 	! . $ 
 	call APPLY_FRAMESEQ_FROM_HL		;2472	cd 96 1b 	. . . 
 	ld de,0xdc		;2475	11 dc 00 	. . . 
 	ld a,009h		;2478	3e 09 	> . 
@@ -6715,13 +6714,15 @@ l24c2h:
 	ld (bc),a			;24c7	02 	. 
 	ld bc,0ffffh		;24c8	01 ff ff 	. . . 
 	rst 38h			;24cb	ff 	. 
-l24cch:
-	ld b,007h		;24cc	06 07 	. . 
-	ex af,af'			;24ce	08 	. 
-	ex af,af'			;24cf	08 	. 
-	ld de,l18ffh		;24d0	11 ff 18 	. . . 
-	dec h			;24d3	25 	% 
-	ld sp,hl			;24d4	f9 	. 
+
+ENEMY_FRAMESEQ_TABLE6:
+    defb 0x06, 0x07, 0x08, 0x08, 0x11, 0xff
+    
+    ; Unused data/code here?
+    ;jr $+39     ; 24d2
+    jr l24f9h     ; 24d2    18 25
+    
+    ld sp,hl	 ;24d4	f9 	.     
 	rra			;24d5	1f 	. 
 	jp l3525h		;24d6	c3 25 35 	. % 5 
 	dec h			;24d9	25 	% 
@@ -6748,7 +6749,10 @@ l24cch:
 	jp po,0b47dh		;24f2	e2 7d b4 	. } . 
 	jr z,l24fbh		;24f5	28 04 	( . 
 	dec hl			;24f7	2b 	+ 
-	ld (0e2f8h),hl		;24f8	22 f8 e2 	" . . 
+
+    defb 0x22       ;24f8
+l24f9h:
+	defb 0xf8, 0xe2		;24f9	f8 e2
 l24fbh:
 	ld hl,0e2d6h		;24fb	21 d6 e2 	! . . 
 	ld a,(hl)			;24fe	7e 	~ 
