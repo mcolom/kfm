@@ -6451,7 +6451,7 @@ l2271h:
 ENEMY_FRAMESEQ_TABLE5:
     defb 0x06, 0x0a, 0x08, 0x0b, 0x13, 0xff
 
-l228ah:
+l228ah: ; Acceded from 1b2b: jr nz,l1b37h ;	20 0a 	  . 
 	and l			;228a	a5 	. 
 	ld (l1ff9h),hl		;228b	22 f9 1f 	" . . 
 	add hl,bc			;228e	09 	. 
