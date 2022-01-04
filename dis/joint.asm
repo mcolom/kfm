@@ -203,8 +203,8 @@ GRIPPING_ENERGY_DECREASE_DSW_STEP: EQU 7
 ; releasing Thomas.
 ;ENEMY_STEADY_COUNTER_IDX: EQU 11
 
-;ENEMY_REACTION_L_IDX: EQU 12
-;ENEMY_REACTION_H_IDX: EQU 13
+;ENEMY_FRAMESEQ_PTR_L_IDX: EQU 12
+;ENEMY_FRAMESEQ_PTR_H_IDX: EQU 13
 
 ; ENEMY_ATTACK_STEP_IDX: EQU 14
 
@@ -375,9 +375,9 @@ ENEMY_STEADY_COUNTER: EQU TBL_ENEMIES + ENEMY_STEADY_COUNTER_IDX
 ;   5C, 1C: knifer attacked
 ;   5E, 1C: knifer falling
 
-ENEMY_REACTION_L_IDX: EQU 12
-ENEMY_REACTION_H_IDX: EQU 13
-ENEMY_REACTION: EQU TBL_ENEMIES + ENEMY_REACTION_L_IDX
+ENEMY_FRAMESEQ_PTR_L_IDX: EQU 12
+ENEMY_FRAMESEQ_PTR_H_IDX: EQU 13
+ENEMY_FRAMESEQ_PTR: EQU TBL_ENEMIES + ENEMY_FRAMESEQ_PTR_L_IDX
 
 ; When the action of the gripper is to remove energy, the
 ; energy decrease rate is also governed by this counter.
@@ -4707,7 +4707,7 @@ l1626h:
 	ld hl,NUM_GRIPPING		;1626	21 1a e7 	! . . 
 	dec (hl)			;1629	35 	5 
 	ld a,009h		;162a	3e 09 	> . 
-	jp l1b90h		;162c	c3 90 1b 	. . . 
+	jp APPLY_FRAMESEQ_TABLE1		;162c	c3 90 1b 	. . . 
 l162fh:
 	ld hl,06a7bh		;162f	21 7b 6a 	! { j 
 l1632h:
@@ -4831,9 +4831,9 @@ l170bh:
 	pop af			;171d	f1 	. 
 	jr z,l173dh		;171e	28 1d 	( . 
 	ld de,0ffd6h		;1720	11 d6 ff 	. . . 
-	call GET_ENEMY_REACTION_IN_HL		;1723	cd ac 1c 	. . . 
+	call GET_ENEMY_FRAMESEQ_PTR_IN_HL		;1723	cd ac 1c 	. . . 
 	add hl,de			;1726	19 	. 
-	call SET_ENEMY_REACTION_FROM_HL		;1727	cd a5 1c 	. . . 
+	call SET_ENEMY_FRAMESEQ_PTR_FROM_HL		;1727	cd a5 1c 	. . . 
 	ex de,hl			;172a	eb 	. 
 	call GET_ENEMY_HEIGHT_IN_HL		;172b	cd 9e 1c 	. . . 
 	add hl,de			;172e	19 	. 
@@ -4900,11 +4900,11 @@ l1796h:
 	call sub_2ee2h		;17a1	cd e2 2e 	. . . 
 	ld a,007h		;17a4	3e 07 	> . 
 	push af			;17a6	f5 	. 
-	call GET_ENEMY_REACTION_IN_HL		;17a7	cd ac 1c 	. . . 
+	call GET_ENEMY_FRAMESEQ_PTR_IN_HL		;17a7	cd ac 1c 	. . . 
 	ex de,hl			;17aa	eb 	. 
 	ld hl,0		;17ab	21 00 00 	! . . 
 	sbc hl,de		;17ae	ed 52 	. R 
-	call SET_ENEMY_REACTION_FROM_HL		    ;17b0	cd a5 1c
+	call SET_ENEMY_FRAMESEQ_PTR_FROM_HL		    ;17b0	cd a5 1c
 	set 1,(ix + ENEMY_STEADY_COUNTER_IDX)	;17b3	dd cb 0b ce
 	pop af			;17b7	f1 	. 
 	jr l1768h		;17b8	18 ae 	. . 
@@ -4929,12 +4929,12 @@ l17d7h:
 	ld a,091h		;17da	3e 91 	> . 
 	call PLAY_SOUND		;17dc	cd fe 0d 	. . . 
 sub_17df:
-	ld hl,01c5bh		;17df	21 5b 1c 	! [ . 
-	jp l1b96h		;17e2	c3 96 1b 	. . . 
+	ld hl,ENEMY_FRAMESEQ_TABLE2		;17df	21 5b 1c 	! [ . 
+	jp APPLY_FRAMESEQ_FROM_HL		;17e2	c3 96 1b 	. . . 
 l17e5h:
 	ld (ix + ENEMY_STATE_IDX),00ah		;17e5	dd 36 01 0a
 	ld hl,003a0h		                ;17e9	21 a0 03
-	call SET_ENEMY_REACTION_FROM_HL		;17ec	cd a5 1c
+	call SET_ENEMY_FRAMESEQ_PTR_FROM_HL		;17ec	cd a5 1c
 	ld hl,00028h		;17ef	21 28 00 	! ( . 
 	ld (ix + 14),l		;17f2	dd 75 0e 	. u . 
 	ld (ix + 15),h		;17f5	dd 74 0f 	. t . 
@@ -5370,7 +5370,7 @@ sub_1ad2h:
 	ret nc			;1adb	d0 	. 
 	push af			;1adc	f5 	. 
 	and 00fh		;1add	e6 0f 	. . 
-	call sub_1b8eh		;1adf	cd 8e 1b 	. . . 
+	call APPLY_FRAMESEQ_TABLE1_FRAME_A_PLUS_4		;1adf	cd 8e 1b 	. . . 
 	call GET_ENEMY_POS_IN_DE		;1ae2	cd 91 1c 	. . . 
 	pop af			;1ae5	f1 	. 
 	ret			;1ae6	c9 	. 
@@ -5483,17 +5483,17 @@ l1b89h:
 	ret			        ;1b8d	c9
 
 
-sub_1b8eh:
+APPLY_FRAMESEQ_TABLE1_FRAME_A_PLUS_4:
 	add a,004h		;1b8e	c6 04 	. . 
-l1b90h:
+APPLY_FRAMESEQ_TABLE1:
 	ld (ix + ENEMY_FRAME_IDX),a		;1b90	dd 77 06 	. w . 
-	ld hl,l1c55h		;1b93	21 55 1c 	! U . 
-l1b96h:
+	ld hl,ENEMY_FRAMESEQ_TABLE1		;1b93	21 55 1c 	! U . 
+APPLY_FRAMESEQ_FROM_HL:
 	ld (ix + ENEMY_STATE_IDX), 1 ;1b96	dd 36 01 01 1=enemy disappears
 	ld a,(hl)			;1b9a	7e 	~ 
 	inc hl			;1b9b	23 	# 
 	ld (ix + ENEMY_FRAME_COUNTER_IDX),a		;1b9c	dd 77 07 level 1
-	call SET_ENEMY_REACTION_FROM_HL		    ;1b9f	cd a5 1c
+	call SET_ENEMY_FRAMESEQ_PTR_FROM_HL		    ;1b9f	cd a5 1c
 	xor a			;1ba2	af 	. 
 	ld (ix + ENEMY_ATTACK_STEP_IDX),a		;1ba3	dd 77 0e level 1
 	ld (ix + THOMAS_LAST_SHAKE_MOVE),a	;1ba6	dd 77 0f level 1
@@ -5502,7 +5502,7 @@ l1b96h:
 l1baah:
 	dec (ix + ENEMY_FRAME_COUNTER_IDX)	;1baa	dd 35 07 level 1
 	jp nz,l1bc4h		                ;1bad	c2 c4 1b
-	call GET_ENEMY_REACTION_IN_HL		    ;1bb0	cd ac 1c
+	call GET_ENEMY_FRAMESEQ_PTR_IN_HL		    ;1bb0	cd ac 1c
 	ld a,(hl)			;1bb3	7e 	~ 
 	and a			;1bb4	a7 	. 
 	jp m,REMOVE_ENEMY		;1bb5	fa 7a 1b 	. z . 
@@ -5511,7 +5511,7 @@ l1baah:
 	ld a,(hl)			;1bbc
 	inc hl			;1bbd	23
 	ld (ix + ENEMY_FRAME_COUNTER_IDX),a		;1bbe	dd 77 07 level 1
-	call SET_ENEMY_REACTION_FROM_HL		    ;1bc1	cd a5 1c
+	call SET_ENEMY_FRAMESEQ_PTR_FROM_HL		    ;1bc1	cd a5 1c
 l1bc4h:
     ; Question:
     ; Why are we mising ENEMY_ATTACK_STEP_IDX and THOMAS_LAST_SHAKE_MOVE and adding 16h?
@@ -5617,17 +5617,14 @@ CHECK_RESET_NEW_ENEMY_ON_THE_LEFT:
 	res 3,(hl)		                    ;1c52	cb 9e
 	ret			                        ;1c54	c9
 
-l1c55h:
-	dec b			;1c55	05 	. 
-	rlca			;1c56	07 	. 
-	rlca			;1c57	07 	. 
-	ex af,af'			;1c58	08 	. 
-	defb 011h, 0ffh, 005h
-	rlca			;1c5c	07 	. 
-	ld a,(bc)			;1c5d	0a 	. 
-	ex af,af'			;1c5e	08 	. 
-	rla			;1c5f	17 	. 
-	rst 38h			;1c60	ff
+; Tables of ENEMY_FRAME_COUNTER values, terminated with 0ffh.
+; We shall refer to these sequences of frames as "FRAMESEQS".
+ENEMY_FRAMESEQ_TABLE1: ; 1c55
+    defb 5, 7, 7, 8, 011h, 0ffh
+
+ENEMY_FRAMESEQ_TABLE2: ; 1c5b
+    defb 5, 7, 0xa, 8, 0x17, 0xff
+
 
 ; Get the effective player move
 ; If in demo, use PLAYER_MOVE, PLAYER_CONTROLS (direct input) otherwise
@@ -5683,14 +5680,14 @@ GET_ENEMY_HEIGHT_IN_HL:
 	ld h,(ix + ENEMY_HEIGHT_H_IDX)		;1ca1	dd 66 05
 	ret			;1ca4	c9 	. 
 
-SET_ENEMY_REACTION_FROM_HL:
-	ld (ix + ENEMY_REACTION_L_IDX),l		;1ca5	dd 75 0c
-	ld (ix + ENEMY_REACTION_H_IDX),h	;1ca8	dd 74 0d
+SET_ENEMY_FRAMESEQ_PTR_FROM_HL:
+	ld (ix + ENEMY_FRAMESEQ_PTR_L_IDX),l		;1ca5	dd 75 0c
+	ld (ix + ENEMY_FRAMESEQ_PTR_H_IDX),h	;1ca8	dd 74 0d
 	ret			;1cab	c9 	. 
 
-GET_ENEMY_REACTION_IN_HL:
-	ld l,(ix + ENEMY_REACTION_L_IDX)		;1cac	dd 6e 0c
-	ld h,(ix + ENEMY_REACTION_H_IDX)	;1caf	dd 66 0d
+GET_ENEMY_FRAMESEQ_PTR_IN_HL:
+	ld l,(ix + ENEMY_FRAMESEQ_PTR_L_IDX)		;1cac	dd 6e 0c
+	ld h,(ix + ENEMY_FRAMESEQ_PTR_H_IDX)	;1caf	dd 66 0d
 	ret			;1cb2	c9 	. 
 
 sub_1cb3h:
@@ -6162,7 +6159,7 @@ l2036h:
 	jr c,l2045h		;2040	38 03 	8 . 
 	ld hl,0212ch		;2042	21 2c 21 	! , ! 
 l2045h:
-	call l1b96h		;2045	cd 96 1b 	. . . 
+	call APPLY_FRAMESEQ_FROM_HL		;2045	cd 96 1b 	. . . 
 	ld hl,l2d67h		;2048	21 67 2d 	! g - 
 	ld de,l00d8h		;204b	11 d8 00 	. . . 
 	call sub_2d19h		;204e	cd 19 2d 	. . - 
@@ -6448,7 +6445,7 @@ l2271h:
 	call l247ah		;2277	cd 7a 24 	. z $ 
 	ld (ix + ENEMY_FRAME_IDX), 0	;227a	dd 36 06 00
 	ld hl,l2284h		;227e	21 84 22 	! . " 
-	jp l1b96h		;2281	c3 96 1b 	. . . 
+	jp APPLY_FRAMESEQ_FROM_HL		;2281	c3 96 1b 	. . . 
 l2284h:
 	ld b,00ah		;2284	06 0a 	. . 
 	ex af,af'			;2286	08 	. 
@@ -6643,7 +6640,7 @@ l2409h:
 	bit 0,(ix-001h)		;2421	dd cb ff 46 	. . . F 
 	jr nz,l23d3h		;2425	20 ac 	  . 
 l2427h:
-	ld a,(ENEMY_REACTION)		;2427	3a e4 e2 	: . . 
+	ld a,(ENEMY_FRAMESEQ_PTR)		;2427	3a e4 e2 	: . . 
 	ld (ENEMY_FRAME),a		;242a	32 de e2 	2 . . 
 	ld (ix + ENEMY_STATE_IDX),004h		;242d	dd 36 01 04
 	ret			;2431	c9 	. 
@@ -6664,7 +6661,7 @@ l2448h:
 	ld hl,l2d6dh		;2450	21 6d 2d 	! m - 
 	call sub_2d19h		;2453	cd 19 2d 	. . - 
 	jr c,l246fh		;2456	38 17 	8 . 
-	ld (ix + ENEMY_REACTION_L_IDX),b		    ;2458	dd 70 0c
+	ld (ix + ENEMY_FRAMESEQ_PTR_L_IDX),b		    ;2458	dd 70 0c
 	ld (ix + ENEMY_FRAME_COUNTER_IDX), 6	;245b	dd 36 07 06 level 2
 	ld a,(ix-002h)		;245f	dd 7e fe 	. ~ . 
 	ld (ix-002h),01ch		;2462	dd 36 fe 1c 	. 6 . . 
@@ -6674,7 +6671,7 @@ l2448h:
 	ret			;246e	c9 	. 
 l246fh:
 	ld hl,l24cch		;246f	21 cc 24 	! . $ 
-	call l1b96h		;2472	cd 96 1b 	. . . 
+	call APPLY_FRAMESEQ_FROM_HL		;2472	cd 96 1b 	. . . 
 	ld de,0xdc		;2475	11 dc 00 	. . . 
 	ld a,009h		;2478	3e 09 	> . 
 l247ah:
@@ -6923,7 +6920,7 @@ l264bh:
 	ld (hl),a			;266c	77 	w 
 	ret			;266d	c9 	. 
 l266eh:
-	call l1b96h		;266e	cd 96 1b 	. . . 
+	call APPLY_FRAMESEQ_FROM_HL		;266e	cd 96 1b 	. . . 
 	ld l,(ix + ENEMY_POS_L_IDX)		;2671	dd 6e 02
 	ld h,(ix + ENEMY_POS_H_IDX)		;2674	dd 66 03
 	ld de,000d7h		;2677	11 d7 00 	. . . 
@@ -7031,8 +7028,8 @@ l2737h:
 	ld (ix + ENEMY_FRAME_IDX), 3	;274e	dd 36 06 03
 l2752h:
 	ld hl,(THOMAS_POSITION)		;2752	2a 12 e7 	* . . 
-	ld e,(ix + ENEMY_REACTION_L_IDX)		;2755	dd 5e 0c
-	ld d,(ix + ENEMY_REACTION_H_IDX)	;2758	dd 56 0d
+	ld e,(ix + ENEMY_FRAMESEQ_PTR_L_IDX)		;2755	dd 5e 0c
+	ld d,(ix + ENEMY_FRAMESEQ_PTR_H_IDX)	;2758	dd 56 0d
 	sbc hl,de		;275b	ed 52 	. R 
 	ex de,hl			;275d	eb
     ; Bit 6: looking direction
@@ -7126,7 +7123,7 @@ l2800h:
 	ld hl,0		;2830	21 00 00 	! . . 
 	ld de,(0e2f4h)		;2833	ed 5b f4 e2 	. [ . . 
 	sbc hl,de		;2837	ed 52 	. R 
-	ld (ENEMY_REACTION),hl		;2839	22 e4 e2 	" . . 
+	ld (ENEMY_FRAMESEQ_PTR),hl		;2839	22 e4 e2 	" . . 
 	ret			;283c	c9 	. 
 l283dh:
     ; Weird negative addressing here.
@@ -7514,7 +7511,7 @@ l2b04h:
 	ld (0e2d6h),a		;2b0d	32 d6 e2 	2 . . 
 l2b10h:
 	ld hl,l2c69h		;2b10	21 69 2c 	! i , 
-	call l1b96h		;2b13	cd 96 1b 	. . . 
+	call APPLY_FRAMESEQ_FROM_HL		;2b13	cd 96 1b 	. . . 
 	ld hl,l2d67h		;2b16	21 67 2d 	! g - 
 	ld de,0xde		;2b19	11 de 00 	. . . 
 	call sub_2d19h		;2b1c	cd 19 2d 	. . - 
@@ -7540,7 +7537,7 @@ l2b28h:
 	ld de,0016h+2		;2b48	11 18 00 	. . . 
 	call l2c95h		;2b4b	cd 95 2c 	. . , 
 l2b4eh:
-	ld hl,(ENEMY_REACTION)		;2b4e	2a e4 e2 	* . . 
+	ld hl,(ENEMY_FRAMESEQ_PTR)		;2b4e	2a e4 e2 	* . . 
 	dec (ix + ENEMY_FRAME_COUNTER_IDX)		;2b51	dd 35 07 level 5
 	jr nz,l2b6ah		;2b54	20 14 	  . 
 	inc hl			;2b56	23 	# 
@@ -7553,7 +7550,7 @@ l2b4eh:
 	ld a,(hl)			            ;2b62	7e
 	ld (ix + ENEMY_FRAME_COUNTER_IDX),a	;2b63	dd 77 07
 	inc hl			;2b66	23 	# 
-	ld (ENEMY_REACTION),hl		;2b67	22 e4 e2 	" . . 
+	ld (ENEMY_FRAMESEQ_PTR),hl		;2b67	22 e4 e2 	" . . 
 l2b6ah:
 	ld a,(hl)			;2b6a	7e 	~ 
 	add a,(ix + 4)		;2b6b	dd 86 04 	. . . 
@@ -7657,7 +7654,7 @@ l2bddh:
 	ld (0e2d7h),a		;2c0d	32 d7 e2 	2 . . 
 	ld (0e2d6h),a		;2c10	32 d6 e2 	2 . . 
 l2c13h:
-	ld (ENEMY_REACTION),hl		;2c13	22 e4 e2 	" . . 
+	ld (ENEMY_FRAMESEQ_PTR),hl		;2c13	22 e4 e2 	" . . 
 	ret			;2c16	c9 	. 
 l2c17h:
 	ld a,015h		;2c17	3e 15 	> . 
