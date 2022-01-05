@@ -321,10 +321,12 @@ TBL_ENEMIES: EQU 0xE2D8
 ; Bit 1: 1 if it's a boss
 ENEMY_PROPS_IDX: EQU 0
 
-; 1: enemy disappears
-; 3: unknown (see 1a3c)
+; 0: enemy advances towards Thomas
+; 1: enemy disappears dies
+; 2, 3: enemy waits that Thomas approaches before attacking
 ; 4: enemy goes back, without turning back
 ; 5: enemy goes back, turning back
+; 8: enemy stops and replica appears
 ; 9: enemy is gripping
 ENEMY_STATE_IDX: EQU 1
 ENEMY_STATE: EQU TBL_ENEMIES + ENEMY_STATE_IDX ; Enemy's state
@@ -5832,8 +5834,8 @@ l1db9h:
 sub_1dbfh:
 	push hl			;1dbf	e5 	. 
 	push de			;1dc0	d5 	. 
-	ld hl,(TIME)		;1dc1	2a 03 e0 	* . . 
-	ld de,0fccdh		;1dc4	11 cd fc 	. . . 
+	ld hl,(TIME)	;1dc1	2a 03 e0 	* . . 
+	ld de, -819		;1dc4	11 cd fc 	. . . 
 	add hl,de			;1dc7	19 	. 
 	ld a,095h		;1dc8	3e 95 	> . 
 	jr c,l1dceh		;1dca	38 02 	8 . 
@@ -7117,7 +7119,7 @@ l27dfh:
 	jr z,l284fh		;27e9	28 64 Get out if enemy is dead
 	push ix		;27eb	dd e5 	. . 
 	ld ix,TBL_ENEMIES		;27ed	dd 21 d8 e2 	. ! . . 
-	call sub_287eh		;27f1	cd 7e 28 	. ~ ( 
+	call MAGICIAN_REPLICA_APPEARS_OR_DISAPPEARS_STATE		;27f1	cd 7e 28 	. ~ ( 
 	ld (ix + FRAME_COUNTER_IDX + 16), 8	            ;27f4	dd 36 17 08
 	ld (ix + CURRENT_FRAME_IDX + 16), 26	        ;27f8	dd 36 16 1a
 	ld (ix + ENEMY_STATE_IDX + 16), 10    ;27fc	dd 36 11 0a
@@ -7183,10 +7185,10 @@ l285ch:
 	ld (ix + CURRENT_FRAME_IDX + 16), 30	;2876	dd 36 16 1e 	. 6 . . 
 	ld (ix + ENEMY_STATE_IDX + 16), 9		;287a	dd 36 11 09 	. 6 . .
 
-; Some state/frame update of the boss
-; SEGUIR
-sub_287eh:
-	ld (ix + ENEMY_STATE_IDX), 8	;287e	dd 36 01 08
+; Update state and frame of replica (only at level 4) when the
+; replica appears.
+MAGICIAN_REPLICA_APPEARS_OR_DISAPPEARS_STATE:
+	ld (ix + ENEMY_STATE_IDX), 8	;287e	dd 36 01 08     8: enemy stops and replica appears/disappears
 	ld (ix + ENEMY_FRAME_IDX), 26	;2882	dd 36 06 1a
 	ret			;2886	c9 	. 
 
@@ -7310,6 +7312,7 @@ l2952h:
 	ld de, 18  		;2952	11 12 00 	. . . 
 	ret			;2955	c9 	. 
 
+    ; Unused code?
 	call l1be2h		;2956	cd e2 1b 	. . . 
 	ld de,0f760h		;2959	11 60 f7 	. ` . 
 	add hl,de			;295c	19 	. 
