@@ -5527,7 +5527,7 @@ l1bc4h:
 	sbc hl,de		;1bd7	ed 52 	. R 
 	call SET_ENEMY_HEIGHT_FROM_HL		;1bd9	cd 97 1c 	. . . 
 	ld de,l0039h		;1bdc	11 39 00 	. 9 . 
-	call sub_1c7ah		;1bdf	cd 7a 1c 	. z . 
+	call ENEMY_GO_BACK_POSITION		;1bdf	cd 7a 1c 	. z . 
 l1be2h:
 	call GET_ENEMY_POS_IN_HL		;1be2	cd 8a 1c 	. . . 
 	jr l1c08h		;1be5	18 21 	. ! 
@@ -5539,7 +5539,7 @@ l1beah:
 sub_1befh:
 	ld de,l0036h		;1bef	11 36 00 	. 6 . 
 l1bf2h:
-	call sub_1c7ah		;1bf2	cd 7a 1c 	. z . 
+	call ENEMY_GO_BACK_POSITION		;1bf2	cd 7a 1c 	. z . 
 l1bf5h:
 	dec (ix + ENEMY_FRAME_COUNTER_IDX)		;1bf5	dd 35 07 ; level 1.
 	jr nz,l1c08h		;1bf8	20 0e 	  . 
@@ -5637,13 +5637,14 @@ GET_EFFECTIVE_PLAYER_MOVE:
 	and 00fh		        ;1c6d	e6 0f Consider only joystick directions, not buttons
 	ret			            ;1c6f	c9
 
-; Make an enemy (gripper, knifer, tom-tom, or boss) advance (or go back)
-; his position.
+; Make an enemy (gripper, knifer, tom-tom, or boss) advance his position.
+; It can be a position or negative amount whether the enemy is on the right or
+; the left of Thomas.
 ;
 ; Increment or decrement ENEMY_POS.
-; ENEMY_POS = ENEMY_POS + DE if ENEMY_POS else ENEMY_POS - DE.
+; ENEMY_POS = ENEMY_POS + DE if ENEMY_POS >= 64 else ENEMY_POS - DE.
 ;
-; Input DE: offset to add of subtract.
+; Input DE: offset to add or subtract.
 ENEMY_ADVANCE_POSITION:
 	call GET_ENEMY_POS_IN_HL	;1c70	cd 8a 1c    HL = ENEMY_POS
 	bit 6,c		                ;1c73	cb 71       2**6 = 64
@@ -5656,8 +5657,15 @@ l1c77h:
 	add hl,de			        ;1c77	19          ENEMY_POS += DE
 	jr SET_ENEMY_POS_FROM_HL		;1c78	18 09 	. . 
     
-; SEGUIR
-sub_1c7ah:
+; Make an enemy (gripper, knifer, tom-tom, or boss) move back his position.
+; It's used for example when a knifer turns back, or when a boss goes back.
+;
+; Increment or decrement ENEMY_POS.
+; ENEMY_POS = ENEMY_POS - DE if ENEMY_POS >= 64 else ENEMY_POS + DE.
+;
+; Input DE: offset to add of subtract.
+
+ENEMY_GO_BACK_POSITION:
 	call GET_ENEMY_POS_IN_HL		;1c7a	cd 8a 1c 	. . . 
 	bit 6,c		;1c7d	cb 71 	. q 
 	jr z,l1c77h		;1c7f	28 f6 	( . 
@@ -5881,7 +5889,7 @@ sub_1dfdh:
 	set 7,(ix + 0)		;1e1c	dd cb 00 fe 	. . . . 
 l1e20h:
 	ld de,0x72		;1e20	11 72 00 	. r . 
-	call sub_1c7ah		;1e23	cd 7a 1c 	. z . 
+	call ENEMY_GO_BACK_POSITION		;1e23	cd 7a 1c 	. z . 
 	call l1be2h		;1e26	cd e2 1b 	. . . 
 	ld hl,(0e327h)		;1e29	2a 27 e3 	* ' . 
 	ld de,001bh		;1e2c	11 1b 00 	. . . 
@@ -6156,7 +6164,7 @@ l2011h:
 	sbc hl,de		;2025	ed 52 	. R 
 	jr c,l200dh		;2027	38 e4 	8 . 
 	ld de,0x55		;2029	11 55 00 	. U . 
-	call sub_1c7ah		;202c	cd 7a 1c 	. z . 
+	call ENEMY_GO_BACK_POSITION		;202c	cd 7a 1c 	. z . 
 	jr l2011h		;202f	18 e0 	. . 
 l2031h:
 	ld (ix + ENEMY_STATE_IDX),006h		;2031	dd 36 01 06 	. 6 . . 
@@ -6660,7 +6668,7 @@ l2427h:
 	sbc hl,de		;243c	ed 52 	. R 
 	jr nc,l2405h		;243e	30 c5 	0 . 
 	ld de,0x55		;2440	11 55 00 	. U . 
-	call sub_1c7ah		;2443	cd 7a 1c 	. z . 
+	call ENEMY_GO_BACK_POSITION		;2443	cd 7a 1c 	. z . 
 	jr l2409h		;2446	18 c1 	. . 
 l2448h:
 	ld b,(ix + ENEMY_FRAME_IDX)	;2448	dd 46 06
@@ -7461,7 +7469,7 @@ l2a87h:
 	djnz $-49		;2a8b	10 cd 	. . 
 	inc a			;2a8d	3c 	< 
 	add hl,hl			;2a8e	29
-	call sub_1c7ah		;2a8f	cd 7a 1c
+	call ENEMY_GO_BACK_POSITION		;2a8f	cd 7a 1c
 	call sub_2ab6h		;2a92	cd b6 2a
 	call sub_2ba0h		;2a95	cd a0 2b
 	ld a,(ix + ENEMY_MOVE_COUNTER_L_IDX)		;2a98	dd 7e 08 level 5
@@ -7485,7 +7493,7 @@ sub_2ab6h:
 l2ac5h:
 	jp l1be2h		;2ac5	c3 e2 1b 	. . . 
 	ld de,(0e1abh)		;2ac8	ed 5b ab e1 	. [ . . 
-	call sub_1c7ah		;2acc	cd 7a 1c 	. z . 
+	call ENEMY_GO_BACK_POSITION		;2acc	cd 7a 1c 	. z . 
 	call sub_2ab6h		;2acf	cd b6 2a 	. . * 
 	call sub_2ba0h		;2ad2	cd a0 2b 	. . + 
 	dec (ix + ENEMY_FRAME_COUNTER_IDX)		;2ad5	dd 35 07 level 5
@@ -8509,7 +8517,7 @@ l315dh:
 	ld de,(0e372h)		;3160	ed 5b 72 e3 	. [ r . 
 	jr l3174h		;3164	18 0e 	. . 
 	ld de,(0e376h)		;3166	ed 5b 76 e3 	. [ v . 
-	call sub_1c7ah		;316a	cd 7a 1c 	. z . 
+	call ENEMY_GO_BACK_POSITION		;316a	cd 7a 1c 	. z . 
 l316dh:
 	call l1be2h		;316d	cd e2 1b 	. . . 
 	ld de,(0e374h)		;3170	ed 5b 74 e3 	. [ t . 
@@ -8783,7 +8791,7 @@ l33c2h:
 	call PLAY_SOUND		;33d0	cd fe 0d 	. . . 
 	ret			;33d3	c9 	. 
 	ld de,(0e36eh)		;33d4	ed 5b 6e e3 	. [ n . 
-	call sub_1c7ah		;33d8	cd 7a 1c 	. z . 
+	call ENEMY_GO_BACK_POSITION		;33d8	cd 7a 1c 	. z . 
 	call l1be2h		;33db	cd e2 1b 	. . . 
 	ld de,0e400h		;33de	11 00 e4 	. . . 
 	add hl,de			;33e1	19 	. 
@@ -8835,7 +8843,7 @@ l3435h:
 	jp l33b3h		;3441	c3 b3 33 	. . 3 
 l3444h:
 	ld de,(0e372h)		;3444	ed 5b 72 e3 	. [ r . 
-	call sub_1c7ah		;3448	cd 7a 1c 	. z . 
+	call ENEMY_GO_BACK_POSITION		;3448	cd 7a 1c 	. z . 
 	call l1be2h		;344b	cd e2 1b 	. . . 
 	call sub_37bfh		;344e	cd bf 37 	. . 7 
 	jp c,l3315h		;3451	da 15 33 	. . 3 
@@ -8856,11 +8864,11 @@ l3474h:
 	ld (ix + CURRENT_FRAME_IDX),a		;3474	dd 77 06 	. w . 
 	ret			;3477	c9 	. 
 	ld de,(0e374h)		;3478	ed 5b 74 e3 	. [ t . 
-	call sub_1c7ah		;347c	cd 7a 1c 	. z . 
+	call ENEMY_GO_BACK_POSITION		;347c	cd 7a 1c 	. z . 
 	ld hl,(0e36ah)		;347f	2a 6a e3 	* j . 
 	jr l348eh		;3482	18 0a 	. . 
 	ld de,(0e376h)		;3484	ed 5b 76 e3 	. [ v . 
-	call sub_1c7ah		;3488	cd 7a 1c 	. z . 
+	call ENEMY_GO_BACK_POSITION		;3488	cd 7a 1c 	. z . 
 	ld hl,(ME_INITIAL_FALL_SPEED)		;348b	2a 6c e3 	* l . 
 l348eh:
 	ld (0e800h),hl		;348e	22 00 e8 	" . . 
@@ -8948,7 +8956,7 @@ l352ch:
 	nop			;3535	00 	. 
 	ld e,d			;3536	5a 	Z 
 	ld de,(0e363h)		;3537	ed 5b 63 e3 	. [ c . 
-	call sub_1c7ah		;353b	cd 7a 1c 	. z . 
+	call ENEMY_GO_BACK_POSITION		;353b	cd 7a 1c 	. z . 
 	call l1be2h		;353e	cd e2 1b 	. . . 
 	call sub_3773h		;3541	cd 73 37 	. s 7 
 	jp c,l3315h		;3544	da 15 33 	. . 3 
@@ -12019,7 +12027,7 @@ l4d7fh:
 	jr l4da9h
 l4da0h:
 	ld de,l0036h
-	call sub_1c7ah
+	call ENEMY_GO_BACK_POSITION
 l4da6h:
 	call sub_4821h
 l4da9h:
