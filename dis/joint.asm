@@ -7277,7 +7277,7 @@ l2907h:
 	ld (ix + ENEMY_FRAME_IDX), 0		    ;290f	dd 36 06 00
 	ret			                            ;2913	c9
 l2914h:
-	call sub_293ch		;2914	cd 3c 29 	. < ) 
+	call CHECK_AND_UPDATE_MR_X_FRAME		;2914	cd 3c 29 	. < ) 
 	call ENEMY_ADVANCE_POSITION		;2917	cd 70 1c 	. p . 
 	call l1be2h		;291a	cd e2 1b 	. . . 
 	ld de,0f760h		;291d	11 60 f7 	. ` . 
@@ -7296,21 +7296,33 @@ l2937h:
 	ld (ix + ENEMY_STATE_IDX), 6	;2937	dd 36 01 06
 	ret			;293b	c9 	. 
 
-; SEGUIR
-sub_293ch:
-	dec (ix + ENEMY_FRAME_COUNTER_IDX)		;293c	dd 35 07 level 5
-	jr nz,l2952h		;293f	20 11 	  . 
-	ld (ix + ENEMY_FRAME_COUNTER_IDX), 9	;2941	dd 36 07 09 level 5
+; Check and update Mr. X frame at level 5
+CHECK_AND_UPDATE_MR_X_FRAME:
+    ; Check if it's time to update the frame of Mr. X
+	dec (ix + ENEMY_FRAME_COUNTER_IDX)		;293c	dd 35 07
+	jr nz,l2952h		                    ;293f	20 11 Exit if no frame update needed.
+    
+    ; We need to update the frame
+    
+	ld (ix + ENEMY_FRAME_COUNTER_IDX), 9	;2941	dd 36 07 09 Reset frame counter
+
 	ld a,(ix + ENEMY_FRAME_IDX)		;2945	dd 7e 06
-	inc a		;2948	3c
-	cp 5		;2949	fe 05
-	jr z,l294fh		;294b	28 02
-	ld a, 4		;294d	3e 04
+	inc a		                    ;2948	3c
+
+    ; A = ENEMY_FRAME_IDX + 1;
+    ; if A == 5:
+    ;     ENEMY_FRAME_IDX = 5
+    ; else:
+    ;     ENEMY_FRAME_IDX = 4
+    
+	cp 5		                    ;2949	fe 05
+	jr z,l294fh		                ;294b	28 02
+	ld a, 4		                    ;294d	3e 04
 l294fh:
 	ld (ix + ENEMY_FRAME_IDX),a		;294f	dd 77 06
 l2952h:
-	ld de, 18  		;2952	11 12 00 	. . . 
-	ret			;2955	c9 	. 
+	ld de, 18  		                ;2952	11 12 00
+	ret			                    ;2955	c9
 
     ; Unused code?
 	call l1be2h		;2956	cd e2 1b 	. . . 
