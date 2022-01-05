@@ -4826,7 +4826,7 @@ l170bh:
 	ld a,(ix + ENEMY_FRAME_IDX)		        ;1711	dd 7e 06
 	cp 00ah		;1714	fe 0a
 	push af			;1716	f5 	. 
-	call nz,sub_1c70h		;1717	c4 70 1c 	. p . 
+	call nz,ENEMY_ADVANCE_POSITION		;1717	c4 70 1c 	. p . 
 	call l1be2h		;171a	cd e2 1b 	. . . 
 	pop af			;171d	f1 	. 
 	jr z,l173dh		;171e	28 1d 	( . 
@@ -5534,7 +5534,7 @@ l1be2h:
 sub_1be7h:
 	ld de,l0036h		;1be7	11 36 00 	. 6 . 
 l1beah:
-	call sub_1c70h		;1bea	cd 70 1c 	. p . 
+	call ENEMY_ADVANCE_POSITION		;1bea	cd 70 1c 	. p . 
 	jr l1bf5h		;1bed	18 06 	. . 
 sub_1befh:
 	ld de,l0036h		;1bef	11 36 00 	. 6 . 
@@ -5637,14 +5637,23 @@ GET_EFFECTIVE_PLAYER_MOVE:
 	and 00fh		        ;1c6d	e6 0f Consider only joystick directions, not buttons
 	ret			            ;1c6f	c9
 
-; An update of the boss position
-; SEGUIR
-sub_1c70h:
-	call GET_ENEMY_POS_IN_HL	;1c70	cd 8a 1c
-	bit 6,c		                ;1c73	cb 71 	. q 
-	jr z,l1c81h		;1c75	28 0a 	( . 
+; Make an enemy (gripper, knifer, tom-tom, or boss) advance (or go back)
+; his position.
+;
+; Increment or decrement ENEMY_POS.
+; ENEMY_POS = ENEMY_POS + DE if ENEMY_POS else ENEMY_POS - DE.
+;
+; Input DE: offset to add of subtract.
+ENEMY_ADVANCE_POSITION:
+	call GET_ENEMY_POS_IN_HL	;1c70	cd 8a 1c    HL = ENEMY_POS
+	bit 6,c		                ;1c73	cb 71       2**6 = 64
+	jr z,l1c81h		            ;1c75	28 0a       Jump if ENEMY_POS < 64
+    ; It'll do sbc hl,de ==> HL = ENEMY_POS - DE and then set ENEMY_POS
+    
+    ; ENEMY_POS >= 64
+    ; It'll do ENEMY_POS += DE
 l1c77h:
-	add hl,de			;1c77	19 	. 
+	add hl,de			        ;1c77	19          ENEMY_POS += DE
 	jr SET_ENEMY_POS_FROM_HL		;1c78	18 09 	. . 
     
 ; SEGUIR
@@ -7259,7 +7268,7 @@ l2907h:
 	ret			                            ;2913	c9
 l2914h:
 	call sub_293ch		;2914	cd 3c 29 	. < ) 
-	call sub_1c70h		;2917	cd 70 1c 	. p . 
+	call ENEMY_ADVANCE_POSITION		;2917	cd 70 1c 	. p . 
 	call l1be2h		;291a	cd e2 1b 	. . . 
 	ld de,0f760h		;291d	11 60 f7 	. ` . 
 	add hl,de			;2920	19 	. 
@@ -7321,7 +7330,7 @@ l2977h:
 	ld (ix + ENEMY_STATE_IDX), 7    ;298a	dd 36 01 07
 	ret			;298e	c9 	. 
 	ld de,(0e1abh)		;298f	ed 5b ab e1 	. [ . . 
-	call sub_1c70h		;2993	cd 70 1c 	. p . 
+	call ENEMY_ADVANCE_POSITION		;2993	cd 70 1c 	. p . 
 	call l1be2h		;2996	cd e2 1b 	. . . 
 	call sub_2ba0h		;2999	cd a0 2b 	. . + 
 	dec (ix + ENEMY_FRAME_COUNTER_IDX)		;299c	dd 35 07 level 5
@@ -8493,7 +8502,7 @@ l314ch:
 	djnz l311ch		;3151	10 c9 	. . 
 	ret			;3153	c9 	.  Why a RET here? Debug?
 	ld de,(0e376h)		;3154	ed 5b 76 e3 	. [ v . 
-	call sub_1c70h		;3158	cd 70 1c 	. p . 
+	call ENEMY_ADVANCE_POSITION		;3158	cd 70 1c 	. p . 
 	jr l316dh		;315b	18 10 	. . 
 l315dh:
 	call l1be2h		;315d	cd e2 1b 	. . . 
