@@ -404,6 +404,10 @@ ENEMY_BOOMERANG_TYPE: EQU TBL_ENEMIES + ENEMY_BOOMERANG_TYPE_IDX
 
 TBL_REPLICA: EQU TBL_ENEMIES + 16 ; 0xE2E8
 
+; Downcount counter for the replica to appear or disappear, when this
+; counter reaches zero.
+REPLICA_APPEAR_COUNTER: EQU 0xE2F8
+
 ; *******************************************************************
 
 
@@ -819,7 +823,6 @@ l0110h:
 	ld (hl),a			;0113	77 	w 
 	call CHECK_FLIPSCREEN_AND_READ_PLAYER_CONTROLS		;0114	cd 05 0d 	. . . 
 	call CHECK_UPDATE_COINS		;0117	cd 48 0d 	. H . 
-l011ah:
 	call UPDATE_PLAYER_MOVE		;011a	cd 2f 48 	. / H 
 	call SEND_NEXT_SOUND_TO_IREM_AUDIO		;011d	cd e5 0d 	. . . 
 l0120h:
@@ -883,7 +886,6 @@ l017fh:
 l0185h:
 	call sub_47b6h		;0185	cd b6 47 	. . G 
 	ld a,(FLOOR_STAGE)		;0188	3a 00 e1 	: . . 
-l018bh:
 	and a			;018b	a7 	. 
 	jr z,l019ch		;018c	28 0e 	( . 
 	cp 00ah		;018e	fe 0a 	. . 
@@ -5964,8 +5966,8 @@ l1ea1h:
 	ret c			;1ea1	d8 	. 
 	cp 003h		;1ea2	fe 03 	. . 
 	jr nz,l1each		;1ea4	20 06 	  . 
-	ld hl,0034fh		;1ea6	21 4f 03 	! O . 
-	ld (0e2f8h),hl		;1ea9	22 f8 e2 	" . . 
+	ld hl, 847		;1ea6	21 4f 03 	! O . 
+	ld (REPLICA_APPEAR_COUNTER),hl		;1ea9	22 f8 e2 	" . . 
 l1each:
 	bit 0,a		;1eac	cb 47 	. G 
 	ld c,a			;1eae	4f 	O 
@@ -6839,7 +6841,7 @@ l2575h:
 l2589h:
 	call sub_2ce8h		;2589	cd e8 2c 	. . , 
 l258ch:
-	call sub_2cd4h		;258c	cd d4 2c 	. . , 
+	call CAN_REPLICA_APPEAR		;258c	cd d4 2c 	. . , 
 	jp z,l27dfh		;258f	ca df 27 	. . ' 
 l2592h:
 	ld a,(0e012h)		;2592	3a 12 e0 	: . . 
@@ -7031,7 +7033,7 @@ l270eh:
 	call sub_2d13h		;271b	cd 13 2d 	. . - 
 	call sub_28bah		;271e	cd ba 28 	. . ( 
 	jp c,l264bh		;2721	da 4b 26 	. K & 
-	call sub_2cd4h		;2724	cd d4 2c 	. . , 
+	call CAN_REPLICA_APPEAR		;2724	cd d4 2c 	. . , 
 	jp z,l2080h		;2727	ca 80 20
     ; Bit 6: looking direction
 	bit 6,(ix + ENEMY_PROPS_IDX)		;272a	dd cb 00 76 	. . . v 
@@ -7102,8 +7104,8 @@ l27b0h:
 	ld a,(ix + ENEMY_FRAME_IDX)		;27c8	dd 7e 06 	. ~ . 
 	cp 022h		;27cb	fe 22 	. " 
 	ret nz			;27cd	c0 	. 
-	ld hl,l018bh		;27ce	21 8b 01 	! . . 
-	ld (0e2f8h),hl		;27d1	22 f8 e2
+	ld hl, 395		;27ce	21 8b 01 	! . . 
+	ld (REPLICA_APPEAR_COUNTER),hl		;27d1	22 f8 e2
     ; Set enemy is dead
 	ld (ix + ENEMY_PROPS_IDX), 0	;27d4	dd 36 00 00
 	ld hl,0e701h		            ;27d8	21 01 e7
@@ -7134,8 +7136,8 @@ l2800h:
 	ld a,(ix + ENEMY_FRAME_IDX)		    ;2811	dd 7e 06
 	cp 38		                                ;2814	fe 26
 	ret nz			;2816	c0 	. 
-	ld hl,l011ah		;2817	21 1a 01 	! . . 
-	ld (0e2f8h),hl		;281a	22 f8 e2 	" . . 
+	ld hl, 282		;2817	21 1a 01 	! . . 
+	ld (REPLICA_APPEAR_COUNTER),hl		;281a	22 f8 e2 	" . . 
 	call l27a3h		;281d	cd a3 27 	. . ' 
 	call l283dh		;2820	cd 3d 28 	. = ( 
 	ld a,r		;2823	ed 5f 	. _ 
@@ -7821,21 +7823,28 @@ sub_2cb9h:
 	set 4,(hl)		;2cd1	cb e6 	. . 
 	ret			;2cd3	c9 	. 
 
-; SEGUIR
-sub_2cd4h:
-	ld hl,(0e2f8h)		;2cd4	2a f8 e2 	* . . 
-	ld a,l			;2cd7	7d 	} 
-	or h			;2cd8	b4 	. 
-	ret nz			;2cd9	c0 	. 
-	ld a,(THOMAS_STATE)		;2cda	3a 02 e7 	: . . 
-	cp THOMAS_STATE_JUMPING_AHEAD		;2cdd	fe 09 	. . 
-	jr z,l2ce6h		;2cdf	28 05 	( . 
-	cp THOMAS_STATE_UNKNOWN		;2ce1	fe 0a 	. . 
-	jr z,l2ce6h		;2ce3	28 01 	( . 
-	ld a,h			;2ce5	7c 	| 
+; Check if the replica should appear/disappear now.
+; The replica basically can appear/disappear when REPLICA_APPEAR_COUNTER != 0 and
+; THOMAS_STATE not in (THOMAS_STATE_JUMPING_AHEAD, THOMAS_STATE_UNKNOWN).
+;
+; Used in level 4 when fighting against the magician.
+; Output: Z flag active if the replica can appear now.
+CAN_REPLICA_APPEAR:
+	ld hl,(REPLICA_APPEAR_COUNTER)	;2cd4	2a f8 e2
+	ld a,l			                ;2cd7	7d
+	or h			                ;2cd8	b4
+	ret nz			                ;2cd9	c0 Get out if REPLICA_APPEAR_COUNTER != 0
+    
+    
+	ld a,(THOMAS_STATE)		        ;2cda	3a 02 e7
+	cp THOMAS_STATE_JUMPING_AHEAD	;2cdd	fe 09
+	jr z,l2ce6h		                ;2cdf	28 05
+	cp THOMAS_STATE_UNKNOWN		    ;2ce1	fe 0a
+	jr z,l2ce6h		                ;2ce3	28 01
+	ld a,h			                ;2ce5	7c
 l2ce6h:
-	and a			;2ce6	a7 	. 
-	ret			;2ce7	c9 	. 
+	and a			                ;2ce6	a7
+	ret			                    ;2ce7	c9
 
 ;SEGUIR
 sub_2ce8h:
