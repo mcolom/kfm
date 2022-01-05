@@ -4821,9 +4821,9 @@ l16feh:
 	ld (ix + ENEMY_FRAME_COUNTER_IDX),7 	;1706	dd 36 07 07
 	ret			;170a	c9 	. 
 l170bh:
-	ld e,(ix + 14)		;170b	dd 5e 0e 	. ^ . 
-	ld d,(ix + 15)		;170e	dd 56 0f 	. V . 
-	ld a,(ix + ENEMY_FRAME_IDX)		;1711	dd 7e 06 	. ~ . 
+	ld e,(ix + ENEMY_ATTACK_STEP_IDX)		;170b	dd 5e 0e
+	ld d,(ix + ENEMY_BOOMERANG_TYPE_IDX)	;170e	dd 56 0f
+	ld a,(ix + ENEMY_FRAME_IDX)		        ;1711	dd 7e 06
 	cp 00ah		;1714	fe 0a
 	push af			;1716	f5 	. 
 	call nz,sub_1c70h		;1717	c4 70 1c 	. p . 
@@ -4846,7 +4846,7 @@ l1738h:
 	call SET_ENEMY_HEIGHT_FROM_HL		;1738	cd 97 1c 	. . . 
 	jr c,l16feh		;173b	38 c1 	8 . 
 l173dh:
-	bit 1,(ix + 11)		;173d	dd cb 0b 4e 	. . . N 
+	bit 1,(ix + ENEMY_STEADY_COUNTER_IDX)		;173d	dd cb 0b 4e 	. . . N 
 	jr nz,l175fh		;1741	20 1c 	  . 
 	call GET_ENEMY_POS_IN_HL		;1743	cd 8a 1c 	. . . 
 	ld de,0ff60h		;1746	11 60 ff 	. ` . 
@@ -4936,8 +4936,8 @@ l17e5h:
 	ld hl,003a0h		                ;17e9	21 a0 03
 	call SET_ENEMY_FRAMESEQ_PTR_FROM_HL		;17ec	cd a5 1c
 	ld hl,00028h		;17ef	21 28 00 	! ( . 
-	ld (ix + 14),l		;17f2	dd 75 0e 	. u . 
-	ld (ix + 15),h		;17f5	dd 74 0f 	. t . 
+	ld (ix + ENEMY_ATTACK_STEP_IDX),l		;17f2	dd 75 0e 	. u . 
+	ld (ix + ENEMY_BOOMERANG_TYPE_IDX),h		;17f5	dd 74 0f 	. t . 
 	xor a			;17f8	af 	. 
 	jp l1768h		;17f9	c3 68 17 	. h . 
 l17fch:
@@ -5095,7 +5095,7 @@ l18eah:
 	jr z,l195dh		;18f6	28 65 	( e 
 	dec (ix + ENEMY_FRAME_COUNTER_IDX)		;18f8	dd 35 07 	. 5 . 
 	ret nz			;18fb	c0 	. 
-	ld a,(ix + 14)		;18fc	dd 7e 0e 	. ~ . 
+	ld a,(ix + ENEMY_ATTACK_STEP_IDX)		;18fc	dd 7e 0e 	. ~ . 
 l18ffh:
 	and a			;18ff	a7 	. 
 	jp nz,l1942h		;1900	c2 42 19 	. B . 
@@ -5136,7 +5136,7 @@ sub_1931h:
 	inc hl			;1932	23 	# 
 	ld (hl),d			;1933	72 	r 
 	call sub_1dbfh		;1934	cd bf 1d 	. . . 
-	dec (ix + 14)		;1937	dd 35 0e 	. 5 . 
+	dec (ix + ENEMY_ATTACK_STEP_IDX)		;1937	dd 35 0e 	. 5 . 
 	ld (ix + ENEMY_FRAME_COUNTER_IDX),010h		;193a	dd 36 07 10 	. 6 . . 
 	inc (ix + ENEMY_FRAME_IDX)		;193e	dd 34 06 	. 4 . 
 	ret			;1941	c9 	. 
@@ -5250,11 +5250,11 @@ l1a0ah:
 	jr c,l1a1bh		;1a18	38 01 	8 . 
 	inc hl			;1a1a	23 	# 
 l1a1bh:
-	ld a,(hl)			;1a1b	7e 	~ 
-	ld (ix + ENEMY_MOVE_COUNTER_L_IDX),a		;1a1c	dd 77 08 	. w . 
-	ld (ix + 14),000h		;1a1f	dd 36 0e 00 	. 6 . . 
+	ld a,(hl)			                    ;1a1b	7e
+	ld (ix + ENEMY_MOVE_COUNTER_L_IDX),a	;1a1c	dd 77 08
+	ld (ix + ENEMY_ATTACK_STEP_IDX), 0		;1a1f	dd 36 0e 00
 	ld (ix + ENEMY_FRAME_COUNTER_IDX),00bh	;1a23	dd 36 07 0b
-	ret			;1a27	c9 	. 
+	ret			                            ;1a27	c9
 
     ; Mystery: how can one arrive here?
     ; I've checked that code at PC=1A30 was indeed executed.
@@ -5445,7 +5445,7 @@ l1b37h:
 
     ; Steps the gripper needs that Thomas shake before releasing him
 	ld (ix + ENEMY_STEADY_COUNTER_IDX), 6	;1b4c	dd 36 0b 06
-	ld (ix + 14),005h		                ;1b50	dd 36 0e 05
+	ld (ix + ENEMY_ATTACK_STEP_IDX), 5	    ;1b50	dd 36 0e 05
 
 sub_1b54h:
 	bit 2,(ix + ENEMY_PROPS_IDX)    ;1b54	dd cb 00 56 Check if guy is a kid
@@ -9127,7 +9127,9 @@ l3685h:
 	ld (ix + MAGICAL_ELEMENT_LOOKAT_IDX),a		;3693	dd 77 00
 	ld (ix + MAGICAL_ELEMENT_STATE_IDX),e		;3696	dd 73 01
 	ld (ix + CURRENT_FRAME_IDX),e	;3699	dd 73 06
-	ld (ix + 18),d		;369c	dd 72 12 	. r . 
+    
+    ; ToDo: + 18 (!) figure out why so far
+	ld (ix + 18),d		                        ;369c	dd 72 12
 	ld (ix + MAGICAL_ELEMENT_DISTANCE_H_IDX),d	;369f	dd 72 03
 	ld (ix + MAGICAL_ELEMENT_DISTANCE_L_IDX),0	;36a2	dd 36 02
 	ld hl,09000h		;36a6	21 00 90 	! . . 
