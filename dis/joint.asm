@@ -5139,7 +5139,7 @@ sub_1931h:
 	ld (hl),e			;1931	73 	s 
 	inc hl			;1932	23 	# 
 	ld (hl),d			;1933	72 	r 
-	call sub_1dbfh		;1934	cd bf 1d 	. . . 
+	call PLAY_KNIFE_THOWING_SOUND		;1934	cd bf 1d 	. . . 
 	dec (ix + ENEMY_ATTACK_STEP_IDX)		;1937	dd 35 0e 	. 5 . 
 	ld (ix + ENEMY_FRAME_COUNTER_IDX),010h		;193a	dd 36 07 10 	. 6 . . 
 	inc (ix + ENEMY_FRAME_IDX)		;193e	dd 34 06 	. 4 . 
@@ -5814,7 +5814,7 @@ l1d8fh:
 	inc a			;1d9b	3c 	< 
 	cp 006h		;1d9c	fe 06 	. . 
 	jr c,l1da4h		;1d9e	38 04 	8 . 
-	call sub_1dbfh		;1da0	cd bf 1d 	. . . 
+	call PLAY_KNIFE_THOWING_SOUND		;1da0	cd bf 1d 	. . . 
 	xor a			;1da3	af 	. 
 l1da4h:
 	ld (ix + 6),a		;1da4	dd 77 06 	. w . 
@@ -5832,16 +5832,18 @@ l1db9h:
 	ld hl,075a5h		;1db9	21 a5 75 	! . u 
 	jp l1a7eh		;1dbc	c3 7e 1a 	. ~ . 
 
-; SEGUIR
-sub_1dbfh:
+; Play the knife-throwing sound
+PLAY_KNIFE_THOWING_SOUND:
 	push hl			;1dbf	e5 	. 
 	push de			;1dc0	d5 	. 
-	ld hl,(TIME)	;1dc1	2a 03 e0 	* . . 
-	ld de, -819		;1dc4	11 cd fc 	. . . 
-	add hl,de			;1dc7	19 	. 
-	ld a,095h		;1dc8	3e 95 	> . 
-	jr c,l1dceh		;1dca	38 02 	8 . 
-	ld a,099h		;1dcc	3e 99 	> . 
+	ld hl,(TIME)	;1dc1	2a 03 e0
+	ld de, -819		;1dc4	11 cd fc
+	add hl,de		;1dc7	19
+    
+    ; Knife throwing sound
+	ld a,095h		;1dc8	3e 95
+	jr c,l1dceh		;1dca	38 02
+	ld a,099h		;1dcc	3e 99
 l1dceh:
 	call PLAY_SOUND		;1dce	cd fe 0d 	. . . 
 	pop de			;1dd1	d1 	. 
