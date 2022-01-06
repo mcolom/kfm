@@ -5850,8 +5850,8 @@ l1dceh:
 	pop hl			;1dd2	e1 	. 
 	ret			;1dd3	c9 	. 
 
-; SEGUIR
-sub_1dd4h:
+; Play the stick sound (boss at level #1) or kicks/punches (boss at level #3)
+PLAY_WHISTLE_SOUND:
 	push hl			;1dd4	e5 	. 
 	push de			;1dd5	d5 	. 
 	ld hl,(TIME)		;1dd6	2a 03 e0 	* . . 
@@ -6082,7 +6082,7 @@ l1f50h:
 	ld a,(ENEMY_ATTACK_STEP)		        ;1f75	3a e6 e2
 	cp 002h		;1f78	fe 02 	. . 
 	ret nz			;1f7a	c0 	. 
-	call sub_1dd4h		;1f7b	cd d4 1d 	. . . 
+	call PLAY_WHISTLE_SOUND		;1f7b	cd d4 1d 	. . . 
 	ld de,(ME_INITIAL_FALL_SPEED_COPY)		;1f7e	ed 5b 0c e8 	. [ . . 
 	ld hl,0fa60h		;1f82	21 60 fa 	! ` . 
 	add hl,de			;1f85	19 	. 
@@ -6359,7 +6359,7 @@ l215dh:
 	ld a,(ENEMY_ATTACK_STEP)		        ;2180	3a e6 e2
 	cp 2		                            ;2183	fe 02
 	ret nz			;2185	c0 	. 
-	call sub_1dd4h		;2186	cd d4 1d 	. . . 
+	call PLAY_WHISTLE_SOUND		;2186	cd d4 1d 	. . . 
 	ld hl,(ENEMY_POS)		;2189	2a da e2 	* . . 
 	ld a,(ENEMY_FRAME)		;218c	3a de e2 	: . . 
 	cp 007h		;218f	fe 07 	. . 
