@@ -6184,9 +6184,9 @@ l2036h:
 	ld hl,ENEMY_FRAMESEQ_TABLE3		;2042	21 2c 21 	! , ! 
 l2045h:
 	call APPLY_FRAMESEQ_FROM_HL		;2045	cd 96 1b 	. . . 
-	ld hl,l2d67h		;2048	21 67 2d 	! g - 
+	ld hl,BOSS_ENERGY_UPKICK_DECREASE_UNKNOWN_TABLE		;2048	21 67 2d 	! g - 
 	ld de,l00d8h		;204b	11 d8 00 	. . . 
-	call sub_2d19h		;204e	cd 19 2d 	. . - 
+	call DECREASE_ENEMY_ENERGY_UPKICK		;204e	cd 19 2d 	. . - 
 	ld a,008h		;2051	3e 08 	> . 
 	jp c,l247ah		;2053	da 7a 24 	. z $ 
 	ld a,(ix-002h)		;2056	dd 7e fe 	. ~ . 
@@ -6455,8 +6455,8 @@ sub_224bh:
 	push de			;225c	d5 	. 
 	ld hl,5		;225d	21 05 00 	! . . 
 	call sub_2e5ch		;2260	cd 5c 2e 	. \ . 
-	ld hl,l2d6ah		;2263	21 6a 2d 	! j - 
-	call sub_2d19h		;2266	cd 19 2d 	. . - 
+	ld hl,BOSS_ENERGY_UPKICK_DECREASE_BOSSES_1_5_TABLE		;2263	21 6a 2d 	! j - 
+	call DECREASE_ENEMY_ENERGY_UPKICK		;2266	cd 19 2d 	. . - 
 	pop de			;2269	d1 	. 
 	jr c,l2271h		;226a	38 05 	8 . 
 	ld hl,09000h		;226c	21 00 90 	! . . 
@@ -6680,8 +6680,8 @@ l2448h:
 	ld b,(ix + ENEMY_FRAME_IDX)	;2448	dd 46 06
 	add a, 4                		;244b	c6 04
 	ld (ENEMY_FRAME),a		;244d	32 de e2 	2 . . 
-	ld hl,l2d6dh		;2450	21 6d 2d 	! m - 
-	call sub_2d19h		;2453	cd 19 2d 	. . - 
+	ld hl,BOSS_ENERGY_UPKICK_DECREASE_BOSS_3_TABLE		;2450	21 6d 2d 	! m - 
+	call DECREASE_ENEMY_ENERGY_UPKICK		;2453	cd 19 2d 	. . - 
 	jr c,l246fh		;2456	38 17 	8 . 
 	ld (ix + ENEMY_FRAMESEQ_PTR_L_IDX),b		    ;2458	dd 70 0c
 	ld (ix + ENEMY_FRAME_COUNTER_IDX), 6	;245b	dd 36 07 06 level 2
@@ -6933,8 +6933,8 @@ l264bh:
 	and a			;264b	a7 	. 
 	jr z,l2698h		;264c	28 4a 	( J 
 	ld (ix + ENEMY_FRAME_IDX), 8	;264e	dd 36 06 08
-	ld hl,02d70h		;2652	21 70 2d 	! p - 
-	call sub_2d19h		;2655	cd 19 2d 	. . - 
+	ld hl,BOSS_ENERGY_UPKICK_DECREASE_BOSS_2_TABLE		;2652	21 70 2d 	! p - 
+	call DECREASE_ENEMY_ENERGY_UPKICK		;2655	cd 19 2d 	. . - 
 	ld hl,l28d6h		;2658	21 d6 28 	! . ( 
 	jr c,l266eh		;265b	38 11 	8 . 
 	ld a,(hl)			;265d	7e 	~ 
@@ -7552,9 +7552,9 @@ l2b04h:
 l2b10h:
 	ld hl,l2c69h		;2b10	21 69 2c 	! i , 
 	call APPLY_FRAMESEQ_FROM_HL		;2b13	cd 96 1b 	. . . 
-	ld hl,l2d67h		;2b16	21 67 2d 	! g - 
+	ld hl,BOSS_ENERGY_UPKICK_DECREASE_UNKNOWN_TABLE		;2b16	21 67 2d 	! g - 
 	ld de,0xde		;2b19	11 de 00 	. . . 
-	call sub_2d19h		;2b1c	cd 19 2d 	. . - 
+	call DECREASE_ENEMY_ENERGY_UPKICK		;2b1c	cd 19 2d 	. . - 
 	ld a,00bh		;2b1f	3e 0b 	> . 
 	jp c,l247ah		;2b21	da 7a 24 	. z $ 
 	inc (ix + ENEMY_STATE_IDX)	;2b24	dd 34 01
@@ -7883,70 +7883,66 @@ sub_2d13h:
 	ld de,001bh		;2d13	11 1b 00 	. . . 
 	jp l1bf2h		;2d16	c3 f2 1b 	. . . 
 
-; SEGUIR
-sub_2d19h:
-	ld a,083h		;2d19	3e 83 	> . 
-	call PLAY_SOUND		;2d1b	cd fe 0d 	. . . 
-	ld a,091h		;2d1e	3e 91 	> . 
-	call PLAY_SOUND		;2d20	cd fe 0d 	. . . 
-	push de			;2d23	d5 	. 
-	ld a,(THOMAS_FRAME)		;2d24	3a 06 e7 	: . . 
-	push hl			;2d27	e5 	. 
-	ld hl,l2d42h		;2d28	21 42 2d 	! B - 
-	ld e,a			;2d2b	5f 	_ 
-	ld d,000h		;2d2c	16 00 	. . 
-	add hl,de			;2d2e	19 	. 
-	ld e,(hl)			;2d2f	5e 	^ 
-	pop hl			;2d30	e1 	. 
-	add hl,de			;2d31	19 	. 
-	ld a,(ENEMY_ENERGY)		;2d32	3a e2 e2 	: . . 
-	sub (hl)			;2d35	96 	. 
-	ld (ENEMY_ENERGY),a		;2d36	32 e2 e2 	2 . . 
-	pop de			;2d39	d1 	. 
-	ret nc			;2d3a	d0 	. 
-	ld a,087h		;2d3b	3e 87 	> . 
-	call PLAY_SOUND		;2d3d	cd fe 0d 	. . . 
-	scf			;2d40	37 	7 
-	ret			;2d41	c9 	. 
+; Decreases the energy of the enemy depending on the attack Thomas
+; performed. To determine the attack type, it checks THOMAS_FRAME.
+; It also makes the enemy groan.
+; ENEMY_ENERGY -= (HL0 + (BOSS_ENERGY_UPKICK_DECREASE_BASE_TABLE + THOMAS_FRAME))
+DECREASE_ENEMY_ENERGY_UPKICK:
+	; Enemy groans
+    ld a,083h		    ;2d19	3e 83
+	call PLAY_SOUND		;2d1b	cd fe 0d
+    ;
+	ld a,091h		    ;2d1e	3e 91
+	call PLAY_SOUND		;2d20	cd fe 0d
 
-l2d42h:
-	nop			;2d42	00 	. 
-	nop			;2d43	00 	. 
-	nop			;2d44	00 	. 
-	nop			;2d45	00 	. 
-	nop			;2d46	00 	. 
-	nop			;2d47	00 	. 
-	nop			;2d48	00 	. 
-	ld (bc),a			;2d49	02 	. 
-	nop			;2d4a	00 	. 
-	ld bc,0001h		;2d4b	01 01 00 	. . . 
-	ld (bc),a			;2d4e	02 	. 
-	nop			;2d4f	00 	. 
-	ld bc,0001h		;2d50	01 01 00 	. . . 
-	nop			;2d53	00 	. 
-	nop			;2d54	00 	. 
-	nop			;2d55	00 	. 
-	nop			;2d56	00 	. 
-	ld bc,0001h		;2d57	01 01 00 	. . . 
-	inc bc			;2d5a	03 	. 
-	inc bc			;2d5b	03 	. 
-	nop			;2d5c	00 	. 
-	nop			;2d5d	00 	. 
-	nop			;2d5e	00 	. 
-	nop			;2d5f	00 	. 
-	nop			;2d60	00 	. 
-	nop			;2d61	00 	. 
-	nop			;2d62	00 	. 
-	nop			;2d63	00 	. 
-	nop			;2d64	00 	. 
-	nop			;2d65	00 	. 
-	nop			;2d66	00 	. 
-l2d67h:
-    defb 0x00, 0x10, 0x0c
-l2d6ah:
-    defb 0x20, 0x0c, 0x08
-l2d6dh:
-    defb 0x18, 0x10, 0x10, 0x20, 0x10
+	push de			        ;2d23	d5 	. 
+	ld a,(THOMAS_FRAME)		;2d24	3a 06 e7    A = THOMAS_FRAME
+
+	push hl			        ;2d27	e5
+	ld hl,BOSS_ENERGY_UPKICK_DECREASE_BASE_TABLE		    ;2d28	21 42 2d    HL = 0x2d42. ToDo: what is this table?
+	ld e,a			        ;2d2b	5f
+	ld d,000h		        ;2d2c	16 00       DE = THOMAS_FRAME
+	add hl,de			    ;2d2e	19          HL = BOSS_ENERGY_UPKICK_DECREASE_BASE_TABLE + THOMAS_FRAME
+	ld e,(hl)			    ;2d2f	5e          E = (BOSS_ENERGY_UPKICK_DECREASE_BASE_TABLE + THOMAS_FRAME)
+	pop hl			        ;2d30	e1
+
+	add hl,de			    ;2d31	19          HL = HL0 + (BOSS_ENERGY_UPKICK_DECREASE_BASE_TABLE + THOMAS_FRAME) (we assume D=0)
+	ld a,(ENEMY_ENERGY)		;2d32	3a e2 e2    A = ENEMY_ENERGY
+	sub (hl)			    ;2d35	96          A = ENEMY_ENERGY - (HL0 + (BOSS_ENERGY_UPKICK_DECREASE_BASE_TABLE + THOMAS_FRAME))
+	ld (ENEMY_ENERGY),a		;2d36	32 e2 e2 	ENEMY_ENERGY = ENEMY_ENERGY - (HL0 + (BOSS_ENERGY_UPKICK_DECREASE_BASE_TABLE + THOMAS_FRAME))
+	pop de			        ;2d39	d1
+	ret nc			        ;2d3a	d0
+    
+    ; Enemy yells defeated
+	ld a,087h		        ;2d3b	3e 87
+	call PLAY_SOUND		    ;2d3d	cd fe 0d
+	scf			            ;2d40	37
+	ret			            ;2d41	c9
+
+BOSS_ENERGY_UPKICK_DECREASE_BASE_TABLE:
+    defb 0, 0, 0, 0, 0, 0, 0
+    defb 2, 0, 1, 1, 0, 2, 0
+    defb 1, 1, 0, 0, 0, 0, 0
+    defb 1, 1, 0, 3, 3
+    defb 0, 0, 0, 0, 0, 0, 0
+    defb 0, 0, 0, 0
+
+; ToDo: when is this read?
+; It didn't activate the breakpoint "wp 2d67,1,r"
+BOSS_ENERGY_UPKICK_DECREASE_UNKNOWN_TABLE:
+    defb 0, 16, 12
+
+; Upkick, boss 1, 5
+BOSS_ENERGY_UPKICK_DECREASE_BOSSES_1_5_TABLE: ; 2d6a
+    defb 32, 12, 8
+
+; Upkick, boss 3
+BOSS_ENERGY_UPKICK_DECREASE_BOSS_3_TABLE:
+    defb 24, 16, 16
+
+; Upkick, boss 2
+BOSS_ENERGY_UPKICK_DECREASE_BOSS_2_TABLE:
+    defb 32, 16
     
     
 ; This part was incorrectly disassembled by z80dasm.
