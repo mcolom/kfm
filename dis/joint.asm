@@ -7047,7 +7047,7 @@ l2737h:
 	dec (ix + ENEMY_FRAME_COUNTER_IDX)		;2737	dd 35 07 level 4
 	jr nz,l2752h		;273a	20 16 	  . 
 	inc (ix + ENEMY_FRAME_COUNTER_IDX)		;273c	dd 34 07
-	call sub_2887h		;273f	cd 87 28 	. . ( 
+	call IS_THOMAS_MOVING		;273f	cd 87 28 	. . ( 
 	jr nz,l27b0h		;2742	20 6c 	  l 
 	ld (ix + ENEMY_FRAME_COUNTER_IDX), 7	;2744	dd 36 07 07 level 4
 	dec (ix + ENEMY_FRAME_IDX)		;2748	dd 35 06
@@ -7078,7 +7078,7 @@ l277bh:
 	ld (ix + ENEMY_POS_H_IDX),d		;277e	dd 72 03
 	jp l1be2h		;2781	c3 e2 1b 	. . . 
 	call l1be2h		;2784	cd e2 1b 	. . . 
-	call sub_2887h		;2787	cd 87 28 	. . ( 
+	call IS_THOMAS_MOVING		;2787	cd 87 28 	. . ( 
 	jr z,l27a3h		;278a	28 17 	( . 
 	dec (ix + ENEMY_FRAME_COUNTER_IDX)	;278c	dd 35 07 level 4
 	ret nz			;278f	c0 	. 
@@ -7196,8 +7196,8 @@ MAGICIAN_REPLICA_APPEARS_OR_DISAPPEARS_STATE:
 	ld (ix + ENEMY_FRAME_IDX), 26	;2882	dd 36 06 1a
 	ret			;2886	c9 	. 
 
-; SEGUIR
-sub_2887h:
+; Sets Z if Thomas is moving (or in THOMAS_STATE_UNKNOWN).
+IS_THOMAS_MOVING:
 	ld a,(THOMAS_STATE)		;2887	3a 02 e7 	: . . 
 	cp THOMAS_STATE_WALKING		;288a	fe 01 	. . 
 	ret z			;288c	c8 	. 
