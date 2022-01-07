@@ -244,12 +244,14 @@ BOOMERANG_ACTIVE2_BIT: EQU 6
 ; Entry 1: direction of the boomerang
 BOOMERANG_DIRECTION: EQU 1
 ;
-BOOMERANG_DIRECTION_LEFT: EQU 0
+;BOOMERANG_DIRECTION_LEFT: EQU 0
 BOOMERANG_DIRECTION_TURNING: EQU 1
-BOOMERANG_DIRECTION_RIGHT: EQU 2
+;BOOMERANG_DIRECTION_RIGHT: EQU 2
+
+; The head of the magician. Creepy!
+TBL_HEAD: EQU 0xE31B ; SEGUIR
 
 
-TBL_E31B: EQU 0xE31B
 TBL_E292: EQU 0xE292
 TBL_E272: EQU 0xE272
 
@@ -5902,9 +5904,9 @@ sub_1defh:
 	ld (ix + 3),h		;1df9	dd 74 03 	. t . 
 	ret			;1dfc	c9 	. 
 
-; SEGUIR, to discover what TBL_E31B is.
+; SEGUIR
 sub_1dfdh:
-	ld ix,TBL_E31B		;1dfd	dd 21 1b e3 	. ! . . 
+	ld ix,TBL_HEAD		;1dfd	dd 21 1b e3 	. ! . . 
 	ld c,(ix + 0)		;1e01	dd 4e 00 	. N . 
 	bit 4,c		;1e04	cb 61 	. a 
 	ret z			;1e06	c8 	. 
@@ -5912,7 +5914,7 @@ sub_1dfdh:
 	jr nz,l1e20h		;1e0a	20 14 	  . 
 	ld (ix + 7),005h		;1e0c	dd 36 07 05 	. 6 . . 
 	inc (ix + 6)		;1e10	dd 34 06 	. 4 . 
-	ld a,(0e321h)		;1e13	3a 21 e3 	: ! . 
+	ld a,(TBL_HEAD + 6)		;1e13	3a 21 e3 	: ! . 
 	cp 004h		;1e16	fe 04 	. . 
 	jr c,l1e20h		;1e18	38 06 	8 . 
 	jr nz,l1e45h		;1e1a	20 29 	  ) 
@@ -5921,16 +5923,16 @@ l1e20h:
 	ld de,0x72		;1e20	11 72 00 	. r . 
 	call ENEMY_GO_BACK_POSITION		;1e23	cd 7a 1c 	. z . 
 	call l1be2h		;1e26	cd e2 1b 	. . . 
-	ld hl,(0e327h)		;1e29	2a 27 e3 	* ' . 
+	ld hl,(TBL_HEAD + 12)		;1e29	2a 27 e3 	* ' . 
 	ld de,001bh		;1e2c	11 1b 00 	. . . 
 	add hl,de			;1e2f	19 	. 
-	ld (0e327h),hl		;1e30	22 27 e3 	" ' . 
+	ld (TBL_HEAD + 12),hl		;1e30	22 27 e3 	" ' . 
 	ex de,hl			;1e33	eb 	. 
-	ld hl,(0e31fh)		;1e34	2a 1f e3 	* . . 
+	ld hl,(TBL_HEAD + 4)		;1e34	2a 1f e3 	* . . 
 	sbc hl,de		;1e37	ed 52 	. R 
-	ld (0e31fh),hl		;1e39	22 1f e3 	" . . 
+	ld (TBL_HEAD + 4),hl		;1e39	22 1f e3 	" . . 
 	ld hl,073d2h		;1e3c	21 d2 73 	! . s 
-	ld a,(TBL_E31B)		;1e3f	3a 1b e3 	: . . 
+	ld a,(TBL_HEAD)		;1e3f	3a 1b e3 	: . . 
 	jp l1a7eh		;1e42	c3 7e 1a 	. ~ . 
 l1e45h:
 	ld (ix + 0),000h		;1e45	dd 36 00 00 	. 6 . . 
@@ -7000,19 +7002,25 @@ l2698h:
     ; 0x50 = 0101 0000
     ; Look right, not being attacked, enemy is alive
     ; This seems an initializacion for the enemy.
-	and 0x50		;26a9	e6 50
-	ld (TBL_E31B),a		;26ab	32 1b e3 	2 . . 
-	ld hl,06500h		;26ae	21 00 65 	! . e 
-	ld (0e31fh),hl		;26b1	22 1f e3 	" . . 
-	ld hl,0x5b		    ;26b4	21 5b 00 	! [ . 
-	ld (0e327h),hl		;26b7	22 27 e3 	" ' . 
-	ld a,005h		;26ba	3e 05 	> . 
-	ld (0e322h),a		;26bc	32 22 e3 	2 " . 
-	xor a			;26bf	af 	. 
-	ld (0e321h),a		;26c0	32 21 e3
+	and 0x50		      ;26a9	e6 50
+	ld (TBL_HEAD),a		  ;26ab	32 1b e3
+
+	ld hl,06500h		  ;26ae	21 00 65
+	ld (TBL_HEAD + 4),hl  ;26b1	22 1f e3
+
+	ld hl,0x5b		      ;26b4	21 5b 00
+	ld (TBL_HEAD + 12),hl ;26b7	22 27 e3
+
+	ld a,005h		      ;26ba	3e 05
+	ld (TBL_HEAD + 7),a	  ;26bc	32 22 e3
+
+	xor a			      ;26bf	af
+	ld (TBL_HEAD + 6),a	;26c0	32 21 e3
+
     ; Set Thomas is frozen
 	ld hl,THOMAS_PROPS		;26c3	21 00 e7
 	set 0,(hl)		    ;26c6	cb c6
+
 	ld (ix + ENEMY_STATE_IDX), 6    ;26c8	dd 36 01 06
 	ld a, 11		;26cc	3e 0b
 l26ceh:
