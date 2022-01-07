@@ -228,7 +228,9 @@ TBL_GUYS_ENTRY_2: EQU TBL_GUYS + 2*16
 TBL_GUYS_ENTRY_4: EQU TBL_GUYS + 4*16
 TBL_GUYS_ENTRY_5: EQU TBL_GUYS + 5*16
 
-TBL_BOOMERANG: EQU 0xE2FB
+TBL_BOOMERANG_1: EQU 0xE2FB
+TBL_BOOMERANG_2: EQU 0xE30B
+
 ; Entry 0
 ; bit #4: boomerang active
 ; bit #5: boomerang damaged Thomas
@@ -238,6 +240,13 @@ BOOMERANG_PROPS_IDX: EQU 0
 BOOMERANG_ACTIVE1_BIT: EQU 4
 BOOMERANG_CAUSED_DAMAGE_BIT: EQU 5
 BOOMERANG_ACTIVE2_BIT: EQU 6
+
+; Entry 1: direction of the boomerang
+BOOMERANG_DIRECTION: EQU 1
+;
+BOOMERANG_DIRECTION_LEFT: EQU 0
+BOOMERANG_DIRECTION_TURNING: EQU 1
+BOOMERANG_DIRECTION_RIGHT: EQU 2
 
 
 TBL_E31B: EQU 0xE31B
@@ -5726,12 +5735,12 @@ GET_ENEMY_FRAMESEQ_PTR_IN_HL:
 sub_1cb3h:
 	call sub_1e4ah		;1cb3	cd 4a 1e 	. J . 
 	call sub_1dfdh		;1cb6	cd fd 1d 	. . . 
-	ld ix,TBL_BOOMERANG		;1cb9	dd 21 fb e2 	. ! . . 
+	ld ix, TBL_BOOMERANG_1		;1cb9	dd 21 fb e2 	. ! . . 
 	call sub_1cc4h		;1cbd	cd c4 1c 	. . . 
-	ld ix,0e30bh		;1cc0	dd 21 0b e3 ToDo: what is this table???
+	ld ix, TBL_BOOMERANG_2	;1cc0	dd 21 0b e3
 
 sub_1cc4h:
-    ; IX = TBL_BOOMERANG
+    ; IX = TBL_BOOMERANG_1
 	ld a,(ix + BOOMERANG_PROPS_IDX)		;1cc4	dd 7e 00
 	ld c,a			;1cc7	4f
     and 1 << BOOMERANG_ACTIVE1_BIT ;1cc8
@@ -5739,8 +5748,8 @@ sub_1cc4h:
 	ld a,(THOMAS_PROPS)	;1ccb	3a 00 e7 	: . . 
 	and 002h		;1cce	e6 02 Check if Thomas is fighting
 	jp nz,l1da7h	;1cd0	c2 a7 1d Skip if he's not
-	ld a,(ix + 1)		;1cd3	dd 7e 01 	. ~ . 
-	cp 001h		;1cd6	fe 01 	. . 
+	ld a,(ix + BOOMERANG_DIRECTION)		;1cd3	dd 7e 01
+	cp BOOMERANG_DIRECTION_TURNING		;1cd6	fe 01
 	jp c,l1d4bh		;1cd8	da 4b 1d 	. K . 
 	jr z,l1d03h		;1cdb	28 26 	( & 
 	call sub_1de9h		;1cdd	cd e9 1d 	. . . 
@@ -6536,10 +6545,10 @@ l22d2h:
 	inc (ix + ENEMY_FRAME_IDX)		;22e7	dd 34 06
 
 	ld (ix + ENEMY_FRAME_COUNTER_IDX), 11		;22ea	dd 36 07 0b level 2
-	ld iy,TBL_BOOMERANG		;22ee	fd 21 fb e2 	. ! . . 
+	ld iy,TBL_BOOMERANG_1		;22ee	fd 21 fb e2 	. ! . . 
 	bit BOOMERANG_ACTIVE1_BIT, (iy + BOOMERANG_PROPS_IDX)	;22f2	fd cb 00 66
 	jr z,l22fch		;22f6	28 04 	( . 
-	ld iy,0e30bh		;22f8	fd 21 0b e3 	. ! . . 
+	ld iy, TBL_BOOMERANG_2		;22f8	fd 21 0b e3
 l22fch:
 	ld a,(ENEMY_BOOMERANG_TYPE)		;22fc	3a e7 e2 	: . . 
 	cp 002h		;22ff	fe 02 	. . 
@@ -6563,9 +6572,9 @@ l2309h:
 	ld (iy+00ch),l		;232c	fd 75 0c 	. u . 
 	ld (iy+00dh),h		;232f	fd 74 0d 	. t . 
 	ld a,050h		;2332	3e 50 	> P 
-	ld (iy+000h),a		;2334	fd 77 00 	. w . 
+	ld (iy + BOOMERANG_PROPS_IDX),a		;2334	fd 77 00
 	xor a			;2337	af 	. 
-	ld (iy+001h),a		;2338	fd 77 01 	. w . 
+	ld (iy + BOOMERANG_DIRECTION),a		;2338	fd 77 01
 	ld (iy+006h),a		;233b	fd 77 06 	. w . 
 	ld a,002h		;233e	3e 02 	> . 
 	ld (iy+007h),a		;2340	fd 77 07 	. w . 
@@ -6573,7 +6582,7 @@ l2309h:
 l2344h:
 	inc (ix + ENEMY_ATTACK_STEP_IDX)		;2344	dd 34 0e level 2
 	inc (ix + ENEMY_FRAME_COUNTER_IDX)		;2347	dd 34 07 level 2
-	ld iy,TBL_BOOMERANG		;234a	fd 21 fb e2 	. ! . . 
+	ld iy,TBL_BOOMERANG_1		;234a	fd 21 fb e2 	. ! . . 
 	bit BOOMERANG_ACTIVE1_BIT, (iy + BOOMERANG_PROPS_IDX)   	;234e	fd cb 00 66
 	jr z,l2368h		;2352	28 14 	( . 
 	bit 7,(iy+00dh)		;2354	fd cb 0d 7e 	. . . ~ 
@@ -6584,7 +6593,7 @@ l2344h:
 	jr nz,l2371h		;2363	20 0c 	  . 
 	jp l23d3h		;2365	c3 d3 23 	. . # 
 l2368h:
-	ld iy,0e30bh		;2368	fd 21 0b e3 	. ! . . 
+	ld iy, TBL_BOOMERANG_2		;2368	fd 21 0b e3
 	bit 7,(iy+00dh)		;236c	fd cb 0d 7e 	. . . ~ 
 	ret nz			;2370	c0 	. 
 l2371h:
@@ -6608,8 +6617,8 @@ l2381h:
 	ret nc			;2393	d0 	. 
 	ld (iy + 0), 0	;2394	fd 36 00 00
 	dec (ix + ENEMY_FRAME_IDX)		;2398	dd 35 06
-	ld a,(0e30bh)		;239b	3a 0b e3 	: . . 
-	and 010h		;239e	e6 10 	. . 
+	ld a,(TBL_BOOMERANG_2)		;239b	3a 0b e3
+	and 1 << BOOMERANG_ACTIVE1_BIT		;239e	e6 10 	. . 
 	ld a,00bh		;23a0	3e 0b 	> . 
 	jr nz,l23b0h		;23a2	20 0c 	  . 
 	dec (ix + ENEMY_ATTACK_STEP_IDX)		;23a4	dd 35 0e level 2
@@ -6669,10 +6678,10 @@ l2409h:
 	dec (ix + ENEMY_FRAME_COUNTER_IDX)		;240c	dd 35 07 level 2
 	ret nz			;240f	c0 	. 
 	inc (ix + ENEMY_FRAME_COUNTER_IDX)		;2410	dd 34 07
-	ld a,(0e30bh)		;2413	3a 0b e3 	: . . 
-	and 010h		;2416	e6 10 	. . 
+	ld a,(TBL_BOOMERANG_2)		;2413	3a 0b e3
+	and 1 << BOOMERANG_ACTIVE1_BIT		;2416	e6 10
 	jr nz,l2427h		;2418	20 0d 	  . 
-	ld a,(TBL_BOOMERANG)		;241a	3a fb e2 	: . . 
+	ld a,(TBL_BOOMERANG_1)		;241a	3a fb e2 	: . . 
 	and 1 << BOOMERANG_ACTIVE1_BIT		;241d	e6 10
 	jr z,l23c6h		;241f	28 a5 	( . 
 	bit 0,(ix-001h)		;2421	dd cb ff 46 	. . . F 
