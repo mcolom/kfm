@@ -228,7 +228,18 @@ TBL_GUYS_ENTRY_2: EQU TBL_GUYS + 2*16
 TBL_GUYS_ENTRY_4: EQU TBL_GUYS + 4*16
 TBL_GUYS_ENTRY_5: EQU TBL_GUYS + 5*16
 
-TBL_E2FB: EQU 0xE2FB
+TBL_BOOMERANG: EQU 0xE2FB
+; Entry 0
+; bit #4: boomerang active
+; bit #5: boomerang damaged Thomas
+; bit #6: boomerang active
+BOOMERANG_PROPS_IDX: EQU 0
+
+BOOMERANG_ACTIVE1_BIT: EQU 4
+BOOMERANG_CAUSED_DAMAGE_BIT: EQU 5
+BOOMERANG_ACTIVE2_BIT: EQU 6
+
+
 TBL_E31B: EQU 0xE31B
 TBL_E292: EQU 0xE292
 TBL_E272: EQU 0xE272
@@ -5715,13 +5726,15 @@ GET_ENEMY_FRAMESEQ_PTR_IN_HL:
 sub_1cb3h:
 	call sub_1e4ah		;1cb3	cd 4a 1e 	. J . 
 	call sub_1dfdh		;1cb6	cd fd 1d 	. . . 
-	ld ix,TBL_E2FB		;1cb9	dd 21 fb e2 	. ! . . 
+	ld ix,TBL_BOOMERANG		;1cb9	dd 21 fb e2 	. ! . . 
 	call sub_1cc4h		;1cbd	cd c4 1c 	. . . 
 	ld ix,0e30bh		;1cc0	dd 21 0b e3 ToDo: what is this table???
+
 sub_1cc4h:
-	ld a,(ix + 0)		;1cc4	dd 7e 00 	. ~ . 
-	ld c,a			;1cc7	4f 	O 
-	and 010h		;1cc8	e6 10 	. . 
+    ; IX = TBL_BOOMERANG
+	ld a,(ix + BOOMERANG_PROPS_IDX)		;1cc4	dd 7e 00
+	ld c,a			;1cc7	4f
+    and 1 << BOOMERANG_ACTIVE1_BIT ;1cc8
 	ret z			;1cca	c8 	. 
 	ld a,(THOMAS_PROPS)	;1ccb	3a 00 e7 	: . . 
 	and 002h		;1cce	e6 02 Check if Thomas is fighting
@@ -5867,6 +5880,8 @@ l1de3h:
 	ret			;1de8	c9 	. 
 
 ; SEGUIR
+; Boss at level 2, IX=E2FB
+; E302 (ix + 7): boomerang frame
 sub_1de9h:
 	ld l,(ix + 12)		;1de9	dd 6e 0c 	. n . 
 	ld h,(ix + 13)		;1dec	dd 66 0d 	. f . 
@@ -6519,9 +6534,10 @@ l22d2h:
 	jr z,l2344h		;22e2	28 60 	( ` 
 	jp m,l23b4h		;22e4	fa b4 23 	. . # 
 	inc (ix + ENEMY_FRAME_IDX)		;22e7	dd 34 06
+
 	ld (ix + ENEMY_FRAME_COUNTER_IDX), 11		;22ea	dd 36 07 0b level 2
-	ld iy,TBL_E2FB		;22ee	fd 21 fb e2 	. ! . . 
-	bit 4,(iy+000h)		;22f2	fd cb 00 66 	. . . f 
+	ld iy,TBL_BOOMERANG		;22ee	fd 21 fb e2 	. ! . . 
+	bit BOOMERANG_ACTIVE1_BIT, (iy + BOOMERANG_PROPS_IDX)	;22f2	fd cb 00 66
 	jr z,l22fch		;22f6	28 04 	( . 
 	ld iy,0e30bh		;22f8	fd 21 0b e3 	. ! . . 
 l22fch:
@@ -6557,8 +6573,8 @@ l2309h:
 l2344h:
 	inc (ix + ENEMY_ATTACK_STEP_IDX)		;2344	dd 34 0e level 2
 	inc (ix + ENEMY_FRAME_COUNTER_IDX)		;2347	dd 34 07 level 2
-	ld iy,TBL_E2FB		;234a	fd 21 fb e2 	. ! . . 
-	bit 4,(iy+000h)		;234e	fd cb 00 66 	. . . f 
+	ld iy,TBL_BOOMERANG		;234a	fd 21 fb e2 	. ! . . 
+	bit BOOMERANG_ACTIVE1_BIT, (iy + BOOMERANG_PROPS_IDX)   	;234e	fd cb 00 66
 	jr z,l2368h		;2352	28 14 	( . 
 	bit 7,(iy+00dh)		;2354	fd cb 0d 7e 	. . . ~ 
 	ret nz			;2358	c0 	. 
@@ -6656,8 +6672,8 @@ l2409h:
 	ld a,(0e30bh)		;2413	3a 0b e3 	: . . 
 	and 010h		;2416	e6 10 	. . 
 	jr nz,l2427h		;2418	20 0d 	  . 
-	ld a,(TBL_E2FB)		;241a	3a fb e2 	: . . 
-	and 010h		;241d	e6 10 	. . 
+	ld a,(TBL_BOOMERANG)		;241a	3a fb e2 	: . . 
+	and 1 << BOOMERANG_ACTIVE1_BIT		;241d	e6 10
 	jr z,l23c6h		;241f	28 a5 	( . 
 	bit 0,(ix-001h)		;2421	dd cb ff 46 	. . . F 
 	jr nz,l23d3h		;2425	20 ac 	  . 
