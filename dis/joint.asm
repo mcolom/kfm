@@ -5745,7 +5745,7 @@ GET_ENEMY_FRAMESEQ_PTR_IN_HL:
 
 sub_1cb3h:
 	call sub_1e4ah		;1cb3	cd 4a 1e 	. J . 
-	call sub_1dfdh		;1cb6	cd fd 1d 	. . . 
+	call UPDATE_FALLING_HEAD		;1cb6	cd fd 1d 	. . . 
 	ld ix, TBL_BOOMERANG_1		;1cb9	dd 21 fb e2 	. ! . . 
 	call sub_1cc4h		;1cbd	cd c4 1c 	. . . 
 	ld ix, TBL_BOOMERANG_2	;1cc0	dd 21 0b e3
@@ -5913,40 +5913,48 @@ sub_1defh:
 	ld (ix + 3),h		;1df9	dd 74 03 	. t . 
 	ret			;1dfc	c9 	. 
 
-; SEGUIR
-sub_1dfdh:
+; Update the frame, position, frameseq, and height of the
+; falling head of boss at level 4.
+UPDATE_FALLING_HEAD:
+    ; Exit if the falling head is not active.
 	ld ix,TBL_HEAD		        ;1dfd	dd 21 1b e3
 	ld c,(ix + ENEMY_PROPS_IDX)	;1e01	dd 4e 00
 	bit ENEMY_IS_ALIVE_BIT, c	;1e04	cb 61
-	ret z			;1e06	c8 	. 
+	ret z			            ;1e06	c8
 
-	dec (ix + 7)		;1e07	dd 35 07 	. 5 . 
-	jr nz,l1e20h		;1e0a	20 14 	  . 
-	ld (ix + 7),005h		;1e0c	dd 36 07 05 	. 6 . . 
-	inc (ix + 6)		;1e10	dd 34 06 	. 4 . 
-	ld a,(TBL_HEAD + 6)		;1e13	3a 21 e3 	: ! . 
-	cp 004h		;1e16	fe 04 	. . 
-	jr c,l1e20h		;1e18	38 06 	8 . 
-	jr nz,l1e45h		;1e1a	20 29 	  ) 
-	set 7,(ix + 0)		;1e1c	dd cb 00 fe 	. . . . 
+    ; Update frame if needed
+	dec (ix + ENEMY_FRAME_COUNTER_IDX)	 ;1e07	dd 35 07
+	jr nz,l1e20h		                 ;1e0a	20 14
+	ld (ix + ENEMY_FRAME_COUNTER_IDX), 5 ;1e0c	dd 36 07 05
+	inc (ix + ENEMY_FRAME_IDX)		     ;1e10	dd 34 06
+	ld a,(TBL_HEAD + ENEMY_FRAME_IDX)	 ;1e13	3a 21 e3
+	cp 4		                         ;1e16	fe 04
+	jr c,l1e20h		                     ;1e18	38 06
+	jr nz,l1e45h		                 ;1e1a	20 29
+	
+    ; bit 7 doesn't seem to be used.
+    ; It's only set here and only reset at l1e45h just below.
+    set 7,  (ix + 0)		            ;1e1c	dd cb 00 fe
 l1e20h:
-	ld de,0x72		;1e20	11 72 00 	. r . 
-	call ENEMY_GO_BACK_POSITION		;1e23	cd 7a 1c 	. z . 
-	call l1be2h		;1e26	cd e2 1b 	. . . 
-	ld hl,(TBL_HEAD + 12)		;1e29	2a 27 e3 	* ' . 
-	ld de,001bh		;1e2c	11 1b 00 	. . . 
-	add hl,de			;1e2f	19 	. 
-	ld (TBL_HEAD + 12),hl		;1e30	22 27 e3 	" ' . 
-	ex de,hl			;1e33	eb 	. 
-	ld hl,(TBL_HEAD + 4)		;1e34	2a 1f e3 	* . . 
-	sbc hl,de		;1e37	ed 52 	. R 
-	ld (TBL_HEAD + 4),hl		;1e39	22 1f e3 	" . . 
-	ld hl,073d2h		;1e3c	21 d2 73 	! . s 
-	ld a,(TBL_HEAD)		;1e3f	3a 1b e3 	: . . 
-	jp l1a7eh		;1e42	c3 7e 1a 	. ~ . 
+    ; Update position of the head, frameseq, and height.
+	ld de,0x72		                ;1e20	11 72 00
+	call ENEMY_GO_BACK_POSITION		;1e23	cd 7a 1c
+	call l1be2h		                ;1e26	cd e2 1b
+	ld hl,(TBL_HEAD + ENEMY_FRAMESEQ_PTR_L_IDX)	;1e29	2a 27 e3
+	ld de,001bh		                            ;1e2c	11 1b 00
+	add hl,de			                        ;1e2f	19
+	ld (TBL_HEAD + ENEMY_FRAMESEQ_PTR_L_IDX),hl	;1e30	22 27 e3
+	ex de,hl			                        ;1e33	eb
+	ld hl,(TBL_HEAD + ENEMY_HEIGHT_L_IDX)		;1e34	2a 1f e3
+	sbc hl,de		                            ;1e37	ed 52
+	ld (TBL_HEAD + ENEMY_HEIGHT_L_IDX),hl		;1e39	22 1f e3
+	ld hl,073d2h		                        ;1e3c	21 d2 73
+	ld a,(TBL_HEAD)		                        ;1e3f	3a 1b e3
+	jp l1a7eh		                            ;1e42	c3 7e 1a
 l1e45h:
-	ld (ix + 0),000h		;1e45	dd 36 00 00 	. 6 . . 
-	ret			;1e49	c9 	. 
+	ld (ix + 0), 0 		                        ;1e45	dd 36 00 00
+	ret			                                ;1e49	c9
+
 sub_1e4ah:
 	ld a,(TBL_ENEMIES)		;1e4a	3a d8 e2 	: . . 
 	ld c,a			;1e4d	4f 	O 
