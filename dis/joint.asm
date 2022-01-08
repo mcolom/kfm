@@ -258,7 +258,7 @@ BOOMERANG_DIRECTION_TURNING: EQU 1
 ;BOOMERANG_DIRECTION_RIGHT: EQU 2
 
 ; The head of the magician. Creepy!
-TBL_HEAD: EQU 0xE31B ; SEGUIR
+TBL_HEAD: EQU 0xE31B
 
 
 TBL_E292: EQU 0xE292
@@ -9388,14 +9388,12 @@ sub_37deh:
 	ld hl,(THOMAS_POSITION)		;37de	2a 12 e7 	* . . 
 	ld de,08000h		;37e1	11 00 80 	. . . 
 	add hl,de			;37e4	19 	. 
-	jr c,l37f1h		;37e5	38 0a 	8 . 
+	jr c,clear_floor_stage		;37e5	38 0a 	8 . 
 	call sub_37f6h		;37e7	cd f6 37 	. . 7 
 	call sub_38ffh		;37ea	cd ff 38 	. . 8 
 	call sub_3960h		;37ed	cd 60 39 	. ` 9 
 	ret			;37f0	c9 	. 
-
-; SEGUIR
-l37f1h:
+clear_floor_stage:
 	xor a			;37f1	af 	. 
 	ld (FLOOR_STAGE),a		;37f2	32 00 e1 	2 . . 
 	ret			;37f5	c9 	. 
