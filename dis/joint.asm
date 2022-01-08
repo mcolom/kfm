@@ -127,7 +127,13 @@ SKIP_LETTER_SKIP_EXTRA_LIFE: EQU 0xE085
 ENERGY: EQU 0xE709
 ENERGY_DISP: EQU 0xE81A ; Displayed energy. Use to animate the bar when energy changes
 
+
+; 1, knife, dragon, 3: snake, bursting ball
+ORIGIN_OF_DAMAGE: EQU 0xE720
+
 ENERGY_TO_SUBTRACT: EQU 0xE721
+
+HEIGHT_OF_DAMAGE_TO_THOMAS: EQU 0xE722
 
 ; Bit 0: receiving damage (it changes the displayed frame)
 ; Bit 1: dying (all energy lost or time over)
@@ -4932,7 +4938,7 @@ l1796h:
 	ld de,l010ch		;1799	11 0c 01 	. . . 
 	ld a,091h		;179c	3e 91 	> . 
 	call PLAY_SOUND		;179e	cd fe 0d 	. . . 
-	call sub_2ee2h		;17a1	cd e2 2e 	. . . 
+	call STORE_DAMAGE_ORIGIN_AND_AMOUNT		;17a1	cd e2 2e 	. . . 
 	ld a,007h		;17a4	3e 07 	> . 
 	push af			;17a6	f5 	. 
 	call GET_ENEMY_FRAMESEQ_PTR_IN_HL		;17a7	cd ac 1c 	. . . 
@@ -7860,7 +7866,7 @@ sub_2c9ah:
 l2cb3h:
 	ld (0e007h),a		;2cb3	32 07 e0 	2 . . 
 l2cb6h:
-	jp sub_2ee2h		;2cb6	c3 e2 2e 	. . . 
+	jp STORE_DAMAGE_ORIGIN_AND_AMOUNT		;2cb6	c3 e2 2e 	. . . 
 
 ; SEGUIR
 sub_2cb9h:
@@ -8149,7 +8155,7 @@ l2e42h:
 	ld hl,06900h		;2e51	21 00 69 	! . i 
 l2e54h:
 	ld de,00118h		;2e54	11 18 01 	. . . 
-	call sub_2ee2h		;2e57	cd e2 2e 	. . . 
+	call STORE_DAMAGE_ORIGIN_AND_AMOUNT		;2e57	cd e2 2e 	. . . 
 	jr l2e19h		;2e5a	18 bd 	. . 
 sub_2e5ch:
 	ld (0e338h),hl		;2e5c	22 38 e3 	" 8 . 
@@ -8185,7 +8191,7 @@ l2e70h:
 	ret			;2e90	c9 	. 
 
 sub_2e91:
-	ld a,(0e720h)		;2e91	3a 20 e7 	:   . 
+	ld a,(ORIGIN_OF_DAMAGE)		;2e91	3a 20 e7 	:   . 
 	cp 003h		;2e94	fe 03 	. . 
 	ld a,001h		;2e96	3e 01 	> . 
 	jr z,l2e9bh		;2e98	28 01 	( . 
@@ -8196,10 +8202,10 @@ l2e9bh:
 	bit 6,a		;2ea1	cb 77 	. w 
 	ld hl,0fffeh		;2ea3	21 fe ff 	! . . 
 	jr z,l2eabh		;2ea6	28 03 	( . 
-	ld hl,0001h+1		;2ea8	21 02 00 	! . . 
+	ld hl,2		;2ea8	21 02 00 	! . . 
 l2eabh:
 	ld (0e33dh),hl		;2eab	22 3d e3 	" = . 
-	ld hl,(0e722h)		;2eae	2a 22 e7 	* " . 
+	ld hl,(HEIGHT_OF_DAMAGE_TO_THOMAS)		;2eae	2a 22 e7 	* " . 
 	add hl,hl			;2eb1	29 	) 
 	ld l,h			;2eb2	6c 	l 
 	ld h,000h		;2eb3	26 00 	& . 
@@ -8231,35 +8237,51 @@ sub_2ec1h:
 	pop bc			;2ee0	c1 	. 
 	ret			;2ee1	c9 	. 
 
-; E = amount of energy to subtract
-; SEGUIR
-sub_2ee2h:
+; Store the origin and mount of the damage (i.e. Thomas is hit by a knife).
+; Play groan sound.
+;
+; Input D: origin of damage.
+;          1, knife, dragon, 3: snake, bursting ball
+; Input E: amount of energy to subtract
+; Input HL: height of the attacking element (for example, a knife or a dragon's fire).
+;           0x5A00: low knife, 0x6900: high knife, ...
+STORE_DAMAGE_ORIGIN_AND_AMOUNT:
 	ld a,(THOMAS_DAMAGE_STATUS)	;2ee2	3a 1f e7
 	and 1		                ;2ee5	e6 01 	. . 
 	jr nz,l2efbh		        ;2ee7	20 12 Jump if Thomas is not receiving damage
     ; Thomas is receiving damage
-	ld (0e722h),hl		        ;2ee9	22 22 e7
+    
+    ; Store height of the attacking element
+	ld (HEIGHT_OF_DAMAGE_TO_THOMAS),hl  ;2ee9	22 22 e7
+
     ; Set Thomas is not receiving damage
 	ld hl,THOMAS_DAMAGE_STATUS	;2eec	21 1f e7
 	set 0,(hl)		            ;2eef	cb c6
-    ;
-	inc hl			;2ef1	23 	# 
-	ld (hl),d			;2ef2	72 	r 
-	inc hl			;2ef3	23 	# 
-	ld (hl),e		;2ef4	73 Write E = amount of energy to subtract. HL = ENERGY_TO_SUBTRACT.
-	ld a,083h		;2ef5	3e 83 	> . 
-	call PLAY_SOUND		;2ef7	cd fe 0d 	. . . 
-	ret			;2efa	c9
+
+    ; Store origin of damage
+	inc hl			            ;2ef1	23      HL = 0xE720 = ORIGIN_OF_DAMAGE
+	ld (hl),d			        ;2ef2	72
+
+    ; Set energy to subtract
+	inc hl	        ;2ef3	23    HL = 0xE721 = ENERGY_TO_SUBTRACT
+	ld (hl),e		;2ef4	73    Write E = amount of energy to subtract. HL = ENERGY_TO_SUBTRACT.
+
+	ld a,083h		;2ef5	3e 83
+	call PLAY_SOUND	;2ef7	cd fe 0d
+	ret			    ;2efa	c9
 
 l2efbh:
+    ; It seems to reach here when Thomas receives two attacks at the same time
+    ; For example, a snake and a bursting ball piece.
+    
     ; ENERGY = ENERGY - E
 	ld a,(ENERGY)	;2efb	3a 09 e7
 	sub e			;2efe	93
 	jr nc,l2f02h	;2eff	30 01 Set ENERGY = 0 if it becomes negative
-	xor a			;2f01	af 	. 
+	xor a			;2f01	af
 l2f02h:
-	ld (ENERGY),a		;2f02	32 09 e7 	2 . . 
-	ret			;2f05	c9
+	ld (ENERGY),a	;2f02	32 09 e7
+	ret			    ;2f05	c9
 
 sub_2f06h:
 	ld hl,POINTS_VISIBLE_COUNTER		;2f06	21 4c e6 	! L . 
@@ -8635,7 +8657,7 @@ l31c0h:
 	ld de,l0120h		;31c6	11 20 01 	.   . 
 	ld a,091h		;31c9	3e 91 	> . 
 	call PLAY_SOUND		;31cb	cd fe 0d 	. . . 
-	call sub_2ee2h		;31ce	cd e2 2e 	. . . 
+	call STORE_DAMAGE_ORIGIN_AND_AMOUNT		;31ce	cd e2 2e 	. . . 
 	jp l3713h		;31d1	c3 13 37 	. . 7 
 	call l1be2h		;31d4	cd e2 1b 	. . . 
 	call sub_3773h		;31d7	cd 73 37 	. s 7 
@@ -9249,7 +9271,7 @@ sub_36cah:
 	ld a,005h		;36df	3e 05 	> . 
 	ld (0e007h),a		;36e1	32 07 e0 	2 . . 
 l36e4h:
-	jp sub_2ee2h		;36e4	c3 e2 2e 	. . . 
+	jp STORE_DAMAGE_ORIGIN_AND_AMOUNT		;36e4	c3 e2 2e 	. . . 
 l36e7h:
 	ld hl,(ME_INITIAL_FALL_SPEED_COPY)		;36e7	2a 0c e8 	* . . 
 	ld de,0e400h		;36ea	11 00 e4 	. . . 
@@ -9975,7 +9997,7 @@ l3c0dh:
 	jr l3c2ah		;3c1c	18 0c 	. . 
 l3c1eh:
 	ld de,00115h		;3c1e	11 15 01 	. . . 
-	call sub_2ee2h		;3c21	cd e2 2e 	. . . 
+	call STORE_DAMAGE_ORIGIN_AND_AMOUNT		;3c21	cd e2 2e 	. . . 
 	ld a,094h		;3c24	3e 94 	> . 
 	call PLAY_SOUND		;3c26	cd fe 0d 	. . . 
 	xor a			;3c29	af 	. 
@@ -11234,7 +11256,7 @@ l4591h:
 	call CHECK_DEMO_OR_VULNERABLE
 	ret nz	
 	inc (hl)	
-	ld a,(0e720h)
+	ld a,(ORIGIN_OF_DAMAGE)
 l459fh:
 	and a	
 	push af	
@@ -11370,7 +11392,7 @@ sub_468eh:
 	ld hl,(0e710h)
 	ld de,1800h
 	add hl,de	
-	ld de,(0e722h)
+	ld de,(HEIGHT_OF_DAMAGE_TO_THOMAS)
 	sbc hl,de
 	ld a,020h
 	ret c	
