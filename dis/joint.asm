@@ -171,6 +171,15 @@ TBL_GUYS: EQU 0xE262
 ; Bit 4: guy is alive (not falling). A falling guy will still use its place in TBL_GUYS
 ; Bit 5: 1=avoid adding guys behind this one on the right
 ; Bit 6: moving direction of the guy (0 to the right, 1 to the left)
+ENEMY_IS_A_GRIPPER_BIT: EQU 0
+ENEMY_IS_A_BOSS_BIT: EQU 1
+ENEMY_IS_A_KID_BIT: EQU 2
+TRAILING_LEFT_BIT: EQU 3
+ENEMY_IS_ALIVE_BIT: EQU 4
+TRAILING_RIGHT_BIT: EQU 5
+ENEMY_MOVE_RIGHT_BIT: EQU 6
+
+
 
 ;ENEMY_PROPS_IDX: EQU 0
 ;ENEMY_STATE_IDX: EQU 1
@@ -4496,12 +4505,12 @@ l14bfh:
 l14d3h:
 	ld a,(TBL_ENEMIES)		;14d3	3a d8 e2 	: . . 
 	ld l,a			;14d6	6f 	o 
-	bit 4,l		;14d7	cb 65 	. e 
+	bit ENEMY_IS_ALIVE_BIT, l		;14d7	cb 65 	. e 
 	jr z,l14f1h		;14d9	28 16 	( . 
 	ld a,(0e197h)		;14db	3a 97 e1 	: . . 
 	and a			;14de	a7 	. 
 	jr z,l14ech		;14df	28 0b 	( . 
-	bit 6,l		;14e1	cb 75 	. u 
+	bit ENEMY_MOVE_RIGHT_BIT, l		;14e1	cb 75 	. u 
 	jr nz,l14f1h		;14e3	20 0c 	  . 
 	ld hl,(ENEMY_POS)		;14e5	2a da e2 	* . . 
 	sbc hl,de		;14e8	ed 52 	. R 
@@ -4593,7 +4602,7 @@ l1556h:
 
     ; Guy is alive?
 	ld c,(ix + ENEMY_PROPS_IDX)	;155b	dd 4e 00
-	bit 4,c		    ;155e	cb 61
+	bit ENEMY_IS_ALIVE_BIT,c		    ;155e	cb 61
 	ret z			;1560	c8 Guy is falling, get out
 
 	bit 5,c		        ;1561	cb 69 Can we add more guys behind, on the right?
@@ -5303,14 +5312,14 @@ sub_1a49h:
 	ld a,(0e701h)		;1a49	3a 01 e7 	: . . 
 	and 003h		;1a4c	e6 03 	. . 
 	jr nz,l1a54h		;1a4e	20 04 	  . 
-	res 2,(ix + ENEMY_PROPS_IDX)		;1a50	dd cb 00 96 	. . . . 
+	res ENEMY_IS_A_KID_BIT, (ix + ENEMY_PROPS_IDX)		;1a50	dd cb 00 96
 l1a54h:
-	bit 2,(ix + ENEMY_PROPS_IDX)		;1a54	dd cb 00 56 	. . . V 
+	bit ENEMY_IS_A_KID_BIT, (ix + ENEMY_PROPS_IDX)		;1a54	dd cb 00 56
 	ret nz			;1a58	c0 	. 
 	ld de,l1680h		;1a59	11 80 16 	. . . 
 	call sub_1ad2h		;1a5c	cd d2 1a 	. . . 
 	ret nc			;1a5f	d0 	. 
-	set 2,(ix + ENEMY_PROPS_IDX)		;1a60	dd cb 00 d6 	. . . . 
+	set ENEMY_IS_A_KID_BIT, (ix + ENEMY_PROPS_IDX)		;1a60	dd cb 00 d6 	. . . . 
 	ld a,085h		;1a64	3e 85 	> . 
 	ret p			;1a66	f0 	. 
 	call CHECK_THOMAS_IS_JUMPING		;1a67	cd c9 1a 	. . . 
@@ -5333,7 +5342,7 @@ l1a7eh:
 l1a80h:
 	and 0c0h		;1a80	e6 c0 	. . 
     ; Bit 4: enemy is alive
-	bit 4,(ix + ENEMY_PROPS_IDX)	;1a82	dd cb 00 66
+	bit ENEMY_IS_ALIVE_BIT,(ix + ENEMY_PROPS_IDX)	;1a82	dd cb 00 66
 	ret z			;1a86	c8 	. 
 	ex de,hl			;1a87	eb 	. 
 	call GET_ENEMY_HEIGHT_IN_HL		;1a88	cd 9e 1c
@@ -5474,14 +5483,14 @@ l1b37h:
 	ld (ix + ENEMY_ATTACK_STEP_IDX), 5	    ;1b50	dd 36 0e 05
 
 sub_1b54h:
-	bit 2,(ix + ENEMY_PROPS_IDX)    ;1b54	dd cb 00 56 Check if guy is a kid
+	bit ENEMY_IS_A_KID_BIT, (ix + ENEMY_PROPS_IDX)    ;1b54	dd cb 00 56 Check if the guy is a kid
 	ld hl,ACTIVE_GRIPPERS_LEFT		;1b58	21 1b e7
 	jr z,l1b5fh		                ;1b5b	28 02 Jump if he's not a kind
 	inc hl			;1b5d	23
 	inc hl			;1b5e	23 Now HL = ACTIVE_GRIPPERS_RIGHT
 l1b5fh:
     ; HL = ACTIVE_GRIPPERS (left or right)
-	bit 6,(ix + ENEMY_PROPS_IDX)		;1b5f	dd cb 00 76 Check the moving direction
+	bit ENEMY_MOVE_RIGHT_BIT, (ix + ENEMY_PROPS_IDX)		;1b5f	dd cb 00 76 Check the moving direction
 	ld de, -128		    ;1b63	11 80 ff
 	jr nz,l1b6ch		;1b66	20 04 Jump if moving to the left
 	inc hl			    ;1b68	23
@@ -5497,7 +5506,7 @@ l1b71h:
 	jp l1be2h		;1b77	c3 e2 1b 	. . . 
 
 REMOVE_ENEMY:
-	bit 1,(ix + ENEMY_PROPS_IDX)		;1b7a	dd cb 00 4e Is enemy a boss?
+	bit ENEMY_IS_A_BOSS_BIT, (ix + ENEMY_PROPS_IDX)		;1b7a	dd cb 00 4e Is enemy a boss?
 	jr nz,l1b89h		;1b7e	20 09 If so, mark it as inactive, but don't remove it from TBL_GUYS.
 	ld (ix + ENEMY_PROPS_IDX), 0  	;1b80	dd 36 00 00 Guy is no longer active
 	ld hl,TBL_GUYS_LEN	;1b84	21 61 e2 Decrease length of table
@@ -5505,7 +5514,7 @@ REMOVE_ENEMY:
 	ret			        ;1b88	c9
 l1b89h:
     ; Mark the guy as inactive, but don't remove from TBL_GUYS
-	res 4,(ix + ENEMY_PROPS_IDX)		;1b89	dd cb 00 a6
+	res ENEMY_IS_ALIVE_BIT, (ix + ENEMY_PROPS_IDX)		;1b89	dd cb 00 a6
 	ret			        ;1b8d	c9
 
 
@@ -5611,11 +5620,11 @@ CHECK_RESET_NEW_ENEMY_ON_THE_RIGHT:
     ;ENEMY_POSITION - THOMAS_POSITION <  0x1000
     
     ; we can add guys on the right
-	res 5,(ix + ENEMY_PROPS_IDX)	;1c33	dd cb 00 ae
+	res TRAILING_RIGHT_BIT, (ix + ENEMY_PROPS_IDX)	;1c33	dd cb 00 ae
 
     ; Reset bit #5 (new enemy on the right) of NEW_GUY_SIDE ==> We can add
-	ld hl,NEW_GUY_SIDE	;1c37	21 60 e2
-	res 5,(hl)		    ;1c3a	cb ae
+	ld hl, NEW_GUY_SIDE	;1c37	21 60 e2
+	res TRAILING_RIGHT_BIT,(hl)		    ;1c3a	cb ae
 	ret			        ;1c3c	c9
 
 ; Check if we can add a new enemy of the left.
@@ -5636,11 +5645,11 @@ CHECK_RESET_NEW_ENEMY_ON_THE_LEFT:
 	ret c			            ;1c4a	d8
     
     ; we can add guys on the left
-	res 3,(ix + ENEMY_PROPS_IDX)		;1c4b	dd cb 00 9e
+	res TRAILING_LEFT_BIT, (ix + ENEMY_PROPS_IDX)		;1c4b	dd cb 00 9e
 
     ; Reset bit #3 (new enemy on the left) of NEW_GUY_SIDE  ==> We can add
-	ld hl,NEW_GUY_SIDE		            ;1c4f	21 60 e2
-	res 3,(hl)		                    ;1c52	cb 9e
+	ld hl, NEW_GUY_SIDE		            ;1c4f	21 60 e2
+	res TRAILING_LEFT_BIT, (hl)		                    ;1c52	cb 9e
 	ret			                        ;1c54	c9
 
 ; Tables of ENEMY_FRAME_COUNTER values, terminated with 0ffh.
@@ -5906,10 +5915,11 @@ sub_1defh:
 
 ; SEGUIR
 sub_1dfdh:
-	ld ix,TBL_HEAD		;1dfd	dd 21 1b e3 	. ! . . 
-	ld c,(ix + 0)		;1e01	dd 4e 00 	. N . 
-	bit 4,c		;1e04	cb 61 	. a 
+	ld ix,TBL_HEAD		        ;1dfd	dd 21 1b e3
+	ld c,(ix + ENEMY_PROPS_IDX)	;1e01	dd 4e 00
+	bit ENEMY_IS_ALIVE_BIT, c	;1e04	cb 61
 	ret z			;1e06	c8 	. 
+
 	dec (ix + 7)		;1e07	dd 35 07 	. 5 . 
 	jr nz,l1e20h		;1e0a	20 14 	  . 
 	ld (ix + 7),005h		;1e0c	dd 36 07 05 	. 6 . . 
@@ -6174,12 +6184,12 @@ l1ff9h:
 	bit 4,(ix + 0)	;1ffc	dd cb 00 66
 	ret nz			;2000	c0
 	pop hl			;2001	e1
-    ; Resets bit 4 (enemy is alive) of magician and...
+    ; Resets bit "enemy is alive" of magician and...
 	ld hl,TBL_ENEMIES		;2002	21 d8 e2
-	res 4,(hl)		        ;2005	cb a6
+	res ENEMY_IS_ALIVE_BIT,(hl)		        ;2005	cb a6
     ; ...its replica.
 	ld hl,TBL_REPLICA + ENEMY_PROPS_IDX    ;2007	21 e8 e2
-	res 4,(hl)		;200a	cb a6 	. . 
+	res ENEMY_IS_ALIVE_BIT,(hl)		;200a	cb a6 	. . 
 	ret			;200c	c9 	. 
 l200dh:
 	ld (ix + ENEMY_STATE_IDX),002h		;200d	dd 36 01 02 	. 6 . . 
@@ -6253,8 +6263,7 @@ sub_20a2h:
 	ld a,(0e701h)		;20a2	3a 01 e7 	: . . 
 	and 003h		;20a5	e6 03 	. . 
 	jr nz,l20adh		;20a7	20 04
-    ; Reset bit 5 (enemy is being attacked)
-	res 5,(ix + ENEMY_PROPS_IDX)	;20a9	dd cb 00 ae
+	res TRAILING_RIGHT_BIT, (ix + ENEMY_PROPS_IDX)	;20a9	dd cb 00 ae
 l20adh:
 	push hl			;20ad	e5 	. 
 	ld a,(ix + ENEMY_STATE_IDX)		;20ae	dd 7e 01
@@ -6263,8 +6272,8 @@ l20adh:
 	ld hl,(ME_INITIAL_FALL_SPEED_COPY)	;20b5	2a 0c e8
 	add hl,de			                ;20b8	19
 	ld hl,0e701h		                ;20b9	21 01 e7
-    ; Bit 6: looking direction (0: left, 1: right)
-	bit 6,(ix + ENEMY_PROPS_IDX)		;20bc	dd cb 00 76
+
+	bit ENEMY_MOVE_RIGHT_BIT, (ix + ENEMY_PROPS_IDX)		;20bc	dd cb 00 76
 	jr z,l20cch		;20c0	28 0a 	( . 
 	jr c,l20c8h		;20c2	38 04 	8 . 
 	set 4,(hl)		;20c4	cb e6 	. . 
@@ -6306,8 +6315,7 @@ l20fdh:
 l2100h:
 	call CHECK_VAL_HL_PLUS_B_0XFF		;2100	cd 18 1b
 	ret nc			                    ;2103	d0
-    ; Bit 5: enemy is being attacked
-	set 5,(ix + ENEMY_PROPS_IDX)		;2104	dd cb 00 ee
+	set TRAILING_RIGHT_BIT, (ix + ENEMY_PROPS_IDX)		;2104	dd cb 00 ee
 	ret			                        ;2108	c9
 
 sub_2109h:
@@ -6315,10 +6323,11 @@ sub_2109h:
     ;        7654 3219 
     ; 0x20 = 0010 0000
     ; Bit 5: set when eneny is being attacked
-	and 020h		;210c	e6 20
-	ret nz			;210e	c0 Return, enemy under attack
-    ; Enemy not under attack
+	and 1 << TRAILING_RIGHT_BIT		;210c	e6 20
+	ret nz			;210e	c0
 	jp sub_1ae7h		;210f	c3 e7 1a 	. . . 
+
+; ToDo: this looks like a (frameseq?) table:
 l2112h:
 	inc b			;2112	04 	. 
 	inc bc			;2113	03 	. 
@@ -6812,8 +6821,8 @@ l24fbh:
 l2503h:
 	call sub_250fh		;2503	cd 0f 25 	. . % 
 	ld ix,TBL_REPLICA		    ;2506	dd 21 e8 e2
-    ; Bit 4: enemy is alive
-	bit 4,(ix + ENEMY_PROPS_IDX)	;250a	dd cb 00 66
+
+	bit ENEMY_IS_ALIVE_BIT, (ix + ENEMY_PROPS_IDX)	;250a	dd cb 00 66
 	ret z			;250e	c8 Return if enemy is dead
 sub_250fh:
 	ld hl,024d2h		;250f	21 d2 24 	! . $ 
@@ -6823,9 +6832,10 @@ sub_250fh:
 	ld de,0f800h		;251b	11 00 f8 	. . . 
 	add hl,de			;251e	19 	. 
 	jp nc,l2589h		;251f	d2 89 25
-    ; Bit 6: looking direction
-	bit 6,(ix + ENEMY_PROPS_IDX)		;2522	dd cb 00 76
+
+	bit ENEMY_MOVE_RIGHT_BIT, (ix + ENEMY_PROPS_IDX)		;2522	dd cb 00 76
 	ret nz			;2526	c0 Return if looking right
+
 	ld de,05f00h		;2527	11 00 5f 	. . _ 
 	ld l,(ix + ENEMY_POS_L_IDX)		;252a	dd 6e 02
 	ld h,(ix + ENEMY_POS_H_IDX)		;252d	dd 66 03
@@ -7002,7 +7012,7 @@ l2698h:
     ; 0x50 = 0101 0000
     ; Look right, not being attacked, enemy is alive
     ; This seems an initializacion for the enemy.
-	and 0x50		      ;26a9	e6 50
+	and (1 << ENEMY_IS_ALIVE_BIT) | (1 << 6); 0x50		      ;26a9	e6 50
 	ld (TBL_HEAD),a		  ;26ab	32 1b e3
 
 	ld hl,06500h		  ;26ae	21 00 65
@@ -7044,10 +7054,11 @@ l26edh:
 	ld l,(ix + ENEMY_POS_L_IDX)		;26f0	dd 6e 02
 	ld h,(ix + ENEMY_POS_H_IDX)		;26f3	dd 66 03
 	ld de,0x0280		;26f6	11 80 02 	. . . 
-    ; Bit 6: looking direction
-	bit 6,(ix + ENEMY_PROPS_IDX)		;26f9	dd cb 00 76
+
+	bit ENEMY_MOVE_RIGHT_BIT, (ix + ENEMY_PROPS_IDX)		;26f9	dd cb 00 76
 	jr nz,l270ch		;26fd	20 0d
-    ; Do this is looking left
+
+    ; Looking left
 	add hl,de			;26ff	19 	. 
 	ex de,hl			;2700	eb 	. 
 	ld hl,(0e106h)		;2701	2a 06 e1 	* . . 
@@ -7070,9 +7081,10 @@ l270eh:
 	jp c,l264bh		;2721	da 4b 26 	. K & 
 	call CAN_REPLICA_APPEAR		;2724	cd d4 2c 	. . , 
 	jp z,l2080h		;2727	ca 80 20
-    ; Bit 6: looking direction
-	bit 6,(ix + ENEMY_PROPS_IDX)		;272a	dd cb 00 76 	. . . v 
+
+	bit ENEMY_MOVE_RIGHT_BIT,(ix + ENEMY_PROPS_IDX)		;272a	dd cb 00 76 	. . . v 
 	jp z,l2488h		;272e	ca 88 24 	. . $ 
+
 	ld de,0a100h		;2731	11 00 a1 	. . . 
 	jp l2071h		;2734	c3 71 20
 
@@ -7092,9 +7104,10 @@ l2752h:
 	ld d,(ix + ENEMY_FRAMESEQ_PTR_H_IDX)	;2758	dd 56 0d
 	sbc hl,de		;275b	ed 52 	. R 
 	ex de,hl			;275d	eb
-    ; Bit 6: looking direction
-	bit 6,(ix + ENEMY_PROPS_IDX)		;275e	dd cb 00 76 	. . . v 
+
+	bit ENEMY_MOVE_RIGHT_BIT,(ix + ENEMY_PROPS_IDX)		;275e	dd cb 00 76 	. . . v 
 	jr nz,l2771h		;2762	20 0d 	  . 
+
 	ld hl,(0e106h)		;2764	2a 06 e1 	* . . 
 	sbc hl,de		;2767	ed 52 	. R 
 	jr nc,l276fh		;2769	30 04 	0 . 
@@ -7144,15 +7157,15 @@ l27b0h:
     ; Set enemy is dead
 	ld (ix + ENEMY_PROPS_IDX), 0	;27d4	dd 36 00 00
 	ld hl,0e701h		            ;27d8	21 01 e7
-	res 4,(hl)		                ;27db	cb a6 Set enemy is not alive
+	res ENEMY_IS_ALIVE_BIT, (hl)		                ;27db	cb a6 Set enemy is not alive
 	jr l283dh		                ;27dd	18 5e
 l27dfh:
     ; Set Thomas is frozen
 	ld hl,THOMAS_PROPS	;27df	21 00 e7
 	set 0,(hl)		;27e2	cb c6
 	ld a,(TBL_REPLICA + ENEMY_PROPS_IDX)		;27e4	3a e8 e2 	: . . 
-    ; Check bit 4: enemy is alive
-	and 010h		;27e7	e6 10 	. . 
+    ; Check bit ENEMY_IS_ALIVE_BIT: enemy is alive
+	and 1 << ENEMY_IS_ALIVE_BIT		;27e7	e6 10
 	jr z,l284fh		;27e9	28 64 Get out if enemy is dead
 	push ix		;27eb	dd e5 	. . 
 	ld ix,TBL_ENEMIES		;27ed	dd 21 d8 e2 	. ! . . 
@@ -7217,7 +7230,7 @@ l285ch:
 	ld hl,05000h		;2868	21 00 50
 	ld (0e2ech),hl		;286b	22 ec e2
     ; 0x50 = enemy looks right and he's alive
-	ld (ix + ENEMY_PROPS_IDX  + 16), 0x50	;286e	dd 36 10 Replica appears
+	ld (ix + ENEMY_PROPS_IDX  + 16), (1 << ENEMY_IS_ALIVE_BIT) | (1 << 6)	;286e	dd 36 10 Replica appears
 	ld (ix + FRAME_COUNTER_IDX + 16), 8		;2872	dd 36 17 08 	. 6 . . 
 	ld (ix + CURRENT_FRAME_IDX + 16), 30	;2876	dd 36 16 1e 	. 6 . . 
 	ld (ix + ENEMY_STATE_IDX + 16), 9		;287a	dd 36 11 09 	. 6 . .
@@ -7247,8 +7260,8 @@ l2893h:
 	ld de,0e198h		;289d	11 98 e1 	. . . 
 	jr nc,l28aah		;28a0	30 08
 	ld a,(TBL_REPLICA + ENEMY_PROPS_IDX)	;28a2	3a e8 e2
-    ; Check bit 4: enemy is alive
-	and 010h		;28a5	e6 10 	. . 
+    ; Check if enemy is alive
+	and 1 << ENEMY_IS_ALIVE_BIT		;28a5	e6 10 	. . 
 	jr nz,l28aah		;28a7	20 01 	  . 
 	ex de,hl			;28a9	eb 	. 
 l28aah:
@@ -8389,8 +8402,7 @@ l2fd2h:
 	push bc			;2fd2	c5 	. 
 	ld c,(ix + MAGICAL_ELEMENT_LOOKAT_IDX)	;2fd3	dd 4e 00
 l2fd6h:
-    ; Bit 4: enemy is alive
-	bit 4,c		    ;2fd6	cb 61
+	bit ENEMY_IS_ALIVE_BIT,c		    ;2fd6	cb 61
 	call nz,sub_2fe4h	;2fd8	c4 e4 2f Call if alive
 	pop bc			;2fdb	c1 	. 
 	ld de, 19		;2fdc	11 13 00 	. . . 
@@ -8968,7 +8980,7 @@ sub_34ddh:
 	ld de,00200h		;34e6	11 00 02 	. . . 
 	ld a,(ix + ENEMY_PROPS_IDX)		;34e9	dd 7e 00
     ; Check bit 6: looking direction
-	and 040h		;34ec	e6 40 	. @ 
+	and 1 << ENEMY_MOVE_RIGHT_BIT	;34ec	e6 40 	. @ 
 	jr z,l34f3h		;34ee	28 03 	( . 
 	add hl,de			;34f0	19 	. 
 	jr l34f5h		;34f1	18 02 	. . 
@@ -9162,8 +9174,7 @@ l363dh:
 	ld b,010h		;364e	06 10 	. . 
 l3650h:
 	add ix,de		;3650	dd 19
-    ; Bit 4: enemy is alive
-	bit 4,(ix + MAGICAL_ELEMENT_LOOKAT_IDX)		;3652	dd cb 00 66
+	bit ENEMY_IS_ALIVE_BIT,(ix + MAGICAL_ELEMENT_LOOKAT_IDX)		;3652	dd cb 00 66
 	jr z,l366ch		;3656	28 14 	( . 
 	ld a,(ix + MAGICAL_ELEMENT_STATE_IDX)		;3658	dd 7e 01
 	cp ME_STATE_POT_TOUCHES_FLOOR		;365b	fe 03
@@ -9190,8 +9201,7 @@ l366ch:
 	ld bc, 19   		;3682	01 13 00 	. . . 
 l3685h:
 	add ix,bc		;3685	dd 09
-    ; Bit 4: enemy is alive
-	bit 4,(ix + MAGICAL_ELEMENT_LOOKAT_IDX)		;3687	dd cb 00 66
+	bit ENEMY_IS_ALIVE_BIT, (ix + MAGICAL_ELEMENT_LOOKAT_IDX)		;3687	dd cb 00 66
 	jr nz,l3685h		;368b	20 f8 	  . 
 	ld a,r		;368d	ed 5f 	. _ 
 	and 040h		;368f	e6 40 	. @ 
@@ -11674,7 +11684,7 @@ l487eh:
 	ld (0e347h),a
 
 	ld ix,TBL_GUYS
-	ld bc,0750h
+	ld bc, (7 << 8) | (1 << ENEMY_IS_ALIVE_BIT) | (1 << ENEMY_MOVE_RIGHT_BIT);
 	ld hl, 3840 ; Position of guy
 	ld b, 7 ; 7 guys in the intro. However, the programmer already set B with ld bc,0750h. Question: debug?
 iterate_guys_intro:
@@ -11686,8 +11696,7 @@ iterate_guys_intro:
 	ld (ix + ENEMY_ATTACK_STEP_IDX), 038h
 	ld (ix + THOMAS_LAST_SHAKE_MOVE),b
 
-    ; 0x50: look right, not being attacked, enemy is alive
-	ld (ix + ENEMY_PROPS_IDX),c ; Set to 0x50 or 0x10 ; 48e5
+	ld (ix + ENEMY_PROPS_IDX),c ; 48e5
 
     ; Set position to HL
 	ld (ix + ENEMY_POS_L_IDX),l
@@ -11707,7 +11716,7 @@ l48ffh:
 	ld hl, 12544
     ; Set looking direction.
     ; 0x10: look left, not being attacked, enemy is alive
-	ld c, 0x10
+	ld c, 1 << ENEMY_IS_ALIVE_BIT
 next_guy_intro: ; 4902
     ; Next guy in TBL_GUYS
 	ld de, 16
