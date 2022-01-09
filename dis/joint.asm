@@ -183,12 +183,14 @@ TBL_E10A: EQU 0xE10A
 ; Seem related to the moths at 4th floor
 TBL_E520: EQU 0xE520
 
-
-
-
 ; Unknown yet. I only know each element of the table has length 19
 TABLE_WIDTH_19: EQU 0xE36F
+
 TABLE_WIDTH_41: EQU 0xE54A
+TBL_E562: EQU 0xE562
+
+
+
 
 
 
@@ -9208,7 +9210,7 @@ l3813h:
 	cp (hl)			;383b	be 	. 
 	jp c,l38d9h		;383c	da d9 38 	. . 8 
 	inc (hl)			;383f	34 	4 
-	ld iy,0e562h		;3840	fd 21 62 e5 	. ! b . 
+	ld iy,TBL_E562		;3840	fd 21 62 e5 	. ! b . 
 	ld bc,0013h+2		;3844	01 15 00 	. . . 
 l3847h:
 	add iy,bc		;3847	fd 09 	. . 
@@ -9913,7 +9915,7 @@ l3d5bh:
 	cp (hl)			;3d61	be 	. 
 	ret c			;3d62	d8 	. 
 	inc (hl)			;3d63	34 	4 
-	ld iy,0e562h		;3d64	fd 21 62 e5 	. ! b . 
+	ld iy,TBL_E562		;3d64	fd 21 62 e5 	. ! b . 
 	ld de,0013h+2		;3d68	11 15 00 	. . . 
 l3d6bh:
 	add iy,de		;3d6b	fd 19 	. . 
