@@ -113,7 +113,7 @@ DRAGONS_LEVEL: EQU 0xE080 ; 00 DDD LLL, where D is the number of dragons, and L 
 ;
 ; 0: normal enemies
 ; 3, 4: falling magical elements of level 2
-; B, C: butterflies, 
+; 11, 12: butterflies, 
 FLOOR_STAGE: EQU 0xE100
 
 
@@ -1644,7 +1644,7 @@ l07b6h:
 	ld de,0e19ch		;07cd	11 9c e1 	. . . 
 	ld bc,001dh		;07d0	01 1d 00 	. . . 
 	ldir		;07d3	ed b0 	. . 
-	ld hl,0x980		;07d5	21 80 09 	! . . 
+	ld hl, INDICES_980		;07d5	21 80 09 	! . . 
 	pop bc			;07d8	c1 	. 
 	add hl,bc			;07d9	09 	. 
 	ld a,(hl)			;07da	7e 	~ 
@@ -1653,7 +1653,7 @@ l07b6h:
 	ld l,a			;07dd	6f 	o 
 	or h			;07de	b4 	. 
 	jr z,l07e6h		;07df	28 05 	( . 
-	ld bc,0006h+2		;07e1	01 08 00 	. . . 
+	ld bc, 8		;07e1	01 08 00 	. . . 
 	ldir		;07e4	ed b0 	. . 
 l07e6h:
 	pop bc			;07e6	c1 	. 
@@ -1782,6 +1782,7 @@ TBL_FLOOR_STAGE_FROM_ROUND: ; 88a
 	defb 5, 0
     defb 2, 0                      ;089c
 
+; Another table to obtain FLOOR_STAGE from GET_ROUND_IN_BC.
 TBL_FLOOR_STAGE_FROM_ROUND_2: ;089e
     defb 0, 0, 0, 10, 0, 0, 0, 0, 11, 0, 0, 0, 0, 12, 0, 0, 0, 0
     
@@ -1873,7 +1874,7 @@ INDICES_DATA_MAGICAL_ELEMENTS: ;08b0, 12 entries, 24 bytes
     
 INDICES_DATA_MOTHS: ; 0920
 ; 17 bytes per entry
-    defw 0x3000
+    defw l3000h
     defw 0x0049
     defw 0x0000
     defw 0x0061
@@ -1883,59 +1884,34 @@ INDICES_DATA_MOTHS: ; 0920
     defw 0x0052    
     defw 0x0049
     defw 0x002d
-    defw TBL_INIT_MOTHS; 0x093c
-    defw 0x094d
-    defw 0x095e
-    defw 0x096f
+    defw TBL_INIT_MOTHS_1 ; 0x093c
+    defw TBL_INIT_MOTHS_2 ; 0x094d
+    defw TBL_INIT_MOTHS_3 ; 0x095e
+    defw TBL_INIT_MOTHS_4;  0x096f
     
 ; Table init moths
-TBL_INIT_MOTHS: ; 0x093c
-    db 0x20, 0x0, 0x32, 0x0, 0x28, 0x0, 0x33, 0x0; 0x93c - 0x943
-    db 0x23, 0x0, 0x6b, 0x7, 0x7f, 0x3f, 0x3f, 0x38; 0x944 - 0x94b
-    db 0x70; 0x94c
+TBL_INIT_MOTHS_1: ; 0x093c
+    db 0x20, 0x0, 0x32, 0x0, 0x28, 0x0, 0x33, 0x0
+    db 0x23, 0x0, 0x6b, 0x7, 0x7f, 0x3f, 0x3f, 0x38
+    db 0x70
 	
+TBL_INIT_MOTHS_2: ; 0x094d
+    db 0x32, 0x00, 0x3b, 0x00, 0x3f, 0x00, 0x50, 0x00
+    db 0x38, 0x00, 0x6b, 0x07, 0xb2, 0x3f, 0x66, 0x38
+	db 0x70
 
-	ld (03b00h),a		;094d	32 00 3b 	2 . ; 
-	nop			;0950	00 	. 
-	ccf			;0951	3f 	? 
-	nop			;0952	00 	. 
-	ld d,b			;0953	50 	P 
-	nop			;0954	00 	. 
-	jr c,0x957		;0955	38 00 	8 . 
-	ld l,e			;0957	6b 	k 
-	rlca			;0958	07 	. 
-	or d			;0959	b2 	. 
-	ccf			;095a	3f 	? 
-	ld h,(hl)			;095b	66 	f 
-	jr c,l09ceh		;095c	38 70 	8 p 
-	ld (03b00h),a		;095e	32 00 3b 	2 . ; 
-	nop			;0961	00 	. 
-	ccf			;0962	3f 	? 
-	nop			;0963	00 	. 
-	ld d,b			;0964	50 	P 
-	nop			;0965	00 	. 
-	jr c,0x968		;0966	38 00 	8 . 
-	jr c,0x96e		;0968	38 04 	8 . 
-	ld a,a			;096a	7f 	 
-	ld h,(hl)			;096b	66 	f 
-	ld h,(hl)			;096c	66 	f 
-	inc e			;096d	1c 	. 
-	jr c,0x9ab		;096e	38 3b 	8 ; 
-	nop			;0970	00 	. 
-	ld b,h			;0971	44 	D 
-	nop			;0972	00 	. 
-	ld c,d			;0973	4a 	J 
-	nop			;0974	00 	. 
-	ld e,a			;0975	5f 	_ 
-	nop			;0976	00 	. 
-	ld b,h			;0977	44 	D 
-	nop			;0978	00 	. 
-	jr c,0x97f		;0979	38 04 	8 . 
-	or d			;097b	b2 	. 
-	ld h,(hl)			;097c	66 	f 
-	ld a,a			;097d	7f 	 
-	inc e			;097e	1c 	. 
-	jr c,0x981		;097f	38 00 	8 . 
+TBL_INIT_MOTHS_3: ; 0x095e
+	db 0x32, 0x00, 0x3b, 0x00, 0x3f, 0x00, 0x50, 0x00
+	db 0x38, 0x00, 0x38, 0x04, 0x7f, 0x66, 0x66, 0x1c
+    db 0x38
+    
+TBL_INIT_MOTHS_4: ; 0x096f
+    db 0x3b, 0x00, 0x44, 0x00, 0x4a, 0x00, 0x5f, 0x00
+    db 0x44, 0x00, 0x38, 0x04, 0xb2, 0x66, 0x7f, 0x1c
+    db 0x38
+    
+INDICES_980:
+    db 0
 	nop			;0981	00 	. 
 	xor b			;0982	a8 	. 
 	add hl,bc			;0983	09 	. 
@@ -2629,7 +2605,7 @@ l0c79h:
 	nop			;0c79	00 	. 
 	ld h,c			;0c7a	61 	a 
 	inc bc			;0c7b	03 	. 
-	ld (03000h),hl		;0c7c	22 00 30 	" . 0 
+	ld (l3000h),hl		;0c7c	22 00 30 	" . 0 
 	ld (02740h),a		;0c7f	32 40 27 	2 @ ' 
 	inc hl			;0c82	23 	# 
 	nop			;0c83	00 	. 
@@ -8157,7 +8133,12 @@ l2ff7h:
 	call nc,sub_1931h		;2ff9	d4 31 19 	. 1 . 
 	jr nc,l2f96h		;2ffc	30 98 	0 . 
 	inc sp			;2ffe	33 	3 
-	call nc,0c833h		;2fff	d4 33 c8 	. 3 . 
+	;call nc,0c833h		;2fff	d4 33 c8 	. 3 . 
+    defb 0xd4
+l3000h:
+    defb 0x33, 0xc8
+    
+    
 	ld (l3049h),a		;3002	32 49 30 	2 I 0 
 	xor 031h		;3005	ee 31 	. 1 
 	dec h			;3007	25 	% 
