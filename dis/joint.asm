@@ -189,7 +189,8 @@ TBL_E520: EQU 0xE520
 ; Unknown yet. I only know each element of the table has length 19
 TABLE_WIDTH_19: EQU 0xE36F
 TABLE_WIDTH_41: EQU 0xE54A
-TBL_WIDTH_21: EQU 0xE577
+
+
 
 DISTANCE_TO_LEFT: EQU 0xE802
 
@@ -9202,7 +9203,7 @@ l3813h:
 	add hl,bc			;382f	09 	. 
 	sbc hl,de		;3830	ed 52 	. R 
 	jp nc,l38d9h		;3832	d2 d9 38 	. . 8 
-	ld hl,TBL_MOTHS		;3835	21 76 e5 	! v . 
+	ld hl,TBL_MOTHS_LEN		;3835	21 76 e5 	! v . 
 	ld a,(0e50bh)		;3838	3a 0b e5 	: . . 
 	cp (hl)			;383b	be 	. 
 	jp c,l38d9h		;383c	da d9 38 	. . 8 
@@ -9447,10 +9448,10 @@ l39b9h:
 
 ; Adding a RET (C9) here avoids that the moths at level #4 appear.
 sub_39c0h:
-	ld a,(TBL_MOTHS)		;39c0	3a 76 e5 	: v . 
+	ld a,(TBL_MOTHS_LEN)		;39c0	3a 76 e5 	: v . 
 	and a			;39c3	a7 	. 
 	ret z			;39c4	c8 	. 
-	ld ix,TBL_WIDTH_21		;39c5	dd 21 77 e5 	. ! w . 
+	ld ix,TBL_MOTHS		;39c5	dd 21 77 e5 	. ! w . 
 	ld a,(0e50bh)		;39c9	3a 0b e5 	: . . 
 	ld b,a			;39cc	47 	G 
 l39cdh:
@@ -9842,12 +9843,12 @@ sub_3ccfh:
 	ret			;3cf1	c9 	. 
 
 l3cf2h:
-	ld hl,TBL_MOTHS		;3cf2	21 76 e5 	! v . 
+	ld hl,TBL_MOTHS_LEN		;3cf2	21 76 e5 	! v . 
 	dec (hl)			;3cf5	35 	5 
 	ld (ix + 0),000h		;3cf6	dd 36 00 00 	. 6 . . 
 	ret			;3cfa	c9 	. 
 l3cfbh:
-	ld hl,TBL_MOTHS		;3cfb	21 76 e5 	! v . 
+	ld hl,TBL_MOTHS_LEN		;3cfb	21 76 e5 	! v . 
 	dec (hl)			;3cfe	35 	5 
 	bit 6,(ix + 0)		;3cff	dd cb 00 76 	. . . v 
 	ld (ix + 0),000h		;3d03	dd 36 00 00 	. 6 . . 
@@ -9907,7 +9908,7 @@ sub_3d55h:
 sub_3d59h:
 	ld b,050h		;3d59	06 50 	. P 
 l3d5bh:
-	ld hl,TBL_MOTHS		;3d5b	21 76 e5 	! v . 
+	ld hl,TBL_MOTHS_LEN		;3d5b	21 76 e5 	! v . 
 	ld a,(0e50bh)		;3d5e	3a 0b e5 	: . . 
 	cp (hl)			;3d61	be 	. 
 	ret c			;3d62	d8 	. 
