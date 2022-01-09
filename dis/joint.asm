@@ -154,114 +154,22 @@ NUM_GRIPPING: EQU 0xE71A
 ACTIVE_GRIPPERS_LEFT: EQU 0xE71B
 ACTIVE_GRIPPERS_RIGHT: EQU 0xE71D
 
+; Grippers, knifers, and tom-toms
+include 'guys.asm'
+
+; The boomerangs thrown by the boss at level #2
+include 'boomerang.asm'
+
+; Bosses and other enemies
+include 'enemies.asm'
+
+; Magical elements, mainly at the beginning of level #2
+include 'magical_elements.asm'
+
 
 TBL_E10A: EQU 0xE10A
 
 
-; Side of the screen where the new guy (gripper of knifer) will appear
-; 00: nothing
-; 08  (bit #3): new enemy on the left
-; 20: (bit #5): new enemy on the right
-NEW_GUY_SIDE: EQU 0xE260
-
-; TBL_GUYS: each entry is 16 bytes
-; Setting a large number in TBL_GUYS_LEN will prevent adding more guys
-TBL_GUYS_LEN: EQU 0xE261
-TBL_GUYS: EQU 0xE262
-
-; Entry 0
-; Bit 0: guy is a gripper (0) or a knifer (1)
-; Bit 1: unused for guys? It's 1 when it's a boss, but in TBL_ENEMIES
-; Bit 2: guy is a kid
-; Bit 3: 1=avoid adding guys behind this one on the left
-; Bit 4: guy is alive (not falling). A falling guy will still use its place in TBL_GUYS
-; Bit 5: 1=avoid adding guys behind this one on the right
-; Bit 6: moving direction of the guy (0 to the right, 1 to the left)
-ENEMY_IS_A_GRIPPER_BIT: EQU 0
-ENEMY_IS_A_BOSS_BIT: EQU 1
-ENEMY_IS_A_KID_BIT: EQU 2
-TRAILING_LEFT_BIT: EQU 3
-ENEMY_IS_ALIVE_BIT: EQU 4
-TRAILING_RIGHT_BIT: EQU 5
-ENEMY_MOVE_RIGHT_BIT: EQU 6
-
-
-
-;ENEMY_PROPS_IDX: EQU 0
-;ENEMY_STATE_IDX: EQU 1
-;ENEMY_STATE: EQU TBL_ENEMIES + ENEMY_STATE_IDX ; Enemy's state
-;
-;ENEMY_POS_L_IDX: EQU 2
-;ENEMY_POS_H_IDX: EQU 3
-
-;ENEMY_HEIGHT_L_IDX: EQU 4
-;ENEMY_HEIGHT_H_IDX: EQU 5 ; Height of boss when falling after being defeated
-
-;ENEMY_FRAME_IDX: EQU 6 ; Enemy's displayed frame
-
-;ENEMY_FRAME_COUNTER_IDX: EQU 7
-
-; Step counter to decrease the energy. It's related to the configuration
-; of DSW1 (energy loss slow/fast).
-; I guess this was added afterwards, since it's weird to have this
-; variable and also ENEMY_ATTACK_STEP_IDX to the same.
-GRIPPING_ENERGY_DECREASE_DSW_STEP: EQU 7
-
-
-;ENEMY_MOVE_COUNTER_L_IDX: EQU 8
-;ENEMY_MOVE_COUNTER_H_IDX: EQU 9
-
-;ENEMY_ENERGY_IDX: EQU 10
-
-; This controls the time left the enemy is standing without moving.
-; For grippers, it's the number of shakes for the gripper before
-; releasing Thomas.
-;ENEMY_STEADY_COUNTER_IDX: EQU 11
-
-;ENEMY_FRAMESEQ_PTR_L_IDX: EQU 12
-;ENEMY_FRAMESEQ_PTR_H_IDX: EQU 13
-
-; ENEMY_ATTACK_STEP_IDX: EQU 14
-
-
-; This variable stores the last move Thomas did in order to get
-; released from a gripper.
-; The code checks that indeed the moves are different to perform an
-; effective shake.
-;
-; This variable with index 15 is "ENEMY_BOOMERANG_TYPE_IDX" in the case of
-; the boomerang guy at level 2.
-THOMAS_LAST_SHAKE_MOVE: EQU 15
-
-
-
-
-
-TBL_GUYS_ENTRY_2: EQU TBL_GUYS + 2*16
-
-; These are used in the intro only
-TBL_GUYS_ENTRY_4: EQU TBL_GUYS + 4*16
-TBL_GUYS_ENTRY_5: EQU TBL_GUYS + 5*16
-
-TBL_BOOMERANG_1: EQU 0xE2FB
-TBL_BOOMERANG_2: EQU 0xE30B
-
-; Entry 0
-; bit #4: boomerang active
-; bit #5: boomerang damaged Thomas
-; bit #6: boomerang active
-BOOMERANG_PROPS_IDX: EQU 0
-
-BOOMERANG_ACTIVE1_BIT: EQU 4
-BOOMERANG_CAUSED_DAMAGE_BIT: EQU 5
-BOOMERANG_ACTIVE2_BIT: EQU 6
-
-; Entry 1: direction of the boomerang
-BOOMERANG_DIRECTION: EQU 1
-;
-;BOOMERANG_DIRECTION_LEFT: EQU 0
-BOOMERANG_DIRECTION_TURNING: EQU 1
-;BOOMERANG_DIRECTION_RIGHT: EQU 2
 
 ; The head of the magician. Creepy!
 TBL_HEAD: EQU 0xE31B
@@ -283,172 +191,8 @@ TBL_E520: EQU 0xE520
 
 ; Unknown yet. I only know each element of the table has length 19
 TABLE_WIDTH_19: EQU 0xE36F
-
 TABLE_WIDTH_41: EQU 0xE54A
-
 TBL_WIDTH_21: EQU 0xE577
-
-
-; *******************************************************************
-TBL_MAGICAL_ELEMENTS: EQU 0xE382
-
-MAGICAL_ELEMENT_LOOKAT_IDX: EQU 0 ; E382
-
-; This counter controls how many ticks the falling magical element will
-; stay in that state
-MAGICAL_ELEMENT_STATE_IDX: EQU 1 ; E383
-MAGICAL_ELEMENT_DISTANCE_L_IDX: EQU 2 ; E384
-MAGICAL_ELEMENT_DISTANCE_H_IDX: EQU 3 ; E385
-
-; Height of falling or floating magical elements
-MAGICAL_ELEMENT_HEIGHT_L_IDX: EQU 4 ; E386
-MAGICAL_ELEMENT_HEIGHT_H_IDX: EQU 5 ; E387
-
-CURRENT_FRAME_IDX: EQU 6 ; E388
-FRAME_COUNTER_IDX: EQU 7 ; E389
-
-; Ticks left before the magician's fireballs turns into a bat,
-; Ticks before the confetti ball explodes.
-FIREBALL_TIMEOUT_IDX: EQU 8 ; 0xE38A
-
-; (IDX 9 unused)
-
-MAGICAL_ELEMENT_FALL_ACCELERATION_L_IDX: EQU 10 ; E38C
-MAGICAL_ELEMENT_FALL_ACCELERATION_H_IDX: EQU 11 ; E38D
-
-MAGICAL_ELEMENT_FALL_SPEED_L_IDX: EQU 12 ; E38E
-MAGICAL_ELEMENT_FALL_SPEED_H_IDX: EQU 13 ; E38F
-
-
-MAGICAL_ELEMENT_HOR_OFFSET_L_IDX: EQU 14; E390
-MAGICAL_ELEMENT_HOR_OFFSET_H_IDX: EQU 15; E391
-
-; This seems to control the falling height of the confetti ball
-MAGICAL_ELEMENT_HEIGHT_OFFSET_L_IDX: EQU 16; E392
-MAGICAL_ELEMENT_HEIGHT_OFFSET_H_IDX: EQU 17; E393
-
-ME_INITIAL_FALL_SPEED: EQU 0xE36C
-ME_INITIAL_FALL_SPEED_COPY: EQU 0xE80C
-
-ME_STATE_POT_FALLS: EQU 0
-ME_STATE_POT_TOUCHES_FLOOR: EQU 3
-ME_STATE_SNAKE_WALKING: EQU 4
-ME_STATE_CONFETTI_EXPLODES: EQU 5
-ME_STATE_CONFETTI_FALLS_AND_FLOATS: EQU 6
-ME_STATE_DRAGON_FALLS: EQU 1
-ME_STATE_DRAGON_SMOKE_APPEARS: EQU 7
-ME_STATE_DRAGON_OUT_AND_WILL_FIRE: EQU 8
-ME_STATE_DRAGON_DISAPPEARS: EQU 9
-ME_STATE_CONFETTI_MOVES_DIAGONAL: EQU 10
-
-BOUNCING_BALL_EXPLODE_TIMEOUT_INIT: EQU 0xE371
-; *******************************************************************
-
-
-; *******************************************************************
-TBL_ENEMIES: EQU 0xE2D8
-
-; The meaning of these indices seems to be mainly shared with TBL_GUYS too.
-; ToDo: put them as common variables, perhaps in a separate file.
-
-; Enemy's properties
-; Bit 6: looking (and moving!) direction. 0 = look left and 1 = look right
-; Bit 5: set to 1 when the enemy is attacked
-; Bit 4: enemy is alive
-; Bit 1: 1 if it's a boss
-ENEMY_PROPS_IDX: EQU 0
-
-; 0: enemy advances towards Thomas
-; 1: enemy disappears dies
-; 2, 3: enemy waits that Thomas approaches before attacking
-; 4: enemy goes back, without turning back
-; 5: enemy goes back, turning back
-; 8: enemy stops and replica appears
-; 9: enemy is gripping
-ENEMY_STATE_IDX: EQU 1
-ENEMY_STATE: EQU TBL_ENEMIES + ENEMY_STATE_IDX ; Enemy's state
-
-ENEMY_POS_L_IDX: EQU 2
-ENEMY_POS_H_IDX: EQU 3
-ENEMY_POS: EQU TBL_ENEMIES + ENEMY_POS_L_IDX ; Position of the enemy
-
-ENEMY_HEIGHT_L_IDX: EQU 4
-ENEMY_HEIGHT_H_IDX: EQU 5 ; Height of boss when falling after being defeated
-
-ENEMY_FRAME_IDX: EQU 6 ; Enemy's displayed frame
-ENEMY_FRAME: EQU TBL_ENEMIES + ENEMY_FRAME_IDX
-
-ENEMY_FRAME_COUNTER_IDX: EQU 7
-ENEMY_FRAME_COUNTER: EQU TBL_ENEMIES + ENEMY_FRAME_COUNTER_IDX ; Ticks the enemy stays in its current frame
-
-; If ENEMY_MOVE_COUNTER_L_IDX !=0, the enemy won't do anything.
-; For example, this is the time the knifers wait before throwing.
-; Also, when the boss moves forward and backwards.
-ENEMY_MOVE_COUNTER_L_IDX: EQU 8
-ENEMY_MOVE_COUNTER_H_IDX: EQU 9
-ENEMY_MOVE_COUNTER: EQU TBL_ENEMIES + ENEMY_MOVE_COUNTER_L_IDX
-
-; The energy of an boss or a knifer.
-; In the case of a knifer it's set to 2.
-; This way you need to attack twice to defeat him.
-ENEMY_ENERGY_IDX: EQU 10
-ENEMY_ENERGY: EQU TBL_ENEMIES + ENEMY_ENERGY_IDX ; Enemy's energy
-
-
-; This controls the time left the enemy is standing without moving.
-; For grippers, it's the number of shakes for the gripper before
-; releasing Thomas.
-ENEMY_STEADY_COUNTER_IDX: EQU 11
-ENEMY_STEADY_COUNTER: EQU TBL_ENEMIES + ENEMY_STEADY_COUNTER_IDX 
-;
-; This controls how Mr. X reacts to attacks
-; 7A: low kick, that he avoids by jumping
-; 6A: attack that he can't avoid
-;
-; For the stick guy: 27: punch, kick
-
-; For grippers/knifers:
-;   56, 1C: about to start falling because of kick/punch or un-gripped
-;   58, 1C: falling
-;   5A, 1C: normal
-;   5C, 1C: knifer attacked
-;   5E, 1C: knifer falling
-
-ENEMY_FRAMESEQ_PTR_L_IDX: EQU 12
-ENEMY_FRAMESEQ_PTR_H_IDX: EQU 13
-ENEMY_FRAMESEQ_PTR: EQU TBL_ENEMIES + ENEMY_FRAMESEQ_PTR_L_IDX
-
-; When the action of the gripper is to remove energy, the
-; energy decrease rate is also governed by this counter.
-ENEMY_ATTACK_STEP_IDX: EQU 14
-ENEMY_ATTACK_STEP: EQU TBL_ENEMIES + ENEMY_ATTACK_STEP_IDX ; Enemy attack step
-;
-; Enemy attack type
-; 0: boomerang goes up, returns up
-; 1: boomerang goes up, returns down
-; 2: boomerang goes down, returns down
-; 3: boomerang goes down, returns up
-ENEMY_BOOMERANG_TYPE_IDX: EQU 15
-ENEMY_BOOMERANG_TYPE: EQU TBL_ENEMIES + ENEMY_BOOMERANG_TYPE_IDX
-
-
-; *******************************************************************
-
-; In the 4th floor, the magician can make a replica of himself appear.
-; The code addresses the variables of the replica in two different ways:
-;   - With the same indices, but with base address TBL_ENEMIES + 16 = 0xE2E8 or
-;   - with the same base address, but adding 16 to the index.
-
-TBL_REPLICA: EQU TBL_ENEMIES + 16 ; 0xE2E8
-
-; Downcount counter for the replica to appear or disappear, when this
-; counter reaches zero.
-REPLICA_APPEAR_COUNTER: EQU 0xE2F8
-
-; *******************************************************************
-
-
-
 
 DISTANCE_TO_LEFT: EQU 0xE802
 
