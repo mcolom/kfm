@@ -683,7 +683,7 @@ l019fh:
 	ld a,(0e33fh)		;01a2	3a 3f e3 	: ? . 
 	and a			;01a5	a7 	. 
 	call nz,sub_2ec1h		;01a6	c4 c1 2e 	. . . 
-	call sub_39c0h		;01a9	cd c0 39 	. . 9 
+	call PROCESS_ALL_MOTHS		;01a9	cd c0 39 	. . 9 
 	call sub_2d72h		;01ac	cd 72 2d 	. r - 
 	call sub_2f06h		;01af	cd 06 2f 	. . / 
 	jr l01c4h		;01b2	18 10 	. . 
@@ -1433,23 +1433,24 @@ sub_064a:
     
 	call sub_074dh		;0657	cd 4d 07 	. M . 
 	call sub_06beh		;065a	cd be 06 	. . . 
-	ld hl,0e380h		;065d	21 80 e3 	! . . 
+	ld hl,0e380h		;065d	21 80 e3 	! . .  ToDo: what is 0e380h? Why not NUM_MAGICAL_ELEMENTS?
 	ld de,NUM_MAGICAL_ELEMENTS		;0660	11 81 e3 	. . . 
 	ld bc,00131h		;0663	01 31 01 	. 1 . 
 	ld (hl),000h		;0666	36 00 	6 . 
 	ldir		;0668	ed b0 	. . 
 	call GET_ROUND_IN_BC		;066a	cd 66 08 	. f . 
-	ld hl,l088ah		;066d	21 8a 08 	! . . 
+	ld hl,TBL_FLOOR_STAGE_FROM_ROUND		;066d	21 8a 08 	! . . 
 	add hl,bc			;0670	09 	. 
 	ld a,(hl)			;0671	7e 	~ 
 	ld (FLOOR_STAGE),a		;0672	32 00 e1 	2 . . 
 	and a			;0675	a7 	. 
 	jr z,l0689h		;0676	28 11 	( . 
-	ld hl,l08b0h		;0678	21 b0 08 	! . . 
-	ld de,0e360h		;067b	11 60 e3 	. ` . 
-l067eh:
-	ld bc,0x0018	    ;067e	01 18 00
+
+	ld hl, INDICES_DATA_MAGICAL_ELEMENTS		;0678	21 b0 08 	! . . 
+	ld de, 0e360h		;067b	11 60 e3 	. ` . 
+	ld bc, 24	        ;067e	01 18 00
 	call LDIR_WITH_INDEXED_HL		;0681	cd b2 06 	. . . 
+
 	ld a,001h		;0684	3e 01 	> . 
 	ld (0e380h),a		;0686	32 80 e3 	2 . . 
 l0689h:
@@ -1462,15 +1463,19 @@ l0689h:
 	ldir		        ;0694	ed b0
     
 	call GET_ROUND_IN_BC		;0696	cd 66 08 	. f . 
-	ld hl,l089eh		;0699	21 9e 08 	! . . 
+	ld hl,TBL_FLOOR_STAGE_FROM_ROUND_2		;0699	21 9e 08 	! . . 
 	add hl,bc			;069c	09 	. 
 	ld a,(hl)			;069d	7e 	~ 
 	and a			;069e	a7 	. 
 	ret z			;069f	c8 	. 
+
 	ld (FLOOR_STAGE),a		;06a0	32 00 e1 	2 . . 
-	ld hl,0x0920		;06a3	21 20 09 	!   . 
-	ld de,0xe500		;06a6	11 00 e5 	. . . 
-	ld bc,0x0011		;06a9	01 11 00 	. . . 
+
+	ld hl, INDICES_DATA_MOTHS		;06a3	21 20 09
+	ld de,0xe500            		;06a6	11 00 e5
+	ld bc, 17   		            ;06a9	01 11 00
+    ;
+    ; Do LDIR with HL=0x93C, DE=0xE500, BC=0x11
 	call LDIR_WITH_INDEXED_HL		;06ac	cd b2 06 	. . . 
 	jp l3d53h		;06af	c3 53 3d 	. S =
 
@@ -1630,7 +1635,7 @@ l07b6h:
 	sla c		;07c1	cb 21 	. ! 
 	push bc			;07c3	c5 	. 
 	push bc			;07c4	c5 	. 
-	ld hl,l09b0h		;07c5	21 b0 09 	! . . 
+	ld hl,TBL_FLOOR_STAGE_FROM_ROUND_3		;07c5	21 b0 09 	! . . 
 	add hl,bc			;07c8	09 	. 
 	ld a,(hl)			;07c9	7e 	~ 
 	inc hl			;07ca	23 	# 
@@ -1639,7 +1644,7 @@ l07b6h:
 	ld de,0e19ch		;07cd	11 9c e1 	. . . 
 	ld bc,001dh		;07d0	01 1d 00 	. . . 
 	ldir		;07d3	ed b0 	. . 
-	ld hl,l097fh+1		;07d5	21 80 09 	! . . 
+	ld hl,0x980		;07d5	21 80 09 	! . . 
 	pop bc			;07d8	c1 	. 
 	add hl,bc			;07d9	09 	. 
 	ld a,(hl)			;07da	7e 	~ 
@@ -1731,9 +1736,11 @@ sub_0851h:
 ; Computes the effective round, computed as 5*DRAGONS + LEVEL.
 ; Output: BC
 ;
+; We assume the maximum is: 3 dragons and last level = 3*5 + 4 = 19.
 ; Adding a RET at the beginning of this function makes the ME not to
 ; appear at level 2, and neither the moths at level 4. Instead, you
 ; have normal grippers.
+;
 GET_ROUND_IN_BC:
 	ld a,(DRAGONS_LEVEL)	;0866	3a 80 e0
 	ld l,a			        ;0869	6f      L = DRAGONS_LEVEL
@@ -1768,47 +1775,17 @@ TIME_BY_LEVEL_TABLE:
     defw 0x2000
     defw 0x2000
 
-; Unknown table
-l088ah:
-    defw 0x0100
-    defw 0x0200
+; Table to obtain FLOOR_STAGE from GET_ROUND_IN_BC.
+TBL_FLOOR_STAGE_FROM_ROUND: ; 88a
+    defb 0, 1, 0, 2, 0, 0, 3, 0
+    defb 2, 0, 0, 4, 0, 2, 0, 0
+	defb 5, 0
+    defb 2, 0                      ;089c
 
-    defw 0x0000
+TBL_FLOOR_STAGE_FROM_ROUND_2: ;089e
+    defb 0, 0, 0, 10, 0, 0, 0, 0, 11, 0, 0, 0, 0, 12, 0, 0, 0, 0
     
-	inc bc			;0890	03 	. 
-	nop			;0891	00 	. 
-	ld (bc),a			;0892	02 	. 
-	nop			;0893	00 	. 
-	nop			;0894	00 	. 
-	inc b			;0895	04 	. 
-	nop			;0896	00 	. 
-	ld (bc),a			;0897	02 	. 
-	nop			;0898	00 	. 
-	nop			;0899	00 	. 
-	dec b			;089a	05 	. 
-	nop			;089b	00 	. 
-	ld (bc),a			;089c	02 	. 
-	nop			;089d	00 	. 
-l089eh:
-	nop			;089e	00 	. 
-	nop			;089f	00 	. 
-	nop			;08a0	00 	. 
-	ld a,(bc)			;08a1	0a 	. 
-	nop			;08a2	00 	. 
-	nop			;08a3	00 	. 
-	nop			;08a4	00 	. 
-	nop			;08a5	00 	. 
-	dec bc			;08a6	0b 	. 
-	nop			;08a7	00 	. 
-	nop			;08a8	00 	. 
-	nop			;08a9	00 	. 
-	nop			;08aa	00 	. 
-	inc c			;08ab	0c 	. 
-	nop			;08ac	00 	. 
-	nop			;08ad	00 	. 
-	nop			;08ae	00 	. 
-	nop			;08af	00 	. 
-l08b0h:
+INDICES_DATA_MAGICAL_ELEMENTS: ;08b0, 12 entries, 24 bytes
 	dec c			;08b0	0d 	. 
 	nop			;08b1	00 	. 
 	cp h			;08b2	bc 	. 
@@ -1863,7 +1840,7 @@ l08b0h:
 	ld d,h			;08f1	54 	T 
 	xor b			;08f2	a8 	. 
 	inc e			;08f3	1c 	. 
-	jr c,l0939h		;08f4	38 43 	8 C 
+	jr c,0x0939		;08f4	38 43 	8 C 
 	ld h,(hl)			;08f6	66 	f 
 	call z,0		;08f7	cc 00 00 	. . . 
 	ld (hl),000h		;08fa	36 00 	6 . 
@@ -1881,7 +1858,7 @@ l08b0h:
 	xor b			;090a	a8 	. 
 	inc e			;090b	1c 	. 
 	dec l			;090c	2d 	- 
-	jr c,l0975h		;090d	38 66 	8 f 
+	jr c,0x975		;090d	38 66 	8 f 
 	call z,0		;090f	cc 00 00 	. . . 
 	ld (hl),000h		;0912	36 00 	6 . 
 	ld d,0a9h		;0914	16 a9 	. . 
@@ -1892,54 +1869,39 @@ l08b0h:
 	nop			;091c	00 	. 
 	nop			;091d	00 	. 
 	nop			;091e	00 	. 
-	ld (hl),000h		;091f	36 00 	6 . 
-	jr nc,l096ch		;0921	30 49 	0 I 
-	nop			;0923	00 	. 
-	nop			;0924	00 	. 
-	nop			;0925	00 	. 
-	ld h,c			;0926	61 	a 
-	nop			;0927	00 	. 
-	and h			;0928	a4 	. 
-	nop			;0929	00 	. 
-	ld (hl),000h		;092a	36 00 	6 . 
-	ld d,000h		;092c	16 00 	. . 
-	ld d,d			;092e	52 	R 
-	nop			;092f	00 	. 
-	ld c,c			;0930	49 	I 
-	nop			;0931	00 	. 
-	dec l			;0932	2d 	- 
-	nop			;0933	00 	. 
-	inc a			;0934	3c 	< 
-	add hl,bc			;0935	09 	. 
-	ld c,l			;0936	4d 	M 
-	add hl,bc			;0937	09 	. 
-	ld e,(hl)			;0938	5e 	^ 
-l0939h:
-	add hl,bc			;0939	09 	. 
-	ld l,a			;093a	6f 	o 
-	add hl,bc			;093b	09 	. 
-	jr nz,l093eh		;093c	20 00 	  . 
-l093eh:
-	ld (l2800h),a		;093e	32 00 28 	2 . ( 
-	nop			;0941	00 	. 
-	inc sp			;0942	33 	3 
-	nop			;0943	00 	. 
-	inc hl			;0944	23 	# 
-	nop			;0945	00 	. 
-	ld l,e			;0946	6b 	k 
-	rlca			;0947	07 	. 
-	ld a,a			;0948	7f 	 
-	ccf			;0949	3f 	? 
-	ccf			;094a	3f 	? 
-	jr c,$+114		;094b	38 70 	8 p 
+    defB 0x36
+    
+INDICES_DATA_MOTHS: ; 0920
+; 17 bytes per entry
+    defw 0x3000
+    defw 0x0049
+    defw 0x0000
+    defw 0x0061
+    defw 0x00A4
+    defw 0x0036
+    defw 0x0016
+    defw 0x0052    
+    defw 0x0049
+    defw 0x002d
+    defw TBL_INIT_MOTHS; 0x093c
+    defw 0x094d
+    defw 0x095e
+    defw 0x096f
+    
+; Table init moths
+TBL_INIT_MOTHS: ; 0x093c
+    db 0x20, 0x0, 0x32, 0x0, 0x28, 0x0, 0x33, 0x0; 0x93c - 0x943
+    db 0x23, 0x0, 0x6b, 0x7, 0x7f, 0x3f, 0x3f, 0x38; 0x944 - 0x94b
+    db 0x70; 0x94c
+	
+
 	ld (03b00h),a		;094d	32 00 3b 	2 . ; 
 	nop			;0950	00 	. 
 	ccf			;0951	3f 	? 
 	nop			;0952	00 	. 
 	ld d,b			;0953	50 	P 
 	nop			;0954	00 	. 
-	jr c,l0957h		;0955	38 00 	8 . 
-l0957h:
+	jr c,0x957		;0955	38 00 	8 . 
 	ld l,e			;0957	6b 	k 
 	rlca			;0958	07 	. 
 	or d			;0959	b2 	. 
@@ -1952,34 +1914,28 @@ l0957h:
 	nop			;0963	00 	. 
 	ld d,b			;0964	50 	P 
 	nop			;0965	00 	. 
-	jr c,l0968h		;0966	38 00 	8 . 
-l0968h:
-	jr c,l096eh		;0968	38 04 	8 . 
+	jr c,0x968		;0966	38 00 	8 . 
+	jr c,0x96e		;0968	38 04 	8 . 
 	ld a,a			;096a	7f 	 
 	ld h,(hl)			;096b	66 	f 
-l096ch:
 	ld h,(hl)			;096c	66 	f 
 	inc e			;096d	1c 	. 
-l096eh:
-	jr c,l09abh		;096e	38 3b 	8 ; 
+	jr c,0x9ab		;096e	38 3b 	8 ; 
 	nop			;0970	00 	. 
 	ld b,h			;0971	44 	D 
 	nop			;0972	00 	. 
 	ld c,d			;0973	4a 	J 
 	nop			;0974	00 	. 
-l0975h:
 	ld e,a			;0975	5f 	_ 
 	nop			;0976	00 	. 
 	ld b,h			;0977	44 	D 
 	nop			;0978	00 	. 
-	jr c,l097fh		;0979	38 04 	8 . 
+	jr c,0x97f		;0979	38 04 	8 . 
 	or d			;097b	b2 	. 
 	ld h,(hl)			;097c	66 	f 
 	ld a,a			;097d	7f 	 
 	inc e			;097e	1c 	. 
-l097fh:
-	jr c,l0981h		;097f	38 00 	8 . 
-l0981h:
+	jr c,0x981		;097f	38 00 	8 . 
 	nop			;0981	00 	. 
 	xor b			;0982	a8 	. 
 	add hl,bc			;0983	09 	. 
@@ -2022,12 +1978,12 @@ l0981h:
 	or e			;09a8	b3 	. 
 	rst 38h			;09a9	ff 	. 
 	rlca			;09aa	07 	. 
-l09abh:
 	nop			;09ab	00 	. 
 	ld l,000h		;09ac	2e 00 	. . 
 	rst 10h			;09ae	d7 	. 
 	nop			;09af	00 	. 
-l09b0h:
+
+TBL_FLOOR_STAGE_FROM_ROUND_3:
 	ret c			;09b0	d8 	. 
 	add hl,bc			;09b1	09 	. 
 	pop hl			;09b2	e1 	. 
@@ -2037,8 +1993,7 @@ l09b0h:
 	add iy,bc		;09b6	fd 09 	. . 
 	dec bc			;09b8	0b 	. 
 	ld a,(bc)			;09b9	0a 	. 
-	jr z,l09c6h		;09ba	28 0a 	( . 
-l09bch:
+	jr z,0x9c6		;09ba	28 0a 	( . 
 	defb 031h, 00ah, 03fh
 	ld a,(bc)			;09bf	0a 	. 
 	ld c,l			;09c0	4d 	M 
@@ -2047,7 +2002,6 @@ l09bch:
 	ld a,(bc)			;09c3	0a 	. 
 	ld a,b			;09c4	78 	x 
 	ld a,(bc)			;09c5	0a 	. 
-l09c6h:
 	add a,c			;09c6	81 	. 
 	ld a,(bc)			;09c7	0a 	. 
 	adc a,a			;09c8	8f 	. 
@@ -2085,7 +2039,7 @@ l09ceh:
 	xor b			;09eb	a8 	. 
 	inc e			;09ec	1c 	. 
 	dec l			;09ed	2d 	- 
-	jr c,l09bch		;09ee	38 cc 	8 . 
+	jr c,0x9bc		;09ee	38 cc 	8 . 
 	push hl			;09f0	e5 	. 
 	xor b			;09f1	a8 	. 
 l09f2h:
@@ -8459,7 +8413,7 @@ l323dh:
 	cp 012h		;3253	fe 12 	. . 
 	jr nz,l3275h		;3255	20 1e 	  . 
 	ld hl,(0e80ah)		;3257	2a 0a e8 	* . . 
-	ld de,l067eh+2		;325a	11 80 06 	. . . 
+	ld de,0x0680		;325a	11 80 06 	. . . 
 	bit 6,c		;325d	cb 71 	. q 
 	jr nz,l3265h		;325f	20 04 	  . 
 	sbc hl,de		;3261	ed 52 	. R 
@@ -9206,7 +9160,7 @@ l3813h:
 	sbc hl,de		;3830	ed 52 	. R 
 	jp nc,l38d9h		;3832	d2 d9 38 	. . 8 
 	ld hl,TBL_MOTHS_LEN		;3835	21 76 e5 	! v . 
-	ld a,(0e50bh)		;3838	3a 0b e5 	: . . 
+	ld a,(MAX_NUM_MOTHS)		;3838	3a 0b e5 	: . . 
 	cp (hl)			;383b	be 	. 
 	jp c,l38d9h		;383c	da d9 38 	. . 8 
 	inc (hl)			;383f	34 	4 
@@ -9448,67 +9402,88 @@ l39b9h:
 	djnz l396ah		;39bd	10 ab 	. . 
 	ret			;39bf	c9 	. 
 
+; Process the list of moths
 ; Adding a RET (C9) here avoids that the moths at level #4 appear.
-sub_39c0h:
-	ld a,(TBL_MOTHS_LEN)		;39c0	3a 76 e5 	: v . 
-	and a			;39c3	a7 	. 
-	ret z			;39c4	c8 	. 
-	ld ix,TBL_MOTHS		;39c5	dd 21 77 e5 	. ! w . 
-	ld a,(0e50bh)		;39c9	3a 0b e5 	: . . 
+PROCESS_ALL_MOTHS:
+    ; Get out if there aren't any active moths
+	ld a,(TBL_MOTHS_LEN)	;39c0	3a 76 e5
+	and a			        ;39c3	a7
+	ret z			        ;39c4	c8
+
+	ld ix,TBL_MOTHS		;39c5	dd 21 77 e5
+	ld a,(MAX_NUM_MOTHS)		;39c9	3a 0b e5
 	ld b,a			;39cc	47 	G 
 l39cdh:
-	push bc			;39cd	c5 	. 
-	ld c,(ix + 0)		;39ce	dd 4e 00 	. N . 
-	bit 4,c		;39d1	cb 61 	. a 
-	call nz,sub_39dfh		;39d3	c4 df 39 	. . 9 
-	pop bc			;39d6	c1 	. 
-	ld de, 21		;39d7	11 15 00 	. . . 
-	add ix,de		;39da	dd 19 	. . 
-	djnz l39cdh		;39dc	10 ef 	. . 
-	ret			;39de	c9 	. 
+	push bc			                ;39cd	c5
+	ld c,(ix + ENEMY_PROPS_IDX)		;39ce	dd 4e 00
+	bit ENEMY_IS_ALIVE_BIT, c		;39d1	cb 61
+    ; Call if the moth is active
+	call nz,sub_39dfh		        ;39d3	c4 df 39
+	pop bc			                ;39d6	c1
+    
+    ; Next moth. Width of each entry: 21 bytes
+	ld de, 21		                ;39d7	11 15 00
+	add ix,de		                ;39da	dd 19
+	djnz l39cdh		                ;39dc	10 ef
 
+    ; All done, exit
+	ret			                    ;39de	c9
+
+; Process a moth
 sub_39dfh:
-	ld a,(ix + 1)		;39df	dd 7e 01 	. ~ . 
-	cp 004h		;39e2	fe 04 	. . 
-	jr c,l39f1h		;39e4	38 0b 	8 . 
-	cp 007h		;39e6	fe 07 	. . 
-	jp c,l3c3bh		;39e8	da 3b 3c 	. ; < 
-	jp z,l3be9h		;39eb	ca e9 3b 	. . ; 
-	jp l3b1fh		;39ee	c3 1f 3b 	. . ; 
+    ; Jump if ENEMY_STATE_IDX < 4
+	ld a,(ix + ENEMY_STATE_IDX)		;39df	dd 7e 01
+	cp 4		                    ;39e2	fe 04
+	jr c,l39f1h		                ;39e4	38 0b
+
+	; Jump if ENEMY_STATE_IDX < 7
+    cp 7		                    ;39e6	fe 07
+	jp c,l3c3bh		                ;39e8	da 3b 3c
+    
+    ; Jump if ENEMY_STATE_IDX == 0
+	jp z,l3be9h		                ;39eb	ca e9 3b
+    
+	jp l3b1fh		                ;39ee	c3 1f 3b
+;
+; ENEMY_STATE_IDX < 4
 l39f1h:
-	dec (ix + 7)		;39f1	dd 35 07 	. 5 . 
-	jr nz,l3a03h		;39f4	20 0d 	  . 
-	ld (ix + 7),005h		;39f6	dd 36 07 05 	. 6 . . 
-	dec (ix + 6)		;39fa	dd 35 06 	. 5 . 
-	jr z,l3a03h		;39fd	28 04 	( . 
-	ld (ix + 6),001h		;39ff	dd 36 06 01 	. 6 . . 
+	; Update frame counter
+    dec (ix + ENEMY_FRAME_COUNTER_IDX)		;39f1	dd 35 07
+	jr nz,l3a03h		                    ;39f4	20 0d
+	ld (ix + ENEMY_FRAME_COUNTER_IDX), 5    ;39f6	dd 36 07 05
+    
+    ; Update frame
+	dec (ix + ENEMY_FRAME_IDX)		;39fa	dd 35 06
+	jr z,l3a03h		                ;39fd	28 04
+	ld (ix + ENEMY_FRAME_IDX), 1	;39ff	dd 36 06 01
 l3a03h:
-	bit 1,(ix+014h)		;3a03	dd cb 14 4e 	. . . N 
-	jr z,l3a26h		;3a07	28 1d 	( . 
-	dec (ix+013h)		;3a09	dd 35 13 	. 5 . 
+	bit 1,(ix + 20)		            ;3a03	dd cb 14 4e
+	jr z,l3a26h		                ;3a07	28 1d
+	dec (ix + 19)		;3a09	dd 35 13 	. 5 . 
 	jr nz,l3a26h		;3a0c	20 18 	  . 
-	bit 2,(ix+014h)		;3a0e	dd cb 14 56 	. . . V 
+	bit 2,(ix + 20)		;3a0e	dd cb 14 56 	. . . V 
 	jr nz,l3a1eh		;3a12	20 0a 	  . 
-	set 2,(ix+014h)		;3a14	dd cb 14 d6 	. . . . 
-	ld (ix+013h),0a9h		;3a18	dd 36 13 a9 	. 6 . . 
+	set 2,(ix + 20)		;3a14	dd cb 14 d6 	. . . . 
+	ld (ix + 19),0a9h		;3a18	dd 36 13 a9 	. 6 . . 
 	jr l3a26h		;3a1c	18 08 	. . 
 l3a1eh:
-	res 2,(ix+014h)		;3a1e	dd cb 14 96 	. . . . 
-	res 1,(ix+014h)		;3a22	dd cb 14 8e 	. . . . 
+	res 2,(ix + 20)		;3a1e	dd cb 14 96 	. . . . 
+	res 1,(ix + 20)		;3a22	dd cb 14 8e 	. . . . 
 l3a26h:
-	bit 0,(ix+014h)		;3a26	dd cb 14 46 	. . . F 
+	bit 0,(ix + 20)		;3a26	dd cb 14 46 	. . . F 
 	jr z,l3a32h		;3a2a	28 06 	( . 
 	dec (ix + 18)		;3a2c	dd 35 12 	. 5 . 
 	jp z,l3b92h		;3a2f	ca 92 3b 	. . ; 
 l3a32h:
-	ld l,(ix + 2)		;3a32	dd 6e 02 	. n . 
-	ld h,(ix + 3)		;3a35	dd 66 03 	. f . 
-	ld e,(ix+010h)		;3a38	dd 5e 10 	. ^ . 
-	ld d,(ix+011h)		;3a3b	dd 56 11 	. V . 
-	bit 2,(ix+014h)		;3a3e	dd cb 14 56 	. . . V 
+	ld l,(ix + ENEMY_POS_L_IDX)		;3a32	dd 6e 02 	. n . 
+	ld h,(ix + ENEMY_POS_H_IDX)		;3a35	dd 66 03 	. f . 
+	ld e,(ix + 16)		;3a38	dd 5e 10 	. ^ . 
+	ld d,(ix + 17)		;3a3b	dd 56 11 	. V . 
+	bit 2,(ix + 20)		;3a3e	dd cb 14 56 	. . . V 
 	jr z,l3a47h		;3a42	28 03 	( . 
 	ld de,0		;3a44	11 00 00 	. . . 
 l3a47h:
+    ; C is probably the moth index
 	bit 6,c		;3a47	cb 71 	. q 
 	jr nz,l3a5eh		;3a49	20 13 	  . 
 	sbc hl,de		;3a4b	ed 52 	. R 
@@ -9516,7 +9491,7 @@ l3a47h:
 	ld hl,0f400h		;3a4e	21 00 f4 	! . . 
 	add hl,de			;3a51	19 	. 
 	jr c,l3a70h		;3a52	38 1c 	8 . 
-	set 6,(ix + 0)		;3a54	dd cb 00 f6 	. . . . 
+	set ENEMY_MOVE_RIGHT_BIT, (ix + ENEMY_PROPS_IDX)		;3a54	dd cb 00 f6 	. . . . 
 	ld hl,l3eabh		;3a58	21 ab 3e 	! . > 
 	jp l3baah		;3a5b	c3 aa 3b 	. . ; 
 l3a5eh:
@@ -9525,12 +9500,12 @@ l3a5eh:
 	ld hl,08400h		;3a60	21 00 84 	! . . 
 	add hl,de			;3a63	19 	. 
 	jr nc,l3a70h		;3a64	30 0a 	0 . 
-	res 6,(ix + 0)		;3a66	dd cb 00 b6 	. . . . 
+	res ENEMY_MOVE_RIGHT_BIT, (ix + ENEMY_PROPS_IDX)		;3a66	dd cb 00 b6 	. . . . 
 	ld hl,l3e7fh		;3a6a	21 7f 3e 	!  > 
 	jp l3baah		;3a6d	c3 aa 3b 	. . ; 
 l3a70h:
-	ld (ix + 2),e		;3a70	dd 73 02 	. s . 
-	ld (ix + 3),d		;3a73	dd 72 03 	. r . 
+	ld (ix + ENEMY_POS_L_IDX),e		;3a70	dd 73 02 	. s . 
+	ld (ix + ENEMY_POS_H_IDX),d		;3a73	dd 72 03 	. r . 
 	push de			;3a76	d5 	. 
 	ld hl,(THOMAS_POSITION)		;3a77	2a 12 e7 	* . . 
 	sbc hl,de		;3a7a	ed 52 	. R 
@@ -9554,8 +9529,8 @@ l3a94h:
 	dec a			;3a9b	3d 	= 
 	jp m,l3ae4h		;3a9c	fa e4 3a 	. . : 
 	push de			;3a9f	d5 	. 
-	ld l,(ix + 12)		;3aa0	dd 6e 0c 	. n . 
-	ld h,(ix + 13)		;3aa3	dd 66 0d 	. f . 
+	ld l,(ix + ENEMY_FRAMESEQ_PTR_L_IDX)		;3aa0	dd 6e 0c 	. n . 
+	ld h,(ix + ENEMY_FRAMESEQ_PTR_H_IDX)		;3aa3	dd 66 0d 	. f . 
 	jr z,l3aaeh		;3aa6	28 06 	( . 
 	ld de,(0e504h)		;3aa8	ed 5b 04 e5 	. [ . . 
 	jr l3ab2h		;3aac	18 04 	. . 
@@ -9568,7 +9543,7 @@ l3ab2h:
 	ex de,hl			;3ab8	eb 	. 
 	bit 7,d		;3ab9	cb 7a 	. z 
 	jr z,l3adbh		;3abb	28 1e 	( . 
-	res 3,(ix + 0)		;3abd	dd cb 00 9e 	. . . . 
+	res 3,(ix + ENEMY_PROPS_IDX)		;3abd	dd cb 00 9e 	. . . . 
 	jr l3adbh		;3ac1	18 18 	. . 
 l3ac3h:
 	add hl,de			;3ac3	19 	. 
@@ -9716,6 +9691,7 @@ sub_3bd5h:
 	ld (ix + 15),h		;3be5	dd 74 0f 	. t . 
 	ret			;3be8	c9 	. 
 
+; ENEMY_STATE_IDX == 0
 l3be9h:
 	dec (ix + 7)		;3be9	dd 35 07 	. 5 . 
 	jp nz,l3ca9h		;3bec	c2 a9 3c 	. . < 
@@ -9752,6 +9728,8 @@ l3c2ah:
 	ld (ix + 6),007h		;3c31	dd 36 06 07 	. 6 . . 
 	ld (ix + 1),007h		;3c35	dd 36 01 07 	. 6 . . 
 	jr l3ca9h		;3c39	18 6e 	. n 
+
+; ENEMY_STATE_IDX < 7
 l3c3bh:
 	dec (ix + 7)		;3c3b	dd 35 07 	. 5 . 
 	jr z,l3c66h		;3c3e	28 26 	( & 
@@ -9911,7 +9889,7 @@ sub_3d59h:
 	ld b,050h		;3d59	06 50 	. P 
 l3d5bh:
 	ld hl,TBL_MOTHS_LEN		;3d5b	21 76 e5 	! v . 
-	ld a,(0e50bh)		;3d5e	3a 0b e5 	: . . 
+	ld a,(MAX_NUM_MOTHS)		;3d5e	3a 0b e5 	: . . 
 	cp (hl)			;3d61	be 	. 
 	ret c			;3d62	d8 	. 
 	inc (hl)			;3d63	34 	4 
@@ -10288,7 +10266,7 @@ l40adh:
 	sbc hl,de
 	jr c,l40ceh
 	add hl,de	
-	ld de,l067eh+2
+	ld de,0x0680
 	sbc hl,de
 	jr nc,l40ceh
 	add hl,de	

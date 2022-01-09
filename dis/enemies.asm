@@ -1,4 +1,4 @@
-; Bosses and other enemies
+; Bosses, moths, and other enemies
 
 TBL_ENEMIES: EQU 0xE2D8
 
