@@ -166,19 +166,12 @@ include 'enemies.asm'
 ; Magical elements, mainly at the beginning of level #2
 include 'magical_elements.asm'
 
-
-TBL_E10A: EQU 0xE10A
-
-
-
 ; The head of the magician. Creepy!
 TBL_HEAD: EQU 0xE31B
 
-
-TBL_E292: EQU 0xE292
-TBL_E272: EQU 0xE272
-
-TBL_E2C2: EQU 0xE2C2
+; This is related to the boss at level #3, but not understood yet.
+; Bit 7 read at 1333, wrote at 137E
+TBL_E10A: EQU 0xE10A
 
 
 
@@ -12003,7 +11996,7 @@ l4e87h:
 	add hl,de ; Next entry
 	djnz l4e87h
 
-	ld ix,0e2c2h
+	ld ix,TBL_GUYS_ENTRY_6
 	call sub_4ed7h
 	ld ix,TBL_GUYS_ENTRY_5
 	call sub_4ed7h
@@ -12011,9 +12004,9 @@ l4e87h:
 	call sub_4ed7h
 	ld ix,TBL_GUYS_ENTRY_2
 	call sub_4eb3h
-	ld ix,TBL_E292
+	ld ix,TBL_GUYS_ENTRY_3
 	call sub_4eb3h
-	ld ix,TBL_E272
+	ld ix,TBL_GUYS_ENTRY_1
 sub_4eb3h:
 	ld c,(ix + 0)
 	ld hl,l4ed1h
