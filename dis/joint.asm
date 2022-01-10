@@ -1438,6 +1438,7 @@ sub_064a:
 	ld bc,00131h		;0663	01 31 01 	. 1 . 
 	ld (hl),000h		;0666	36 00 	6 . 
 	ldir		;0668	ed b0 	. . 
+
 	call GET_ROUND_IN_BC		;066a	cd 66 08 	. f . 
 	ld hl,TBL_FLOOR_STAGE_FROM_ROUND		;066d	21 8a 08 	! . . 
 	add hl,bc			;0670	09 	. 
@@ -1449,7 +1450,7 @@ sub_064a:
 	ld hl, INDICES_DATA_MAGICAL_ELEMENTS		;0678	21 b0 08 	! . . 
 	ld de, 0e360h		;067b	11 60 e3 	. ` . 
 	ld bc, 24	        ;067e	01 18 00
-	call LDIR_WITH_INDEXED_HL		;0681	cd b2 06 	. . . 
+	call LDIR_WITH_INDEXED_HL		;05	cd b2 06 	. . . 
 
 	ld a,001h		;0684	3e 01 	> . 
 	ld (0e380h),a		;0686	32 80 e3 	2 . . 
@@ -1737,6 +1738,8 @@ sub_0851h:
 ; Output: BC
 ;
 ; We assume the maximum is: 3 dragons and last level = 3*5 + 4 = 19.
+; Actually if we force DRAGONS_LEVEL == 0xFF, it'll return 3*5 + 7 = 22
+;
 ; Adding a RET at the beginning of this function makes the ME not to
 ; appear at level 2, and neither the moths at level 4. Instead, you
 ; have normal grippers.
@@ -1776,104 +1779,66 @@ TIME_BY_LEVEL_TABLE:
     defw 0x2000
 
 ; Table to obtain FLOOR_STAGE from GET_ROUND_IN_BC.
+; 20 entries
 TBL_FLOOR_STAGE_FROM_ROUND: ; 88a
     defb 0, 1, 0, 2, 0, 0, 3, 0
     defb 2, 0, 0, 4, 0, 2, 0, 0
-	defb 5, 0
-    defb 2, 0                      ;089c
+	defb 5, 0, 2, 0
 
 ; Another table to obtain FLOOR_STAGE from GET_ROUND_IN_BC.
+; 18 entries
 TBL_FLOOR_STAGE_FROM_ROUND_2: ;089e
-    defb 0, 0, 0, 10, 0, 0, 0, 0, 11, 0, 0, 0, 0, 12, 0, 0, 0, 0
+    defb 0, 0, 0, 10, 0, 0, 0, 0
+    defb 11, 0, 0, 0, 0, 12, 0, 0
+    defb 0, 0
     
-INDICES_DATA_MAGICAL_ELEMENTS: ;08b0, 12 entries, 24 bytes
-	dec c			;08b0	0d 	. 
-	nop			;08b1	00 	. 
-	cp h			;08b2	bc 	. 
-	ex af,af'			;08b3	08 	. 
-	inc e			;08b4	1c 	. 
-	add hl,bc			;08b5	09 	. 
-	call nc,0ec08h		;08b6	d4 08 ec 	. . . 
-	ex af,af'			;08b9	08 	. 
-	inc b			;08ba	04 	. 
-	add hl,bc			;08bb	09 	. 
-	nop			;08bc	00 	. 
-	nop			;08bd	00 	. 
-	ld (hl),b			;08be	70 	p 
-	nop			;08bf	00 	. 
-	dec c			;08c0	0d 	. 
-	ld d,h			;08c1	54 	T 
-	xor b			;08c2	a8 	. 
-	ld b,e			;08c3	43 	C 
-	ld e,d			;08c4	5a 	Z 
-	ld (hl),b			;08c5	70 	p 
-	ld h,(hl)			;08c6	66 	f 
-	call z,0		;08c7	cc 00 00 	. . . 
-	ld (hl),000h		;08ca	36 00 	6 . 
-	ld d,0a9h		;08cc	16 a9 	. . 
-	or (hl)			;08ce	b6 	. 
-	ld bc,l014bh		;08cf	01 4b 01 	. K . 
-	ld a,h			;08d2	7c 	| 
-	nop			;08d3	00 	. 
-	nop			;08d4	00 	. 
-	nop			;08d5	00 	. 
-	ld (hl),b			;08d6	70 	p 
-	nop			;08d7	00 	. 
-	dec c			;08d8	0d 	. 
-	ld d,h			;08d9	54 	T 
-	xor b			;08da	a8 	. 
-	dec l			;08db	2d 	- 
-	ld b,e			;08dc	43 	C 
-	ld e,d			;08dd	5a 	Z 
-	ld h,(hl)			;08de	66 	f 
-	call z,0		;08df	cc 00 00 	. . . 
-	ld (hl),000h		;08e2	36 00 	6 . 
-	ld d,0a9h		;08e4	16 a9 	. . 
-	or (hl)			;08e6	b6 	. 
-	ld bc,l014bh		;08e7	01 4b 01 	. K . 
-	ld a,h			;08ea	7c 	| 
-	nop			;08eb	00 	. 
-	nop			;08ec	00 	. 
-	nop			;08ed	00 	. 
-	ld (hl),b			;08ee	70 	p 
-	nop			;08ef	00 	. 
-	dec c			;08f0	0d 	. 
-	ld d,h			;08f1	54 	T 
-	xor b			;08f2	a8 	. 
-	inc e			;08f3	1c 	. 
-	jr c,0x0939		;08f4	38 43 	8 C 
-	ld h,(hl)			;08f6	66 	f 
-	call z,0		;08f7	cc 00 00 	. . . 
-	ld (hl),000h		;08fa	36 00 	6 . 
-	ld d,0a9h		;08fc	16 a9 	. . 
-	or (hl)			;08fe	b6 	. 
-	ld bc,l014bh		;08ff	01 4b 01 	. K . 
-	ld a,h			;0902	7c 	| 
-	nop			;0903	00 	. 
-	nop			;0904	00 	. 
-	nop			;0905	00 	. 
-	ld (hl),b			;0906	70 	p 
-	nop			;0907	00 	. 
-	dec c			;0908	0d 	. 
-	ld d,h			;0909	54 	T 
-	xor b			;090a	a8 	. 
-	inc e			;090b	1c 	. 
-	dec l			;090c	2d 	- 
-	jr c,0x975		;090d	38 66 	8 f 
-	call z,0		;090f	cc 00 00 	. . . 
-	ld (hl),000h		;0912	36 00 	6 . 
-	ld d,0a9h		;0914	16 a9 	. . 
-	or (hl)			;0916	b6 	. 
-	ld bc,l014bh		;0917	01 4b 01 	. K . 
-	ld a,h			;091a	7c 	| 
-	nop			;091b	00 	. 
-	nop			;091c	00 	. 
-	nop			;091d	00 	. 
-	nop			;091e	00 	. 
-    defB 0x36
+INDICES_DATA_MAGICAL_ELEMENTS: ;08b0
+; each indexed entry is 24 bytes
+; To obtain the offset, it uses GET_ROUND_IN_BC + TBL_FLOOR_STAGE_FROM_ROUND.
+    dw 0x000d
+    dw MAGICAL_ELEMENTS_DATA_ENTRY_1
+    dw MAGICAL_ELEMENTS_DATA_ENTRY_5
+    dw MAGICAL_ELEMENTS_DATA_ENTRY_2
+    dw MAGICAL_ELEMENTS_DATA_ENTRY_3
+    dw MAGICAL_ELEMENTS_DATA_ENTRY_4
+    
+MAGICAL_ELEMENTS_DATA_ENTRY_1: ; 0x8BC + 0*24
+    db 0x00, 0x00, 0x70, 0x00, 0x0d, 0x54, 0xa8, 0x43
+    db 0x5a, 0x70, 0x66, 0xcc, 0x00, 0x00, 0x36, 0x00
+    db 0x16, 0xa9, 0xb6, 0x01, 0x4b, 0x01, 0x7c, 0x00
+
+
+MAGICAL_ELEMENTS_DATA_ENTRY_2:
+    db 0x00, 0x00, 0x70, 0x00, 0x0d, 0x54, 0xa8, 0x2d
+    db 0x43, 0x5a, 0x66, 0xcc, 0x00, 0x00, 0x36, 0x00
+    db 0x16, 0xa9, 0xb6, 0x01, 0x4b, 0x01, 0x7c, 0x00
+    
+MAGICAL_ELEMENTS_DATA_ENTRY_3:
+    db 0x00, 0x00, 0x70, 0x00, 0x0d, 0x54, 0xa8, 0x1c
+    db 0x38, 0x43, 0x66, 0xcc, 0x00, 0x00, 0x36, 0x00
+    db 0x16, 0xa9, 0xb6, 0x01, 0x4b, 0x01, 0x7c, 0x00
+
+MAGICAL_ELEMENTS_DATA_ENTRY_4:
+    dw 0x0000
+    dw 0x0070
+    dw 0x540d
+    dw 0x1ca8
+    dw 0x382d
+    dw 0xcc66
+    dw 0x0000
+    dw 0x0036
+    dw 0xa916
+    dw 0x01b6
+    dw 0x014b
+    dw 0x007c
+
+MAGICAL_ELEMENTS_DATA_ENTRY_5:
+    db 0x00, 0x00, 0x00, 0x36
+
     
 INDICES_DATA_MOTHS: ; 0920
-; 17 bytes per entry
+; 14 entries
+; 17 bytes per indexed entry
     defw l3000h
     defw 0x0049
     defw 0x0000
@@ -1910,54 +1875,31 @@ TBL_INIT_MOTHS_4: ; 0x096f
     db 0x44, 0x00, 0x38, 0x04, 0xb2, 0x66, 0x7f, 0x1c
     db 0x38
     
-INDICES_980:
-    db 0
-	nop			;0981	00 	. 
-	xor b			;0982	a8 	. 
-	add hl,bc			;0983	09 	. 
-	nop			;0984	00 	. 
-	nop			;0985	00 	. 
-	nop			;0986	00 	. 
-	nop			;0987	00 	. 
-	nop			;0988	00 	. 
-	nop			;0989	00 	. 
-	nop			;098a	00 	. 
-	nop			;098b	00 	. 
-	xor b			;098c	a8 	. 
-	add hl,bc			;098d	09 	. 
-	nop			;098e	00 	. 
-	nop			;098f	00 	. 
-	nop			;0990	00 	. 
-	nop			;0991	00 	. 
-	nop			;0992	00 	. 
-	nop			;0993	00 	. 
-	nop			;0994	00 	. 
-	nop			;0995	00 	. 
-	xor b			;0996	a8 	. 
-	add hl,bc			;0997	09 	. 
-	nop			;0998	00 	. 
-	nop			;0999	00 	. 
-	nop			;099a	00 	. 
-	nop			;099b	00 	. 
-	nop			;099c	00 	. 
-	nop			;099d	00 	. 
-	nop			;099e	00 	. 
-	nop			;099f	00 	. 
-	xor b			;09a0	a8 	. 
-	add hl,bc			;09a1	09 	. 
-	nop			;09a2	00 	. 
-	nop			;09a3	00 	. 
-	nop			;09a4	00 	. 
-	nop			;09a5	00 	. 
-	nop			;09a6	00 	. 
-	nop			;09a7	00 	. 
-	or e			;09a8	b3 	. 
-	rst 38h			;09a9	ff 	. 
-	rlca			;09aa	07 	. 
-	nop			;09ab	00 	. 
-	ld l,000h		;09ac	2e 00 	. . 
-	rst 10h			;09ae	d7 	. 
-	nop			;09af	00 	. 
+INDICES_980: ;0981
+    dw 0x0000
+    dw 0x09a8
+    dw 0x0000
+    dw 0x0000
+    dw 0x0000
+    dw 0x0000
+    dw 0x09a8
+    dw 0x0000
+    dw 0x0000
+    dw 0x0000
+    dw 0x0000
+    dw 0x09a8
+    dw 0x0000
+    dw 0x0000
+    dw 0x0000
+    dw 0x0000
+    dw 0x09a8
+    dw 0x0000
+    dw 0x0000
+    dw 0x0000
+    dw 0xffb3
+    dw 0x0007
+    dw 0x002e
+    dw 0x00d7
 
 TBL_FLOOR_STAGE_FROM_ROUND_3:
 	ret c			;09b0	d8 	. 
