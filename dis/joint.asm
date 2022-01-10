@@ -11425,12 +11425,12 @@ l4925h:
 	ld a,(EXT_TICKS)
 	cp 00bh
 	jr nz,l4925h
-	call sub_49aeh
+	call ERASE_INTRO_TEXT
 	ld hl,4c0eh
 	call l1134h
 	ld a,0e1h
 	call DELAY_A
-	call sub_49aeh
+	call ERASE_INTRO_TEXT
 	ld hl,LARGE_KUNG_FU_MASTER_LOGO
 	call WRITE_TEXT
 l4943h:
@@ -11482,13 +11482,13 @@ l4994h:
 	call DELAY_A
 	jp l487eh
 
-; SEGUIR
-sub_49aeh:
+; Clears the intro text, line by line
+ERASE_INTRO_TEXT:
 	ld de,0d150h
 	ld b,004h
 l49b3h:
 	push de	
-	call CLEAR_32_CHARS
+	call ERASE_LINE
 	pop hl	
 	ld de,0x80
 	add hl,de	
@@ -12968,7 +12968,7 @@ CLEAR_26_CHARS:
 	push bc	
 	ld b, 26
 	jr l572dh
-CLEAR_32_CHARS:
+ERASE_LINE:
 	push bc	
 	ld b, 32
 l572dh:
