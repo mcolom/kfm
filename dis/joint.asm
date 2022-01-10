@@ -178,15 +178,21 @@ TBL_HEAD: EQU 0xE31B
 TBL_E10A: EQU 0xE10A
 
 
-
+TBL_E360: EQU 0xE360
+TBL_E500: EQU 0xE500
+TBL_E19C: EQU 0xE19C
+TBL_E1B9: EQU 0xE1B9
 
 ; Seem related to the moths at 4th floor
 TBL_E520: EQU 0xE520
 
 ; Unknown yet. I only know each element of the table has length 19
+TABLE_WIDTH_19_LEN: EQU 0xE36E
 TABLE_WIDTH_19: EQU 0xE36F
 
+TABLE_WIDTH_41_LEN: EQU 0xE549
 TABLE_WIDTH_41: EQU 0xE54A
+
 TBL_E562: EQU 0xE562
 
 
@@ -1448,7 +1454,7 @@ sub_064a:
 	jr z,l0689h		;0676	28 11 	( . 
 
 	ld hl, INDICES_DATA_MAGICAL_ELEMENTS		;0678	21 b0 08 	! . . 
-	ld de, 0e360h		;067b	11 60 e3 	. ` . 
+	ld de, TBL_E360		;067b	11 60 e3 	. ` . 
 	ld bc, 24	        ;067e	01 18 00
 	call LDIR_WITH_INDEXED_HL		;05	cd b2 06 	. . . 
 
@@ -1473,7 +1479,7 @@ l0689h:
 	ld (FLOOR_STAGE),a		;06a0	32 00 e1 	2 . . 
 
 	ld hl, INDICES_DATA_MOTHS		;06a3	21 20 09
-	ld de,0xe500            		;06a6	11 00 e5
+	ld de, TBL_E500            		;06a6	11 00 e5
 	ld bc, 17   		            ;06a9	01 11 00
     ;
     ; Do LDIR with HL=0x93C, DE=0xE500, BC=0x11
@@ -1636,15 +1642,17 @@ l07b6h:
 	sla c		;07c1	cb 21 	. ! 
 	push bc			;07c3	c5 	. 
 	push bc			;07c4	c5 	. 
+
 	ld hl,TBL_FLOOR_STAGE_FROM_ROUND_3		;07c5	21 b0 09 	! . . 
 	add hl,bc			;07c8	09 	. 
 	ld a,(hl)			;07c9	7e 	~ 
 	inc hl			;07ca	23 	# 
 	ld h,(hl)			;07cb	66 	f 
 	ld l,a			;07cc	6f 	o 
-	ld de,0e19ch		;07cd	11 9c e1 	. . . 
-	ld bc,001dh		;07d0	01 1d 00 	. . . 
+	ld de, TBL_E19C		;07cd	11 9c e1 	. . . 
+	ld bc, 29		;07d0	01 1d 00 	. . . 
 	ldir		;07d3	ed b0 	. . 
+
 	ld hl, INDICES_980		;07d5	21 80 09 	! . . 
 	pop bc			;07d8	c1 	. 
 	add hl,bc			;07d9	09 	. 
@@ -1656,6 +1664,7 @@ l07b6h:
 	jr z,l07e6h		;07df	28 05 	( . 
 	ld bc, 8		;07e1	01 08 00 	. . . 
 	ldir		;07e4	ed b0 	. . 
+
 l07e6h:
 	pop bc			;07e6	c1 	. 
 	ld hl,l0be0h		;07e7	21 e0 0b 	! . . 
@@ -1794,7 +1803,7 @@ TBL_FLOOR_STAGE_FROM_ROUND_2: ;089e
     
 INDICES_DATA_MAGICAL_ELEMENTS: ;08b0
 ; each indexed entry is 24 bytes
-; To obtain the offset, it uses GET_ROUND_IN_BC + TBL_FLOOR_STAGE_FROM_ROUND.
+; It uses TBL_FLOOR_STAGE_FROM_ROUND (max 5 ==> 6 entries) to get the index.
     dw 0x000d
     dw MAGICAL_ELEMENTS_DATA_ENTRY_1
     dw MAGICAL_ELEMENTS_DATA_ENTRY_5
@@ -1807,39 +1816,31 @@ MAGICAL_ELEMENTS_DATA_ENTRY_1: ; 0x8BC + 0*24
     db 0x5a, 0x70, 0x66, 0xcc, 0x00, 0x00, 0x36, 0x00
     db 0x16, 0xa9, 0xb6, 0x01, 0x4b, 0x01, 0x7c, 0x00
 
-
-MAGICAL_ELEMENTS_DATA_ENTRY_2:
+MAGICAL_ELEMENTS_DATA_ENTRY_2: ; 0x8BC + 1*24
     db 0x00, 0x00, 0x70, 0x00, 0x0d, 0x54, 0xa8, 0x2d
     db 0x43, 0x5a, 0x66, 0xcc, 0x00, 0x00, 0x36, 0x00
     db 0x16, 0xa9, 0xb6, 0x01, 0x4b, 0x01, 0x7c, 0x00
     
-MAGICAL_ELEMENTS_DATA_ENTRY_3:
+MAGICAL_ELEMENTS_DATA_ENTRY_3: ; 0x8BC + 2*24
     db 0x00, 0x00, 0x70, 0x00, 0x0d, 0x54, 0xa8, 0x1c
     db 0x38, 0x43, 0x66, 0xcc, 0x00, 0x00, 0x36, 0x00
     db 0x16, 0xa9, 0xb6, 0x01, 0x4b, 0x01, 0x7c, 0x00
 
-MAGICAL_ELEMENTS_DATA_ENTRY_4:
-    dw 0x0000
-    dw 0x0070
-    dw 0x540d
-    dw 0x1ca8
-    dw 0x382d
-    dw 0xcc66
-    dw 0x0000
-    dw 0x0036
-    dw 0xa916
-    dw 0x01b6
-    dw 0x014b
-    dw 0x007c
+MAGICAL_ELEMENTS_DATA_ENTRY_4: ; 0x8BC + 3*24
+    db 0x00, 0x00, 0x70, 0x00, 0x0d, 0x54, 0xa8, 0x1c
+    db 0x2d, 0x38, 0x66, 0xcc, 0x00, 0x00, 0x36, 0x00
+    db 0x16, 0xa9, 0xb6, 0x01, 0x4b, 0x01, 0x7c, 0x00
 
-MAGICAL_ELEMENTS_DATA_ENTRY_5:
+MAGICAL_ELEMENTS_DATA_ENTRY_5: ; 0x8BC + 4*24
     db 0x00, 0x00, 0x00, 0x36
 
     
 INDICES_DATA_MOTHS: ; 0920
-; 14 entries
+; It uses TBL_FLOOR_STAGE_FROM_ROUND_2 (max 12 ==> 13 entries) to get the index.
+; We have 14 entries. Is the last one unused?
+;
 ; 17 bytes per indexed entry
-    defw l3000h
+    defw 0x3000
     defw 0x0049
     defw 0x0000
     defw 0x0061
@@ -1854,7 +1855,7 @@ INDICES_DATA_MOTHS: ; 0920
     defw TBL_INIT_MOTHS_3 ; 0x095e
     defw TBL_INIT_MOTHS_4;  0x096f
     
-; Table init moths
+; Tables with init data for the moths
 TBL_INIT_MOTHS_1: ; 0x093c
     db 0x20, 0x0, 0x32, 0x0, 0x28, 0x0, 0x33, 0x0
     db 0x23, 0x0, 0x6b, 0x7, 0x7f, 0x3f, 0x3f, 0x38
@@ -2224,6 +2225,7 @@ l0b18h:
 	ld c,h			;0b29	4c 	L 
 	ld h,(hl)			;0b2a	66 	f 
 	ld a,a			;0b2b	7f 	 
+
 l0b2ch:
 	inc b			;0b2c	04 	. 
 	ccf			;0b2d	3f 	? 
@@ -2547,7 +2549,7 @@ l0c79h:
 	nop			;0c79	00 	. 
 	ld h,c			;0c7a	61 	a 
 	inc bc			;0c7b	03 	. 
-	ld (l3000h),hl		;0c7c	22 00 30 	" . 0 
+	ld (0x3000),hl		;0c7c	22 00 30 	" . 0 
 	ld (02740h),a		;0c7f	32 40 27 	2 @ ' 
 	inc hl			;0c82	23 	# 
 	nop			;0c83	00 	. 
@@ -6209,7 +6211,7 @@ l2309h:
 	add hl,de			;2322	19 	. 
 	ld (iy+00eh),l		;2323	fd 75 0e 	. u . 
 	ld (iy+00fh),h		;2326	fd 74 0f 	. t . 
-	ld hl,(0e1b9h)		;2329	2a b9 e1 	* . . 
+	ld hl,(TBL_E1B9)		;2329	2a b9 e1 	* . . 
 	ld (iy+00ch),l		;232c	fd 75 0c 	. u . 
 	ld (iy+00dh),h		;232f	fd 74 0d 	. t . 
 	ld a,050h		;2332	3e 50 	> P 
@@ -6287,8 +6289,8 @@ l23cch:
 l23d3h:
 	ld (ix + ENEMY_STATE_IDX), 4 ;23d3	dd 36 01 04
 	ld a,(EXT_RANDOM)		;23d7	3a 10 e0 	: . . 
-	ld hl,0e19ch		;23da	21 9c e1 	! . . 
-	ld b,000h		;23dd	06 00 	. . 
+	ld hl, TBL_E19C		;23da	21 9c e1 	! . . 
+	ld b,0  		;23dd	06 00 	. . 
 	cp (hl)			;23df	be 	. 
 	jr c,l23edh		;23e0	38 0b 	8 . 
 	inc hl			;23e2	23 	# 
@@ -7527,7 +7529,7 @@ l2ce6h:
 ;SEGUIR
 sub_2ce8h:
 	ld a,(EXT_RANDOM)		;2ce8	3a 10 e0 	: . . 
-	ld hl,0e19ch		;2ceb	21 9c e1 	! . . 
+	ld hl, TBL_E19C		;2ceb	21 9c e1 	! . . 
 	ld b,001h		;2cee	06 01 	. . 
 	cp (hl)			;2cf0	be 	. 
 	jr c,l2cf9h		;2cf1	38 06 	8 . 
@@ -8077,7 +8079,6 @@ l2ff7h:
 	inc sp			;2ffe	33 	3 
 	;call nc,0c833h		;2fff	d4 33 c8 	. 3 . 
     defb 0xd4
-l3000h:
     defb 0x33, 0xc8
     
     
@@ -8508,7 +8509,7 @@ l33c2h:
 	ld a,093h		;33ce	3e 93 	> . 
 	call PLAY_SOUND		;33d0	cd fe 0d 	. . . 
 	ret			;33d3	c9 	. 
-	ld de,(0e36eh)		;33d4	ed 5b 6e e3 	. [ n . 
+	ld de,(TABLE_WIDTH_19_LEN)		;33d4	ed 5b 6e e3 	. [ n . 
 	call ENEMY_GO_BACK_POSITION		;33d8	cd 7a 1c 	. z . 
 	call l1be2h		;33db	cd e2 1b 	. . . 
 	ld de,0e400h		;33de	11 00 e4 	. . . 
@@ -8713,7 +8714,7 @@ l356bh:
 
 ; SEGUIR
 sub_3595h:
-	ld a,(0e360h)		;3595	3a 60 e3 	: ` . 
+	ld a,(TBL_E360 + 0)		;3595	3a 60 e3 	: ` . 
 	ld de,(THOMAS_POSITION)		;3598	ed 5b 12 e7 	. [ . . 
 	ld hl,(0e361h)		;359c	2a 61 e3 	* a . 
 	sbc hl,de		;359f	ed 52 	. R 
@@ -9105,7 +9106,7 @@ l3860h:
 	call sub_3dc5h		;3863	cd c5 3d 	. . = 
 	push de			;3866	d5 	. 
 	ld a,(0e012h)		;3867	3a 12 e0 	: . . 
-	ld hl,0e50dh		;386a	21 0d e5 	! . . 
+	ld hl, TBL_E500 + 13	;386a	21 0d e5 	! . . 
 	cp (hl)			;386d	be 	. 
 	jr nc,l387fh		;386e	30 0f 	0 . 
 	set 1,(iy+014h)		;3870	fd cb 14 ce 	. . . . 
@@ -9117,7 +9118,7 @@ l387ch:
 	ld (iy+013h),a		;387c	fd 77 13 	. w . 
 l387fh:
 	ld a,(0e013h)		;387f	3a 13 e0 	: . . 
-	ld hl,0e50eh		;3882	21 0e e5 	! . . 
+	ld hl, TBL_E500 + 14	;3882	21 0e e5 	! . . 
 	cp (hl)			;3885	be 	. 
 	jr nc,l3896h		;3886	30 0e 	0 . 
 	set 0,(iy+014h)		;3888	fd cb 14 c6 	. . . . 
@@ -9160,7 +9161,7 @@ l38c4h:
 l38c8h:
 	ld (iy+006h),006h		;38c8	fd 36 06 06 	. 6 . . 
 	ld (iy+007h),010h		;38cc	fd 36 07 10 	. 6 . . 
-	ld a,(0e50ah)		;38d0	3a 0a e5 	: . . 
+	ld a,(TBL_E500 + 10)		;38d0	3a 0a e5 	: . . 
 	pop hl			;38d3	e1 	. 
 	ld (hl),a			;38d4	77 	w 
 	pop bc			;38d5	c1 	. 
@@ -9265,7 +9266,7 @@ l3959h:
 	djnz l3909h		;395d	10 aa 	. . 
 	ret			;395f	c9 	. 
 sub_3960h:
-	ld a,(0e549h)		;3960	3a 49 e5 	: I . 
+	ld a,(TABLE_WIDTH_41_LEN)		;3960	3a 49 e5 	: I . 
 	and a			;3963	a7 	. 
 	ret z			;3964	c8 	. 
 	ld b,a			;3965	47 	G 
@@ -9303,7 +9304,7 @@ l39a0h:
 	call sub_3d59h		;39a1	cd 59 3d 	. Y = 
 	pop bc			;39a4	c1 	. 
 l39a5h:
-	ld hl,0e549h		;39a5	21 49 e5 	! I . 
+	ld hl,TABLE_WIDTH_41_LEN		;39a5	21 49 e5 	! I . 
 	dec (hl)			;39a8	35 	5 
 	ret z			;39a9	c8 	. 
 	dec b			;39aa	05 	. 
@@ -9455,10 +9456,10 @@ l3a94h:
 	ld l,(ix + ENEMY_FRAMESEQ_PTR_L_IDX)		;3aa0	dd 6e 0c 	. n . 
 	ld h,(ix + ENEMY_FRAMESEQ_PTR_H_IDX)		;3aa3	dd 66 0d 	. f . 
 	jr z,l3aaeh		;3aa6	28 06 	( . 
-	ld de,(0e504h)		;3aa8	ed 5b 04 e5 	. [ . . 
+	ld de,(TBL_E500 + 4)		;3aa8	ed 5b 04 e5 	. [ . . 
 	jr l3ab2h		;3aac	18 04 	. . 
 l3aaeh:
-	ld de,(0e506h)		;3aae	ed 5b 06 e5 	. [ . . 
+	ld de,(TBL_E500 + 6)		;3aae	ed 5b 06 e5 	. [ . . 
 l3ab2h:
 	bit 3,c		;3ab2	cb 59 	. Y 
 	jr z,l3ac3h		;3ab4	28 0d 	( . 
@@ -9499,7 +9500,7 @@ l3ae4h:
 l3af4h:
 	call sub_3d22h		;3af4	cd 22 3d 	. " = 
 	push de			;3af7	d5 	. 
-	ld de,(0e504h)		;3af8	ed 5b 04 e5 	. [ . . 
+	ld de,(TBL_E500 + 4)		;3af8	ed 5b 04 e5 	. [ . . 
 	ld l,(ix + 12)		;3afc	dd 6e 0c 	. n . 
 	ld h,(ix + 13)		;3aff	dd 66 0d 	. f . 
 	bit 3,c		;3b02	cb 59 	. Y 
@@ -9762,7 +9763,7 @@ sub_3d09h:
 	jr l3d11h		;3d0c	18 03 	. . 
 
 sub_3d0eh:
-	ld hl,0e549h		;3d0e	21 49 e5 	! I . 
+	ld hl,TABLE_WIDTH_41_LEN		;3d0e	21 49 e5 	! I . 
 l3d11h:
 	ld a,(hl)			;3d11	7e 	~ 
 	cp 014h		;3d12	fe 14 	. . 
@@ -9782,7 +9783,7 @@ l3d11h:
 sub_3d22h:
 	ld l,(ix + 10)		;3d22	dd 6e 0a 	. n . 
 	ld h,(ix + 11)		;3d25	dd 66 0b 	. f . 
-	ld de,(0e508h)		;3d28	ed 5b 08 e5 	. [ . . 
+	ld de,(TBL_E500 + 8)		;3d28	ed 5b 08 e5 	. [ . . 
 	bit 2,(ix + 0)		;3d2c	dd cb 00 56 	. . . V 
 	jr z,l3d40h		;3d30	28 0e 	( . 
 	sbc hl,de		;3d32	ed 52 	. R 
@@ -9903,11 +9904,11 @@ l3df4h:
 	ld (iy+009h),d		;3e02	fd 72 09 	. r . 
 	ld (iy+00bh),002h		;3e05	fd 36 0b 02 	. 6 . . 
 	ld a,(EXT_RANDOM + 1)		;3e09	3a 11 e0 	: . . 
-	ld hl,0e50ch		;3e0c	21 0c e5 	! . . 
+	ld hl,TBL_E500 + 12		;3e0c	21 0c e5 	! . . 
 	cp (hl)			;3e0f	be 	. 
-	ld hl,(0e500h)		;3e10	2a 00 e5 	* . . 
+	ld hl,(TBL_E500 + 0)		;3e10	2a 00 e5 	* . . 
 	jr c,l3e18h		;3e13	38 03 	8 . 
-	ld hl,(0e502h)		;3e15	2a 02 e5 	* . . 
+	ld hl,(TBL_E500 + 2)		;3e15	2a 02 e5 	* . . 
 l3e18h:
 	ld (iy+010h),l		;3e18	fd 75 10 	. u . 
 	ld (iy+011h),h		;3e1b	fd 74 11 	. t . 
