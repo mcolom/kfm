@@ -179,12 +179,13 @@ TBL_E10A: EQU 0xE10A
 
 
 TBL_E360: EQU 0xE360
-TBL_E500: EQU 0xE500
+TBL_E500: EQU 0xE500 ; Seems related to the moths
 TBL_E19C: EQU 0xE19C
 TBL_E1B9: EQU 0xE1B9
 
 ; Seem related to the moths at 4th floor
-TBL_E520: EQU 0xE520
+TBL_E520_LEN: EQU 0xE520
+TBL_E521: EQU 0xE521
 
 ; Unknown yet. I only know each element of the table has length 19
 TABLE_WIDTH_19_LEN: EQU 0xE36E
@@ -1462,9 +1463,9 @@ sub_064a:
 	ld (0e380h),a		;0686	32 80 e3 	2 . . 
 l0689h:
 	
-    ; Set to zero 324 bytes in TBL_E520
-    ld hl,TBL_E520		;0689	21 20 e5
-	ld de,TBL_E520+1	;068c	11 21 e5
+    ; Set to zero 324 bytes in TBL_E520_LEN
+    ld hl,TBL_E520_LEN		;0689	21 20 e5
+	ld de,TBL_E520_LEN+1	;068c	11 21 e5
 	ld bc, 323  		;068f	01 43 01
 	ld (hl),000h		;0692	36 00
 	ldir		        ;0694	ed b0
@@ -9089,7 +9090,7 @@ l3813h:
 	jp c,l38d9h		;383c	da d9 38 	. . 8 
 	inc (hl)			;383f	34 	4 
 	ld iy,TBL_E562		;3840	fd 21 62 e5 	. ! b . 
-	ld bc,0013h+2		;3844	01 15 00 	. . . 
+	ld bc,0015h		;3844	01 15 00 	. . . 
 l3847h:
 	add iy,bc		;3847	fd 09 	. . 
 	bit 4,(iy+000h)		;3849	fd cb 00 66 	. . . f 
@@ -9206,11 +9207,11 @@ l38ebh:
 	nop			;38fd	00 	. 
 	add a,b			;38fe	80 	. 
 sub_38ffh:
-	ld a,(TBL_E520)		;38ff	3a 20 e5 	:   . 
+	ld a,(TBL_E520_LEN)		;38ff	3a 20 e5 	:   . 
 	and a			;3902	a7 	. 
 	ret z			;3903	c8 	. 
 	ld b,a			;3904	47 	G 
-	ld ix,0e521h		;3905	dd 21 21 e5 	. ! ! . 
+	ld ix,TBL_E521		;3905	dd 21 21 e5 	. ! ! . 
 l3909h:
 	ld l,(ix + 0)		;3909	dd 6e 00 	. n . 
 	ld h,(ix + 1)		;390c	dd 66 01 	. f . 
@@ -9244,7 +9245,7 @@ l3940h:
 	call sub_3d55h		;3941	cd 55 3d 	. U = 
 	pop bc			;3944	c1 	. 
 l3945h:
-	ld hl,TBL_E520		;3945	21 20 e5 	!   . 
+	ld hl,TBL_E520_LEN		;3945	21 20 e5 	!   . 
 	dec (hl)			;3948	35 	5 
 	ret z			;3949	c8 	. 
 	dec b			;394a	05 	. 
@@ -9759,7 +9760,7 @@ l3cfbh:
 	jr nz,sub_3d0eh		;3d07	20 05 	  . 
 
 sub_3d09h:
-	ld hl,TBL_E520		;3d09	21 20 e5 	!   . 
+	ld hl,TBL_E520_LEN		;3d09	21 20 e5 	!   . 
 	jr l3d11h		;3d0c	18 03 	. . 
 
 sub_3d0eh:
@@ -9818,7 +9819,7 @@ l3d5bh:
 	ret c			;3d62	d8 	. 
 	inc (hl)			;3d63	34 	4 
 	ld iy,TBL_E562		;3d64	fd 21 62 e5 	. ! b . 
-	ld de,0013h+2		;3d68	11 15 00 	. . . 
+	ld de,0015h		;3d68	11 15 00 	. . . 
 l3d6bh:
 	add iy,de		;3d6b	fd 19 	. . 
 	bit 4,(iy+000h)		;3d6d	fd cb 00 66 	. . . f 
