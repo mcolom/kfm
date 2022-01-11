@@ -175,21 +175,33 @@ TBL_HEAD: EQU 0xE31B
 
 ; This is related to the boss at level #3, but not understood yet.
 ; Bit 7 read at 1333, wrote at 137E
+; Length 35
 TBL_E10A: EQU 0xE10A
 
 
-TBL_E360: EQU 0xE360
-TBL_E500: EQU 0xE500 ; Seems related to the moths
-TBL_E19C: EQU 0xE19C
-TBL_E1B9: EQU 0xE1B9
+; SEGUIR: index all E36... with TBL_E360
+TBL_E360: EQU 0xE360 ; length 24, magical elements
+; The following is overlapping with TB_E360, 0xe360 + 24 = 0xe378
+; Each element of the table has length 19
+; E36E = E360 + 14: speed of the snakes
 
-; Seem related to the moths at 4th floor
-TBL_E520_LEN: EQU 0xE520
+TBL_E36F: EQU 0xE36F
+
+; Seems related to the moths.
+; Length 17
+TBL_E500: EQU 0xE500
+
+; Length 29
+TBL_E19C: EQU 0xE19C
+
+; 1 word
+VAR_E1B9: EQU 0xE1B9
+
+; Seems related to the moths at 4th floor
+TBL_E521_LEN: EQU 0xE520
 TBL_E521: EQU 0xE521
 
-; Unknown yet. I only know each element of the table has length 19
-TABLE_WIDTH_19_LEN: EQU 0xE36E
-TABLE_WIDTH_19: EQU 0xE36F
+
 
 TABLE_WIDTH_41_LEN: EQU 0xE549
 TABLE_WIDTH_41: EQU 0xE54A
@@ -1463,9 +1475,9 @@ sub_064a:
 	ld (0e380h),a		;0686	32 80 e3 	2 . . 
 l0689h:
 	
-    ; Set to zero 324 bytes in TBL_E520_LEN
-    ld hl,TBL_E520_LEN		;0689	21 20 e5
-	ld de,TBL_E520_LEN+1	;068c	11 21 e5
+    ; Set to zero 324 bytes in TBL_E521_LEN
+    ld hl,TBL_E521_LEN		;0689	21 20 e5
+	ld de,TBL_E521_LEN+1	;068c	11 21 e5
 	ld bc, 323  		;068f	01 43 01
 	ld (hl),000h		;0692	36 00
 	ldir		        ;0694	ed b0
@@ -6212,7 +6224,7 @@ l2309h:
 	add hl,de			;2322	19 	. 
 	ld (iy+00eh),l		;2323	fd 75 0e 	. u . 
 	ld (iy+00fh),h		;2326	fd 74 0f 	. t . 
-	ld hl,(TBL_E1B9)		;2329	2a b9 e1 	* . . 
+	ld hl,(VAR_E1B9)		;2329	2a b9 e1 	* . . 
 	ld (iy+00ch),l		;232c	fd 75 0c 	. u . 
 	ld (iy+00dh),h		;232f	fd 74 0d 	. t . 
 	ld a,050h		;2332	3e 50 	> P 
@@ -8510,7 +8522,10 @@ l33c2h:
 	ld a,093h		;33ce	3e 93 	> . 
 	call PLAY_SOUND		;33d0	cd fe 0d 	. . . 
 	ret			;33d3	c9 	. 
-	ld de,(TABLE_WIDTH_19_LEN)		;33d4	ed 5b 6e e3 	. [ n . 
+    
+    ; Speed of the snakes
+	ld de,(TBL_E360 + 14)		;33d4	ed 5b 6e e3
+    
 	call ENEMY_GO_BACK_POSITION		;33d8	cd 7a 1c 	. z . 
 	call l1be2h		;33db	cd e2 1b 	. . . 
 	ld de,0e400h		;33de	11 00 e4 	. . . 
@@ -8822,7 +8837,7 @@ l363dh:
 	ld d,a			;3643	57 	W 
 	set 0,d		    ;3644	cb c2 	. . 
 	ex de,hl		;3646	eb 	. 
-	ld ix,TABLE_WIDTH_19	;3647	dd 21 6f e3 	. ! o . 
+	ld ix,TBL_E36F	;3647	dd 21 6f e3 	. ! o . 
 	ld de, 19		;364b	11 13 00 	. . . 
 	ld b,010h		;364e	06 10 	. . 
 l3650h:
@@ -8850,7 +8865,7 @@ l366ch:
 	ld (hl),a			;367b	77 	w 
 	inc hl			;367c	23 	# 
 	inc (hl)			;367d	34 	4 
-	ld ix,TABLE_WIDTH_19		;367e	dd 21 6f e3 	. ! o . 
+	ld ix,TBL_E36F		;367e	dd 21 6f e3 	. ! o . 
 	ld bc, 19   		;3682	01 13 00 	. . . 
 l3685h:
 	add ix,bc		;3685	dd 09
@@ -8911,7 +8926,7 @@ sub_36f6h:
 	jr nc,l3711h		;36fb	30 14 	0 . 
 	inc a			;36fd	3c 	< 
 	ld (NUM_MAGICAL_ELEMENTS),a		;36fe	32 81 e3 	2 . . 
-	ld iy,TABLE_WIDTH_19	;3701	fd 21 6f e3 	. ! o . 
+	ld iy,TBL_E36F	;3701	fd 21 6f e3 	. ! o . 
 	ld de, 19		        ;3705	11 13 00 	. . . 
 l3708h:
 	add iy,de		;3708	fd 19 	. . 
@@ -9207,7 +9222,7 @@ l38ebh:
 	nop			;38fd	00 	. 
 	add a,b			;38fe	80 	. 
 sub_38ffh:
-	ld a,(TBL_E520_LEN)		;38ff	3a 20 e5 	:   . 
+	ld a,(TBL_E521_LEN)		;38ff	3a 20 e5 	:   . 
 	and a			;3902	a7 	. 
 	ret z			;3903	c8 	. 
 	ld b,a			;3904	47 	G 
@@ -9245,7 +9260,7 @@ l3940h:
 	call sub_3d55h		;3941	cd 55 3d 	. U = 
 	pop bc			;3944	c1 	. 
 l3945h:
-	ld hl,TBL_E520_LEN		;3945	21 20 e5 	!   . 
+	ld hl,TBL_E521_LEN		;3945	21 20 e5 	!   . 
 	dec (hl)			;3948	35 	5 
 	ret z			;3949	c8 	. 
 	dec b			;394a	05 	. 
@@ -9760,7 +9775,7 @@ l3cfbh:
 	jr nz,sub_3d0eh		;3d07	20 05 	  . 
 
 sub_3d09h:
-	ld hl,TBL_E520_LEN		;3d09	21 20 e5 	!   . 
+	ld hl,TBL_E521_LEN		;3d09	21 20 e5 	!   . 
 	jr l3d11h		;3d0c	18 03 	. . 
 
 sub_3d0eh:
