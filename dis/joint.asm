@@ -178,18 +178,9 @@ TBL_HEAD: EQU 0xE31B
 ; Length 35
 TBL_E10A: EQU 0xE10A
 
-
-; SEGUIR: index all E36... with TBL_E360
-TBL_E360: EQU 0xE360 ; length 24, magical elements
-; The following is overlapping with TB_E360, 0xe360 + 24 = 0xe378
-; Each element of the table has length 19
-; E36E = E360 + 14: speed of the snakes
-
-TBL_E36F: EQU 0xE36F
-
-; Seems related to the moths.
+; Config of the moths
 ; Length 17
-TBL_E500: EQU 0xE500
+DATA_MOTHS_CONFIG: EQU 0xE500
 
 ; Length 29
 TBL_E19C: EQU 0xE19C
@@ -223,11 +214,7 @@ SILVIA_LEFT_OR_RIGHT: EQU 0xE340
 ; Values: 0 (clean up), 0x10, 0x40
 SILVIA_STATE: EQU 0xE34C
 
-; Number of "magic elements".
-; At floor 2: dragons, snakes, bursting balls, ...
-; Also at floor 4, with elements thrown by the magician
-; Unknown at 0xE380
-NUM_MAGICAL_ELEMENTS: EQU 0xE381
+
 
 ; Absolute position of Thomas ìn the complete floor
 THOMAS_POSITION: EQU 0xE712 ; Left end is 0
@@ -1467,7 +1454,7 @@ sub_064a:
 	jr z,l0689h		;0676	28 11 	( . 
 
 	ld hl, INDICES_DATA_MAGICAL_ELEMENTS		;0678	21 b0 08 	! . . 
-	ld de, TBL_E360		;067b	11 60 e3 	. ` . 
+	ld de, MAGICAL_ELEMENTS_CONFIG		;067b	11 60 e3 	. ` . 
 	ld bc, 24	        ;067e	01 18 00
 	call LDIR_WITH_INDEXED_HL		;05	cd b2 06 	. . . 
 
@@ -1492,7 +1479,7 @@ l0689h:
 	ld (FLOOR_STAGE),a		;06a0	32 00 e1 	2 . . 
 
 	ld hl, INDICES_DATA_MOTHS		;06a3	21 20 09
-	ld de, TBL_E500            		;06a6	11 00 e5
+	ld de, DATA_MOTHS_CONFIG            		;06a6	11 00 e5
 	ld bc, 17   		            ;06a9	01 11 00
     ;
     ; Do LDIR with HL=0x93C, DE=0xE500, BC=0x11
@@ -8524,7 +8511,7 @@ l33c2h:
 	ret			;33d3	c9 	. 
     
     ; Speed of the snakes
-	ld de,(TBL_E360 + 14)		;33d4	ed 5b 6e e3
+	ld de,(MAGICAL_ELEMENTS_CONFIG + 14)		;33d4	ed 5b 6e e3
     
 	call ENEMY_GO_BACK_POSITION		;33d8	cd 7a 1c 	. z . 
 	call l1be2h		;33db	cd e2 1b 	. . . 
@@ -8600,7 +8587,7 @@ l3474h:
 	ret			;3477	c9 	. 
 	ld de,(0e374h)		;3478	ed 5b 74 e3 	. [ t . 
 	call ENEMY_GO_BACK_POSITION		;347c	cd 7a 1c 	. z . 
-	ld hl,(0e36ah)		;347f	2a 6a e3 	* j . 
+	ld hl,(MAGICAL_ELEMENTS_CONFIG + 10)		;347f	2a 6a e3 	* j . 
 	jr l348eh		;3482	18 0a 	. . 
 	ld de,(0e376h)		;3484	ed 5b 76 e3 	. [ v . 
 	call ENEMY_GO_BACK_POSITION		;3488	cd 7a 1c 	. z . 
@@ -8677,7 +8664,7 @@ l34f5h:
 	jr nz,l352ch		;351f	20 0b 	  . 
 	ld (iy+006h),019h		;3521	fd 36 06 19 	. 6 . . 
 l3525h:
-	ld a,(0e365h)		;3525	3a 65 e3 	: e . 
+	ld a,(MAGICAL_ELEMENTS_CONFIG + 5)		;3525	3a 65 e3 	: e . 
 	ld (iy+008h),a		;3528	fd 77 08 	. w . 
 	ret			;352b	c9 	. 
 
@@ -8690,7 +8677,7 @@ l352ch:
 	ld e,a			;3534	5f 	_ 
 	nop			;3535	00 	. 
 	ld e,d			;3536	5a 	Z 
-	ld de,(0e363h)		;3537	ed 5b 63 e3 	. [ c . 
+	ld de,(MAGICAL_ELEMENTS_CONFIG + 3)		;3537	ed 5b 63 e3 	. [ c . 
 	call ENEMY_GO_BACK_POSITION		;353b	cd 7a 1c 	. z . 
 	call l1be2h		;353e	cd e2 1b 	. . . 
 	call sub_3773h		;3541	cd 73 37 	. s 7 
@@ -8724,18 +8711,18 @@ l356bh:
 	ld (ix + MAGICAL_ELEMENT_STATE_IDX),010h		;3582	dd 36 01 10 	. 6 . . 
 	ld (ix + CURRENT_FRAME_IDX),01dh		;3586	dd 36 06 1d 	. 6 . . 
 	ld (ix + FRAME_COUNTER_IDX), 11 ;358a	dd 36 07 0b
-	ld a,(0e366h)		;358e	3a 66 e3 	: f . 
+	ld a,(MAGICAL_ELEMENTS_CONFIG + 6)		;358e	3a 66 e3 	: f . 
 	ld (ix + FIREBALL_TIMEOUT_IDX),a		;3591	dd 77 08
 	ret			;3594	c9 	. 
 
 ; SEGUIR
 sub_3595h:
-	ld a,(TBL_E360 + 0)		;3595	3a 60 e3 	: ` . 
+	ld a,(MAGICAL_ELEMENTS_CONFIG + 0)		;3595	3a 60 e3 	: ` . 
 	ld de,(THOMAS_POSITION)		;3598	ed 5b 12 e7 	. [ . . 
-	ld hl,(0e361h)		;359c	2a 61 e3 	* a . 
+	ld hl,(MAGICAL_ELEMENTS_CONFIG + 1)		;359c	2a 61 e3 	* a . 
 	sbc hl,de		;359f	ed 52 	. R 
 	jr c,l35aeh		;35a1	38 0b 	8 . 
-	ld hl,(0e363h)		;35a3	2a 63 e3 	* c . 
+	ld hl,(MAGICAL_ELEMENTS_CONFIG + 3)		;35a3	2a 63 e3 	* c . 
 	sbc hl,de		;35a6	ed 52 	. R 
 	jr c,l35b5h		;35a8	38 0b 	8 . 
 	cp 001h		;35aa	fe 01 	. . 
@@ -8758,7 +8745,7 @@ l35b5h:
 	cp 010h		;35bd	fe 10 	. . 
 	ret nc			;35bf	d0 	. 
 	ld a,(0e017h)		;35c0	3a 17 e0 	: . . 
-	ld hl,0e36ah		;35c3	21 6a e3 	! j . 
+	ld hl,MAGICAL_ELEMENTS_CONFIG + 10		;35c3	21 6a e3 	! j . 
 	ld e,000h		;35c6	1e 00 	. . 
 	cp (hl)			;35c8	be 	. 
 	jr c,l35e8h		;35c9	38 1d 	8 . 
@@ -8837,7 +8824,7 @@ l363dh:
 	ld d,a			;3643	57 	W 
 	set 0,d		    ;3644	cb c2 	. . 
 	ex de,hl		;3646	eb 	. 
-	ld ix,TBL_E36F	;3647	dd 21 6f e3 	. ! o . 
+	ld ix,TBL_MAGICAL_ELEMENTS - 19	;3647	dd 21 6f e3 	. ! o . 
 	ld de, 19		;364b	11 13 00 	. . . 
 	ld b,010h		;364e	06 10 	. . 
 l3650h:
@@ -8859,13 +8846,13 @@ l366ch:
 	djnz l3650h		;366c	10 e2 	. . 
 	ex de,hl			;366e	eb 	. 
 	ld a,(0e015h)		;366f	3a 15 e0 	: . . 
-	ld hl,0e365h		;3672	21 65 e3 	! e . 
+	ld hl,MAGICAL_ELEMENTS_CONFIG + 5		;3672	21 65 e3 	! e . 
 	call sub_1214h		;3675	cd 14 12 	. . . 
 	ld hl,0e380h		;3678	21 80 e3 	! . . 
 	ld (hl),a			;367b	77 	w 
 	inc hl			;367c	23 	# 
 	inc (hl)			;367d	34 	4 
-	ld ix,TBL_E36F		;367e	dd 21 6f e3 	. ! o . 
+	ld ix,TBL_MAGICAL_ELEMENTS - 19		;367e	dd 21 6f e3 	. ! o . 
 	ld bc, 19   		;3682	01 13 00 	. . . 
 l3685h:
 	add ix,bc		;3685	dd 09
@@ -8926,7 +8913,7 @@ sub_36f6h:
 	jr nc,l3711h		;36fb	30 14 	0 . 
 	inc a			;36fd	3c 	< 
 	ld (NUM_MAGICAL_ELEMENTS),a		;36fe	32 81 e3 	2 . . 
-	ld iy,TBL_E36F	;3701	fd 21 6f e3 	. ! o . 
+	ld iy,TBL_MAGICAL_ELEMENTS - 19	;3701	fd 21 6f e3 	. ! o . 
 	ld de, 19		        ;3705	11 13 00 	. . . 
 l3708h:
 	add iy,de		;3708	fd 19 	. . 
@@ -9122,7 +9109,7 @@ l3860h:
 	call sub_3dc5h		;3863	cd c5 3d 	. . = 
 	push de			;3866	d5 	. 
 	ld a,(0e012h)		;3867	3a 12 e0 	: . . 
-	ld hl, TBL_E500 + 13	;386a	21 0d e5 	! . . 
+	ld hl, DATA_MOTHS_CONFIG + 13	;386a	21 0d e5 	! . . 
 	cp (hl)			;386d	be 	. 
 	jr nc,l387fh		;386e	30 0f 	0 . 
 	set 1,(iy+014h)		;3870	fd cb 14 ce 	. . . . 
@@ -9134,7 +9121,7 @@ l387ch:
 	ld (iy+013h),a		;387c	fd 77 13 	. w . 
 l387fh:
 	ld a,(0e013h)		;387f	3a 13 e0 	: . . 
-	ld hl, TBL_E500 + 14	;3882	21 0e e5 	! . . 
+	ld hl, DATA_MOTHS_CONFIG + 14	;3882	21 0e e5 	! . . 
 	cp (hl)			;3885	be 	. 
 	jr nc,l3896h		;3886	30 0e 	0 . 
 	set 0,(iy+014h)		;3888	fd cb 14 c6 	. . . . 
@@ -9177,7 +9164,7 @@ l38c4h:
 l38c8h:
 	ld (iy+006h),006h		;38c8	fd 36 06 06 	. 6 . . 
 	ld (iy+007h),010h		;38cc	fd 36 07 10 	. 6 . . 
-	ld a,(TBL_E500 + 10)		;38d0	3a 0a e5 	: . . 
+	ld a,(DATA_MOTHS_CONFIG + 10)		;38d0	3a 0a e5 	: . . 
 	pop hl			;38d3	e1 	. 
 	ld (hl),a			;38d4	77 	w 
 	pop bc			;38d5	c1 	. 
@@ -9472,10 +9459,10 @@ l3a94h:
 	ld l,(ix + ENEMY_FRAMESEQ_PTR_L_IDX)		;3aa0	dd 6e 0c 	. n . 
 	ld h,(ix + ENEMY_FRAMESEQ_PTR_H_IDX)		;3aa3	dd 66 0d 	. f . 
 	jr z,l3aaeh		;3aa6	28 06 	( . 
-	ld de,(TBL_E500 + 4)		;3aa8	ed 5b 04 e5 	. [ . . 
+	ld de,(DATA_MOTHS_CONFIG + 4)		;3aa8	ed 5b 04 e5 	. [ . . 
 	jr l3ab2h		;3aac	18 04 	. . 
 l3aaeh:
-	ld de,(TBL_E500 + 6)		;3aae	ed 5b 06 e5 	. [ . . 
+	ld de,(DATA_MOTHS_CONFIG + 6)		;3aae	ed 5b 06 e5 	. [ . . 
 l3ab2h:
 	bit 3,c		;3ab2	cb 59 	. Y 
 	jr z,l3ac3h		;3ab4	28 0d 	( . 
@@ -9516,7 +9503,7 @@ l3ae4h:
 l3af4h:
 	call sub_3d22h		;3af4	cd 22 3d 	. " = 
 	push de			;3af7	d5 	. 
-	ld de,(TBL_E500 + 4)		;3af8	ed 5b 04 e5 	. [ . . 
+	ld de,(DATA_MOTHS_CONFIG + 4)		;3af8	ed 5b 04 e5 	. [ . . 
 	ld l,(ix + 12)		;3afc	dd 6e 0c 	. n . 
 	ld h,(ix + 13)		;3aff	dd 66 0d 	. f . 
 	bit 3,c		;3b02	cb 59 	. Y 
@@ -9799,7 +9786,7 @@ l3d11h:
 sub_3d22h:
 	ld l,(ix + 10)		;3d22	dd 6e 0a 	. n . 
 	ld h,(ix + 11)		;3d25	dd 66 0b 	. f . 
-	ld de,(TBL_E500 + 8)		;3d28	ed 5b 08 e5 	. [ . . 
+	ld de,(DATA_MOTHS_CONFIG + 8)		;3d28	ed 5b 08 e5 	. [ . . 
 	bit 2,(ix + 0)		;3d2c	dd cb 00 56 	. . . V 
 	jr z,l3d40h		;3d30	28 0e 	( . 
 	sbc hl,de		;3d32	ed 52 	. R 
@@ -9920,11 +9907,11 @@ l3df4h:
 	ld (iy+009h),d		;3e02	fd 72 09 	. r . 
 	ld (iy+00bh),002h		;3e05	fd 36 0b 02 	. 6 . . 
 	ld a,(EXT_RANDOM + 1)		;3e09	3a 11 e0 	: . . 
-	ld hl,TBL_E500 + 12		;3e0c	21 0c e5 	! . . 
+	ld hl,DATA_MOTHS_CONFIG + 12		;3e0c	21 0c e5 	! . . 
 	cp (hl)			;3e0f	be 	. 
-	ld hl,(TBL_E500 + 0)		;3e10	2a 00 e5 	* . . 
+	ld hl,(DATA_MOTHS_CONFIG + 0)		;3e10	2a 00 e5 	* . . 
 	jr c,l3e18h		;3e13	38 03 	8 . 
-	ld hl,(TBL_E500 + 2)		;3e15	2a 02 e5 	* . . 
+	ld hl,(DATA_MOTHS_CONFIG + 2)		;3e15	2a 02 e5 	* . . 
 l3e18h:
 	ld (iy+010h),l		;3e18	fd 75 10 	. u . 
 	ld (iy+011h),h		;3e1b	fd 74 11 	. t . 

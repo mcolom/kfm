@@ -1,5 +1,15 @@
 ; Magical elements, mainly at the beginning of level #2
 
+; SEGUIR: index all E36... with MAGICAL_ELEMENTS_CONFIG
+MAGICAL_ELEMENTS_CONFIG: EQU 0xE360 ; length 24 (0xE360, ..., 0xE377), magical elements
+; Copied using INDICES_DATA_MAGICAL_ELEMENTS.
+; E36E = E360 + 14: speed of the snakes
+
+; Number of "magic elements".
+; At floor 2: dragons, snakes, bursting balls, ...
+; Also at floor 4, with elements thrown by the magician
+; Unknown at 0xE380
+NUM_MAGICAL_ELEMENTS: EQU 0xE381
 TBL_MAGICAL_ELEMENTS: EQU 0xE382
 
 MAGICAL_ELEMENT_LOOKAT_IDX: EQU 0 ; E382
