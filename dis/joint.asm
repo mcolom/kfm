@@ -8228,18 +8228,18 @@ l314ch:
 	add iy,de		;314f	fd 19 	. . 
 	djnz l311ch		;3151	10 c9 	. . 
 	ret			;3153	c9 	.  Why a RET here? Debug?
-	ld de,(0e376h)		;3154	ed 5b 76 e3 	. [ v . 
+	ld de,(MAGICAL_ELEMENTS_CONFIG + 22)		;3154	ed 5b 76 e3 	. [ v . 
 	call ENEMY_ADVANCE_POSITION		;3158	cd 70 1c 	. p . 
 	jr l316dh		;315b	18 10 	. . 
 l315dh:
 	call l1be2h		;315d	cd e2 1b 	. . . 
-	ld de,(0e372h)		;3160	ed 5b 72 e3 	. [ r . 
+	ld de,(MAGICAL_ELEMENTS_CONFIG + 18)		;3160	ed 5b 72 e3 	. [ r . 
 	jr l3174h		;3164	18 0e 	. . 
-	ld de,(0e376h)		;3166	ed 5b 76 e3 	. [ v . 
+	ld de,(MAGICAL_ELEMENTS_CONFIG + 22)		;3166	ed 5b 76 e3 	. [ v . 
 	call ENEMY_GO_BACK_POSITION		;316a	cd 7a 1c 	. z . 
 l316dh:
 	call l1be2h		;316d	cd e2 1b 	. . . 
-	ld de,(0e374h)		;3170	ed 5b 74 e3 	. [ t . 
+	ld de,(MAGICAL_ELEMENTS_CONFIG + 20)		;3170	ed 5b 74 e3 	. [ t . 
 l3174h:
 	ld hl,05000h		;3174	21 00 50 	! . P 
 	call CHANGE_HEIGHT_WITH_SPEED		;3177	cd 32 37 	. 2 7 
@@ -8357,7 +8357,7 @@ l3275h:
 	cp 19	;327c	fe 13
 	jp z,l32a2h		;327e	ca a2 32
 	inc (ix + CURRENT_FRAME_IDX)		;3281	dd 34 06
-	ld a,(0e370h)		;3284	3a 70 e3 	: p . 
+	ld a,(MAGICAL_ELEMENTS_CONFIG + 16)		;3284	3a 70 e3 	: p . 
 	ld (ix + FRAME_COUNTER_IDX),a	;3287	dd 77 07
 	ret			;328a	c9 	. 
 l328bh:
@@ -8564,7 +8564,7 @@ l3435h:
 	ld (ix + FRAME_COUNTER_IDX), 9	;343d	dd 36 07 09
 	jp l33b3h		;3441	c3 b3 33 	. . 3 
 l3444h:
-	ld de,(0e372h)		;3444	ed 5b 72 e3 	. [ r . 
+	ld de,(MAGICAL_ELEMENTS_CONFIG + 18)		;3444	ed 5b 72 e3 	. [ r . 
 	call ENEMY_GO_BACK_POSITION		;3448	cd 7a 1c 	. z . 
 	call l1be2h		;344b	cd e2 1b 	. . . 
 	call sub_37bfh		;344e	cd bf 37 	. . 7 
@@ -8585,11 +8585,11 @@ l3444h:
 l3474h:
 	ld (ix + CURRENT_FRAME_IDX),a		;3474	dd 77 06 	. w . 
 	ret			;3477	c9 	. 
-	ld de,(0e374h)		;3478	ed 5b 74 e3 	. [ t . 
+	ld de,(MAGICAL_ELEMENTS_CONFIG + 20)		;3478	ed 5b 74 e3 	. [ t . 
 	call ENEMY_GO_BACK_POSITION		;347c	cd 7a 1c 	. z . 
 	ld hl,(MAGICAL_ELEMENTS_CONFIG + 10)		;347f	2a 6a e3 	* j . 
 	jr l348eh		;3482	18 0a 	. . 
-	ld de,(0e376h)		;3484	ed 5b 76 e3 	. [ v . 
+	ld de,(MAGICAL_ELEMENTS_CONFIG + 22)		;3484	ed 5b 76 e3 	. [ v . 
 	call ENEMY_GO_BACK_POSITION		;3488	cd 7a 1c 	. z . 
 	ld hl,(ME_INITIAL_FALL_SPEED)		;348b	2a 6c e3 	* l . 
 l348eh:
