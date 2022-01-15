@@ -178,10 +178,6 @@ TBL_HEAD: EQU 0xE31B
 ; Length 35
 TBL_E10A: EQU 0xE10A
 
-; Config of the moths
-; Length 17
-DATA_MOTHS_CONFIG: EQU 0xE500
-
 ; Length 29
 TBL_E19C: EQU 0xE19C
 
@@ -1635,16 +1631,16 @@ l0791h:
 	ld hl,0cc00h		;07b0	21 00 cc 	! . . 
 	ld de,M62_HSCROLL_HIGH_W		;07b3	11 00 b0 	. . . 
 l07b6h:
-	ld (ENEMY_POS),hl		;07b6	22 da e2 	" . . 
-	ld (0e2d3h),de		;07b9	ed 53 d3 e2 	. S . . 
-	call GET_ROUND_IN_BC		;07bd	cd 66 08 	. f . 
-	push bc			;07c0	c5 	. 
-	sla c		;07c1	cb 21 	. ! 
+	ld (ENEMY_POS),hl		;07b6	22 da e2
+	ld (0e2d3h),de		    ;07b9	ed 53 d3 e2
+	call GET_ROUND_IN_BC	;07bd	cd 66 08
+	push bc			        ;07c0	c5
+	sla c		            ;07c1	cb 21   BC = 2 * ROUND. max = 2 * 22 = 44.
 	push bc			;07c3	c5 	. 
 	push bc			;07c4	c5 	. 
 
-	ld hl,TBL_FLOOR_STAGE_FROM_ROUND_3		;07c5	21 b0 09 	! . . 
-	add hl,bc			;07c8	09 	. 
+	ld hl,TBL_FLOOR_STAGE_FROM_ROUND_3	;07c5	21 b0 09
+	add hl,bc			                ;07c8	09      HL = TBL_FLOOR_STAGE_FROM_ROUND_3 + 2*ROUND
 	ld a,(hl)			;07c9	7e 	~ 
 	inc hl			;07ca	23 	# 
 	ld h,(hl)			;07cb	66 	f 
@@ -9087,7 +9083,7 @@ l3813h:
 	sbc hl,de		;3830	ed 52 	. R 
 	jp nc,l38d9h		;3832	d2 d9 38 	. . 8 
 	ld hl,TBL_MOTHS_LEN		;3835	21 76 e5 	! v . 
-	ld a,(MAX_NUM_MOTHS)		;3838	3a 0b e5 	: . . 
+	ld a,(DATA_MOTHS_CONFIG + MAX_NUM_MOTHS_IDX)		;3838	3a 0b e5
 	cp (hl)			;383b	be 	. 
 	jp c,l38d9h		;383c	da d9 38 	. . 8 
 	inc (hl)			;383f	34 	4 
@@ -9338,7 +9334,7 @@ PROCESS_ALL_MOTHS:
 	ret z			        ;39c4	c8
 
 	ld ix,TBL_MOTHS		;39c5	dd 21 77 e5
-	ld a,(MAX_NUM_MOTHS)		;39c9	3a 0b e5
+	ld a,(DATA_MOTHS_CONFIG + MAX_NUM_MOTHS_IDX)		;39c9	3a 0b e5
 	ld b,a			;39cc	47 	G 
 l39cdh:
 	push bc			                ;39cd	c5
@@ -9816,7 +9812,7 @@ sub_3d59h:
 	ld b,050h		;3d59	06 50 	. P 
 l3d5bh:
 	ld hl,TBL_MOTHS_LEN		;3d5b	21 76 e5 	! v . 
-	ld a,(MAX_NUM_MOTHS)		;3d5e	3a 0b e5 	: . . 
+	ld a,(DATA_MOTHS_CONFIG + MAX_NUM_MOTHS_IDX)		;3d5e	3a 0b e5
 	cp (hl)			;3d61	be 	. 
 	ret c			;3d62	d8 	. 
 	inc (hl)			;3d63	34 	4 
