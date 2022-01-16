@@ -9503,7 +9503,7 @@ l3ad1h:
 l3ad4h:
 	add hl,de			;3ad4	19 	. 
 	jr nc,l3adbh		;3ad5	30 04 	0 . 
-	set 3,(ix + 0)		;3ad7	dd cb 00 de 	. . . . 
+	set 3,(ix + ENEMY_PROPS_IDX)		;3ad7	dd cb 00 de 	. . . . 
 l3adbh:
 	ld (ix + MOTH_VERT_POS_L_IDX),e		;3adb	dd 73 0c
 	ld (ix + MOTH_VERT_POS_H_IDX),d		;3ade	dd 72 0d
@@ -9573,14 +9573,22 @@ l3b57h:
 	ld (ix + 10),000h		;3b57	dd 36 0a 00 	. 6 . . 
 	ld (ix + 6),000h		;3b5b	dd 36 06 00 	. 6 . . 
 	ld (ix + 7),005h		;3b5f	dd 36 07 05 	. 6 . . 
-	ld l,(ix + MOTH_HEIGHT_L_IDX)		;3b63	dd 6e 04 	. n . 
-	ld h,(ix + MOTH_HEIGHT_H_IDX)		;3b66	dd 66 05 	. f . 
-	ld e,(ix + MOTH_BASE_HEIGHT_L_IDX)		;3b69	dd 5e 08 	. ^ . 
-	ld d,(ix + MOTH_BASE_HEIGHT_H_IDX)		;3b6c	dd 56 09 	. V . 
-	sbc hl,de		;3b6f	ed 52 	. R 
-	ld (ix + MOTH_VERT_POS_L_IDX),l		;3b71	dd 75 0c 	. u . 
-	ld (ix + MOTH_VERT_POS_H_IDX),h		;3b74	dd 74 0d 	. t . 
-	ld a,(ix + 1)		;3b77	dd 7e 01 	. ~ . 
+    
+    
+    ; HL = MOTH_HEIGHT
+	ld l,(ix + MOTH_HEIGHT_L_IDX)		;3b63	dd 6e 04
+	ld h,(ix + MOTH_HEIGHT_H_IDX)		;3b66	dd 66 05
+	
+    ; DE = MOTH_BASE_HEIGHT
+    ld e,(ix + MOTH_BASE_HEIGHT_L_IDX)	;3b69	dd 5e 08
+	ld d,(ix + MOTH_BASE_HEIGHT_H_IDX)	;3b6c	dd 56 09
+
+    ; MOTH_VERT_POS = MOTH_HEIGHT - MOTH_BASE_HEIGHT
+	sbc hl,de		                    ;3b6f	ed 52 HL = MOTH_HEIGHT - MOTH_BASE_HEIGHT
+	ld (ix + MOTH_VERT_POS_L_IDX),l		;3b71	dd 75 0c
+	ld (ix + MOTH_VERT_POS_H_IDX),h		;3b74	dd 74 0d
+
+    ld a,(ix + 1)		;3b77	dd 7e 01 	. ~ . 
 	sub 008h		;3b7a	d6 08 	. . 
 	jr nz,l3b8ch		;3b7c	20 0e 	  . 
 	ld a,003h		;3b7e	3e 03 	> . 
@@ -9603,11 +9611,11 @@ l3baah:
 	push hl			;3baa	e5 	. 
 	ld l,(ix + MOTH_HEIGHT_L_IDX)		;3bab	dd 6e 04 	. n . 
 	ld h,(ix + MOTH_HEIGHT_H_IDX)		;3bae	dd 66 05 	. f . 
-	ld de,09800h		;3bb1	11 00 98 	. . . 
+	ld de, 38912		;3bb1	11 00 98
 	add hl,de			;3bb4	19 	. 
 	pop hl			;3bb5	e1 	. 
-	jr nc,l3bbch		;3bb6	30 04 	0 . 
-	ld de,0016h		;3bb8	11 16 00 	. . . 
+	jr nc,l3bbch		;3bb6	30 04
+	ld de, 22   		;3bb8	11 16 00
 	add hl,de			;3bbb	19 	. 
 l3bbch:
 	call sub_3bd5h		;3bbc	cd d5 3b 	. . ; 
@@ -9615,8 +9623,8 @@ l3bbch:
 	add hl,de			;3bc2	19 	. 
 	ld c,(hl)			;3bc3	4e 	N 
 	ld a,(ix + 1)		;3bc4	dd 7e 01 	. ~ . 
-	add a,008h		;3bc7	c6 08 	. . 
-	cp 00bh		;3bc9	fe 0b 	. . 
+	add a, 8		;3bc7	c6 08 	. . 
+	cp 11		;3bc9	fe 0b 	. . 
 	jr nz,l3bcfh		;3bcb	20 02 	  . 
 	ld a,008h		;3bcd	3e 08 	> . 
 l3bcfh:
@@ -9668,15 +9676,15 @@ l3c1eh:
 	call PLAY_SOUND		;3c26	cd fe 0d 	. . . 
 	xor a			;3c29	af 	. 
 l3c2ah:
-	ld (ix + 14),a		;3c2a	dd 77 0e 	. w . 
-	ld (ix + 7),005h		;3c2d	dd 36 07 05 	. 6 . . 
-	ld (ix + 6),007h		;3c31	dd 36 06 07 	. 6 . . 
-	ld (ix + 1),007h		;3c35	dd 36 01 07 	. 6 . . 
-	jr l3ca9h		;3c39	18 6e 	. n 
+	ld (ix + 14),a		                        ;3c2a	dd 77 0e
+	ld (ix + ENEMY_FRAME_COUNTER_IDX), 5		;3c2d	dd 36 07 05
+	ld (ix + ENEMY_FRAME_IDX), 7		        ;3c31	dd 36 06 07
+	ld (ix + ENEMY_STATE_IDX), 7		        ;3c35	dd 36 01 07
+	jr l3ca9h		                            ;3c39	18 6e
 
 ; ENEMY_STATE_IDX  = 4, 5, 6
 moth_states_4_5_6:
-	dec (ix + 7)		;3c3b	dd 35 07 	. 5 . 
+	dec (ix + ENEMY_FRAME_COUNTER_IDX)		;3c3b	dd 35 07 	. 5 . 
 	jr z,l3c66h		;3c3e	28 26 	( & 
 	ld a,(0eb00h)		;3c40	3a 00 eb 	: . . 
 	push af			;3c43	f5 	. 
@@ -9698,40 +9706,40 @@ moth_states_4_5_6:
 	ld (0eb00h),a		;3c62	32 00 eb 	2 . . 
 	ret			;3c65	c9 	. 
 l3c66h:
-	ld (ix + 6),000h		;3c66	dd 36 06 00 	. 6 . . 
-	ld (ix + 7),005h		;3c6a	dd 36 07 05 	. 6 . . 
-	ld a,(ix + 1)		;3c6e	dd 7e 01 	. ~ . 
-	sub 004h		;3c71	d6 04 	. . 
+	ld (ix + ENEMY_FRAME_IDX), 0		;3c66	dd 36 06 00
+	ld (ix + ENEMY_FRAME_COUNTER_IDX), 5		;3c6a	dd 36 07 05
+	ld a,(ix + ENEMY_STATE_IDX)		;3c6e	dd 7e 01 	. ~ . 
+	sub 4		;3c71	d6 04 	. . 
 	jr nz,l3c77h		;3c73	20 02 	  . 
-	ld a,003h		;3c75	3e 03 	> . 
+	ld a, 3		;3c75	3e 03 	> . 
 l3c77h:
-	ld (ix + 1),a		;3c77	dd 77 01 	. w . 
+	ld (ix + ENEMY_STATE_IDX),a		;3c77	dd 77 01 	. w . 
 l3c7ah:
 	call sub_3ccfh		;3c7a	cd cf 3c 	. . < 
 	jp c,l3c0dh		;3c7d	da 0d 3c 	. . < 
-	ld e,(ix + 2)		;3c80	dd 5e 02 	. ^ . 
-	ld d,(ix + 3)		;3c83	dd 56 03 	. V . 
-	ld hl,0ffc0h		;3c86	21 c0 ff 	! . . 
+	ld e,(ix + ENEMY_POS_L_IDX)		;3c80	dd 5e 02 	. ^ . 
+	ld d,(ix + ENEMY_POS_H_IDX)		;3c83	dd 56 03 	. V . 
+	ld hl, -64		;3c86	21 c0 ff 	! . . 
 	add hl,de			;3c89	19 	. 
 	ld (0e80fh),hl		;3c8a	22 0f e8 	" . . 
-	ld hl,0x80		;3c8d	21 80 00 	! . . 
+	ld hl, 128		;3c8d	21 80 00 	! . . 
 	add hl,de			;3c90	19 	. 
 	ld (0e811h),hl		;3c91	22 11 e8 	" . . 
 	ld l,(ix + MOTH_HEIGHT_L_IDX)		;3c94	dd 6e 04 	. n . 
 	ld h,(ix + MOTH_HEIGHT_H_IDX)		;3c97	dd 66 05 	. f . 
-	ld de,00200h		;3c9a	11 00 02 	. . . 
+	ld de, 512		;3c9a	11 00 02 	. . . 
 	add hl,de			;3c9d	19 	. 
-	ld de,0006h		;3c9e	11 06 00 	. . . 
+	ld de, 6		;3c9e	11 06 00 	. . . 
 	push hl			;3ca1	e5 	. 
 	call sub_1172h		;3ca2	cd 72 11 	. r . 
 	pop hl			;3ca5	e1 	. 
 	jp c,l3c1eh		;3ca6	da 1e 3c 	. . < 
 l3ca9h:
 	call l1be2h		;3ca9	cd e2 1b 	. . . 
-	ld de,0e400h		;3cac	11 00 e4 	. . . 
+	ld de, -7168		;3cac	11 00 e4 	. . . 
 	add hl,de			;3caf	19 	. 
 	ret c			;3cb0	d8 	. 
-	ld hl,075c0h		;3cb1	21 c0 75 	! . u 
+	ld hl, 30144		;3cb1	21 c0 75 	! . u 
 	ld a,c			;3cb4	79 	y 
 	xor 040h		;3cb5	ee 40 	. @ 
 	jp l1a80h		;3cb7	c3 80 1a 	. . . 
@@ -9744,25 +9752,25 @@ sub_3cbah:
 	ld d,000h		;3cc1	16 00 	. . 
 	rl d		;3cc3	cb 12 	. . 
 	ld e,h			;3cc5	5c 	\ 
-	ld l,(ix + 2)		;3cc6	dd 6e 02 	. n . 
-	ld h,(ix + 3)		;3cc9	dd 66 03 	. f . 
+	ld l,(ix + ENEMY_POS_L_IDX)		;3cc6	dd 6e 02 	. n . 
+	ld h,(ix + ENEMY_POS_H_IDX)		;3cc9	dd 66 03 	. f . 
 	jp ADD_POINTS		;3ccc	c3 60 2f 	. ` / 
 
 sub_3ccfh:
 	ld hl,l0140h		;3ccf	21 40 01 	! @ . 
 	call sub_1220h		;3cd2	cd 20 12 	.   . 
 	ret nc			;3cd5	d0 	. 
-	ld hl,l017fh+1		;3cd6	21 80 01 	! . . 
+	ld hl, 384		;3cd6	21 80 01 	! . . 
 	add hl,de			;3cd9	19 	. 
 	ex de,hl			;3cda	eb 	. 
-	ld l,(ix + 4)		;3cdb	dd 6e 04 	. n . 
-	ld h,(ix + 5)		;3cde	dd 66 05 	. f . 
+	ld l,(ix + ENEMY_HEIGHT_L_IDX)		;3cdb	dd 6e 04 	. n . 
+	ld h,(ix + ENEMY_HEIGHT_H_IDX)		;3cde	dd 66 05 	. f . 
 	sbc hl,de		;3ce1	ed 52 	. R 
 	ret nc			;3ce3	d0 	. 
-	ld hl,0f380h		;3ce4	21 80 f3 	! . . 
+	ld hl, -3200		;3ce4	21 80 f3 	! . . 
 	add hl,de			;3ce7	19 	. 
-	ld e,(ix + 4)		;3ce8	dd 5e 04 	. ^ . 
-	ld d,(ix + 5)		;3ceb	dd 56 05 	. V . 
+	ld e,(ix + ENEMY_HEIGHT_L_IDX)		;3ce8	dd 5e 04 	. ^ . 
+	ld d,(ix + ENEMY_HEIGHT_H_IDX)		;3ceb	dd 56 05 	. V . 
 	and a			;3cee	a7 	. 
 	sbc hl,de		;3cef	ed 52 	. R 
 	ret			;3cf1	c9 	. 
@@ -9777,7 +9785,7 @@ do_remove_moth:
 l3cfbh:
 	ld hl,TBL_MOTHS_LEN		;3cfb	21 76 e5 	! v . 
 	dec (hl)			;3cfe	35 	5 
-	bit 6,(ix + 0)		;3cff	dd cb 00 76 	. . . v 
+	bit 6,(ix + ENEMY_PROPS_IDX)		;3cff	dd cb 00 76 	. . . v 
 	ld (ix + ENEMY_PROPS_IDX), 0		;3d03	dd 36 00 00 	. 6 . . 
 	jr nz,sub_3d0eh		;3d07	20 05 	  . 
 
