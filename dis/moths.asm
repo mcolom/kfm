@@ -1,7 +1,7 @@
 ; The moths at level #4
 
 ; Config of the moths
-; Length 17: 0xE500, ... , 0xE510
+; Length 17: 0xE500, ... , 0xE520
 DATA_MOTHS_CONFIG: EQU 0xE500
 ;
 ; Maximum number of month in the screen

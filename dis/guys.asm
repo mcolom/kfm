@@ -11,23 +11,6 @@ TBL_GUYS: EQU 0xE262
 ; 20: (bit #5): new enemy on the right
 NEW_GUY_SIDE: EQU 0xE260
 
-; Entry 0
-; Bit 0: guy is a gripper (0) or a knifer (1)
-; Bit 1: unused for guys? It's 1 when it's a boss, but in TBL_ENEMIES
-; Bit 2: guy is a kid
-; Bit 3: 1=avoid adding guys behind this one on the left
-; Bit 4: guy is alive (not falling). A falling guy will still use its place in TBL_GUYS
-; Bit 5: 1=avoid adding guys behind this one on the right
-; Bit 6: moving direction of the guy (0 to the right, 1 to the left)
-ENEMY_IS_A_GRIPPER_BIT: EQU 0
-ENEMY_IS_A_BOSS_BIT: EQU 1
-ENEMY_IS_A_KID_BIT: EQU 2
-TRAILING_LEFT_BIT: EQU 3
-ENEMY_IS_ALIVE_BIT: EQU 4
-TRAILING_RIGHT_BIT: EQU 5
-ENEMY_MOVE_RIGHT_BIT: EQU 6
-
-
 
 ;ENEMY_PROPS_IDX: EQU 0
 ;ENEMY_STATE_IDX: EQU 1

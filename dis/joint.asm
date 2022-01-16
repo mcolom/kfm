@@ -9339,7 +9339,7 @@ l39cdh:
 	ld c,(ix + ENEMY_PROPS_IDX)		;39ce	dd 4e 00
 	bit ENEMY_IS_ALIVE_BIT, c		;39d1	cb 61
     ; Call if the moth is active
-	call nz,PROCESS_ONE_MOTH		        ;39d3	c4 df 39
+	call nz, PROCESS_ONE_MOTH		        ;39d3	c4 df 39
 	pop bc			                ;39d6	c1
     
     ; Next moth. Width of each entry: 21 bytes
@@ -9396,24 +9396,35 @@ l3a26h:
 	dec (ix + 18)		;3a2c	dd 35 12 	. 5 . 
 	jp z,l3b92h		;3a2f	ca 92 3b 	. . ; 
 l3a32h:
+    ; HL = ENEMY_POS
 	ld l,(ix + ENEMY_POS_L_IDX)		    ;3a32	dd 6e 02
 	ld h,(ix + ENEMY_POS_H_IDX)		    ;3a35	dd 66 03
+    
+    ; DE = MOTH_HOR_SPEED
 	ld e,(ix + MOTH_HOR_SPEED_L_IDX)	;3a38	dd 5e 10
 	ld d,(ix + MOTH_HOR_SPEED_H_IDX)	;3a3b	dd 56 11
-	bit 2,(ix + 20)		;3a3e	dd cb 14 56 	. . . V 
-	jr z,l3a47h		;3a42	28 03 	( . 
-	ld de,0		;3a44	11 00 00 	. . . 
+    
+    ; Check bit 2.
+    ; If not activated, set MOTH_HOR_SPEED = 0
+	bit 2,(ix + 20)		                ;3a3e	dd cb 14 56
+	jr z,l3a47h		                    ;3a42	28 03
+	ld de, 0		                    ;3a44	11 00 00
 l3a47h:
     ; C is probably the moth index
-	bit 6,c		;3a47	cb 71 	. q 
-	jr nz,l3a5eh		;3a49	20 13 	  . 
-	sbc hl,de		;3a4b	ed 52 	. R 
-	ex de,hl			;3a4d	eb 	. 
-	ld hl,0f400h		;3a4e	21 00 f4 	! . . 
-	add hl,de			;3a51	19 	. 
+	bit 6,c		    ;3a47	cb 71
+	jr nz,l3a5eh	;3a49	20 13
+	sbc hl,de		;3a4b	ed 52       HL = ENEMY_POS - MOTH_HOR_SPEED
+	
+    ; HL = MOTH_HOR_SPEED
+    ; DE = ENEMY_POS - MOTH_HOR_SPEED
+    ex de,hl		;3a4d	eb
+    
+	ld hl, -3072	;3a4e	21 00 f4    HL = -3072
+	add hl,de		;3a51	19          HL = ENEMY_POS - MOTH_HOR_SPEED - 3072
+    
 	jr c,l3a70h		;3a52	38 1c 	8 . 
-	set ENEMY_MOVE_RIGHT_BIT, (ix + ENEMY_PROPS_IDX)		;3a54	dd cb 00 f6 	. . . . 
-	ld hl,l3eabh		;3a58	21 ab 3e 	! . > 
+	set ENEMY_MOVE_RIGHT_BIT, (ix + ENEMY_PROPS_IDX)		;3a54	dd cb 00 f6
+	ld hl,0x3EAB		;3a58	21 ab 3e 	! . > 
 	jp l3baah		;3a5b	c3 aa 3b 	. . ; 
 l3a5eh:
 	add hl,de			;3a5e	19 	. 
@@ -9574,7 +9585,7 @@ l3b92h:
 	res 6,(ix + 0)		;3b9d	dd cb 00 b6 	. . . . 
 	jr nz,l3baah		;3ba1	20 07 	  . 
 	set 6,(ix + 0)		;3ba3	dd cb 00 f6 	. . . . 
-	ld hl,l3eabh		;3ba7	21 ab 3e 	! . > 
+	ld hl,0x3EAB		;3ba7	21 ab 3e 	! . > 
 l3baah:
 	push hl			;3baa	e5 	. 
 	ld l,(ix + 4)		;3bab	dd 6e 04 	. n . 
@@ -9625,9 +9636,9 @@ l3be9h:
 l3c00h:
 	ld a,(ix + 14)		;3c00	dd 7e 0e 	. ~ . 
 	and a			;3c03	a7 	. 
-	jp z,l3cf2h		;3c04	ca f2 3c 	. . < 
+	jp z,do_remove_moth		;3c04	ca f2 3c 	. . < 
 	call sub_3cbah		;3c07	cd ba 3c 	. . < 
-	jp l3cf2h		;3c0a	c3 f2 3c 	. . < 
+	jp do_remove_moth		;3c0a	c3 f2 3c 	. . < 
 l3c0dh:
 	ld a,086h		;3c0d	3e 86 	> . 
 	call PLAY_SOUND		;3c0f	cd fe 0d 	. . . 
@@ -9743,16 +9754,18 @@ sub_3ccfh:
 	sbc hl,de		;3cef	ed 52 	. R 
 	ret			;3cf1	c9 	. 
 
-l3cf2h:
-	ld hl,TBL_MOTHS_LEN		;3cf2	21 76 e5 	! v . 
-	dec (hl)			;3cf5	35 	5 
-	ld (ix + 0),000h		;3cf6	dd 36 00 00 	. 6 . . 
-	ret			;3cfa	c9 	. 
+do_remove_moth:
+    ; Set the moth as inactive and remove it from the list
+	ld hl,TBL_MOTHS_LEN		        ;3cf2	21 76 e5
+	dec (hl)			            ;3cf5	35 	5 
+	ld (ix + ENEMY_PROPS_IDX), 0	;3cf6	dd 36 00 00
+	ret			                    ;3cfa	c9
+    
 l3cfbh:
 	ld hl,TBL_MOTHS_LEN		;3cfb	21 76 e5 	! v . 
 	dec (hl)			;3cfe	35 	5 
 	bit 6,(ix + 0)		;3cff	dd cb 00 76 	. . . v 
-	ld (ix + 0),000h		;3d03	dd 36 00 00 	. 6 . . 
+	ld (ix + ENEMY_PROPS_IDX), 0		;3d03	dd 36 00 00 	. 6 . . 
 	jr nz,sub_3d0eh		;3d07	20 05 	  . 
 
 sub_3d09h:
@@ -10037,7 +10050,6 @@ l3e7fh:
 	rst 38h			;3ea8	ff 	. 
 	add a,b			;3ea9	80 	. 
 	rst 38h			;3eaa	ff 	. 
-l3eabh:
 	ld (de),a			;3eab	12 	. 
 	ld (bc),a			;3eac	02 	. 
 	sub 0ffh		;3ead	d6 ff 	. . 
