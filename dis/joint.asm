@@ -9511,8 +9511,8 @@ l3adbh:
 	add hl,de			;3ae2	19 	. 
 	ex de,hl			;3ae3	eb 	. 
 l3ae4h:
-	ld l,(ix + 8)		;3ae4	dd 6e 08 	. n . 
-	ld h,(ix + 9)		;3ae7	dd 66 09 	. f . 
+	ld l,(ix + MOTH_BASE_HEIGHT_L_IDX)		;3ae4	dd 6e 08 	. n . 
+	ld h,(ix + MOTH_BASE_HEIGHT_H_IDX)		;3ae7	dd 66 09 	. f . 
 	add hl,de			;3aea	19 	. 
 	ld (ix + MOTH_HEIGHT_L_IDX),l		;3aeb	dd 75 04 	. u . 
 	ld (ix + MOTH_HEIGHT_H_IDX),h		;3aee	dd 74 05 	. t . 
@@ -9575,8 +9575,8 @@ l3b57h:
 	ld (ix + 7),005h		;3b5f	dd 36 07 05 	. 6 . . 
 	ld l,(ix + MOTH_HEIGHT_L_IDX)		;3b63	dd 6e 04 	. n . 
 	ld h,(ix + MOTH_HEIGHT_H_IDX)		;3b66	dd 66 05 	. f . 
-	ld e,(ix + 8)		;3b69	dd 5e 08 	. ^ . 
-	ld d,(ix + 9)		;3b6c	dd 56 09 	. V . 
+	ld e,(ix + MOTH_BASE_HEIGHT_L_IDX)		;3b69	dd 5e 08 	. ^ . 
+	ld d,(ix + MOTH_BASE_HEIGHT_H_IDX)		;3b6c	dd 56 09 	. V . 
 	sbc hl,de		;3b6f	ed 52 	. R 
 	ld (ix + MOTH_VERT_POS_L_IDX),l		;3b71	dd 75 0c 	. u . 
 	ld (ix + MOTH_VERT_POS_H_IDX),h		;3b74	dd 74 0d 	. t . 

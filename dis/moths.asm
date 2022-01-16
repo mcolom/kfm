@@ -22,8 +22,13 @@ MOTH_VERT_POS_H_IDX: EQU 13
 MOTH_HOR_SPEED_L_IDX: EQU 16
 MOTH_HOR_SPEED_H_IDX: EQU 17
 
+; Current height
 MOTH_HEIGHT_L_IDX: EQU 4
 MOTH_HEIGHT_H_IDX: EQU 5
+
+; Base height which is added to obtain the current one
+MOTH_BASE_HEIGHT_L_IDX: EQU 8
+MOTH_BASE_HEIGHT_H_IDX: EQU 9
 
 
 ; To debug the moths set E587 = 00, 00 (MOTH_HOR_SPEED = 0) and
