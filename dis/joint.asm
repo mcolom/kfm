@@ -2975,6 +2975,7 @@ l0e34h:
 	dec b			;0e39	05 	. 
 	inc b			;0e3a	04 	. 
 	ret z			;0e3b	c8 	. 
+    
 l0e3ch:
 	ld a,(hl)			;0e3c	7e 	~ 
 	inc a			;0e3d	3c 	< 
@@ -3019,7 +3020,7 @@ l0e5bh:
 	inc hl			;0e85	23 	# 
 	ld a,(hl)			;0e86	7e 	~ 
 	ld (iy+004h),a		;0e87	fd 77 04 	. w . 
-	ld de,0006h+2		;0e8a	11 08 00 	. . . 
+	ld de, 8		;0e8a	11 08 00 	. . . 
 	add iy,de		;0e8d	fd 19 	. . 
 	inc hl			;0e8f	23 	# 
 	djnz l0e3ch		;0e90	10 aa 	. . 
@@ -9341,7 +9342,7 @@ l39cdh:
 	ld c,(ix + ENEMY_PROPS_IDX)		;39ce	dd 4e 00
 	bit ENEMY_IS_ALIVE_BIT, c		;39d1	cb 61
     ; Call if the moth is active
-	call nz,sub_39dfh		        ;39d3	c4 df 39
+	call nz,PROCESS_ONE_MOTH		        ;39d3	c4 df 39
 	pop bc			                ;39d6	c1
     
     ; Next moth. Width of each entry: 21 bytes
@@ -9353,7 +9354,7 @@ l39cdh:
 	ret			                    ;39de	c9
 
 ; Process a moth
-sub_39dfh:
+PROCESS_ONE_MOTH:
     ; Jump if ENEMY_STATE_IDX < 4
 	ld a,(ix + ENEMY_STATE_IDX)		;39df	dd 7e 01
 	cp 4		                    ;39e2	fe 04
@@ -9398,10 +9399,10 @@ l3a26h:
 	dec (ix + 18)		;3a2c	dd 35 12 	. 5 . 
 	jp z,l3b92h		;3a2f	ca 92 3b 	. . ; 
 l3a32h:
-	ld l,(ix + ENEMY_POS_L_IDX)		;3a32	dd 6e 02 	. n . 
-	ld h,(ix + ENEMY_POS_H_IDX)		;3a35	dd 66 03 	. f . 
-	ld e,(ix + 16)		;3a38	dd 5e 10 	. ^ . 
-	ld d,(ix + 17)		;3a3b	dd 56 11 	. V . 
+	ld l,(ix + ENEMY_POS_L_IDX)		    ;3a32	dd 6e 02
+	ld h,(ix + ENEMY_POS_H_IDX)		    ;3a35	dd 66 03
+	ld e,(ix + MOTH_HOR_SPEED_L_IDX)	;3a38	dd 5e 10
+	ld d,(ix + MOTH_HOR_SPEED_H_IDX)	;3a3b	dd 56 11
 	bit 2,(ix + 20)		;3a3e	dd cb 14 56 	. . . V 
 	jr z,l3a47h		;3a42	28 03 	( . 
 	ld de,0		;3a44	11 00 00 	. . . 
@@ -9455,7 +9456,7 @@ l3a94h:
 	ld l,(ix + ENEMY_FRAMESEQ_PTR_L_IDX)		;3aa0	dd 6e 0c 	. n . 
 	ld h,(ix + ENEMY_FRAMESEQ_PTR_H_IDX)		;3aa3	dd 66 0d 	. f . 
 	jr z,l3aaeh		;3aa6	28 06 	( . 
-	ld de,(DATA_MOTHS_CONFIG + 4)		;3aa8	ed 5b 04 e5 	. [ . . 
+	ld de,(DATA_MOTHS_CONFIG + VERT_SPEED_IDX)		;3aa8	ed 5b 04 e5 	. [ . . 
 	jr l3ab2h		;3aac	18 04 	. . 
 l3aaeh:
 	ld de,(DATA_MOTHS_CONFIG + 6)		;3aae	ed 5b 06 e5 	. [ . . 
@@ -9475,17 +9476,17 @@ l3ac3h:
 	jr nz,l3adbh		;3ac7	20 12 	  . 
 	and a			;3ac9	a7 	. 
 	jr z,l3ad1h		;3aca	28 05 	( . 
-	ld hl,0ec00h		;3acc	21 00 ec 	! . . 
+	ld hl, -5120	;3acc	21 00 ec 	! . . 
 	jr l3ad4h		;3acf	18 03 	. . 
 l3ad1h:
-	ld hl,0f000h		;3ad1	21 00 f0 	! . . 
+	ld hl, -4096		;3ad1	21 00 f0 	! . . 
 l3ad4h:
 	add hl,de			;3ad4	19 	. 
 	jr nc,l3adbh		;3ad5	30 04 	0 . 
 	set 3,(ix + 0)		;3ad7	dd cb 00 de 	. . . . 
 l3adbh:
-	ld (ix + 12),e		;3adb	dd 73 0c 	. s . 
-	ld (ix + 13),d		;3ade	dd 72 0d 	. r . 
+	ld (ix + MOTH_VERT_POS_L_IDX),e		;3adb	dd 73 0c
+	ld (ix + MOTH_VERT_POS_H_IDX),d		;3ade	dd 72 0d
 	pop hl			;3ae1	e1 	. 
 	add hl,de			;3ae2	19 	. 
 	ex de,hl			;3ae3	eb 	. 
@@ -9499,9 +9500,9 @@ l3ae4h:
 l3af4h:
 	call sub_3d22h		;3af4	cd 22 3d 	. " = 
 	push de			;3af7	d5 	. 
-	ld de,(DATA_MOTHS_CONFIG + 4)		;3af8	ed 5b 04 e5 	. [ . . 
-	ld l,(ix + 12)		;3afc	dd 6e 0c 	. n . 
-	ld h,(ix + 13)		;3aff	dd 66 0d 	. f . 
+	ld de,(DATA_MOTHS_CONFIG + VERT_SPEED_IDX)	;3af8	ed 5b 04 e5
+	ld l,(ix + MOTH_VERT_POS_L_IDX)		        ;3afc	dd 6e 0c
+	ld h,(ix + MOTH_VERT_POS_H_IDX)		        ;3aff	dd 66 0d
 	bit 3,c		;3b02	cb 59 	. Y 
 	jr z,l3b0ah		;3b04	28 04 	( . 
 	sbc hl,de		;3b06	ed 52 	. R 
@@ -9513,8 +9514,8 @@ l3b0bh:
 	ld (ix + 1),000h		;3b0d	dd 36 01 00 	. 6 . . 
 	ld hl,0		;3b11	21 00 00 	! . . 
 l3b14h:
-	ld (ix + 12),l		;3b14	dd 75 0c 	. u . 
-	ld (ix + 13),h		;3b17	dd 74 0d 	. t . 
+	ld (ix + MOTH_VERT_POS_L_IDX),l		;3b14	dd 75 0c 	. u . 
+	ld (ix + MOTH_VERT_POS_H_IDX),h		;3b17	dd 74 0d 	. t . 
 	pop de			;3b1a	d1 	. 
 	add hl,de			;3b1b	19 	. 
 	ex de,hl			;3b1c	eb 	. 
@@ -9556,8 +9557,8 @@ l3b57h:
 	ld e,(ix + 8)		;3b69	dd 5e 08 	. ^ . 
 	ld d,(ix + 9)		;3b6c	dd 56 09 	. V . 
 	sbc hl,de		;3b6f	ed 52 	. R 
-	ld (ix + 12),l		;3b71	dd 75 0c 	. u . 
-	ld (ix + 13),h		;3b74	dd 74 0d 	. t . 
+	ld (ix + MOTH_VERT_POS_L_IDX),l		;3b71	dd 75 0c 	. u . 
+	ld (ix + MOTH_VERT_POS_H_IDX),h		;3b74	dd 74 0d 	. t . 
 	ld a,(ix + 1)		;3b77	dd 7e 01 	. ~ . 
 	sub 008h		;3b7a	d6 08 	. . 
 	jr nz,l3b8ch		;3b7c	20 0e 	  . 
