@@ -9384,9 +9384,9 @@ l3a03h:
     ; In the code, it checks bits 0, 1, 2 of ix + 20.
 
     ; ix + 20 (E58B)
-    ;   1 (01): turn
-    ;   2 (10): decrease counter. when zero, set counter to A2 (~), +20 to 6, and 0.
-    ;   3 (11): decrease counter. when zero, set counter to A2 (~), +20 to 7, 6, and 0.
+    ;   1 (001): turn
+    ;   2 (010): decrease counter. when zero, set counter to A2 (~), +20 to 6, and 0.
+    ;   3 (011): decrease counter. when zero, set counter to A2 (~), +20 to 7, 6, and 0.
     
     
 
@@ -9441,7 +9441,7 @@ l3a47h:
 l3a5eh:
 	add hl,de			;3a5e	19 	. 
 	ex de,hl			;3a5f	eb 	. 
-	ld hl,08400h		;3a60	21 00 84 	! . . 
+	ld hl, 33792		;3a60	21 00 84
 	add hl,de			;3a63	19 	. 
 	jr nc,l3a70h		;3a64	30 0a 	0 . 
 	res ENEMY_MOVE_RIGHT_BIT, (ix + ENEMY_PROPS_IDX)		;3a66	dd cb 00 b6 	. . . . 
@@ -9453,7 +9453,7 @@ l3a70h:
 	push de			;3a76	d5 	. 
 	ld hl,(THOMAS_POSITION)		;3a77	2a 12 e7 	* . . 
 	sbc hl,de		;3a7a	ed 52 	. R 
-	ld de,0x1100		;3a7c	11 00 11 	. . . 
+	ld de, 4352		;3a7c	11 00 11
 	jr c,l3a89h		;3a7f	38 08 	8 . 
 	sbc hl,de		;3a81	ed 52 	. R 
 	pop de			;3a83	d1 	. 
@@ -9463,11 +9463,11 @@ l3a89h:
 	add hl,de			;3a89	19 	. 
 	pop de			;3a8a	d1 	. 
 	jr c,l3a94h		;3a8b	38 07 	8 . 
-	ld hl,0df00h		;3a8d	21 00 df 	! . . 
+	ld hl, -8448	;3a8d	21 00 df
 	add hl,de			;3a90	19 	. 
 	jp c,l3cfbh		;3a91	da fb 3c 	. . < 
 l3a94h:
-	cp 003h		;3a94	fe 03 	. . 
+	cp 3		;3a94	fe 03 	. . 
 	jr z,l3af4h		;3a96	28 5c 	( \ 
 	call sub_3d22h		;3a98	cd 22 3d 	. " = 
 	dec a			;3a9b	3d 	= 
@@ -9514,8 +9514,8 @@ l3ae4h:
 	ld l,(ix + 8)		;3ae4	dd 6e 08 	. n . 
 	ld h,(ix + 9)		;3ae7	dd 66 09 	. f . 
 	add hl,de			;3aea	19 	. 
-	ld (ix + 4),l		;3aeb	dd 75 04 	. u . 
-	ld (ix + 5),h		;3aee	dd 74 05 	. t . 
+	ld (ix + MOTH_HEIGHT_L_IDX),l		;3aeb	dd 75 04 	. u . 
+	ld (ix + MOTH_HEIGHT_H_IDX),h		;3aee	dd 74 05 	. t . 
 	jp l3c7ah		;3af1	c3 7a 3c 	. z < 
 l3af4h:
 	call sub_3d22h		;3af4	cd 22 3d 	. " = 
@@ -9561,10 +9561,10 @@ l3b33h:
 	inc hl			;3b42	23 	# 
 	ld a,(hl)			;3b43	7e 	~ 
 	add a,(ix + 4)		;3b44	dd 86 04 	. . . 
-	ld (ix + 4),a		;3b47	dd 77 04 	. w . 
+	ld (ix + MOTH_HEIGHT_L_IDX),a		;3b47	dd 77 04 	. w . 
 	inc hl			;3b4a	23 	# 
 	ld a,(hl)			;3b4b	7e 	~ 
-	adc a,(ix + 5)		;3b4c	dd 8e 05 	. . . 
+	adc a,(ix + MOTH_HEIGHT_H_IDX)		;3b4c	dd 8e 05 	. . . 
 	ld (ix + 5),a		;3b4f	dd 77 05 	. w . 
 	inc hl			;3b52	23 	# 
 	ld c,(hl)			;3b53	4e 	N 
@@ -9573,8 +9573,8 @@ l3b57h:
 	ld (ix + 10),000h		;3b57	dd 36 0a 00 	. 6 . . 
 	ld (ix + 6),000h		;3b5b	dd 36 06 00 	. 6 . . 
 	ld (ix + 7),005h		;3b5f	dd 36 07 05 	. 6 . . 
-	ld l,(ix + 4)		;3b63	dd 6e 04 	. n . 
-	ld h,(ix + 5)		;3b66	dd 66 05 	. f . 
+	ld l,(ix + MOTH_HEIGHT_L_IDX)		;3b63	dd 6e 04 	. n . 
+	ld h,(ix + MOTH_HEIGHT_H_IDX)		;3b66	dd 66 05 	. f . 
 	ld e,(ix + 8)		;3b69	dd 5e 08 	. ^ . 
 	ld d,(ix + 9)		;3b6c	dd 56 09 	. V . 
 	sbc hl,de		;3b6f	ed 52 	. R 
@@ -9592,7 +9592,7 @@ l3b8ch:
 	ld (ix + 1),a		;3b8c	dd 77 01 	. w . 
 	jp l3c7ah		;3b8f	c3 7a 3c 	. z < 
 l3b92h:
-	res 0,(ix+014h)		;3b92	dd cb 14 86 	. . . . 
+	res 0,(ix + 20)		;3b92	dd cb 14 86 	. . . . 
 	bit 6,(ix + 0)		;3b96	dd cb 00 76 	. . . v 
 	ld hl,l3e7fh		;3b9a	21 7f 3e 	!  > 
 	res 6,(ix + 0)		;3b9d	dd cb 00 b6 	. . . . 
@@ -9601,8 +9601,8 @@ l3b92h:
 	ld hl,0x3EAB		;3ba7	21 ab 3e 	! . > 
 l3baah:
 	push hl			;3baa	e5 	. 
-	ld l,(ix + 4)		;3bab	dd 6e 04 	. n . 
-	ld h,(ix + 5)		;3bae	dd 66 05 	. f . 
+	ld l,(ix + MOTH_HEIGHT_L_IDX)		;3bab	dd 6e 04 	. n . 
+	ld h,(ix + MOTH_HEIGHT_H_IDX)		;3bae	dd 66 05 	. f . 
 	ld de,09800h		;3bb1	11 00 98 	. . . 
 	add hl,de			;3bb4	19 	. 
 	pop hl			;3bb5	e1 	. 
@@ -9717,8 +9717,8 @@ l3c7ah:
 	ld hl,0x80		;3c8d	21 80 00 	! . . 
 	add hl,de			;3c90	19 	. 
 	ld (0e811h),hl		;3c91	22 11 e8 	" . . 
-	ld l,(ix + 4)		;3c94	dd 6e 04 	. n . 
-	ld h,(ix + 5)		;3c97	dd 66 05 	. f . 
+	ld l,(ix + MOTH_HEIGHT_L_IDX)		;3c94	dd 6e 04 	. n . 
+	ld h,(ix + MOTH_HEIGHT_H_IDX)		;3c97	dd 66 05 	. f . 
 	ld de,00200h		;3c9a	11 00 02 	. . . 
 	add hl,de			;3c9d	19 	. 
 	ld de,0006h		;3c9e	11 06 00 	. . . 
@@ -9738,8 +9738,8 @@ l3ca9h:
 
 ; SEGUIR
 sub_3cbah:
-	ld l,(ix + 4)		;3cba	dd 6e 04 	. n . 
-	ld h,(ix + 5)		;3cbd	dd 66 05 	. f . 
+	ld l,(ix + MOTH_HEIGHT_L_IDX)		;3cba	dd 6e 04 	. n . 
+	ld h,(ix + MOTH_HEIGHT_H_IDX)		;3cbd	dd 66 05 	. f . 
 	add hl,hl			;3cc0	29 	) 
 	ld d,000h		;3cc1	16 00 	. . 
 	rl d		;3cc3	cb 12 	. . 
