@@ -9355,19 +9355,20 @@ PROCESS_ONE_MOTH:
     ; Jump if ENEMY_STATE_IDX < 4
 	ld a,(ix + ENEMY_STATE_IDX)		;39df	dd 7e 01
 	cp 4		                    ;39e2	fe 04
-	jr c,l39f1h		                ;39e4	38 0b
+	jr c,moth_states_0_1_2_3		;39e4	38 0b
 
-	; Jump if ENEMY_STATE_IDX < 7
+	; Jump if ENEMY_STATE_IDX < 7 ==> 4 <= ENEMY_STATE_IDX < 7
     cp 7		                    ;39e6	fe 07
-	jp c,l3c3bh		                ;39e8	da 3b 3c
+	jp c,moth_states_4_5_6		    ;39e8	da 3b 3c
     
-    ; Jump if ENEMY_STATE_IDX == 0
-	jp z,l3be9h		                ;39eb	ca e9 3b
+    ; Jump if ENEMY_STATE_IDX == 7
+	jp z,moth_state_7		        ;39eb	ca e9 3b
     
-	jp l3b1fh		                ;39ee	c3 1f 3b
+    ; Jump otherwise (ENEMY_STATE_IDX > 7)
+	jp moth_state_8_or_over		                ;39ee	c3 1f 3b
 ;
 ; ENEMY_STATE_IDX < 4
-l39f1h:
+moth_states_0_1_2_3:
 	; Update frame counter
     dec (ix + ENEMY_FRAME_COUNTER_IDX)		;39f1	dd 35 07
 	jr nz,l3a03h		                    ;39f4	20 0d
@@ -9528,7 +9529,8 @@ l3b14h:
 	add hl,de			;3b1b	19 	. 
 	ex de,hl			;3b1c	eb 	. 
 	jr l3ae4h		;3b1d	18 c5 	. . 
-l3b1fh:
+
+moth_state_8_or_over:
 	ld l,(ix + 14)		;3b1f	dd 6e 0e 	. n . 
 	ld h,(ix + 15)		;3b22	dd 66 0f 	. f . 
 	dec (ix + 7)		;3b25	dd 35 07 	. 5 . 
@@ -9623,8 +9625,8 @@ sub_3bd5h:
 	ld (ix + 15),h		;3be5	dd 74 0f 	. t . 
 	ret			;3be8	c9 	. 
 
-; ENEMY_STATE_IDX == 0
-l3be9h:
+; ENEMY_STATE_IDX == 7
+moth_state_7:
 	dec (ix + 7)		;3be9	dd 35 07 	. 5 . 
 	jp nz,l3ca9h		;3bec	c2 a9 3c 	. . < 
 	ld a,(ix + 6)		;3bef	dd 7e 06 	. ~ . 
@@ -9661,8 +9663,8 @@ l3c2ah:
 	ld (ix + 1),007h		;3c35	dd 36 01 07 	. 6 . . 
 	jr l3ca9h		;3c39	18 6e 	. n 
 
-; ENEMY_STATE_IDX < 7
-l3c3bh:
+; ENEMY_STATE_IDX  = 4, 5, 6
+moth_states_4_5_6:
 	dec (ix + 7)		;3c3b	dd 35 07 	. 5 . 
 	jr z,l3c66h		;3c3e	28 26 	( & 
 	ld a,(0eb00h)		;3c40	3a 00 eb 	: . . 
