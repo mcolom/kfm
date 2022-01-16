@@ -193,9 +193,6 @@ TBL_E521: EQU 0xE521
 TABLE_WIDTH_41_LEN: EQU 0xE549
 TABLE_WIDTH_41: EQU 0xE54A
 
-TBL_E562: EQU 0xE562
-
-
 
 
 
@@ -9088,8 +9085,8 @@ l3813h:
 	cp (hl)			;383b	be 	. 
 	jp c,l38d9h		;383c	da d9 38 	. . 8 
 	inc (hl)			;383f	34 	4 
-	ld iy,TBL_E562		;3840	fd 21 62 e5 	. ! b . 
-	ld bc,0015h		;3844	01 15 00 	. . . 
+	ld iy,TBL_MOTHS - 21		;3840	fd 21 62 e5 	. ! b . 
+	ld bc, 21		;3844	01 15 00 	. . . 
 l3847h:
 	add iy,bc		;3847	fd 09 	. . 
 	bit 4,(iy+000h)		;3849	fd cb 00 66 	. . . f 
@@ -9816,9 +9813,9 @@ l3d5bh:
 	ld a,(DATA_MOTHS_CONFIG + MAX_NUM_MOTHS_IDX)		;3d5e	3a 0b e5
 	cp (hl)			;3d61	be 	. 
 	ret c			;3d62	d8 	. 
-	inc (hl)			;3d63	34 	4 
-	ld iy,TBL_E562		;3d64	fd 21 62 e5 	. ! b . 
-	ld de,0015h		;3d68	11 15 00 	. . . 
+	inc (hl)			;3d63	34
+	ld iy,TBL_MOTHS - 21		;3d64	fd 21 62 e5
+	ld de, 21           		;3d68	11 15 00
 l3d6bh:
 	add iy,de		;3d6b	fd 19 	. . 
 	bit 4,(iy+000h)		;3d6d	fd cb 00 66 	. . . f 
