@@ -9379,6 +9379,17 @@ moth_states_0_1_2_3:
 	jr z,l3a03h		                ;39fd	28 04
 	ld (ix + ENEMY_FRAME_IDX), 1	;39ff	dd 36 06 01
 l3a03h:
+    ; ix + 19, counter (E58A)
+
+    ; In the code, it checks bits 0, 1, 2 of ix + 20.
+
+    ; ix + 20 (E58B)
+    ;   1 (01): turn
+    ;   2 (10): decrease counter. when zero, set counter to A2 (~), +20 to 6, and 0.
+    ;   3 (11): decrease counter. when zero, set counter to A2 (~), +20 to 7, 6, and 0.
+    
+    
+
 	bit 1,(ix + 20)		            ;3a03	dd cb 14 4e
 	jr z,l3a26h		                ;3a07	28 1d
 	dec (ix + 19)		;3a09	dd 35 13 	. 5 . 
@@ -9627,13 +9638,13 @@ sub_3bd5h:
 
 ; ENEMY_STATE_IDX == 7
 moth_state_7:
-	dec (ix + 7)		;3be9	dd 35 07 	. 5 . 
-	jp nz,l3ca9h		;3bec	c2 a9 3c 	. . < 
-	ld a,(ix + 6)		;3bef	dd 7e 06 	. ~ . 
-	cp 009h		;3bf2	fe 09 	. . 
-	jr z,l3c00h		;3bf4	28 0a 	( . 
-	ld (ix + 7),005h		;3bf6	dd 36 07 05 	. 6 . . 
-	inc (ix + 6)		;3bfa	dd 34 06 	. 4 . 
+	dec (ix + ENEMY_FRAME_COUNTER_IDX)	;3be9	dd 35 07
+	jp nz,l3ca9h		                ;3bec	c2 a9 3c
+	ld a,(ix + ENEMY_FRAME_IDX)		    ;3bef	dd 7e 06
+	cp 9		                        ;3bf2	fe 09
+	jr z,l3c00h		                    ;3bf4	28 0a
+	ld (ix + ENEMY_FRAME_COUNTER_IDX),5	;3bf6	dd 36 07 05
+	inc (ix + ENEMY_FRAME_IDX)		    ;3bfa	dd 34 06
 	jp l3ca9h		;3bfd	c3 a9 3c 	. . < 
 l3c00h:
 	ld a,(ix + 14)		;3c00	dd 7e 0e 	. ~ . 
